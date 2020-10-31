@@ -1,0 +1,10 @@
+# Build files
+*.so
+obj/
+libs/
+ndkpath.txt
+
+# QPM
+qpm.shared.json
+extern/
+*.backup

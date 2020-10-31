@@ -1,0 +1,25 @@
+{
+	"id": "NoodleExtensions",
+	"name": "Noodle Extensions",
+	"author": "StackDoubleFlow",
+	"description": [
+		""
+	],
+	"category": "Other",
+	"gameVersion": "1.12.2",
+	"version": "0.1.0",
+	"links": {
+		"project-home": "https://github.com/StackDoubleFlow/NoodleExtensions"
+	},
+	"platform": "Quest",
+	"components": [{
+			"Type": "HookMod",
+			"InstallAction": {
+				"InstallLibraryFile": "libnoodleextensions.so"
+			},
+			"UninstallAction": {
+				"RemoveLibraryFile": "libnoodleextensions.so"
+			}
+		}
+	]
+}
