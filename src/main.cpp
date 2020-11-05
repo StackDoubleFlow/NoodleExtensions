@@ -17,6 +17,7 @@
 #include "System/Collections/Generic/List_1.hpp"
 
 #include <string>
+#include <iostream>
 
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
@@ -26,6 +27,16 @@ static ModInfo modInfo;
 const Logger &getLogger() {
     static const Logger &logger(modInfo);
     return logger;
+}
+
+// This is to prevent issues with string limits
+std::string to_utf8(std::u16string_view view) {
+    char* dat = static_cast<char*>(calloc(view.length() + 1, sizeof(char)));
+    std::transform(view.data(), view.data() + view.size(), dat, [](auto utf16_char) {
+        return static_cast<char>(utf16_char);
+    });
+    dat[view.length()] = '\0';
+    return {dat};
 }
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapData, BeatmapData,
@@ -92,15 +103,15 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomNoteData, NoteData,
 
 DEFINE_CLASS(Il2CppNamespace::CustomNoteData);
 
-void Il2CppNamespace::CustomNoteData::ctor() {
-
+void Il2CppNamespace::CustomNoteData::ctor(float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData::NoteType type, NoteCutDirection cutDirection) {
+    
 }
 
 MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *stringData) {
     getLogger().debug("Parsing json");
 
     std::string str = to_utf8(csstrtostr(stringData));
-
+    
     rapidjson::Document doc;
     doc.Parse(str.c_str());
 
