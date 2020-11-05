@@ -68,8 +68,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         NoteCutDirection cutDirection = NoteCutDirection(note_json["_cutDirection"].GetInt());
         auto note = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_NoteData*>(time, lineIndex, lineLayer, type, cutDirection));
         if (note_json.HasMember("_customData")) {
-            rapidjson::Value& customData = note_json["_customData"];
-            note->customData.CopyFrom(customData, note->customData.GetAllocator());
+            note->customData = note_json["_customData"];
         }
         notes->Add(note);
     }
@@ -87,8 +86,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         int width = obstacle_json["_width"].GetInt();
         auto obstacle = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
         if (obstacle_json.HasMember("_customData")) {
-            rapidjson::Value& customData = obstacle_json["_customData"];
-            obstacle->customData.CopyFrom(customData, obstacle->customData.GetAllocator());
+            obstacle->customData = obstacle_json["_customData"];
         }
         obstacles->Add(obstacle);
     }
@@ -104,8 +102,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         int value = event_json["_value"].GetInt();
         auto event = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_EventData*>(time, type, value));
         if (event_json.HasMember("_customData")) {
-            rapidjson::Value& customData = event_json["_customData"];
-            event->customData.CopyFrom(customData, event->customData.GetAllocator());
+            event->customData = event_json["_customData"];
         } 
         events->Add(event);
     }
@@ -113,8 +110,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     getLogger().debug("Parse root custom");
     auto saveData = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData*>(events, notes, obstacles));
     if (doc.HasMember("_customData")) {
-        rapidjson::Value& customData = doc["_customData"];
-        saveData->customData.CopyFrom(customData, saveData->customData.GetAllocator());
+        saveData->customData = doc["_customData"];
     }
 
     getLogger().debug("Finished reading beatmap data");

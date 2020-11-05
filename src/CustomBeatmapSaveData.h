@@ -26,7 +26,7 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData, BeatmapSaveData,
     )
 
 public:
-    rapidjson::Document customData;
+    rapidjson::Value customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSaveData::NoteData,
@@ -40,7 +40,7 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSa
     )
 
 public:
-    rapidjson::Document customData;
+    rapidjson::Value customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_ObstacleData, BeatmapSaveData::ObstacleData,
@@ -54,7 +54,7 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_ObstacleData, Beatm
     )
 
 public:
-    rapidjson::Document customData;
+    rapidjson::Value customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_EventData, BeatmapSaveData::EventData,
@@ -68,7 +68,7 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_EventData, BeatmapS
     )
 
 public:
-    rapidjson::Document customData;
+    rapidjson::Value customData;
 )
 
 
