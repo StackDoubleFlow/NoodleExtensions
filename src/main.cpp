@@ -92,9 +92,9 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         events->Add(event);
     }
 
-    BeatmapSaveData *saveData = BeatmapSaveData::New_ctor(events, notes, obstacles);
+    auto saveData = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData*>(events, notes, obstacles));
 
-    getLogger().debug("Read notes, obstacles, and events");
+    getLogger().debug("Read custom data");
 
     return saveData;
 }
@@ -119,6 +119,7 @@ extern "C" void load() {
     // CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapEventData>());
     // CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomObstacleData>());
     // CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomNoteData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_NoteData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_ObstacleData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_EventData>());

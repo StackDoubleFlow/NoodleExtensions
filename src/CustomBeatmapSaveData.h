@@ -6,8 +6,21 @@
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
+#include "System/Collections/Generic/List_1.hpp"
 
 using namespace GlobalNamespace;
+using namespace System::Collections::Generic;
+
+DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData, BeatmapSaveData,
+    DECLARE_CTOR(ctor, List_1<BeatmapSaveData::EventData*>* events, List_1<BeatmapSaveData::NoteData*>* notes, List_1<BeatmapSaveData::ObstacleData*>* obstacles);
+
+    REGISTER_FUNCTION(CustomBeatmapSaveData,
+        // getLogger().debug("Registering CustomNoteData!");
+
+        // Register constructor
+        REGISTER_METHOD(ctor);
+    )
+)
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSaveData::NoteData,
     DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData::NoteType type, NoteCutDirection cutDirection);

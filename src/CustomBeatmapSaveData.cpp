@@ -1,5 +1,13 @@
 #include "CustomBeatmapSaveData.h"
 
+void Il2CppNamespace::CustomBeatmapSaveData::ctor(List_1<BeatmapSaveData::EventData*>* events, List_1<BeatmapSaveData::NoteData*>* notes, List_1<BeatmapSaveData::ObstacleData*>* obstacles) {
+    this->events = events;
+    this->notes = notes;
+    this->obstacles = obstacles;
+}
+
+DEFINE_CLASS(Il2CppNamespace::CustomBeatmapSaveData);
+
 void Il2CppNamespace::CustomBeatmapSaveData_NoteData::ctor(float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData::NoteType type, NoteCutDirection cutDirection) {
     this->time = time;
     this->lineIndex = lineIndex;
