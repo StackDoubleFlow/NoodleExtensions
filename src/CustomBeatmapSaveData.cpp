@@ -1,6 +1,8 @@
 #include "CustomBeatmapSaveData.h"
 
-void Il2CppNamespace::CustomBeatmapSaveData::ctor(List_1<BeatmapSaveData::EventData*>* events, List_1<BeatmapSaveData::NoteData*>* notes, List_1<BeatmapSaveData::ObstacleData*>* obstacles) {
+void Il2CppNamespace::CustomBeatmapSaveData::ctor(List_1<BeatmapSaveData::EventData*>* events, 
+                                                  List_1<BeatmapSaveData::NoteData*>* notes, 
+                                                  List_1<BeatmapSaveData::ObstacleData*>* obstacles) {
     this->events = events;
     this->notes = notes;
     this->obstacles = obstacles;

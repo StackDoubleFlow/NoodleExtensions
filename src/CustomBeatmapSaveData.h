@@ -1,6 +1,7 @@
 #pragma once
 
 #include "custom-types/shared/macros.hpp"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
 
 #include "GlobalNamespace/BeatmapSaveData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
@@ -12,7 +13,10 @@ using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData, BeatmapSaveData,
-    DECLARE_CTOR(ctor, List_1<BeatmapSaveData::EventData*>* events, List_1<BeatmapSaveData::NoteData*>* notes, List_1<BeatmapSaveData::ObstacleData*>* obstacles);
+    DECLARE_CTOR(ctor, 
+                 List_1<BeatmapSaveData::EventData*>* events, 
+                 List_1<BeatmapSaveData::NoteData*>* notes, 
+                 List_1<BeatmapSaveData::ObstacleData*>* obstacles);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData,
         // getLogger().debug("Registering CustomNoteData!");
@@ -20,6 +24,9 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData, BeatmapSaveData,
         // Register constructor
         REGISTER_METHOD(ctor);
     )
+
+public:
+    rapidjson::Document customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSaveData::NoteData,
@@ -31,6 +38,9 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSa
         // Register constructor
         REGISTER_METHOD(ctor);
     )
+
+public:
+    rapidjson::Document customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_ObstacleData, BeatmapSaveData::ObstacleData,
@@ -42,6 +52,9 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_ObstacleData, Beatm
         // Register constructor
         REGISTER_METHOD(ctor);
     )
+
+public:
+    rapidjson::Document customData;
 )
 
 DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_EventData, BeatmapSaveData::EventData,
@@ -53,6 +66,9 @@ DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_EventData, BeatmapS
         // Register constructor
         REGISTER_METHOD(ctor);
     )
+
+public:
+    rapidjson::Document customData;
 )
 
 
