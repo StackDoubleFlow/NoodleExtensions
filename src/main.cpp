@@ -41,6 +41,7 @@ std::string to_utf8(std::u16string_view view) {
     return {dat};
 }
 
+// This hook loads the json data (with custom data) into a BeatmapSaveData 
 MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *stringData) {
     getLogger().debug("Parsing json");
 
@@ -118,6 +119,25 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     return saveData;
 }
 
+
+// This hook creates the CustomNoteData using the custom json data found in the BeatmapSaveData
+MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
+    BeatmapSaveData::NoteData *noteData;
+
+    // Since I don't feel like patching the original assembly to call my own function
+    // with an extra noteData parameter, I get it by reading the register where it should be.
+    // WARNING: This will most likely break on every update as noteData might be on another register. 
+    //          If a hook is ran before this one and it overwrites this register, then this will most 
+    //          likely break.
+    asm ("mov %[result], x23"
+        : [result] "=r" (noteData));
+
+    getLogger().info("noteData lineIndex: %d", noteData->lineIndex);
+    getLogger().info("time: %d", lineIndex);
+
+    return CreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
+}
+
 extern "C" void setup(ModInfo &info) {
     info.id = "NoodleExtensions";
     info.version = "0.1.0";
@@ -130,8 +150,8 @@ extern "C" void load() {
     Logger::get().options.silent = true;
 
     // Install hooks
-    // BeatmapSaveData DeserializeFromJSONString(string stringData)
     INSTALL_HOOK_OFFSETLESS(DeserializeFromJSONString, il2cpp_utils::FindMethodUnsafe("", "BeatmapSaveData", "DeserializeFromJSONString", 1));
+    INSTALL_HOOK_OFFSETLESS(CreateBasicNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBasicNoteData", 5));
 
     // Register custom tpes
     // CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapData>());
