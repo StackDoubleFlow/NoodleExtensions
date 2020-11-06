@@ -8,3 +8,6 @@ ndkpath.txt
 qpm.shared.json
 extern/
 *.backup
+
+# Logs
+*.log
