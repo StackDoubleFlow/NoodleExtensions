@@ -11,7 +11,7 @@
 
 using namespace GlobalNamespace;
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapData, BeatmapData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
     DECLARE_CTOR(ctor);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
@@ -30,7 +30,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapEventData, BeatmapEventData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
     DECLARE_CTOR(ctor);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
@@ -50,7 +50,7 @@ public:
 )
 
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomObstacleData, ObstacleData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
     DECLARE_CTOR(ctor);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
@@ -69,7 +69,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomNoteData, NoteData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
     DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer noteLineLayer, NoteLineLayer startNoteLineLayer, ColorType colorType, NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration);
 
     DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
@@ -93,7 +93,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomEventData, System::Object, 
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, System::Object, 
     DECLARE_CTOR(ctor, Il2CppString* type, float time);
 
     DECLARE_INSTANCE_FIELD(Il2CppString*, type);

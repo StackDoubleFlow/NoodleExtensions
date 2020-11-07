@@ -12,7 +12,7 @@
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData, BeatmapSaveData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData, BeatmapSaveData,
     DECLARE_CTOR(ctor, 
                  List_1<BeatmapSaveData::EventData*>* events, 
                  List_1<BeatmapSaveData::NoteData*>* notes, 
@@ -29,7 +29,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_NoteData, BeatmapSaveData::NoteData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_NoteData, BeatmapSaveData::NoteData,
     DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData::NoteType type, NoteCutDirection cutDirection);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_NoteData,
@@ -43,7 +43,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_ObstacleData, BeatmapSaveData::ObstacleData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_ObstacleData, BeatmapSaveData::ObstacleData,
     DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType type, float duration, int width);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_ObstacleData,
@@ -57,7 +57,7 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(Il2CppNamespace, CustomBeatmapSaveData_EventData, BeatmapSaveData::EventData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_EventData, BeatmapSaveData::EventData,
     DECLARE_CTOR(ctor, float time, BeatmapSaveData::BeatmapEventType type, int value);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_EventData,

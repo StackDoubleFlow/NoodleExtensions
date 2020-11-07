@@ -16,8 +16,8 @@
 #include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 
-#include "CustomBeatmapSaveData.h"
-#include "CustomBeatmapData.h"
+#include "CustomJSONData/CustomBeatmapSaveData.h"
+#include "CustomJSONData/CustomBeatmapData.h"
 
 #include <string>
 #include <iostream>
@@ -68,7 +68,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         NoteLineLayer lineLayer = NoteLineLayer(note_json["_lineLayer"].GetInt());
         BeatmapSaveData::NoteType type = BeatmapSaveData::NoteType(note_json["_type"].GetInt());
         NoteCutDirection cutDirection = NoteCutDirection(note_json["_cutDirection"].GetInt());
-        auto note = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_NoteData*>(time, lineIndex, lineLayer, type, cutDirection));
+        auto note = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_NoteData*>(time, lineIndex, lineLayer, type, cutDirection));
         if (note_json.HasMember("_customData")) {
             note->customData = new rapidjson::Value(note_json["_customData"], doc.GetAllocator());
         }
@@ -86,7 +86,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         ObstacleType type = ObstacleType(obstacle_json["_type"].GetInt());
         float duration = obstacle_json["_duration"].GetFloat();
         int width = obstacle_json["_width"].GetInt();
-        auto obstacle = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
+        auto obstacle = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
         if (obstacle_json.HasMember("_customData")) {
             obstacle->customData = new rapidjson::Value(obstacle_json["_customData"], doc.GetAllocator());
         }
@@ -102,7 +102,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         float time = event_json["_time"].GetFloat();
         BeatmapSaveData::BeatmapEventType type = BeatmapSaveData::BeatmapEventType(event_json["_type"].GetInt());
         int value = event_json["_value"].GetInt();
-        auto event = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData_EventData*>(time, type, value));
+        auto event = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_EventData*>(time, type, value));
         if (event_json.HasMember("_customData")) {
             event->customData = new rapidjson::Value(event_json["_customData"], doc.GetAllocator());
         } 
@@ -110,7 +110,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     }
 
     getLogger().debug("Parse root custom");
-    auto saveData = CRASH_UNLESS(il2cpp_utils::New<Il2CppNamespace::CustomBeatmapSaveData*>(events, notes, obstacles));
+    auto saveData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData*>(events, notes, obstacles));
     if (doc.HasMember("_customData")) {
         saveData->customData = new rapidjson::Value(doc["_customData"], doc.GetAllocator());
     }
@@ -123,7 +123,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
 
 // This hook creates the CustomNoteData using the custom json data found in the BeatmapSaveData
 MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
-    Il2CppNamespace::CustomBeatmapSaveData_NoteData *noteData;
+    CustomJSONData::CustomBeatmapSaveData_NoteData *noteData;
 
     // Since I don't feel like patching the original assembly to call my own function
     // with an extra noteData parameter, I get it by reading the register where it should be.
@@ -133,20 +133,20 @@ MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, 
     asm ("mov %[result], x23"
         : [result] "=r" (noteData));
 
-    auto result = Il2CppNamespace::CustomNoteData::CreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
+    auto result = CustomJSONData::CustomNoteData::CreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
     result->customData = noteData->customData;
     return result;
 }
 
 // This hook creates the CustomNoteData for bombs using the custom json data found in the BeatmapSaveData
 MAKE_HOOK_OFFSETLESS(CreateBombNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer) {
-    Il2CppNamespace::CustomBeatmapSaveData_NoteData *noteData;
+    CustomJSONData::CustomBeatmapSaveData_NoteData *noteData;
 
     // This register number should be the same as the one used in CreateBasicNoteData
     asm ("mov %[result], x23"
         : [result] "=r" (noteData));
 
-    auto result = Il2CppNamespace::CustomNoteData::CreateBombNoteData(time, lineIndex, noteLineLayer);
+    auto result = CustomJSONData::CustomNoteData::CreateBombNoteData(time, lineIndex, noteLineLayer);
     result->customData = noteData->customData;
     return result;
 }
@@ -168,17 +168,17 @@ extern "C" void load() {
     INSTALL_HOOK_OFFSETLESS(CreateBombNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBombNoteData", 3));
 
     // Register custom tpes
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_NoteData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_ObstacleData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapSaveData_EventData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomBeatmapEventData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomObstacleData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomNoteData>());
-    CRASH_UNLESS(custom_types::Register::RegisterType<Il2CppNamespace::CustomEventData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData_NoteData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData_ObstacleData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData_EventData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapEventData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomObstacleData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomNoteData>());
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomEventData>());
     
-
+    // Remove this
     for (int i = 0; i < custom_types::Register::classes.size(); i++) {
         getLogger().info("%p", custom_types::Register::classes[i]);
     }
