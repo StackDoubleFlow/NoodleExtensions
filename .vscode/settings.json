@@ -85,6 +85,10 @@
         "locale": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "variant": "cpp",
+        "hash_map": "cpp",
+        "concepts": "cpp",
+        "stop_token": "cpp"
     }
 }
