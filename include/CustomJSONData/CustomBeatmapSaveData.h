@@ -9,6 +9,8 @@
 #include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 
+#include "NELogger.h"
+
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
 
@@ -19,7 +21,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData, BeatmapSaveData,
                  List_1<BeatmapSaveData::ObstacleData*>* obstacles);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData,
-        // getLogger().debug("Registering CustomNoteData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapSaveData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -33,7 +35,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_NoteData, BeatmapSav
     DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer lineLayer, BeatmapSaveData::NoteType type, NoteCutDirection cutDirection);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_NoteData,
-        // getLogger().debug("Registering CustomNoteData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapSaveData_NoteData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -47,7 +49,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_ObstacleData, Beatma
     DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType type, float duration, int width);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_ObstacleData,
-        // getLogger().debug("Registering CustomNoteData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapSaveData_ObstacleData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -61,7 +63,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData_EventData, BeatmapSa
     DECLARE_CTOR(ctor, float time, BeatmapSaveData::BeatmapEventType type, int value);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData_EventData,
-        // getLogger().debug("Registering CustomNoteData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapSaveData_EventData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);

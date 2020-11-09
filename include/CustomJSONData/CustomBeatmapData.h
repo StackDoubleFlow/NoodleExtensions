@@ -9,6 +9,8 @@
 #include "GlobalNamespace/NoteData.hpp"
 #include "System/Object.hpp"
 
+#include "NELogger.h"
+
 using namespace GlobalNamespace;
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
@@ -17,7 +19,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomBeatmapData,
-        // getLogger().debug("Registering CustomBeatmapData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -36,7 +38,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomBeatmapEventData,
-        // getLogger().debug("Registering CustomBeatmapEventData!");
+        NELogger::GetLogger().debug("Registering CustomBeatmapEventData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -56,7 +58,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomObstacleData,
-        // getLogger().debug("Registering CustomObstacleData!");
+        NELogger::GetLogger().debug("Registering CustomObstacleData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -78,7 +80,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomNoteData,
-        // getLogger().debug("Registering CustomNoteData!");
+        NELogger::GetLogger().debug("Registering CustomNoteData!");
 
         // Register constructor
         REGISTER_METHOD(ctor);
@@ -102,7 +104,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, System::Object,
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomEventData,
-        // getLogger().debug("Registering CustomEventData!");
+        NELogger::GetLogger().debug("Registering CustomEventData!");
 
         // Register fields
         REGISTER_FIELD(type);

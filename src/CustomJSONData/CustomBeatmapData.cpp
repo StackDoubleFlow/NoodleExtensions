@@ -45,6 +45,7 @@ void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLay
 }
 
 CustomJSONData::CustomNoteData* CustomJSONData::CustomNoteData::CreateBasicNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
+    NELogger::GetLogger().info("Create Basic Note Data");
     return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0, 0, lineIndex, 0, 0));
 }
 

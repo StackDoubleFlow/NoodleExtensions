@@ -14,23 +14,18 @@
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 
 #include "CustomJSONData/CustomBeatmapSaveData.h"
 #include "CustomJSONData/CustomBeatmapData.h"
+#include "NELogger.h"
 
 #include <string>
 #include <iostream>
 
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
-
-static ModInfo modInfo;
-
-const Logger &getLogger() {
-    static const Logger &logger(modInfo);
-    return logger;
-}
 
 // This is to prevent issues with string limits
 std::string to_utf8(std::u16string_view view) {
@@ -44,20 +39,20 @@ std::string to_utf8(std::u16string_view view) {
 
 // This hook loads the json data (with custom data) into a BeatmapSaveData 
 MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *stringData) {
-    getLogger().debug("Parsing json");
+    NELogger::GetLogger().debug("Parsing json");
 
     std::string str = to_utf8(csstrtostr(stringData));
     
     rapidjson::Document doc;
     doc.Parse(str.c_str());
 
-    getLogger().debug("Parsing json success");
+    NELogger::GetLogger().debug("Parsing json success");
     
     List_1<BeatmapSaveData::NoteData*> *notes = List_1<BeatmapSaveData::NoteData*>::New_ctor();
     List_1<BeatmapSaveData::ObstacleData*> *obstacles = List_1<BeatmapSaveData::ObstacleData*>::New_ctor();
     List_1<BeatmapSaveData::EventData*> *events = List_1<BeatmapSaveData::EventData*>::New_ctor();
     
-    getLogger().debug("Parse notes");
+    NELogger::GetLogger().debug("Parse notes");
     // Parse notes
     rapidjson::Value& notes_arr = doc["_notes"];
     for (rapidjson::SizeType i = 0; i < notes_arr.Size(); i++) {
@@ -75,7 +70,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         notes->Add(note);
     }
 
-    getLogger().debug("Parse obstacles");
+    NELogger::GetLogger().debug("Parse obstacles");
     // Parse obstacles
     rapidjson::Value& obstacles_arr = doc["_obstacles"];
     for (rapidjson::SizeType i = 0; i < obstacles_arr.Size(); i++) {
@@ -93,7 +88,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         obstacles->Add(obstacle);
     }
 
-    getLogger().debug("Parse events");
+    NELogger::GetLogger().debug("Parse events");
     // Parse events
     rapidjson::Value& events_arr = doc["_events"];
     for (rapidjson::SizeType i = 0; i < events_arr.Size(); i++) {
@@ -109,13 +104,13 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         events->Add(event);
     }
 
-    getLogger().debug("Parse root custom");
+    NELogger::GetLogger().debug("Parse root custom");
     auto saveData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData*>(events, notes, obstacles));
     if (doc.HasMember("_customData")) {
         saveData->customData = new rapidjson::Value(doc["_customData"], doc.GetAllocator());
     }
 
-    getLogger().debug("Finished reading beatmap data");
+    NELogger::GetLogger().debug("Finished reading beatmap data");
 
     return saveData;
 }
@@ -151,14 +146,84 @@ MAKE_HOOK_OFFSETLESS(CreateBombNoteData, NoteData*, float time, int lineIndex, N
     return result;
 }
 
+UnityEngine::Vector3 GetNoteOffset(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> startRow, std::optional<float> startHeight) {
+    float distance = (-(spawnMovementData->noteLinesCount - 1) * 0.5) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2 : 0);
+    float lineIndex = startRow.value_or(0);
+    distance = (distance + lineIndex) * spawnMovementData->noteLinesDistance;
+
+    return (spawnMovementData->rightVec * distance) + UnityEngine::Vector3(0, 0, 0);
+}
+
+void GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNoteJumpMovementSpeed, std::optional<float> inputNoteJumpStartBeatOffset, float &localJumpDuration, 
+                       float &localJumpDistance, UnityEngine::Vector3 &localMoveStartPos, UnityEngine::Vector3 localMoveEndPos, UnityEngine::Vector3 localJumpEndPos) {
+    float localNoteJumpMovementSpeed = inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed);
+    float localNoteJumpStartBeatOffset = inputNoteJumpStartBeatOffset.value_or(spawnMovementData->noteJumpStartBeatOffset);
+    float num = 60 / spawnMovementData->startBpm;
+    float num2 = spawnMovementData->startHalfJumpDurationInBeats;
+    while (localNoteJumpMovementSpeed * num * num2 > spawnMovementData->maxHalfJumpDistance) {
+        num2 /= 2;
+    }
+
+    num2 += localNoteJumpStartBeatOffset;
+    if (num2 < 1) {
+        num2 = 1;
+    }
+
+    localJumpDuration = num * num2 * 2;
+    localJumpDistance = localNoteJumpMovementSpeed * localJumpDuration;
+    localMoveStartPos = spawnMovementData->centerPos + (spawnMovementData->forwardVec * (spawnMovementData->moveDistance + (localJumpDistance * 0.5)));
+    localMoveEndPos = spawnMovementData->centerPos + (spawnMovementData->forwardVec * localJumpDistance * 0.5);
+    localJumpEndPos = spawnMovementData->centerPos - (spawnMovementData->forwardVec * localJumpDistance * 0.5);
+}
+
+MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
+    BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
+    if (obstacleData->customData == nullptr) {
+        return result;
+    }
+    rapidjson::Value &customData = *obstacleData->customData;
+
+    std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional<rapidjson::Value*>{&customData["_position"]} : std::nullopt;
+    std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional<float>{customData["_noteJumpMovementSpeed"].IsFloat()} : std::nullopt;
+    std::optional<float> spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? std::optional<float>{customData["_noteJumpStartBeatOffset"].IsFloat()} : std::nullopt;
+
+    std::optional<float> startX = position.has_value() ? std::optional<float>{(*position.value())[0].IsFloat()} : std::nullopt;
+    std::optional<float> startY = position.has_value() ? std::optional<float>{(*position.value())[1].IsFloat()} : std::nullopt;
+
+    UnityEngine::Vector3 moveStartPos = result.moveStartPos;
+    UnityEngine::Vector3 moveEndPos = result.moveEndPos;
+    UnityEngine::Vector3 jumpEndPos = result.jumpEndPos;
+
+    float localJumpDuration;
+    float localJumpDistance;
+    UnityEngine::Vector3 localMoveStartPos;
+    UnityEngine::Vector3 localMoveEndPos;
+    UnityEngine::Vector3 localJumpEndPos;
+    GetNoteJumpValues(self, njs, spawnOffset, localJumpDuration, localJumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
+
+    UnityEngine::Vector3 finalNoteOffset;
+
+    if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
+        UnityEngine::Vector3 noteOffset = GetNoteOffset(self, obstacleData, startX, std::nullopt);
+
+        finalNoteOffset = noteOffset;
+
+        moveStartPos = localMoveStartPos + noteOffset;
+        moveEndPos = localMoveEndPos + noteOffset;
+        jumpEndPos = localJumpEndPos + noteOffset;
+    }
+
+    return result;
+}
+
 extern "C" void setup(ModInfo &info) {
     info.id = "NoodleExtensions";
     info.version = "0.1.0";
-    modInfo = info;
+    NELogger::modInfo = info;
 }
 
 extern "C" void load() {
-    getLogger().info("Installing NoodleExtensions Hooks!");
+    NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
 
     Logger::get().options.silent = true;
 
@@ -180,8 +245,8 @@ extern "C" void load() {
     
     // Remove this
     for (int i = 0; i < custom_types::Register::classes.size(); i++) {
-        getLogger().info("%p", custom_types::Register::classes[i]);
+        NELogger::GetLogger().info("%p", custom_types::Register::classes[i]);
     }
 
-    getLogger().info("Installed NoodleExtensions Hooks!");
+    NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }
