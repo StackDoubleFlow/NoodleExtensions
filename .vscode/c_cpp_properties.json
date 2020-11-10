@@ -9,6 +9,7 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/extern/**",
+        "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
         "${workspaceFolder}/extern/codegen/include/**",
         "${workspaceFolder}/../android-ndk-r21d/**"
       ],
