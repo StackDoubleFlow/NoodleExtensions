@@ -118,12 +118,12 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
 CustomJSONData::CustomNoteData* CustomJSONDataCreateBasicNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
     NELogger::GetLogger().info("Create Basic Note Data");
     NELogger::GetLogger().debug("custom klass: %p", CustomJSONData::CustomNoteData::klass);
-    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0, 0, lineIndex, 0, 0));
+    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0.0f, 0.0f, lineIndex, 0.0f, 0.0f));
 }
 
 CustomJSONData::CustomNoteData* CustomJSONDataCreateBombNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer) {
     
-    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, ColorType::None, NoteCutDirection::None, 0, 0, lineIndex, 0, 0));
+    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, ColorType::None, NoteCutDirection::None, 0.0f, 0.0f, lineIndex, 0.0f, 0.0f));
 }
 
 // This hook creates the CustomNoteData using the custom json data found in the BeatmapSaveData
@@ -252,11 +252,6 @@ extern "C" void load() {
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomObstacleData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomNoteData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomEventData>());
-    
-    // Remove this
-    for (int i = 0; i < custom_types::Register::classes.size(); i++) {
-        NELogger::GetLogger().info("%p", custom_types::Register::classes[i]);
-    }
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }
