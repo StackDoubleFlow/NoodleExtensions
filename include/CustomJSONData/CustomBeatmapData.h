@@ -74,10 +74,10 @@ public:
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
     DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer noteLineLayer, NoteLineLayer startNoteLineLayer, ColorType colorType, NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration);
 
-    DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
-    DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);
+    // DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
+    // DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);
 
-    DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+    // DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomNoteData,
         NELogger::GetLogger().debug("Registering CustomNoteData!");
@@ -86,9 +86,9 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        REGISTER_METHOD(CreateBasicNoteData);
-        REGISTER_METHOD(CreateBombNoteData);
-        REGISTER_METHOD(Finalize);
+        // REGISTER_METHOD(CreateBasicNoteData);
+        // REGISTER_METHOD(CreateBombNoteData);
+        // REGISTER_METHOD(Finalize);
     )
 
 public:

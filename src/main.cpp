@@ -115,6 +115,16 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     return saveData;
 }
 
+CustomJSONData::CustomNoteData* CustomJSONDataCreateBasicNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
+    NELogger::GetLogger().info("Create Basic Note Data");
+    NELogger::GetLogger().debug("custom klass: %p", CustomJSONData::CustomNoteData::klass);
+    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0, 0, lineIndex, 0, 0));
+}
+
+CustomJSONData::CustomNoteData* CustomJSONDataCreateBombNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer) {
+    
+    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, ColorType::None, NoteCutDirection::None, 0, 0, lineIndex, 0, 0));
+}
 
 // This hook creates the CustomNoteData using the custom json data found in the BeatmapSaveData
 MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
@@ -128,7 +138,7 @@ MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, 
     asm ("mov %[result], x23"
         : [result] "=r" (noteData));
 
-    auto result = CustomJSONData::CustomNoteData::CreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
+    auto result = CustomJSONDataCreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
     result->customData = noteData->customData;
     return result;
 }
@@ -141,7 +151,7 @@ MAKE_HOOK_OFFSETLESS(CreateBombNoteData, NoteData*, float time, int lineIndex, N
     asm ("mov %[result], x23"
         : [result] "=r" (noteData));
 
-    auto result = CustomJSONData::CustomNoteData::CreateBombNoteData(time, lineIndex, noteLineLayer);
+    auto result = CustomJSONDataCreateBombNoteData(time, lineIndex, noteLineLayer);
     result->customData = noteData->customData;
     return result;
 }

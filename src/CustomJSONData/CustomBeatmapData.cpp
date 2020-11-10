@@ -44,18 +44,9 @@ void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLay
     this->duration = duration;
 }
 
-CustomJSONData::CustomNoteData* CustomJSONData::CustomNoteData::CreateBasicNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
-    NELogger::GetLogger().info("Create Basic Note Data");
-    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0, 0, lineIndex, 0, 0));
-}
-
-CustomJSONData::CustomNoteData* CustomJSONData::CustomNoteData::CreateBombNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer) {
-    return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, ColorType::None, NoteCutDirection::None, 0, 0, lineIndex, 0, 0));
-}
-
-void CustomJSONData::CustomNoteData::Finalize() {
-    delete this->customData;
-}
+// void CustomJSONData::CustomNoteData::Finalize() {
+//     delete this->customData;
+// }
 
 DEFINE_CLASS(CustomJSONData::CustomEventData);
 
