@@ -1,4 +1,6 @@
 #include "CustomJSONData/CustomBeatmapData.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 
 DEFINE_CLASS(CustomJSONData::CustomBeatmapData);
 
@@ -28,12 +30,15 @@ void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, Obstacl
     this->obstacleType = obstacleType;
     this->duration = duration;
     this->width = width;
+    this->customData = nullptr;
 }
 
 BeatmapObjectData *CustomJSONData::CustomObstacleData::GetCopy() {
     auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width));
     copy->customData = this->customData;
-    NELogger::GetLogger().info("CustomJSONData::CustomObstacleData::GetCopy %p %p", copy->customData, this->customData);
+    if (this->customData) {
+        NELogger::GetLogger().info("CustomJSONData::CustomObstacleData::GetCopy %p %p", copy->customData, this->customData);
+    }
     return copy;
 }
 
@@ -55,6 +60,17 @@ void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLay
     this->flipLineIndex = flipLineIndex;
     this->flipYSide = flipYSide;
     this->duration = duration;
+    this->customData = nullptr;
+}
+
+BeatmapObjectData *CustomJSONData::CustomNoteData::GetCopy() {
+    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(this->time, this->lineIndex, this->noteLineLayer, this->startNoteLineLayer, 
+        this->colorType, this->cutDirection, this->timeToNextColorNote, this->timeToPrevColorNote, this->flipLineIndex, this->flipYSide, this->duration));
+    copy->customData = this->customData;
+    if (this->customData) {
+        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p", copy->customData, this->customData);
+    }
+    return copy;
 }
 
 // void CustomJSONData::CustomNoteData::Finalize() {

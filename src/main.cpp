@@ -87,7 +87,6 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         auto obstacle = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
         if (obstacle_json.HasMember("_customData")) {
             obstacle->customData = new rapidjson::Value(obstacle_json["_customData"], doc.GetAllocator());
-            NELogger::GetLogger().info("DeserializeFromJSONString customData pointer: %p", obstacle->customData);
         }
         obstacles->Add(obstacle);
     }
@@ -168,11 +167,20 @@ MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjec
     if (!std::strncmp(beatmapObjectData->klass->name, "CustomObstacleData", 19)) {
         return AddBeatmapObjectData(self, beatmapObjectData);
     }
+    NELogger::GetLogger().info("AddBeatmapObjectData beatmapObjectData pointer: %p", beatmapObjectData);
+    NELogger::GetLogger().info("AddBeatmapObjectData customData pointer: %p", saveObstacleData->customData);
+    NELogger::GetLogger().info("AddBeatmapObjectData type: %i", beatmapObjectData->get_beatmapObjectType());
+    if (saveObstacleData->customData) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        saveObstacleData->customData->Accept(writer);
+        const char* json = buffer.GetString();
+        NELogger::GetLogger().info("custom data: %s", json);
+    }
     if (beatmapObjectData->get_beatmapObjectType() == BeatmapObjectType::Obstacle) {
         ObstacleData *obstacleData = (ObstacleData *) beatmapObjectData;
         CustomJSONData::CustomObstacleData *customObstacleData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleData->time, obstacleData->lineIndex, obstacleData->obstacleType, obstacleData->duration, obstacleData->width));
         customObstacleData->customData = saveObstacleData->customData;
-        NELogger::GetLogger().info("AddBeatmapObjectData customData pointer: %p %p", saveObstacleData->customData, customObstacleData->customData);
         return AddBeatmapObjectData(self, customObstacleData);
     }
     return AddBeatmapObjectData(self, beatmapObjectData);

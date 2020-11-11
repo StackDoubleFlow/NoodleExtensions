@@ -25,7 +25,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        REGISTER_METHOD(Finalize);
+        // REGISTER_METHOD(Finalize);
     )
 
 public:
@@ -44,7 +44,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        REGISTER_METHOD(Finalize);
+        // REGISTER_METHOD(Finalize);
     )
 
 public:
@@ -66,7 +66,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
 
         // Register methods
         REGISTER_METHOD(GetCopy);
-        REGISTER_METHOD(Finalize);
+        // REGISTER_METHOD(Finalize);
     )
 
 public:
@@ -79,6 +79,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
     // DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
     // DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);
 
+    DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     // DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomNoteData,
@@ -91,6 +92,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
         // REGISTER_METHOD(CreateBasicNoteData);
         // REGISTER_METHOD(CreateBombNoteData);
         // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(GetCopy);
     )
 
 public:
@@ -116,7 +118,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, System::Object,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        REGISTER_METHOD(Finalize);
+        // REGISTER_METHOD(Finalize);
     )
 
 public:
