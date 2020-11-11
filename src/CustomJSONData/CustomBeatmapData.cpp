@@ -42,6 +42,8 @@ void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLay
     this->flipLineIndex = flipLineIndex;
     this->flipYSide = flipYSide;
     this->duration = duration;
+    this->time = time;
+    this->lineIndex = lineIndex;
 }
 
 // void CustomJSONData::CustomNoteData::Finalize() {
