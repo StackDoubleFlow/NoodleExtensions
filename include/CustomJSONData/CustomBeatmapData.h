@@ -53,8 +53,9 @@ public:
 
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
-    DECLARE_CTOR(ctor);
+    DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType obstacleType, float duration, int width);
 
+    DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomObstacleData,
@@ -64,6 +65,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
         REGISTER_METHOD(ctor);
 
         // Register methods
+        REGISTER_METHOD(GetCopy);
         REGISTER_METHOD(Finalize);
     )
 

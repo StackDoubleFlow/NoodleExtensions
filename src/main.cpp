@@ -1,6 +1,8 @@
 #include "beatsaber-hook/shared/utils/logging.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 #include "custom-types/shared/macros.hpp"
 #include "custom-types/shared/register.hpp"
 
@@ -10,6 +12,7 @@
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/NoteLineLayer.hpp"
 #include "GlobalNamespace/NoteCutDirection.hpp"
+#include "GlobalNamespace/BeatmapObjectType.hpp"
 #include "GlobalNamespace/BeatmapSaveData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
@@ -84,6 +87,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         auto obstacle = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
         if (obstacle_json.HasMember("_customData")) {
             obstacle->customData = new rapidjson::Value(obstacle_json["_customData"], doc.GetAllocator());
+            NELogger::GetLogger().info("DeserializeFromJSONString customData pointer: %p", obstacle->customData);
         }
         obstacles->Add(obstacle);
     }
@@ -116,8 +120,6 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
 }
 
 CustomJSONData::CustomNoteData* CustomJSONDataCreateBasicNoteData(float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
-    NELogger::GetLogger().info("Create Basic Note Data");
-    NELogger::GetLogger().debug("custom klass: %p", CustomJSONData::CustomNoteData::klass);
     return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, colorType, cutDirection, 0.0f, 0.0f, lineIndex, 0.0f, 0.0f));
 }
 
@@ -139,7 +141,7 @@ MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, 
         : [result] "=r" (noteData));
 
     auto result = CustomJSONDataCreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
-    result->customData = noteData->customData;
+    // result->customData = noteData->customData;
     return result;
 }
 
@@ -156,6 +158,26 @@ MAKE_HOOK_OFFSETLESS(CreateBombNoteData, NoteData*, float time, int lineIndex, N
     return result;
 }
 
+// This hook is primarily used to create CustomObstacleData by checking if it is adding a regular ObstacleData and converting it
+MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjectData *beatmapObjectData) {
+    CustomJSONData::CustomBeatmapSaveData_ObstacleData *saveObstacleData;
+    // This asm will only work correctly if the methods was called from GetBeatmapDataFromBeatmapSaveData
+    asm ("mov %[result], x25"
+        : [result] "=r" (saveObstacleData));
+    // This is to prevent crashes with the hook being called from the unintended functions
+    if (!std::strncmp(beatmapObjectData->klass->name, "CustomObstacleData", 19)) {
+        return AddBeatmapObjectData(self, beatmapObjectData);
+    }
+    if (beatmapObjectData->get_beatmapObjectType() == BeatmapObjectType::Obstacle) {
+        ObstacleData *obstacleData = (ObstacleData *) beatmapObjectData;
+        CustomJSONData::CustomObstacleData *customObstacleData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleData->time, obstacleData->lineIndex, obstacleData->obstacleType, obstacleData->duration, obstacleData->width));
+        customObstacleData->customData = saveObstacleData->customData;
+        NELogger::GetLogger().info("AddBeatmapObjectData customData pointer: %p %p", saveObstacleData->customData, customObstacleData->customData);
+        return AddBeatmapObjectData(self, customObstacleData);
+    }
+    return AddBeatmapObjectData(self, beatmapObjectData);
+}
+
 UnityEngine::Vector3 GetNoteOffset(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> startRow, std::optional<float> startHeight) {
     float distance = (-(spawnMovementData->noteLinesCount - 1) * 0.5) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2 : 0);
     float lineIndex = startRow.value_or(0);
@@ -165,7 +187,7 @@ UnityEngine::Vector3 GetNoteOffset(BeatmapObjectSpawnMovementData *spawnMovement
 }
 
 void GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNoteJumpMovementSpeed, std::optional<float> inputNoteJumpStartBeatOffset, float &localJumpDuration, 
-                       float &localJumpDistance, UnityEngine::Vector3 &localMoveStartPos, UnityEngine::Vector3 localMoveEndPos, UnityEngine::Vector3 localJumpEndPos) {
+                       float &localJumpDistance, UnityEngine::Vector3 &localMoveStartPos, UnityEngine::Vector3 &localMoveEndPos, UnityEngine::Vector3 &localJumpEndPos) {
     float localNoteJumpMovementSpeed = inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed);
     float localNoteJumpStartBeatOffset = inputNoteJumpStartBeatOffset.value_or(spawnMovementData->noteJumpStartBeatOffset);
     float num = 60 / spawnMovementData->startBpm;
@@ -187,10 +209,20 @@ void GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::o
 }
 
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
+    NELogger::GetLogger().info("GetObstacleSpawnData name");
+    NELogger::GetLogger().info("GetObstacleSpawnData pointer: %p", obstacleData->customData);
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
-    if (obstacleData->customData == nullptr) {
+    if (!obstacleData->customData) {
         return result;
     }
+
+    NELogger::GetLogger().info("customData pointer: %p", obstacleData->customData);
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    obstacleData->customData->Accept(writer);
+    const char* json = buffer.GetString();
+    NELogger::GetLogger().info("custom data: %s", json);
+
     rapidjson::Value &customData = *obstacleData->customData;
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional<rapidjson::Value*>{&customData["_position"]} : std::nullopt;
@@ -204,12 +236,13 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
     UnityEngine::Vector3 moveEndPos = result.moveEndPos;
     UnityEngine::Vector3 jumpEndPos = result.jumpEndPos;
 
-    float localJumpDuration;
-    float localJumpDistance;
+    float jumpDuration;
+    float jumpDistance;
     UnityEngine::Vector3 localMoveStartPos;
     UnityEngine::Vector3 localMoveEndPos;
     UnityEngine::Vector3 localJumpEndPos;
-    GetNoteJumpValues(self, njs, spawnOffset, localJumpDuration, localJumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
+    float obstacleHeight = result.obstacleHeight;
+    GetNoteJumpValues(self, njs, spawnOffset, jumpDuration, jumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
 
     UnityEngine::Vector3 finalNoteOffset;
 
@@ -223,6 +256,8 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
         jumpEndPos = localJumpEndPos + noteOffset;
     }
 
+    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, obstacleHeight, result.moveDuration, jumpDuration, result.noteLinesDistance);
+
     return result;
 }
 
@@ -235,12 +270,15 @@ extern "C" void setup(ModInfo &info) {
 extern "C" void load() {
     NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
 
-    Logger::get().options.silent = true;
+    // This prevents any and all Utils logging
+    // Logger::get().options.silent = true;
 
     // Install hooks
     INSTALL_HOOK_OFFSETLESS(DeserializeFromJSONString, il2cpp_utils::FindMethodUnsafe("", "BeatmapSaveData", "DeserializeFromJSONString", 1));
     INSTALL_HOOK_OFFSETLESS(CreateBasicNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBasicNoteData", 5));
     INSTALL_HOOK_OFFSETLESS(CreateBombNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBombNoteData", 3));
+    INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
+    INSTALL_HOOK_OFFSETLESS(AddBeatmapObjectData, il2cpp_utils::FindMethodUnsafe("", "BeatmapData", "AddBeatmapObjectData", 1));
 
     // Register custom tpes
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData>());

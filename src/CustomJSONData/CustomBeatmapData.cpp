@@ -22,8 +22,19 @@ void CustomJSONData::CustomBeatmapEventData::Finalize() {
 
 DEFINE_CLASS(CustomJSONData::CustomObstacleData);
 
-void CustomJSONData::CustomObstacleData::ctor() {
+void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, ObstacleType obstacleType, float duration, int width) {
+    this->time = time;
+    this->lineIndex = lineIndex;
+    this->obstacleType = obstacleType;
+    this->duration = duration;
+    this->width = width;
+}
 
+BeatmapObjectData *CustomJSONData::CustomObstacleData::GetCopy() {
+    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width));
+    copy->customData = this->customData;
+    NELogger::GetLogger().info("CustomJSONData::CustomObstacleData::GetCopy %p %p", copy->customData, this->customData);
+    return copy;
 }
 
 void CustomJSONData::CustomObstacleData::Finalize() {
@@ -33,6 +44,8 @@ void CustomJSONData::CustomObstacleData::Finalize() {
 DEFINE_CLASS(CustomJSONData::CustomNoteData);
 
 void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLayer noteLineLayer, NoteLineLayer startNoteLineLayer, ColorType colorType, NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration) {
+    this->time = time;
+    this->lineIndex = lineIndex;
     this->colorType = colorType;
     this->cutDirection = cutDirection;
     this->timeToNextColorNote = timeToNextColorNote;
@@ -42,8 +55,6 @@ void CustomJSONData::CustomNoteData::ctor(float time, int lineIndex, NoteLineLay
     this->flipLineIndex = flipLineIndex;
     this->flipYSide = flipYSide;
     this->duration = duration;
-    this->time = time;
-    this->lineIndex = lineIndex;
 }
 
 // void CustomJSONData::CustomNoteData::Finalize() {
