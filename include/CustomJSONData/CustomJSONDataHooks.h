@@ -2,6 +2,6 @@
 
 namespace CustomJSONData {
 
-void installHooks();
+void InstallHooks();
 
 }

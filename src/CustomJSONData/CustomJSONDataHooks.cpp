@@ -73,8 +73,10 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         float duration = obstacle_json["_duration"].GetFloat();
         int width = obstacle_json["_width"].GetInt();
         auto obstacle = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData_ObstacleData*>(time, lineIndex, type, duration, width));
+        NELogger::GetLogger().debug("obstacle pointer: %p", obstacle);
         if (obstacle_json.HasMember("_customData")) {
             obstacle->customData = new rapidjson::Value(obstacle_json["_customData"], doc.GetAllocator());
+            NELogger::GetLogger().debug("obstacle->customData pointer: %p", obstacle->customData);
         }
         obstacles->Add(obstacle);
     }
@@ -152,9 +154,10 @@ MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjec
     asm ("mov %[result], x25"
         : [result] "=r" (saveObstacleData));
     // This is to prevent crashes with the hook being called from the unintended functions
-    if (!std::strncmp(beatmapObjectData->klass->name, "CustomObstacleData", 19)) {
+    if (std::strncmp(beatmapObjectData->klass->name, "ObstacleData", 13)) {
         return AddBeatmapObjectData(self, beatmapObjectData);
     }
+    NELogger::GetLogger().info("saveObstacleData->klass->name: %s", saveObstacleData->klass->name);
     NELogger::GetLogger().info("AddBeatmapObjectData beatmapObjectData pointer: %p", beatmapObjectData);
     NELogger::GetLogger().info("AddBeatmapObjectData customData pointer: %p", saveObstacleData->customData);
     NELogger::GetLogger().info("AddBeatmapObjectData type: %i", beatmapObjectData->get_beatmapObjectType());
@@ -174,7 +177,7 @@ MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjec
     return AddBeatmapObjectData(self, beatmapObjectData);
 }
 
-void CustomJSONData::installHooks() {
+void CustomJSONData::InstallHooks() {
     // Install hooks
     INSTALL_HOOK_OFFSETLESS(DeserializeFromJSONString, il2cpp_utils::FindMethodUnsafe("", "BeatmapSaveData", "DeserializeFromJSONString", 1));
     INSTALL_HOOK_OFFSETLESS(CreateBasicNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBasicNoteData", 5));

@@ -15,6 +15,7 @@
 
 #include "CustomJSONData/CustomBeatmapSaveData.h"
 #include "CustomJSONData/CustomBeatmapData.h"
+#include "CustomJSONData/CustomJSONDataHooks.h"
 #include "NELogger.h"
 
 #include <string>
@@ -54,14 +55,15 @@ void GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::o
 }
 
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
-    NELogger::GetLogger().info("GetObstacleSpawnData name");
-    NELogger::GetLogger().info("GetObstacleSpawnData pointer: %p", obstacleData->customData);
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
+
+    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->customData);
+    // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
     if (!obstacleData->customData) {
         return result;
     }
 
-    NELogger::GetLogger().info("customData pointer: %p", obstacleData->customData);
+    // Debug json by pretty printing it
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     obstacleData->customData->Accept(writer);
@@ -116,10 +118,12 @@ extern "C" void load() {
     NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
 
     // This prevents any and all Utils logging
-    // Logger::get().options.silent = true;
+    Logger::get().options.silent = true;
 
     // Install hooks
     INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
+
+    CustomJSONData::InstallHooks();
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }
