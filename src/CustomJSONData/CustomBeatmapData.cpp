@@ -24,27 +24,30 @@ void CustomJSONData::CustomBeatmapEventData::Finalize() {
 
 DEFINE_CLASS(CustomJSONData::CustomObstacleData);
 
-void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, ObstacleType obstacleType, float duration, int width) {
+void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, ObstacleType obstacleType, float duration, int width, long customData) {
     this->time = time;
     this->lineIndex = lineIndex;
     this->obstacleType = obstacleType;
     this->duration = duration;
     this->width = width;
-    this->customData = nullptr;
+    this->_customData = customData;
 }
 
 BeatmapObjectData *CustomJSONData::CustomObstacleData::GetCopy() {
     auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width));
     copy->customData = this->customData;
     if (this->customData) {
-        NELogger::GetLogger().info("CustomJSONData::CustomObstacleData::GetCopy %p %p", copy->customData, this->customData);
+        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
     }
     return copy;
 }
 
 void CustomJSONData::CustomObstacleData::Finalize() {
-    delete this->customData;
+    // delete this->customData;
+    NELogger::GetLogger().debug("CustomObstacleData::Finalize");
 }
+
+
 
 DEFINE_CLASS(CustomJSONData::CustomNoteData);
 
@@ -68,14 +71,15 @@ BeatmapObjectData *CustomJSONData::CustomNoteData::GetCopy() {
         this->colorType, this->cutDirection, this->timeToNextColorNote, this->timeToPrevColorNote, this->flipLineIndex, this->flipYSide, this->duration));
     copy->customData = this->customData;
     if (this->customData) {
-        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p", copy->customData, this->customData);
+        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
     }
     return copy;
 }
 
-// void CustomJSONData::CustomNoteData::Finalize() {
-//     delete this->customData;
-// }
+void CustomJSONData::CustomNoteData::Finalize() {
+    // delete this->customData;
+    NELogger::GetLogger().debug("CustomObstacleData::Finalize");
+}
 
 DEFINE_CLASS(CustomJSONData::CustomEventData);
 

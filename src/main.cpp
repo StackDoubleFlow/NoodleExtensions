@@ -57,20 +57,20 @@ void GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::o
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
-    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->customData);
+    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->getCustomData());
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
-    if (!obstacleData->customData) {
+    if (!obstacleData->getCustomData()) {
         return result;
     }
 
     // Debug json by pretty printing it
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    obstacleData->customData->Accept(writer);
+    obstacleData->getCustomData()->Accept(writer);
     const char* json = buffer.GetString();
     NELogger::GetLogger().info("custom data: %s", json);
 
-    rapidjson::Value &customData = *obstacleData->customData;
+    rapidjson::Value &customData = *obstacleData->getCustomData();
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional<rapidjson::Value*>{&customData["_position"]} : std::nullopt;
     std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional<float>{customData["_noteJumpMovementSpeed"].IsFloat()} : std::nullopt;

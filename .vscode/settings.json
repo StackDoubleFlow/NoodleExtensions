@@ -89,6 +89,9 @@
         "variant": "cpp",
         "hash_map": "cpp",
         "concepts": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "__memory": "cpp",
+        "filesystem": "cpp",
+        "*.inc": "cpp"
     }
 }

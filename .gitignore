@@ -11,3 +11,6 @@ extern/
 
 # Logs
 *.log
+
+# Local testing
+testmaps/

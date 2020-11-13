@@ -25,7 +25,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(Finalize);
     )
 
 public:
@@ -44,7 +44,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(Finalize);
     )
 
 public:
@@ -53,10 +53,12 @@ public:
 
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
-    DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType obstacleType, float duration, int width);
+    DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType obstacleType, float duration, int width, long customData);
 
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+
+    DECLARE_INSTANCE_FIELD(long, _customData);
 
     REGISTER_FUNCTION(CustomObstacleData,
         NELogger::GetLogger().debug("Registering CustomObstacleData!");
@@ -66,11 +68,17 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
 
         // Register methods
         REGISTER_METHOD(GetCopy);
-        // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(Finalize);
+        
+        // Register fields
+        REGISTER_FIELD(_customData);
     )
 
 public:
-    rapidjson::Value *customData;
+//     rapidjson::Value *customData;
+    rapidjson::Value *getCustomData() {
+        return (rapidjson::Value *) this->_customData;
+    }
 )
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
@@ -80,7 +88,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
     // DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);
 
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
-    // DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+    DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
     REGISTER_FUNCTION(CustomNoteData,
         NELogger::GetLogger().debug("Registering CustomNoteData!");
@@ -91,7 +99,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
         // Register methods
         // REGISTER_METHOD(CreateBasicNoteData);
         // REGISTER_METHOD(CreateBombNoteData);
-        // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(Finalize);
         REGISTER_METHOD(GetCopy);
     )
 
@@ -118,7 +126,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, System::Object,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        // REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(Finalize);
     )
 
 public:
