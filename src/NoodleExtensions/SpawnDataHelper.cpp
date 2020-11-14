@@ -33,3 +33,15 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMov
     localMoveEndPos = spawnMovementData->centerPos + (spawnMovementData->forwardVec * localJumpDistance * 0.5);
     localJumpEndPos = spawnMovementData->centerPos - (spawnMovementData->forwardVec * localJumpDistance * 0.5);
 }
+
+float SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> height) {
+    float ypos = spawnMovementData->baseLinesYPos;
+    if (height.has_value()) {
+        ypos = (height.value() * spawnMovementData->noteLinesDistance) + spawnMovementData->baseLinesYPos;
+    }
+    // TODO: Do this
+    // else if (beatmapObjectData is NoteData noteData) {
+    //     ypos = BeatmapObjectSpawnMovementData.LineYPosForLineLayer(noteData.noteLineLayer);
+    // }
+    return ypos;
+}

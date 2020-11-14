@@ -18,4 +18,6 @@ UnityEngine::Vector3 GetNoteOffset(GlobalNamespace::BeatmapObjectSpawnMovementDa
 void GetNoteJumpValues(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNoteJumpMovementSpeed, std::optional<float> inputNoteJumpStartBeatOffset, float &localJumpDuration, 
                        float &localJumpDistance, UnityEngine::Vector3 &localMoveStartPos, UnityEngine::Vector3 &localMoveEndPos, UnityEngine::Vector3 &localJumpEndPos);
 
+float LineYPosForLineLayer(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, GlobalNamespace::BeatmapObjectData *beatmapObjectData, std::optional<float> height);
+
 }
