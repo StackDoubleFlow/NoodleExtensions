@@ -276,7 +276,8 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
             notesSaveDataIdx++;
         } else if (obstacleData) {
             float obstacleTime = ProcessTime(self, obstacleData->get_time(), bpmChangesDataIdx, bpmChangesData, shuffle, shufflePeriod);
-            CustomJSONData::CustomObstacleData *beatmapObjectData2 = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleTime, obstacleData->lineIndex, obstacleData->type, self->GetRealTimeFromBPMTime(obstacleData->duration, startBpm, shuffle, shufflePeriod), obstacleData->width, (long)obstacleData->customData));
+            CustomJSONData::CustomObstacleData *beatmapObjectData2 = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleTime, obstacleData->lineIndex, obstacleData->type, self->GetRealTimeFromBPMTime(obstacleData->duration, startBpm, shuffle, shufflePeriod), obstacleData->width));
+            beatmapObjectData2->customData = obstacleData->customData;
             beatmapData->AddBeatmapObjectData(beatmapObjectData2);
             obstaclesSaveDataIdx++;
         }

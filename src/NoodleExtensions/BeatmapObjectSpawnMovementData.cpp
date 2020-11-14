@@ -24,20 +24,20 @@ using namespace NoodleExtensions;
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
-    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->getCustomData());
+    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->customData);
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
-    if (!obstacleData->getCustomData()) {
+    if (!obstacleData->customData) {
         return result;
     }
 
     // Debug json by pretty printing it
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    obstacleData->getCustomData()->Accept(writer);
+    obstacleData->customData->Accept(writer);
     const char* json = buffer.GetString();
     NELogger::GetLogger().info("custom data: %s", json);
 
-    rapidjson::Value &customData = *obstacleData->getCustomData();
+    rapidjson::Value &customData = *obstacleData->customData;
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional{&customData["_position"]} : std::nullopt;
     std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
