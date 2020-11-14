@@ -30,15 +30,24 @@ void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, Obstacl
     this->obstacleType = obstacleType;
     this->duration = duration;
     this->width = width;
-    this->_customData = customData;
+    this->customData = (rapidjson::Value *) customData;
+    NELogger::GetLogger().info("Creating CustomJSONData::CustomObstacleData %p with with customData %p", this, this->getCustomData());
+    if (this->getCustomData()) {
+        // Debug json by pretty printing it
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        this->getCustomData()->Accept(writer);
+        const char* json = buffer.GetString();
+        NELogger::GetLogger().info("custom data: %s", json);
+    }
 }
 
 BeatmapObjectData *CustomJSONData::CustomObstacleData::GetCopy() {
-    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width));
-    copy->customData = this->customData;
-    if (this->customData) {
-        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
-    }
+    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width, (long) this->customData));
+    // copy->customData = this->customData;
+    // if (this->customData) {
+    //     NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
+    // }
     return copy;
 }
 

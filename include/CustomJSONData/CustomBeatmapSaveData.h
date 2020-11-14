@@ -7,6 +7,8 @@
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
+#include "GlobalNamespace/BeatmapSaveData_WaypointData.hpp"
+#include "GlobalNamespace/BeatmapSaveData_SpecialEventKeywordFiltersData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 
 #include "NELogger.h"
@@ -18,7 +20,9 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapSaveData, BeatmapSaveData,
     DECLARE_CTOR(ctor, 
                  List_1<BeatmapSaveData::EventData*>* events, 
                  List_1<BeatmapSaveData::NoteData*>* notes, 
-                 List_1<BeatmapSaveData::ObstacleData*>* obstacles);
+                 List_1<BeatmapSaveData::WaypointData*>* waypoints, 
+                 List_1<BeatmapSaveData::ObstacleData*>* obstacles,
+                 BeatmapSaveData::SpecialEventKeywordFiltersData *specialEventsKeywordFilters);
 
     REGISTER_FUNCTION(CustomBeatmapSaveData,
         NELogger::GetLogger().debug("Registering CustomBeatmapSaveData!");

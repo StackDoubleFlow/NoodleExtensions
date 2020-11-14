@@ -92,6 +92,7 @@
         "stop_token": "cpp",
         "__memory": "cpp",
         "filesystem": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "span": "cpp"
     }
 }

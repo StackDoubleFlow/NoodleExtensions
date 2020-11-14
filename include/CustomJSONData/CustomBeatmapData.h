@@ -58,7 +58,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
-    DECLARE_INSTANCE_FIELD(long, _customData);
+    // DECLARE_INSTANCE_FIELD(long, _customData);
 
     REGISTER_FUNCTION(CustomObstacleData,
         NELogger::GetLogger().debug("Registering CustomObstacleData!");
@@ -71,13 +71,13 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
         REGISTER_METHOD(Finalize);
         
         // Register fields
-        REGISTER_FIELD(_customData);
+        // REGISTER_FIELD(_customData);
     )
 
 public:
-//     rapidjson::Value *customData;
+     rapidjson::Value *customData;
     rapidjson::Value *getCustomData() {
-        return (rapidjson::Value *) this->_customData;
+        return (rapidjson::Value *) this->customData;
     }
 )
 

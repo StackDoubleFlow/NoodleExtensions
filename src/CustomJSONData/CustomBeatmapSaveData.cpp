@@ -2,10 +2,14 @@
 
 void CustomJSONData::CustomBeatmapSaveData::ctor(List_1<BeatmapSaveData::EventData*>* events, 
                                                   List_1<BeatmapSaveData::NoteData*>* notes, 
-                                                  List_1<BeatmapSaveData::ObstacleData*>* obstacles) {
+                                                  List_1<BeatmapSaveData::WaypointData*>* waypoints, 
+                                                  List_1<BeatmapSaveData::ObstacleData*>* obstacles,
+                                                  BeatmapSaveData::SpecialEventKeywordFiltersData *specialEventsKeywordFilters) {
     this->events = events;
     this->notes = notes;
+    this->waypoints = waypoints;
     this->obstacles = obstacles;
+    this->specialEventsKeywordFilters = specialEventsKeywordFilters;
 }
 
 DEFINE_CLASS(CustomJSONData::CustomBeatmapSaveData);
