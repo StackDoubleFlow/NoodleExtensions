@@ -33,7 +33,7 @@ public:
 )
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
-    DECLARE_CTOR(ctor);
+    DECLARE_CTOR(ctor, float time, BeatmapEventType type, int value);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 

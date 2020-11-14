@@ -14,8 +14,10 @@ void CustomJSONData::CustomBeatmapData::Finalize() {
 
 DEFINE_CLASS(CustomJSONData::CustomBeatmapEventData);
 
-void CustomJSONData::CustomBeatmapEventData::ctor() {
-
+void CustomJSONData::CustomBeatmapEventData::ctor(float time, BeatmapEventType type, int value) {
+    this->time = time;
+    this->type = type;
+    this->value = value;
 }
 
 void CustomJSONData::CustomBeatmapEventData::Finalize() {

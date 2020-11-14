@@ -283,7 +283,7 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
         }
     }
     for (int i = 0; i < eventsSaveData->get_Count(); i++) {
-        BeatmapSaveData::EventData *eventData = eventsSaveData->get_Item(i);
+        auto *eventData = (CustomJSONData::CustomBeatmapSaveData_EventData *) eventsSaveData->get_Item(i);
         float time = eventData->time;
         while (bpmChangesDataIdx < bpmChangesData->get_Count() - 1 && bpmChangesData->get_Item(bpmChangesDataIdx + 1).bpmChangeStartBpmTime < time) {
             bpmChangesDataIdx++;
@@ -291,7 +291,8 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
         BeatmapDataLoader::BpmChangeData bpmChangeData2 = bpmChangesData->get_Item(bpmChangesDataIdx);
         float realTime = bpmChangeData2.bpmChangeStartTime + self->GetRealTimeFromBPMTime(time - bpmChangeData2.bpmChangeStartBpmTime, bpmChangeData2.bpm, shuffle, shufflePeriod);
         BeatmapEventType type = BeatmapDataLoader::ConvertFromBeatmapSaveDataBeatmapEventType(eventData->type);
-        BeatmapEventData *beatmapEventData = BeatmapEventData::New_ctor(time, type, eventData->value);
+        CustomJSONData::CustomBeatmapEventData *beatmapEventData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapEventData*>(time, type, eventData->value));
+        beatmapEventData->customData = eventData->customData;
         beatmapData->AddBeatmapEventData(beatmapEventData);
     }
     if (beatmapData->beatmapEventsData->get_Count() == 0) {
