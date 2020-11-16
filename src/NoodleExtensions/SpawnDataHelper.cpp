@@ -1,15 +1,18 @@
 #include "NoodleExtensions/SpawnDataHelper.h"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
+#include "GlobalNamespace/BeatmapObjectData.hpp"
+#include "GlobalNamespace/NoteData.hpp"
+#include "CustomJSONData/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
 using namespace NoodleExtensions;
 
 UnityEngine::Vector3 SpawnDataHelper::GetNoteOffset(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> startRow, std::optional<float> startHeight) {
     float distance = (-(spawnMovementData->noteLinesCount - 1) * 0.5) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2 : 0);
-    float lineIndex = startRow.value_or(0);
+    float lineIndex = startRow.value_or(beatmapObjectData->lineIndex);
     distance = (distance + lineIndex) * spawnMovementData->noteLinesDistance;
 
-    return (spawnMovementData->rightVec * distance) + UnityEngine::Vector3(0, 0, 0);
+    return (spawnMovementData->rightVec * distance) + UnityEngine::Vector3(0, LineYPosForLineLayer(spawnMovementData, beatmapObjectData, startHeight), 0);
 }
 
 void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNoteJumpMovementSpeed, std::optional<float> inputNoteJumpStartBeatOffset, float &localJumpDuration, 
@@ -38,10 +41,10 @@ float SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spaw
     float ypos = spawnMovementData->baseLinesYPos;
     if (height.has_value()) {
         ypos = (height.value() * spawnMovementData->noteLinesDistance) + spawnMovementData->baseLinesYPos;
+    } else if (beatmapObjectData->klass == classof(CustomJSONData::CustomNoteData *)) { // This check is untested
+        auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
+        ypos = spawnMovementData->LineYPosForLineLayer(noteData->noteLineLayer);
     }
-    // TODO: Do this
-    // else if (beatmapObjectData is NoteData noteData) {
-    //     ypos = BeatmapObjectSpawnMovementData.LineYPosForLineLayer(noteData.noteLineLayer);
-    // }
+
     return ypos;
 }

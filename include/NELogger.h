@@ -1,6 +1,7 @@
 
 #pragma once
 #include "beatsaber-hook/shared/utils/logging.hpp"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
 
 class NELogger {
 public:
@@ -11,3 +12,5 @@ public:
         return log;
     }
 };
+
+void PrintJSONValue(const rapidjson::Value &json);

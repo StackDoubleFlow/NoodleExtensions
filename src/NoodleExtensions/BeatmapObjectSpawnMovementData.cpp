@@ -44,43 +44,43 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional{&customData["_position"]} : std::nullopt;
     std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
-    std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional{customData["_noteJumpMovementSpeed"].IsFloat()} : std::nullopt;
-    std::optional<float> spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? std::optional{customData["_noteJumpStartBeatOffset"].IsFloat()} : std::nullopt;
+    std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional{customData["_noteJumpMovementSpeed"].GetFloat()} : std::nullopt;
+    std::optional<float> spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? std::optional{customData["_noteJumpStartBeatOffset"].GetFloat()} : std::nullopt;
 
-    std::optional<float> startX = position.has_value() ? std::optional{(*position.value())[0].IsFloat()} : std::nullopt;
-    std::optional<float> startY = position.has_value() ? std::optional{(*position.value())[1].IsFloat()} : std::nullopt;
+    std::optional<float> startX = position.has_value() ? std::optional{(*position.value())[0].GetFloat()} : std::nullopt;
+    std::optional<float> startY = position.has_value() ? std::optional{(*position.value())[1].GetFloat()} : std::nullopt;
 
-    std::optional<float> height = scale.has_value() ? std::optional{(*scale.value())[1].IsFloat()} : std::nullopt;
+    std::optional<float> height = scale.has_value() ? std::optional{(*scale.value())[1].GetFloat()} : std::nullopt;
 
     UnityEngine::Vector3 moveStartPos = result.moveStartPos;
     UnityEngine::Vector3 moveEndPos = result.moveEndPos;
     UnityEngine::Vector3 jumpEndPos = result.jumpEndPos;
+    float obstacleHeight = result.obstacleHeight;
 
     float jumpDuration;
     float jumpDistance;
     UnityEngine::Vector3 localMoveStartPos;
     UnityEngine::Vector3 localMoveEndPos;
     UnityEngine::Vector3 localJumpEndPos;
-    float obstacleHeight = result.obstacleHeight;
     SpawnDataHelper::GetNoteJumpValues(self, njs, spawnOffset, jumpDuration, jumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
 
     std::optional<UnityEngine::Vector3> finalNoteOffset = std::nullopt;
 
-    if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
-        UnityEngine::Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
+    // if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
+    //     UnityEngine::Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
 
-        finalNoteOffset = std::optional{noteOffset};
+    //     finalNoteOffset = std::optional{noteOffset};
 
-        moveStartPos = localMoveStartPos + noteOffset;
-        moveEndPos = localMoveEndPos + noteOffset;
-        jumpEndPos = localJumpEndPos + noteOffset;
-    }
+    //     moveStartPos = localMoveStartPos + noteOffset;
+    //     moveEndPos = localMoveEndPos + noteOffset;
+    //     jumpEndPos = localJumpEndPos + noteOffset;
+    // }
 
     if (height.has_value()) {
         obstacleHeight = height.value() * self->noteLinesDistance;
     }
 
-    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, obstacleHeight, result.moveDuration, jumpDuration, result.noteLinesDistance);
+    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, result.noteLinesDistance);
 
 
     return result;
@@ -95,15 +95,15 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::No
     rapidjson::Value &customData = *noteData->customData;
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional{&customData["_position"]} : std::nullopt;
-    std::optional<float> flipLineIndex = customData.HasMember("flipLineIndex") ? std::optional{customData["flipLineIndex"].IsFloat()} : std::nullopt;
-    std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional{customData["_noteJumpMovementSpeed"].IsFloat()} : std::nullopt;
-    std::optional<float> spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? std::optional{customData["_noteJumpStartBeatOffset"].IsFloat()} : std::nullopt;
-    std::optional<float> startLineLayer = customData.HasMember("startNoteLineLayer") ? std::optional{customData["startNoteLineLayer"].IsFloat()} : std::nullopt;
+    std::optional<float> flipLineIndex = customData.HasMember("flipLineIndex") ? std::optional{customData["flipLineIndex"].GetFloat()} : std::nullopt;
+    std::optional<float> njs = customData.HasMember("_noteJumpMovementSpeed") ? std::optional{customData["_noteJumpMovementSpeed"].GetFloat()} : std::nullopt;
+    std::optional<float> spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? std::optional{customData["_noteJumpStartBeatOffset"].GetFloat()} : std::nullopt;
+    std::optional<float> startLineLayer = customData.HasMember("startNoteLineLayer") ? std::optional{customData["startNoteLineLayer"].GetFloat()} : std::nullopt;
 
-    bool gravityOverride = customData.HasMember("_disableNoteGravity") ? customData["_disableNoteGravity"].IsBool() : false;
+    bool gravityOverride = customData.HasMember("_disableNoteGravity") ? customData["_disableNoteGravity"].GetBool() : false;
 
-    std::optional<float> startRow = position.has_value() ? std::optional{(*position.value())[0].IsFloat()} : std::nullopt;
-    std::optional<float> startHeight = position.has_value() ? std::optional{(*position.value())[1].IsFloat()} : std::nullopt;
+    std::optional<float> startRow = position.has_value() ? std::optional{(*position.value())[0].GetFloat()} : std::nullopt;
+    std::optional<float> startHeight = position.has_value() ? std::optional{(*position.value())[1].GetFloat()} : std::nullopt;
 
     float jumpDuration = self->jumpDuration;
 

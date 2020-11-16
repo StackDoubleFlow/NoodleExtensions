@@ -17,7 +17,7 @@ MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self
         }
 
         rapidjson::Value &customData = *beatmapEventData->customData;
-        std::optional<float> rotation = customData.HasMember("_rotation") ? std::optional{customData["_rotation"].IsFloat()} : std::nullopt;
+        std::optional<float> rotation = customData.HasMember("_rotation") ? std::optional{customData["_rotation"].GetFloat()} : std::nullopt;
 
         if (rotation.has_value()) {
             self->rotation = rotation.value();

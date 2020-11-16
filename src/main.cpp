@@ -1,5 +1,7 @@
 #include "beatsaber-hook/shared/utils/logging.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 
 #include "NoodleExtensions/NEHooks.h"
 #include "CustomJSONData/CustomJSONDataHooks.h"
@@ -7,6 +9,16 @@
 
 #include <string>
 #include <iostream>
+
+void PrintJSONValue(const rapidjson::Value &json) {
+    using namespace rapidjson;
+        
+    StringBuffer sb;
+    PrettyWriter<StringBuffer> writer(sb);
+    json.Accept(writer);
+    auto str = sb.GetString();
+    NELogger::GetLogger().info("%s", str);
+}
 
 extern "C" void setup(ModInfo &info) {
     info.id = "NoodleExtensions";
