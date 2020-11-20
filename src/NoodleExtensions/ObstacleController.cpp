@@ -3,8 +3,10 @@
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/StretchableObstacle.hpp"
 #include "GlobalNamespace/SimpleColorSO.hpp"
+#include "GlobalNamespace/ParametricBoxFakeGlowController.hpp"
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "UnityEngine/GameObject.hpp"
 
 #include "CustomJSONData/CustomBeatmapData.h"
 #include "NoodleExtensions/NEHooks.h"
@@ -31,7 +33,6 @@ float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData
     if (obstacleData->customData) {
         rapidjson::Value &customData = *obstacleData->customData;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
-        NELogger::GetLogger().info("width %f", (*scale.value())[0].GetFloat());
         std::optional<float> width = scale.has_value() ? std::optional{(*scale.value())[0].GetFloat()} : std::nullopt;
         if (width.has_value()) {
             return width.value();
@@ -52,6 +53,17 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
     return def;
 }
 
+float GetCustomHeight(float def, CustomJSONData::CustomObstacleData *obstacleData) {
+    if (obstacleData->customData) {
+        rapidjson::Value &customData = *obstacleData->customData;
+        std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
+        std::optional<float> height = scale.has_value() ? std::optional{(*scale.value())[1].GetFloat()} : std::nullopt;
+        if (height.has_value()) {
+            return height.value();
+        }
+    }
+    return def;
+}
 
 MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
@@ -60,16 +72,9 @@ MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::Custo
     self->worldRotation = rotation;
     self->inverseWorldRotation = UnityEngine::Quaternion::Euler(-rotation.get_eulerAngles());
 
-    float width = GetCustomWidth(obstacleData->get_width(), obstacleData) * singleLineWidth;
-    UnityEngine::Vector3 b = UnityEngine::Vector3((width - singleLineWidth) * 0.5, 0, 0);
-    self->startPos = startPos + b;
-    self->midPos = midPos + b;
-    self->endPos = endPos + b;
+    float width = GetCustomWidth(obstacleData->get_width(), obstacleData) * 0.6;// * singleLineWidth;
 
     float length = GetCustomLength(obstacleData->get_time() - move1Duration - move2Duration * 0.5, obstacleData);
-
-    PrintJSONValue(*obstacleData->customData);
-    // NELogger::GetLogger().info("width height length %f %f %f", width, height, length);
 
     if (!obstacleData->customData) {
         return;
@@ -86,7 +91,8 @@ MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::Custo
         color = UnityEngine::Color(r, g, b, a);
     }
 
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, GetCustomHeight(height, obstacleData), length, color);
+    self->stretchableObstacle->obstacleFakeGlow->get_gameObject()->SetActive(false);
     self->bounds = self->stretchableObstacle->bounds;
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
@@ -101,13 +107,8 @@ MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::Custo
 
     transform->set_localScale(UnityEngine::Vector3::get_one());
 
-    
-
     self->Update();
-
-    // NELogger::GetLogger().info("Custom width: %f", GetCustomWidth(obstacleData->get_width(), obstacleData));
 }
-
 
 void NoodleExtensions::InstallObstacleControllerHooks() {
     INSTALL_HOOK_OFFSETLESS(Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));

@@ -5,10 +5,13 @@
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapEventData.hpp"
 #include "GlobalNamespace/ObstacleData.hpp"
+#include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/NoteLineLayer.hpp"
 #include "GlobalNamespace/NoteCutDirection.hpp"
 #include "GlobalNamespace/BeatmapObjectType.hpp"
+#include "GlobalNamespace/BasicBeatmapObjectManager.hpp"
+#include "GlobalNamespace/MonoMemoryPoolContainer_1.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteSpawnData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
@@ -27,18 +30,10 @@ using namespace NoodleExtensions;
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
-    NELogger::GetLogger().info("GetObstacleSpawnData obstacleData->customData pointer: %p", obstacleData->customData);
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
     if (!obstacleData->customData) {
         return result;
     }
-
-    // Debug json by pretty printing it
-    rapidjson::StringBuffer buffer;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    obstacleData->customData->Accept(writer);
-    const char* json = buffer.GetString();
-    NELogger::GetLogger().info("custom data: %s", json);
 
     rapidjson::Value &customData = *obstacleData->customData;
 
@@ -66,22 +61,23 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
 
     std::optional<UnityEngine::Vector3> finalNoteOffset = std::nullopt;
 
-    // if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
-    //     UnityEngine::Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
+    if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
+        UnityEngine::Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
+        noteOffset.y = startY.has_value() ? self->verticalObstaclePosY + (startY.value() * self->noteLinesDistance) : ((obstacleData->obstacleType == ObstacleType::Top)
+            ? (self->topObstaclePosY + self->jumpOffsetY) : self->verticalObstaclePosY);
 
-    //     finalNoteOffset = std::optional{noteOffset};
+        finalNoteOffset = std::optional{noteOffset};
 
-    //     moveStartPos = localMoveStartPos + noteOffset;
-    //     moveEndPos = localMoveEndPos + noteOffset;
-    //     jumpEndPos = localJumpEndPos + noteOffset;
-    // }
+        moveStartPos = localMoveStartPos + noteOffset;
+        moveEndPos = localMoveEndPos + noteOffset;
+        jumpEndPos = localJumpEndPos + noteOffset;
+    }
 
     if (height.has_value()) {
         obstacleHeight = height.value() * self->noteLinesDistance;
     }
 
-    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, result.noteLinesDistance);
-
+    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
 
     return result;
 }
@@ -145,7 +141,15 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::No
     return result;
 }
 
+// Why the fuck is this needed? the fuck is this?? this is a week of my life I'm never getting back, fuck this game.
+MAKE_HOOK_OFFSETLESS(TestHook, ObstacleController *, BasicBeatmapObjectManager *self, ObstacleData *obstacleData, BeatmapObjectSpawnMovementData::ObstacleSpawnData obstacleSpawnData, float rotation) {
+    ObstacleController *obstacleController = self->obstaclePoolContainer->Spawn();
+    obstacleController->Init(obstacleData, rotation, obstacleSpawnData.moveStartPos, obstacleSpawnData.moveEndPos, obstacleSpawnData.jumpEndPos, obstacleSpawnData.moveDuration, obstacleSpawnData.jumpDuration, obstacleSpawnData.noteLinesDistance, obstacleSpawnData.obstacleHeight);
+    return obstacleController;
+}
+
 void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks() {
     INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
-    INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
+    // INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
+    INSTALL_HOOK_OFFSETLESS(TestHook, il2cpp_utils::FindMethodUnsafe("", "BasicBeatmapObjectManager", "SpawnObstacleInternal", 3));
 }

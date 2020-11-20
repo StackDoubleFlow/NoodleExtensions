@@ -6,7 +6,7 @@
 		""
 	],
 	"category": "Other",
-	"gameVersion": "1.12.2",
+	"gameVersion": "1.13.0",
 	"version": "0.1.0",
 	"links": {
 		"project-home": "https://github.com/StackDoubleFlow/NoodleExtensions"
@@ -20,6 +20,18 @@
 			"UninstallAction": {
 				"RemoveLibraryFile": "libnoodleextensions.so"
 			}
-		}
+		},
+		{
+            "type": "HookModLibrary",
+            "installAction": {
+                "installLibraryFile": "libbeatsaber-hook_0_8_4.so"
+            }
+		},
+		{
+            "type": "HookModLibrary",
+            "installAction": {
+                "installLibraryFile": "libcustom-types.so"
+            }
+        }
 	]
 }
