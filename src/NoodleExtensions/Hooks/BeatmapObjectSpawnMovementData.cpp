@@ -1,17 +1,12 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapEventData.hpp"
 #include "GlobalNamespace/ObstacleData.hpp"
-#include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/NoteLineLayer.hpp"
 #include "GlobalNamespace/NoteCutDirection.hpp"
 #include "GlobalNamespace/BeatmapObjectType.hpp"
-#include "GlobalNamespace/BasicBeatmapObjectManager.hpp"
-#include "GlobalNamespace/MonoMemoryPoolContainer_1.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteSpawnData.hpp"
 #include "System/Collections/Generic/List_1.hpp"
@@ -141,15 +136,7 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::No
     return result;
 }
 
-// Why the fuck is this needed? the fuck is this?? this is a week of my life I'm never getting back, fuck this game.
-MAKE_HOOK_OFFSETLESS(TestHook, ObstacleController *, BasicBeatmapObjectManager *self, ObstacleData *obstacleData, BeatmapObjectSpawnMovementData::ObstacleSpawnData obstacleSpawnData, float rotation) {
-    ObstacleController *obstacleController = self->obstaclePoolContainer->Spawn();
-    obstacleController->Init(obstacleData, rotation, obstacleSpawnData.moveStartPos, obstacleSpawnData.moveEndPos, obstacleSpawnData.jumpEndPos, obstacleSpawnData.moveDuration, obstacleSpawnData.jumpDuration, obstacleSpawnData.noteLinesDistance, obstacleSpawnData.obstacleHeight);
-    return obstacleController;
-}
-
 void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks() {
     INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
-    // INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
-    INSTALL_HOOK_OFFSETLESS(TestHook, il2cpp_utils::FindMethodUnsafe("", "BasicBeatmapObjectManager", "SpawnObstacleInternal", 3));
+    INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
 }

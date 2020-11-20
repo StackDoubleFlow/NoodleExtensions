@@ -6,4 +6,5 @@ void NoodleExtensions::InstallHooks() {
     InstallBeatmapObjectSpawnMovementDataHooks();
     InstallSpawnRotationProcessorProcessBeatmapEventDataHooks();
     InstallObstacleControllerHooks();
+    InstallBasicBeatmapObjectManagerHooks();
 }
