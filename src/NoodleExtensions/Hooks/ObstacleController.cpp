@@ -55,15 +55,16 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
 
 MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
-    NELogger::GetLogger().info("startPos %f %f %f", startPos.x, startPos.y, startPos.z);
-    NELogger::GetLogger().info("midPos %f %f %f", midPos.x, midPos.y, midPos.z);
-    NELogger::GetLogger().info("endPos %f %f %f", endPos.x, endPos.y, endPos.z);
 
     UnityEngine::Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
     self->inverseWorldRotation = UnityEngine::Quaternion::Euler(-rotation.get_eulerAngles());
 
     float width = GetCustomWidth(obstacleData->get_width(), obstacleData) * 0.6;// * singleLineWidth;
+    UnityEngine::Vector3 b = UnityEngine::Vector3 { width - singleLineWidth, 0, 0 };
+    self->startPos = startPos;
+    self->midPos = midPos;
+    self->endPos = endPos;
 
     float length = GetCustomLength(obstacleData->get_time() - move1Duration - move2Duration * 0.5, obstacleData);
 
