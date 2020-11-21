@@ -2,6 +2,7 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
+#include "custom-types/shared/logging.hpp"
 
 #include "NoodleExtensions/NEHooks.h"
 #include "CustomJSONData/CustomJSONDataHooks.h"

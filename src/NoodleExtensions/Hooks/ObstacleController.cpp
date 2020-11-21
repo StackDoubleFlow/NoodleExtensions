@@ -53,20 +53,11 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
     return def;
 }
 
-float GetCustomHeight(float def, CustomJSONData::CustomObstacleData *obstacleData) {
-    if (obstacleData->customData) {
-        rapidjson::Value &customData = *obstacleData->customData;
-        std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
-        std::optional<float> height = scale.has_value() ? std::optional{(*scale.value())[1].GetFloat()} : std::nullopt;
-        if (height.has_value()) {
-            return height.value();
-        }
-    }
-    return def;
-}
-
-MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
-    Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
+MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
+    ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
+    NELogger::GetLogger().info("startPos %f %f %f", startPos.x, startPos.y, startPos.z);
+    NELogger::GetLogger().info("midPos %f %f %f", midPos.x, midPos.y, midPos.z);
+    NELogger::GetLogger().info("endPos %f %f %f", endPos.x, endPos.y, endPos.z);
 
     UnityEngine::Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
@@ -91,7 +82,7 @@ MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::Custo
         color = UnityEngine::Color(r, g, b, a);
     }
 
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, GetCustomHeight(height, obstacleData), length, color);
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
     self->stretchableObstacle->obstacleFakeGlow->get_gameObject()->SetActive(false);
     self->bounds = self->stretchableObstacle->bounds;
 
@@ -111,5 +102,5 @@ MAKE_HOOK_OFFSETLESS(Init, void, ObstacleController *self, CustomJSONData::Custo
 }
 
 void NoodleExtensions::InstallObstacleControllerHooks() {
-    INSTALL_HOOK_OFFSETLESS(Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
+    INSTALL_HOOK_OFFSETLESS(ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
 }
