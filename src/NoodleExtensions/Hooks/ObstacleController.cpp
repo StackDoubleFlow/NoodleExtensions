@@ -61,7 +61,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->inverseWorldRotation = UnityEngine::Quaternion::Euler(-rotation.get_eulerAngles());
 
     float width = GetCustomWidth(obstacleData->get_width(), obstacleData) * 0.6;// * singleLineWidth;
-    UnityEngine::Vector3 b = UnityEngine::Vector3 { width - singleLineWidth, 0, 0 };
+    UnityEngine::Vector3 b = UnityEngine::Vector3 { (width - singleLineWidth) * 0.5f, 0, 0 };
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
