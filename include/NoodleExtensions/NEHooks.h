@@ -3,7 +3,6 @@
 namespace NoodleExtensions {
 
 void InstallBeatmapObjectSpawnMovementDataHooks();
-void InstallBasicBeatmapObjectManagerHooks();
 void InstallSpawnRotationProcessorHooks();
 void InstallObstacleControllerHooks();
 
