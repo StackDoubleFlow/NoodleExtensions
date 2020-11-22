@@ -62,9 +62,9 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
     float width = GetCustomWidth(obstacleData->get_width(), obstacleData) * 0.6;// * singleLineWidth;
     UnityEngine::Vector3 b = UnityEngine::Vector3 { width - singleLineWidth, 0, 0 };
-    self->startPos = startPos;
-    self->midPos = midPos;
-    self->endPos = endPos;
+    self->startPos = startPos + b;
+    self->midPos = midPos + b;
+    self->endPos = endPos + b;
 
     float length = GetCustomLength(obstacleData->get_time() - move1Duration - move2Duration * 0.5, obstacleData);
 
