@@ -22,6 +22,7 @@
 #include <cmath>
 
 using namespace NoodleExtensions;
+using namespace GlobalNamespace;
 
 struct BeatmapObjectSpawnMovementData_ObstacleSpawnData {
     UnityEngine::Vector3 moveStartPos;

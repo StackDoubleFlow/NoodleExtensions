@@ -1,9 +1,11 @@
 #include "CustomJSONData/CustomBeatmapSaveData.h"
 
-void CustomJSONData::CustomBeatmapSaveData::ctor(List_1<BeatmapSaveData::EventData*>* events, 
-                                                  List_1<BeatmapSaveData::NoteData*>* notes, 
-                                                  List_1<BeatmapSaveData::WaypointData*>* waypoints, 
-                                                  List_1<BeatmapSaveData::ObstacleData*>* obstacles,
+using namespace GlobalNamespace;
+
+void CustomJSONData::CustomBeatmapSaveData::ctor(List<BeatmapSaveData::EventData*>* events, 
+                                                  List<BeatmapSaveData::NoteData*>* notes, 
+                                                  List<BeatmapSaveData::WaypointData*>* waypoints, 
+                                                  List<BeatmapSaveData::ObstacleData*>* obstacles,
                                                   BeatmapSaveData::SpecialEventKeywordFiltersData *specialEventsKeywordFilters) {
     this->events = events;
     this->notes = notes;

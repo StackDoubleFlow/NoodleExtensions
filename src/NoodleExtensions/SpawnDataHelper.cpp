@@ -34,6 +34,7 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMov
 
     localJumpDuration = num * num2 * 2;
     localJumpDistance = localNoteJumpMovementSpeed * localJumpDuration;
+    NELogger::GetLogger().info("localJumpDistance %f", localJumpDistance);
     localMoveStartPos = spawnMovementData->centerPos + (spawnMovementData->forwardVec * (spawnMovementData->moveDistance + (localJumpDistance * 0.5)));
     localMoveEndPos =   spawnMovementData->centerPos + (spawnMovementData->forwardVec * localJumpDistance * 0.5);
     localJumpEndPos =   spawnMovementData->centerPos - (spawnMovementData->forwardVec * localJumpDistance * 0.5);

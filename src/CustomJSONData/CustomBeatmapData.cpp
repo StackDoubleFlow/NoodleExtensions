@@ -2,6 +2,8 @@
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 
+using namespace GlobalNamespace;
+
 DEFINE_CLASS(CustomJSONData::CustomBeatmapData);
 
 void CustomJSONData::CustomBeatmapData::ctor() {

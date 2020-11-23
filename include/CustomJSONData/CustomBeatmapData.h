@@ -11,9 +11,7 @@
 
 #include "NELogger.h"
 
-using namespace GlobalNamespace;
-
-DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, BeatmapData,
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, GlobalNamespace::BeatmapData,
     DECLARE_CTOR(ctor);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
@@ -32,8 +30,8 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, BeatmapEventData,
-    DECLARE_CTOR(ctor, float time, BeatmapEventType type, int value);
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, GlobalNamespace::BeatmapEventData,
+    DECLARE_CTOR(ctor, float time, GlobalNamespace::BeatmapEventType type, int value);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
@@ -52,8 +50,8 @@ public:
 )
 
 
-DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, ObstacleData,
-    DECLARE_CTOR(ctor, float time, int lineIndex, ObstacleType obstacleType, float duration, int width);
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, GlobalNamespace::ObstacleData,
+    DECLARE_CTOR(ctor, float time, int lineIndex, GlobalNamespace::ObstacleType obstacleType, float duration, int width);
 
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
@@ -75,8 +73,8 @@ public:
     rapidjson::Value *customData;
 )
 
-DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, NoteData,
-    DECLARE_CTOR(ctor, float time, int lineIndex, NoteLineLayer noteLineLayer, NoteLineLayer startNoteLineLayer, ColorType colorType, NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration);
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, GlobalNamespace::NoteData,
+    DECLARE_CTOR(ctor, float time, int lineIndex, GlobalNamespace::NoteLineLayer noteLineLayer, GlobalNamespace::NoteLineLayer startNoteLineLayer, GlobalNamespace::ColorType colorType, GlobalNamespace::NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration);
 
     // DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
     // DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);

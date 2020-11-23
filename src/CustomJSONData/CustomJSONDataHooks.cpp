@@ -53,7 +53,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     NELogger::GetLogger().debug("Parse notes");
     // Parse notes
     rapidjson::Value& notes_arr = doc["_notes"];
-    List_1<BeatmapSaveData::NoteData*> *notes = List_1<BeatmapSaveData::NoteData*>::New_ctor(notes_arr.Size());
+    List<BeatmapSaveData::NoteData*> *notes = List<BeatmapSaveData::NoteData*>::New_ctor(notes_arr.Size());
     for (rapidjson::SizeType i = 0; i < notes_arr.Size(); i++) {
         rapidjson::Value& note_json = notes_arr[i];
 
@@ -72,7 +72,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     NELogger::GetLogger().debug("Parse obstacles");
     // Parse obstacles
     rapidjson::Value& obstacles_arr = doc["_obstacles"];
-    List_1<BeatmapSaveData::ObstacleData*> *obstacles = List_1<BeatmapSaveData::ObstacleData*>::New_ctor(obstacles_arr.Size());
+    List<BeatmapSaveData::ObstacleData*> *obstacles = List<BeatmapSaveData::ObstacleData*>::New_ctor(obstacles_arr.Size());
     for (rapidjson::SizeType i = 0; i < obstacles_arr.Size(); i++) {
         rapidjson::Value& obstacle_json = obstacles_arr[i];
 
@@ -91,7 +91,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     NELogger::GetLogger().debug("Parse events");
     // Parse events
     rapidjson::Value& events_arr = doc["_events"];
-    List_1<BeatmapSaveData::EventData*> *events = List_1<BeatmapSaveData::EventData*>::New_ctor(events_arr.Size());
+    List<BeatmapSaveData::EventData*> *events = List<BeatmapSaveData::EventData*>::New_ctor(events_arr.Size());
     for (rapidjson::SizeType i = 0; i < events_arr.Size(); i++) {
         rapidjson::Value& event_json = events_arr[i];
         
@@ -107,7 +107,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
 
     NELogger::GetLogger().debug("Parse waypoints");
     rapidjson::Value& waypoints_arr = doc["_waypoints"];
-    List_1<BeatmapSaveData::WaypointData*> *waypoints = List_1<BeatmapSaveData::WaypointData*>::New_ctor(waypoints_arr.Size());
+    List<BeatmapSaveData::WaypointData*> *waypoints = List<BeatmapSaveData::WaypointData*>::New_ctor(waypoints_arr.Size());
     for (rapidjson::SizeType i = 0; i < waypoints_arr.Size(); i++) {
         rapidjson::Value& waypoint_json = waypoints_arr[i];
         
@@ -120,7 +120,7 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
     }
 
     // TODO: Parse whatever the hell this is
-    auto specialEventsKeywordFilters = BeatmapSaveData::SpecialEventKeywordFiltersData::New_ctor(List_1<BeatmapSaveData::SpecialEventsForKeyword*>::New_ctor());
+    auto specialEventsKeywordFilters = BeatmapSaveData::SpecialEventKeywordFiltersData::New_ctor(List<BeatmapSaveData::SpecialEventsForKeyword*>::New_ctor());
 
     NELogger::GetLogger().debug("Parse root");
     auto saveData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapSaveData*>(events, notes, waypoints, obstacles, specialEventsKeywordFilters));
@@ -204,7 +204,7 @@ MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjec
     return AddBeatmapObjectData(self, beatmapObjectData);
 }
 
-float ProcessTime(BeatmapDataLoader *self, float bpmTime, int &bpmChangesDataIdx,List_1<BeatmapDataLoader::BpmChangeData> *bpmChangesData, float shuffle, float shufflePeriod) {
+float ProcessTime(BeatmapDataLoader *self, float bpmTime, int &bpmChangesDataIdx, List<BeatmapDataLoader::BpmChangeData> *bpmChangesData, float shuffle, float shufflePeriod) {
     int bpmChangesDataCount = bpmChangesData->get_Count();
     while(bpmChangesDataIdx < bpmChangesDataCount - 1 && bpmChangesData->items->values[bpmChangesDataIdx + 1].bpmChangeStartBpmTime < bpmTime) {
         bpmChangesDataIdx++;
@@ -213,13 +213,13 @@ float ProcessTime(BeatmapDataLoader *self, float bpmTime, int &bpmChangesDataIdx
     return bpmChangeData.bpmChangeStartTime + self->GetRealTimeFromBPMTime(bpmTime - bpmChangeData.bpmChangeStartBpmTime, bpmChangeData.bpm, shuffle, shufflePeriod);
 }
 
-MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDataLoader *self, List_1<BeatmapSaveData::NoteData *> *notesSaveData, List_1<BeatmapSaveData::WaypointData *> *waypointsSaveData, 
-    List_1<BeatmapSaveData::ObstacleData *> *obstaclesSaveData, List_1<BeatmapSaveData::EventData *> *eventsSaveData, BeatmapSaveData::SpecialEventKeywordFiltersData *evironmentSpecialEventFilterData, float startBpm, float shuffle, float shufflePeriod) {
+MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDataLoader *self, List<BeatmapSaveData::NoteData *> *notesSaveData, List<BeatmapSaveData::WaypointData *> *waypointsSaveData, 
+    List<BeatmapSaveData::ObstacleData *> *obstaclesSaveData, List<BeatmapSaveData::EventData *> *eventsSaveData, BeatmapSaveData::SpecialEventKeywordFiltersData *evironmentSpecialEventFilterData, float startBpm, float shuffle, float shufflePeriod) {
     
     auto startTime = std::chrono::high_resolution_clock::now();
 
     BeatmapData *beatmapData = BeatmapData::New_ctor(4);
-    List_1<BeatmapDataLoader::BpmChangeData> *bpmChangesData = List_1<BeatmapDataLoader::BpmChangeData>::New_ctor();
+    List<BeatmapDataLoader::BpmChangeData> *bpmChangesData = List<BeatmapDataLoader::BpmChangeData>::New_ctor();
     bpmChangesData->Add(BeatmapDataLoader::BpmChangeData(0, 0, startBpm));
     BeatmapDataLoader::BpmChangeData bpmChangeData = bpmChangesData->items->values[0];
     for (int i = 0; i < eventsSaveData->get_Count(); i++) {
