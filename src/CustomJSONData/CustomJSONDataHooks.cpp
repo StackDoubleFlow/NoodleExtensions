@@ -144,66 +144,6 @@ CustomJSONData::CustomNoteData* CustomJSONDataCreateBombNoteData(float time, int
     return CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(time, lineIndex, noteLineLayer, noteLineLayer, ColorType::None, NoteCutDirection::None, 0.0f, 0.0f, lineIndex, 0.0f, 0.0f));
 }
 
-// This hook creates the CustomNoteData using the custom json data found in the BeatmapSaveData
-MAKE_HOOK_OFFSETLESS(CreateBasicNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection) {
-    CustomJSONData::CustomBeatmapSaveData_NoteData *noteData;
-
-    // Since I don't feel like patching the original assembly to call my own function
-    // with an extra noteData parameter, I get it by reading the register where it should be.
-    // WARNING: This will most likely break on every update as noteData might be on another register. 
-    //          If a hook is ran before this one and it overwrites this register, then this will most 
-    //          likely break.
-    asm ("mov %[result], x23"
-        : [result] "=r" (noteData));
-
-    auto result = CustomJSONDataCreateBasicNoteData(time, lineIndex, noteLineLayer, colorType, cutDirection);
-    // result->customData = noteData->customData;
-    return result;
-}
-
-// This hook creates the CustomNoteData for bombs using the custom json data found in the BeatmapSaveData
-MAKE_HOOK_OFFSETLESS(CreateBombNoteData, NoteData*, float time, int lineIndex, NoteLineLayer noteLineLayer) {
-    CustomJSONData::CustomBeatmapSaveData_NoteData *noteData;
-
-    // This register number should be the same as the one used in CreateBasicNoteData
-    asm ("mov %[result], x23"
-        : [result] "=r" (noteData));
-
-    auto result = CustomJSONDataCreateBombNoteData(time, lineIndex, noteLineLayer);
-    result->customData = noteData->customData;
-    return result;
-}
-
-// This hook is primarily used to create CustomObstacleData by checking if it is adding a regular ObstacleData and converting it
-MAKE_HOOK_OFFSETLESS(AddBeatmapObjectData, void, BeatmapData *self, BeatmapObjectData *beatmapObjectData) {
-    CustomJSONData::CustomBeatmapSaveData_ObstacleData *saveObstacleData;
-    // This asm will only work correctly if the methods was called from GetBeatmapDataFromBeatmapSaveData
-    asm ("mov %[result], x25"
-        : [result] "=r" (saveObstacleData));
-    // This is to prevent crashes with the hook being called from the unintended functions
-    if (std::strncmp(beatmapObjectData->klass->name, "ObstacleData", 13)) {
-        return AddBeatmapObjectData(self, beatmapObjectData);
-    }
-    NELogger::GetLogger().info("saveObstacleData->klass->name: %s", saveObstacleData->klass->name);
-    NELogger::GetLogger().info("AddBeatmapObjectData saveObstacleData pointer: %p", saveObstacleData);
-    NELogger::GetLogger().info("AddBeatmapObjectData customData pointer: %p", saveObstacleData->customData);
-    NELogger::GetLogger().info("AddBeatmapObjectData type: %i", beatmapObjectData->get_beatmapObjectType());
-    if (saveObstacleData->customData) {
-        rapidjson::StringBuffer buffer;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-        saveObstacleData->customData->Accept(writer);
-        const char* json = buffer.GetString();
-        NELogger::GetLogger().info("custom data: %s", json);
-    }
-    if (beatmapObjectData->get_beatmapObjectType() == BeatmapObjectType::Obstacle) {
-        ObstacleData *obstacleData = (ObstacleData *) beatmapObjectData;
-        CustomJSONData::CustomObstacleData *customObstacleData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleData->time, obstacleData->lineIndex, obstacleData->obstacleType, obstacleData->duration, obstacleData->width));
-        // customObstacleData->customData = saveObstacleData->customData;
-        return AddBeatmapObjectData(self, customObstacleData);
-    }
-    return AddBeatmapObjectData(self, beatmapObjectData);
-}
-
 float ProcessTime(BeatmapDataLoader *self, float bpmTime, int &bpmChangesDataIdx, List<BeatmapDataLoader::BpmChangeData> *bpmChangesData, float shuffle, float shufflePeriod) {
     int bpmChangesDataCount = bpmChangesData->get_Count();
     while(bpmChangesDataIdx < bpmChangesDataCount - 1 && bpmChangesData->items->values[bpmChangesDataIdx + 1].bpmChangeStartBpmTime < bpmTime) {
@@ -314,9 +254,6 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
 void CustomJSONData::InstallHooks() {
     // Install hooks
     INSTALL_HOOK_OFFSETLESS(DeserializeFromJSONString, il2cpp_utils::FindMethodUnsafe("", "BeatmapSaveData", "DeserializeFromJSONString", 1));
-    // INSTALL_HOOK_OFFSETLESS(CreateBasicNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBasicNoteData", 5));
-    // INSTALL_HOOK_OFFSETLESS(CreateBombNoteData, il2cpp_utils::FindMethodUnsafe("", "NoteData", "CreateBombNoteData", 3));
-    // INSTALL_HOOK_OFFSETLESS(AddBeatmapObjectData, il2cpp_utils::FindMethodUnsafe("", "BeatmapData", "AddBeatmapObjectData", 1));
     INSTALL_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataLoader", "GetBeatmapDataFromBeatmapSaveData", 8));
 
     // Register custom tpes
