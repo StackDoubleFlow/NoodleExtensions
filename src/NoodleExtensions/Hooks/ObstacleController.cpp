@@ -47,9 +47,8 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
     if (obstacleData->customData) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
-        std::optional<float> length = scale.has_value() ? std::optional{(*scale.value())[2].GetFloat()} : std::nullopt;
-        if (length.has_value()) {
-            return length.value() * /*NoteLinesDistace*/ 0.6;
+        if (scale.has_value() && scale.value()->Size() > 2) {
+            return (*scale.value())[2].GetFloat() * /*NoteLinesDistace*/ 0.6;
         }
     }
     return def;
@@ -75,10 +74,8 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     NELogger::GetLogger().info("self->midPos %f %f %f", self->midPos.x, self->midPos.y, self->midPos.z);
     NELogger::GetLogger().info("self->endPos %f %f %f", self->endPos.x, self->endPos.y, self->endPos.z);
 
-    // float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
-    // float length = GetCustomLength(defaultLength, obstacleData);
-    float num2       = UnityEngine::Vector3::Distance(self->endPos, self->midPos) / move2Duration;
-    float length     = num2 * obstacleData->duration;
+    float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
+    float length = GetCustomLength(defaultLength, obstacleData);
 
     if (!obstacleData->customData) {
         return;
