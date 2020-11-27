@@ -75,7 +75,10 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     NELogger::GetLogger().info("self->midPos %f %f %f", self->midPos.x, self->midPos.y, self->midPos.z);
     NELogger::GetLogger().info("self->endPos %f %f %f", self->endPos.x, self->endPos.y, self->endPos.z);
 
-    float length = GetCustomLength(obstacleData->get_time() - move1Duration - move2Duration * 0.5, obstacleData);
+    // float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
+    // float length = GetCustomLength(defaultLength, obstacleData);
+    float num2       = UnityEngine::Vector3::Distance(self->endPos, self->midPos) / move2Duration;
+    float length     = num2 * obstacleData->duration;
 
     if (!obstacleData->customData) {
         return;
@@ -92,8 +95,8 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
         color = UnityEngine::Color(r, g, b, a);
     }
 
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
     self->stretchableObstacle->obstacleFakeGlow->get_gameObject()->SetActive(false);
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
     self->bounds = self->stretchableObstacle->bounds;
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
