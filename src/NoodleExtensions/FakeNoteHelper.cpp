@@ -12,7 +12,7 @@ bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
     if (!customNoteData->customData) {
         return false;
     }
-    rapidjson::Value &customData = *customNoteData->customData;
+    rapidjson::Value &customData = *customNoteData->customData->value;
     return customData.HasMember("_fake") && customData.GetBool();
 }
 
@@ -21,6 +21,6 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
     if (!customNoteData->customData) {
         return true;
     }
-    rapidjson::Value &customData = *customNoteData->customData;
+    rapidjson::Value &customData = *customNoteData->customData->value;
     return !customData.HasMember("_interactable") || customData.GetBool();
 }

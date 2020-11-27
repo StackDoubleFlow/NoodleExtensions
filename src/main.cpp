@@ -29,7 +29,6 @@ extern "C" void setup(ModInfo &info) {
 
 extern "C" void load() {
     NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
-
     // This prevents any and all Utils logging
     Logger::get().options.silent = true;
 

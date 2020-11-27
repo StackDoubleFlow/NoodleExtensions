@@ -1,8 +1,6 @@
 #include "custom-types/shared/register.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 
 #include "GlobalNamespace/BeatmapSaveData.hpp"
 #include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
@@ -171,6 +169,8 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
             bpmChangesData->Add(BeatmapDataLoader::BpmChangeData(bpmChangeStartTime, time, value));
         }
     }
+
+    // Sort by time
     notesSaveData->Sort(il2cpp_utils::MakeDelegate<System::Comparison_1<BeatmapSaveData::NoteData*>*>(classof(System::Comparison_1<BeatmapSaveData::NoteData*>*), (void*)nullptr, 
         +[](BeatmapSaveData::NoteData *x, BeatmapSaveData::NoteData *y) {
             if (x->time >= y->time) {
@@ -195,6 +195,7 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
             return -1;
         }
     ));
+
     int notesSaveDataIdx = 0;
     int obstaclesSaveDataIdx = 0;
     int bpmChangesDataIdx = 0;
@@ -208,19 +209,36 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData *, BeatmapDa
         if (noteData && (!obstacleData || noteData->time <= obstacleData->time)) {
             float time2 = ProcessTime(self, noteData->time, bpmChangesDataIdx, bpmChangesData, shuffle, shufflePeriod);
             ColorType colorType = BeatmapDataLoader::ConvertFromBeatmapSaveDataNoteType(noteData->type);
+
             CustomJSONData::CustomNoteData *beatmapObjectData;
             if (colorType == ColorType::None) {
                 beatmapObjectData = CustomJSONDataCreateBombNoteData(time2, noteData->lineIndex, noteData->lineLayer);
             } else {
                 beatmapObjectData = CustomJSONDataCreateBasicNoteData(time2, noteData->lineIndex, noteData->lineLayer, colorType, noteData->cutDirection);
             }
-            beatmapObjectData->customData = noteData->customData;
+
+            if (noteData->customData) {
+                CustomJSONData::JSONWrapper *customData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::JSONWrapper*>());
+                customData->value = noteData->customData;
+                beatmapObjectData->customData = customData;
+            }
+            beatmapObjectData->bpm = startBpm;
+
             beatmapData->AddBeatmapObjectData(beatmapObjectData);
             notesSaveDataIdx++;
         } else if (obstacleData) {
             float obstacleTime = ProcessTime(self, obstacleData->time, bpmChangesDataIdx, bpmChangesData, shuffle, shufflePeriod);
+
             CustomJSONData::CustomObstacleData *beatmapObjectData2 = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(obstacleTime, obstacleData->lineIndex, obstacleData->type, self->GetRealTimeFromBPMTime(obstacleData->duration, startBpm, shuffle, shufflePeriod), obstacleData->width));
-            beatmapObjectData2->customData = obstacleData->customData;
+            
+            // TODO: Move this into constructor
+            if (obstacleData->customData) {
+                CustomJSONData::JSONWrapper *customData = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::JSONWrapper*>());
+                customData->value = obstacleData->customData;
+                beatmapObjectData2->customData = customData;
+            }
+            beatmapObjectData2->bpm = startBpm;
+
             beatmapData->AddBeatmapObjectData(beatmapObjectData2);
             obstaclesSaveDataIdx++;
         }
@@ -256,7 +274,9 @@ void CustomJSONData::InstallHooks() {
     INSTALL_HOOK_OFFSETLESS(DeserializeFromJSONString, il2cpp_utils::FindMethodUnsafe("", "BeatmapSaveData", "DeserializeFromJSONString", 1));
     INSTALL_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataLoader", "GetBeatmapDataFromBeatmapSaveData", 8));
 
+    static_assert(sizeof(CustomJSONData::JSONWrapper) == 24);
     // Register custom tpes
+    CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::JSONWrapper>());
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData_NoteData>());
     CRASH_UNLESS(custom_types::Register::RegisterType<CustomJSONData::CustomBeatmapSaveData_ObstacleData>());

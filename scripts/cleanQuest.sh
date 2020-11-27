@@ -1,0 +1,1 @@
+adb shell rm /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libnoodleextensions.so

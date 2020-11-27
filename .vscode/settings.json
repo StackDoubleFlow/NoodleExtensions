@@ -93,6 +93,7 @@
         "__memory": "cpp",
         "filesystem": "cpp",
         "*.inc": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "csignal": "cpp"
     }
 }

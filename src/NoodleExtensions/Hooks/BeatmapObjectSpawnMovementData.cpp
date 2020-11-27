@@ -38,14 +38,17 @@ struct BeatmapObjectSpawnMovementData_ObstacleSpawnData {
 MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
     BeatmapObjectSpawnMovementData_ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
-    static_assert(sizeof(BeatmapObjectSpawnMovementData_ObstacleSpawnData) == 0x34);
-
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
+
+    NELogger::GetLogger().info("obstacleData->klass->name %s", obstacleData->klass->name);
+    NELogger::GetLogger().info("obstacleData->customData %p", obstacleData->customData);
     if (!obstacleData->customData) {
         return result;
     }
-
-    rapidjson::Value &customData = *obstacleData->customData;
+    if (!obstacleData->customData->value) {
+        return result;
+    }
+    rapidjson::Value &customData = *obstacleData->customData->value;
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional{&customData["_position"]} : std::nullopt;
     std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
@@ -109,7 +112,7 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_Not
         return result;
     }
 
-    rapidjson::Value &customData = *noteData->customData;
+    rapidjson::Value &customData = *noteData->customData->value;
 
     std::optional<rapidjson::Value*> position = customData.HasMember("_position") ? std::optional{&customData["_position"]} : std::nullopt;
     std::optional<float> flipLineIndex = customData.HasMember("flipLineIndex") ? std::optional{customData["flipLineIndex"].GetFloat()} : std::nullopt;

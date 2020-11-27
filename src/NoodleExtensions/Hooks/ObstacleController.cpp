@@ -16,7 +16,7 @@ using namespace GlobalNamespace;
 UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
     UnityEngine::Quaternion worldRotation = UnityEngine::Quaternion::Euler(0, def, 0);
     if (obstacleData->customData) {
-        rapidjson::Value &customData = *obstacleData->customData;
+        rapidjson::Value &customData = *obstacleData->customData->value;
         if (customData.HasMember("_rotation")) {
             if (customData["_rotation"].IsArray()) {
                 float x = customData["_rotation"][0].GetFloat();
@@ -33,7 +33,7 @@ UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstac
 
 float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData) {
     if (obstacleData->customData) {
-        rapidjson::Value &customData = *obstacleData->customData;
+        rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
         std::optional<float> width = scale.has_value() ? std::optional{(*scale.value())[0].GetFloat()} : std::nullopt;
         if (width.has_value()) {
@@ -45,7 +45,7 @@ float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData
 
 float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleData) {
     if (obstacleData->customData) {
-        rapidjson::Value &customData = *obstacleData->customData;
+        rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
         std::optional<float> length = scale.has_value() ? std::optional{(*scale.value())[2].GetFloat()} : std::nullopt;
         if (length.has_value()) {
@@ -80,7 +80,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     if (!obstacleData->customData) {
         return;
     }
-    rapidjson::Value &customData = *obstacleData->customData;
+    rapidjson::Value &customData = *obstacleData->customData->value;
 
     // Chroma thing
     UnityEngine::Color color = self->color->color;

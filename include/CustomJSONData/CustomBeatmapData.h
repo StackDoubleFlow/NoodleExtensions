@@ -1,20 +1,24 @@
 #pragma once
 
 #include "custom-types/shared/macros.hpp"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapEventData.hpp"
 #include "GlobalNamespace/ObstacleData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
+#include "GlobalNamespace/WaypointData.hpp"
 #include "System/Object.hpp"
 
+#include "CustomJSONData/JSONWrapper.h"
 #include "NELogger.h"
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, GlobalNamespace::BeatmapData,
     DECLARE_CTOR(ctor);
 
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+    DECLARE_OVERRIDE_METHOD(BeatmapData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapData", "GetCopy"));
+
+    DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper *, customData);
 
     REGISTER_FUNCTION(CustomBeatmapData,
         NELogger::GetLogger().debug("Registering CustomBeatmapData!");
@@ -24,10 +28,10 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, GlobalNamespace::Beatma
 
         // Register methods
         REGISTER_METHOD(Finalize);
-    )
 
-public:
-    rapidjson::Value *customData;
+        // Register fields
+        REGISTER_FIELD(customData);
+    )
 )
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, GlobalNamespace::BeatmapEventData,
@@ -56,7 +60,10 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, GlobalNamespace::Obsta
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
 
-    // DECLARE_INSTANCE_FIELD(long, _customData);
+    DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper *, customData);
+    // Used for Noodle Extensions
+    DECLARE_INSTANCE_FIELD(float, bpm);
+    DECLARE_INSTANCE_FIELD(float, aheadTime);
 
     REGISTER_FUNCTION(CustomObstacleData,
         NELogger::GetLogger().debug("Registering CustomObstacleData!");
@@ -67,20 +74,24 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, GlobalNamespace::Obsta
         // Register methods
         REGISTER_METHOD(GetCopy);
         REGISTER_METHOD(Finalize);
-    )
 
-public:
-    rapidjson::Value *customData;
+        // Register fields
+        REGISTER_FIELD(customData);
+        REGISTER_FIELD(bpm);
+        REGISTER_FIELD(aheadTime);    
+    )
 )
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, GlobalNamespace::NoteData,
     DECLARE_CTOR(ctor, float time, int lineIndex, GlobalNamespace::NoteLineLayer noteLineLayer, GlobalNamespace::NoteLineLayer startNoteLineLayer, GlobalNamespace::ColorType colorType, GlobalNamespace::NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote, int flipLineIndex, float flipYSide, float duration);
 
-    // DECLARE_METHOD(static CustomNoteData*, CreateBasicNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer, ColorType colorType, NoteCutDirection cutDirection);
-    // DECLARE_METHOD(static CustomNoteData*, CreateBombNoteData, float time, int lineIndex, NoteLineLayer noteLineLayer);
-
     DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
     DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+
+    DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper *, customData);
+    // Used for Noodle Extensions
+    DECLARE_INSTANCE_FIELD(float, bpm);
+    DECLARE_INSTANCE_FIELD(float, aheadTime);
 
     REGISTER_FUNCTION(CustomNoteData,
         NELogger::GetLogger().debug("Registering CustomNoteData!");
@@ -89,14 +100,40 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, GlobalNamespace::NoteData,
         REGISTER_METHOD(ctor);
 
         // Register methods
-        // REGISTER_METHOD(CreateBasicNoteData);
-        // REGISTER_METHOD(CreateBombNoteData);
         REGISTER_METHOD(Finalize);
         REGISTER_METHOD(GetCopy);
-    )
 
-public:
-    rapidjson::Value *customData;
+        // Register fields
+        REGISTER_FIELD(customData);
+        REGISTER_FIELD(bpm);
+        REGISTER_FIELD(aheadTime);
+    )
+)
+
+DECLARE_CLASS_CODEGEN(CustomJSONData, CustomWaypointData, GlobalNamespace::WaypointData,
+    DECLARE_CTOR(ctor, float time, int lineIndex, GlobalNamespace::NoteLineLayer noteLineLayer, GlobalNamespace::OffsetDirection offsetDirection);
+
+    DECLARE_OVERRIDE_METHOD(BeatmapObjectData *, GetCopy, il2cpp_utils::FindMethod("", "BeatmapObjectData", "GetCopy"));
+    DECLARE_OVERRIDE_METHOD(void, Finalize, il2cpp_utils::FindMethod("System", "Object", "Finalize"));
+
+    // Used for Noodle Extensions
+    DECLARE_INSTANCE_FIELD(float, bpm);
+    DECLARE_INSTANCE_FIELD(float, aheadTime);
+
+    REGISTER_FUNCTION(CustomNoteData,
+        NELogger::GetLogger().debug("Registering CustomWaypointData!");
+
+        // Register constructor
+        REGISTER_METHOD(ctor);
+
+        // Register methods
+        REGISTER_METHOD(Finalize);
+        REGISTER_METHOD(GetCopy);
+
+        // Register fields
+        REGISTER_FIELD(bpm);
+        REGISTER_FIELD(aheadTime);
+    )
 )
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, System::Object, 

@@ -8,7 +8,7 @@ float EaseLinear(float p) {
 }
 
 float EaseStep(float p) {
-    floorf32(p);
+    floorf(p);
 }
 
 float EaseOutQuad(float p) {
@@ -82,39 +82,39 @@ float EaseInOutQuint(float p) {
 }
 
 float EaseInSine(float p) {
-    return sinf32((p - 1) * M_PI_2) + 1;
+    return sinf((p - 1) * M_PI_2) + 1;
 }
 
 float EaseOutSine(float p) {
-    return sinf32(p * M_PI_2);
+    return sinf(p * M_PI_2);
 }
 
 float EaseInOutSine(float p) {
-    return 0.5f * (1 - cosf32(p * M_PI));
+    return 0.5f * (1 - cosf(p * M_PI));
 }
 
 float EaseInCirc(float p) {
-    return 1 - sqrtf32(1 - (p * p));
+    return 1 - sqrtf(1 - (p * p));
 }
 
 float EaseOutCirc(float p) {
-    return sqrtf32((2 - p) * p);
+    return sqrtf((2 - p) * p);
 }
 
 float EaseInOutCirc(float p) {
     if (p < 0.5f) {
-        return 0.5f * (1 - sqrtf32(1 - (4 * (p * p))));
+        return 0.5f * (1 - sqrtf(1 - (4 * (p * p))));
     } else {
-        return 0.5f * (sqrtf32(-((2 * p) - 3) * ((2 * p) - 1)) + 1);
+        return 0.5f * (sqrtf(-((2 * p) - 3) * ((2 * p) - 1)) + 1);
     }
 }
 
 float EaseInExpo(float p) {
-    return (p == 0.0f) ? p : powf32(2, 10 * (p - 1));
+    return (p == 0.0f) ? p : powf(2, 10 * (p - 1));
 }
 
 float EaseOutExpo(float p) {
-    return (p == 1.0f) ? p : 1 - powf32(2, -10 * p);
+    return (p == 1.0f) ? p : 1 - powf(2, -10 * p);
 }
 
 float EaseInOutExpo(float p) {
@@ -123,52 +123,48 @@ float EaseInOutExpo(float p) {
     }
 
     if (p < 0.5f) {
-        return 0.5f * powf32(2, (20 * p) - 10);
+        return 0.5f * powf(2, (20 * p) - 10);
     } else {
-        return (-0.5f * powf32(2, (-20 * p) + 10)) + 1;
+        return (-0.5f * powf(2, (-20 * p) + 10)) + 1;
     }
 }
 
 float EaseInElastic(float p) {
-    return sinf32(13 * M_PI_2 * p) * powf32(2, 10 * (p - 1));
+    return sinf(13 * M_PI_2 * p) * powf(2, 10 * (p - 1));
 }
 
 float EaseOutElastic(float p) {
-    return (sinf32(-13 * M_PI_2 * (p + 1)) * powf32(2, -10 * p)) + 1;
+    return (sinf(-13 * M_PI_2 * (p + 1)) * powf(2, -10 * p)) + 1;
 }
 
 float EaseInOutElastic(float p) {
     if (p < 0.5f) {
-        return 0.5f * sinf32(13 * M_PI_2 * (2 * p)) * powf32(2, 10 * ((2 * p) - 1));
+        return 0.5f * sinf(13 * M_PI_2 * (2 * p)) * powf(2, 10 * ((2 * p) - 1));
     } else {
-        return 0.5f * ((sinf32(-13 * M_PI_2 * (2 * p)) * powf32(2, -10 * ((2 * p) - 1))) + 2);
+        return 0.5f * ((sinf(-13 * M_PI_2 * (2 * p)) * powf(2, -10 * ((2 * p) - 1))) + 2);
     }
 }
 
 float EaseInBack(float p) {
-    return (p * p * p) - (p * sinf32(p * M_PI));
+    return (p * p * p) - (p * sinf(p * M_PI));
 }
 
 float EaseOutBack(float p) {
     float f = 1 - p;
-    return 1 - ((f * f * f) - (f * sinf32(f * M_PI)));
+    return 1 - ((f * f * f) - (f * sinf(f * M_PI)));
 }
 
 float EaseInOutBack(float p) {
     if (p < 0.5f)
     {
         float f = 2 * p;
-        return 0.5f * ((f * f * f) - (f * sinf32(f * M_PI)));
+        return 0.5f * ((f * f * f) - (f * sinf(f * M_PI)));
     }
     else
     {
         float f = 1 - ((2 * p) - 1);
-        return (0.5f * (1 - ((f * f * f) - (f * sinf32(f * M_PI))))) + 0.5f;
+        return (0.5f * (1 - ((f * f * f) - (f * sinf(f * M_PI))))) + 0.5f;
     }
-}
-
-float EaseInBounce(float p) {
-    return 1 - EaseOutBounce(1 - p);
 }
 
 float EaseOutBounce(float p) {
@@ -181,6 +177,10 @@ float EaseOutBounce(float p) {
     } else {
         return (54 / 5.0f * p * p) - (513 / 25.0f * p) + (268 / 25.0f);
     }
+}
+
+float EaseInBounce(float p) {
+    return 1 - EaseOutBounce(1 - p);
 }
 
 float EaseInOutBounce(float p) {

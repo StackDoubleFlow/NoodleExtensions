@@ -10,8 +10,13 @@ void CustomJSONData::CustomBeatmapData::ctor() {
 
 }
 
+BeatmapData *CustomJSONData::CustomBeatmapData::GetCopy() {
+    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomBeatmapData*>());
+    return copy;
+}
+
 void CustomJSONData::CustomBeatmapData::Finalize() {
-    delete this->customData;
+    // delete this->customData;
 }
 
 DEFINE_CLASS(CustomJSONData::CustomBeatmapEventData);
@@ -39,9 +44,7 @@ void CustomJSONData::CustomObstacleData::ctor(float time, int lineIndex, Obstacl
 BeatmapObjectData *CustomJSONData::CustomObstacleData::GetCopy() {
     auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomObstacleData*>(this->time, this->lineIndex, this->obstacleType, this->duration, this->width));
     copy->customData = this->customData;
-    // if (this->customData) {
-    //     NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
-    // }
+    copy->bpm = this->bpm;
     return copy;
 }
 
@@ -49,8 +52,6 @@ void CustomJSONData::CustomObstacleData::Finalize() {
     // delete this->customData;
     NELogger::GetLogger().debug("CustomObstacleData::Finalize");
 }
-
-
 
 DEFINE_CLASS(CustomJSONData::CustomNoteData);
 
@@ -73,15 +74,32 @@ BeatmapObjectData *CustomJSONData::CustomNoteData::GetCopy() {
     auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomNoteData*>(this->time, this->lineIndex, this->noteLineLayer, this->startNoteLineLayer, 
         this->colorType, this->cutDirection, this->timeToNextColorNote, this->timeToPrevColorNote, this->flipLineIndex, this->flipYSide, this->duration));
     copy->customData = this->customData;
-    if (this->customData) {
-        NELogger::GetLogger().info("CustomJSONData::CustomNoteData::GetCopy %p %p %p", copy, copy->customData, this->customData);
-    }
+    copy->bpm = this->bpm;
     return copy;
 }
 
 void CustomJSONData::CustomNoteData::Finalize() {
     // delete this->customData;
-    NELogger::GetLogger().debug("CustomObstacleData::Finalize");
+    NELogger::GetLogger().debug("CustomNoteData::Finalize");
+}
+
+DEFINE_CLASS(CustomJSONData::CustomWaypointData);
+
+void CustomJSONData::CustomWaypointData::ctor(float time, int lineIndex, GlobalNamespace::NoteLineLayer noteLineLayer, GlobalNamespace::OffsetDirection offsetDirection) {
+    this->time = time;
+    this->lineIndex = lineIndex;
+    this->noteLineLayer = noteLineLayer;
+    this->offsetDirection = offsetDirection;
+}
+
+BeatmapObjectData *CustomJSONData::CustomWaypointData::GetCopy() {
+    auto copy = CRASH_UNLESS(il2cpp_utils::New<CustomJSONData::CustomWaypointData*>(this->time, this->lineIndex, this->noteLineLayer, this->offsetDirection));
+    copy->bpm = this->bpm;
+    return copy;
+}
+
+void CustomJSONData::CustomWaypointData::Finalize() {
+    NELogger::GetLogger().debug("CustomWaypointData::Finalize");
 }
 
 DEFINE_CLASS(CustomJSONData::CustomEventData);
