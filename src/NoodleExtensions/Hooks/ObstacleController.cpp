@@ -95,7 +95,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
         color = UnityEngine::Color(r, g, b, a);
     }
 
-    self->stretchableObstacle->obstacleFakeGlow->get_gameObject()->SetActive(false);
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
     self->bounds = self->stretchableObstacle->bounds;
 
@@ -114,6 +113,10 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->Update();
 }
 
+MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
+
 void NoodleExtensions::InstallObstacleControllerHooks() {
     INSTALL_HOOK_OFFSETLESS(ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
+    // Temporary fake glow disable hook
+    INSTALL_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }
