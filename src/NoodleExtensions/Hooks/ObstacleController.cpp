@@ -56,9 +56,6 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
 
 MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
-    NELogger::GetLogger().info("startPos %f %f %f", startPos.x, startPos.y, startPos.z);
-    NELogger::GetLogger().info("midPos %f %f %f", midPos.x, midPos.y, midPos.z);
-    NELogger::GetLogger().info("endPos %f %f %f", endPos.x, endPos.y, endPos.z);
 
     UnityEngine::Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
@@ -69,10 +66,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
-    
-    NELogger::GetLogger().info("self->startPos %f %f %f", self->startPos.x, self->startPos.y, self->startPos.z);
-    NELogger::GetLogger().info("self->midPos %f %f %f", self->midPos.x, self->midPos.y, self->midPos.z);
-    NELogger::GetLogger().info("self->endPos %f %f %f", self->endPos.x, self->endPos.y, self->endPos.z);
 
     float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
     float length = GetCustomLength(defaultLength, obstacleData);

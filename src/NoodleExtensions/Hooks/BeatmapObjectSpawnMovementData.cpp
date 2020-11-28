@@ -40,8 +40,6 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
 
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
 
-    NELogger::GetLogger().info("obstacleData->klass->name %s", obstacleData->klass->name);
-    NELogger::GetLogger().info("obstacleData->customData %p", obstacleData->customData);
     if (!obstacleData->customData) {
         return result;
     }

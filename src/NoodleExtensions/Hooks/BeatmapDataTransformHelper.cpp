@@ -90,7 +90,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
-                NELogger::GetLogger().info("found a CustomObstacleData in transform");
                 auto obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
                 bpm = obstacleData->bpm;
@@ -107,12 +106,10 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             float njs;
             float spawnOffset;
             if (customDataWrapper) {
-                NELogger::GetLogger().info("This one has custom data");
                 rapidjson::Value &customData = *customDataWrapper->value;
                 njs = customData.HasMember("_noteJumpMovementSpeed") ? customData["_noteJumpMovementSpeed"].GetFloat() : CachedNoteJumpMovementSpeed;
                 spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? customData["_noteJumpStartBeatOffset"].GetFloat() : CachedNoteJumpStartBeatOffset;
             } else {
-                NELogger::GetLogger().info("This one doesn't have custom data");
                 njs = CachedNoteJumpMovementSpeed;
                 spawnOffset = CachedNoteJumpStartBeatOffset;
             }
