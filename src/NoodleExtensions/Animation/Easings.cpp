@@ -8,7 +8,7 @@ float EaseLinear(float p) {
 }
 
 float EaseStep(float p) {
-    floorf(p);
+    return floorf(p);
 }
 
 float EaseOutQuad(float p) {

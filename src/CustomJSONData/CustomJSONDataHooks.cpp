@@ -64,8 +64,9 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         if (note_json.HasMember("_customData")) {
             note->customData = new rapidjson::Value(note_json["_customData"], *alloc);
         }
-        notes->Add(note);
+        notes->items->values[i] = note;
     }
+    notes->size = notes_arr.Size();
 
     NELogger::GetLogger().debug("Parse obstacles");
     // Parse obstacles
@@ -83,8 +84,9 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         if (obstacle_json.HasMember("_customData")) {
             obstacle->customData = new rapidjson::Value(obstacle_json["_customData"], *alloc);
         }
-        obstacles->Add(obstacle);
+        obstacles->items->values[i] = obstacle;
     }
+    obstacles->size = obstacles_arr.Size();
 
     NELogger::GetLogger().debug("Parse events");
     // Parse events
@@ -100,8 +102,9 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         if (event_json.HasMember("_customData")) {
             event->customData = new rapidjson::Value(event_json["_customData"], *alloc);
         } 
-        events->Add(event);
+        events->items->values[i] = event;
     }
+    events->size = events_arr.Size();
 
     NELogger::GetLogger().debug("Parse waypoints");
     rapidjson::Value& waypoints_arr = doc["_waypoints"];
@@ -114,8 +117,9 @@ MAKE_HOOK_OFFSETLESS(DeserializeFromJSONString, BeatmapSaveData*, Il2CppString *
         NoteLineLayer lineLayer = NoteLineLayer(waypoint_json["_lineLayer"].GetInt());
         OffsetDirection offsetDirection = OffsetDirection(waypoint_json["_offsetDirection"].GetInt());
         auto waypoint = BeatmapSaveData::WaypointData::New_ctor(time, lineIndex, lineLayer, offsetDirection);
-        waypoints->Add(waypoint);
+        waypoints->items->values[i] = waypoint;
     }
+    waypoints->size = waypoints_arr.Size();
 
     // TODO: Parse whatever the hell this is
     auto specialEventsKeywordFilters = BeatmapSaveData::SpecialEventKeywordFiltersData::New_ctor(List<BeatmapSaveData::SpecialEventsForKeyword*>::New_ctor());
