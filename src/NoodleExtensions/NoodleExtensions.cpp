@@ -10,4 +10,5 @@ void NoodleExtensions::InstallHooks() {
     InstallObstacleControllerHooks();
     InstallGameNoteControllerHooks();
     InstallBombNoteControllerHooks();
+    InstallNoteControllerHooks();
 }

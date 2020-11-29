@@ -94,7 +94,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
     return result;
 }
 
-struct BeatmapObjectSpawnMovementData_NoteSpawnData : public System::ValueType {
+struct BeatmapObjectSpawnMovementData_NoteSpawnData {
     UnityEngine::Vector3 moveStartPos;
     UnityEngine::Vector3 moveEndPos;
     UnityEngine::Vector3 jumpEndPos;
@@ -105,6 +105,7 @@ struct BeatmapObjectSpawnMovementData_NoteSpawnData : public System::ValueType {
 };
 
 MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_NoteSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomNoteData *noteData) {
+    static_assert(sizeof(BeatmapObjectSpawnMovementData_NoteSpawnData) == 48, "Size is not correct");
     BeatmapObjectSpawnMovementData_NoteSpawnData result = GetJumpingNoteSpawnData(self, noteData);
     if (!noteData->customData) {
         return result;
@@ -167,5 +168,5 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_Not
 
 void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks() {
     INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
-    // INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
+    INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
 }

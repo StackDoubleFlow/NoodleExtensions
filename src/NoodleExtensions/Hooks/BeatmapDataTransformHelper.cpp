@@ -46,25 +46,15 @@ List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObject
     using IOrderedEnumerableT = System::Linq::IOrderedEnumerable_1<BeatmapObjectData*>*;
     // Used as a parameter for OrderBy
     auto enumerable = (IEnumerable_1<BeatmapObjectData*> *) beatmapObjectsData;
-    std::vector<Il2CppClass *> genericParams = {classof(BeatmapObjectData*), classof(float)};
+
+    // var orderedEnumerable beatmapObjectsData.OrderBy(orderFunc);
     auto orderByMethodInfo = il2cpp_utils::FindMethodUnsafe("System.Linq", "Enumerable", "OrderBy", 2);
-    auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(orderByMethodInfo, genericParams);
+    auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(orderByMethodInfo, {classof(BeatmapObjectData*), classof(float)});
     auto orderedEnumerable = CRASH_UNLESS(il2cpp_utils::RunMethod<IEnumerable_1<BeatmapObjectData*> *>(nullptr, orderByGenericMethodInfo, enumerable, orderFunc));
-    
+    // return orderedEnumerable.ToList();
     auto toListMethodInfo = il2cpp_utils::FindMethodUnsafe("System.Linq", "Enumerable", "ToList", 1);
     auto toListGenericMethodInfo = il2cpp_utils::MakeGenericMethod(toListMethodInfo, {classof(BeatmapObjectData *)});
     return CRASH_UNLESS(il2cpp_utils::RunMethod<List<BeatmapObjectData*>*>(nullptr, toListGenericMethodInfo, orderedEnumerable));
-
-    // auto arr = beatmapObjectsData->items->values;
-    // std::sort(arr, arr + beatmapObjectsData->items->Length(), [](BeatmapObjectData *a, BeatmapObjectData *b) {
-    //     NELogger::GetLogger().debug("Comparing %p with %p", a, b);
-    //     __android_log_print(ANDROID_LOG_DEBUG, "NOODLEEXTENSIONS", "Comparing %p with %p", a, b);
-    //     usleep(100);
-    //     float aTime = a->time - CRASH_UNLESS(il2cpp_utils::GetFieldValue<float>(a, "aheadTime"));
-    //     float bTime = b->time - CRASH_UNLESS(il2cpp_utils::GetFieldValue<float>(b, "aheadTime"));
-    //     return aTime < bTime;
-    // });
-    // return beatmapObjectsData;
 }
 
 
