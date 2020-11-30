@@ -23,7 +23,7 @@ void PrintJSONValue(const rapidjson::Value &json) {
 
 extern "C" void setup(ModInfo &info) {
     info.id = "NoodleExtensions";
-    info.version = "0.1.0";
+    info.version = VERSION;
     NELogger::modInfo = info;
 }
 
