@@ -8,7 +8,7 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
-#include "NoodleExtensions/NEHooks.h"
+#include "NEHooks.h"
 
 using namespace GlobalNamespace;
 

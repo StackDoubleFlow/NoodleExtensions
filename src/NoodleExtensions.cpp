@@ -1,4 +1,4 @@
-#include "NoodleExtensions/NEHooks.h"
+#include "NEHooks.h"
 
 using namespace NoodleExtensions;
 

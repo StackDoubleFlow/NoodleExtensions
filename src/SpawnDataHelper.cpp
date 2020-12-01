@@ -1,10 +1,10 @@
-#include "NoodleExtensions/SpawnDataHelper.h"
+#include "SpawnDataHelper.h"
 
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 
-#include "CustomJSONData/CustomBeatmapData.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
 using namespace NoodleExtensions;

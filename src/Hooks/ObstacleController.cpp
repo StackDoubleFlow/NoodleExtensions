@@ -4,12 +4,13 @@
 #include "GlobalNamespace/StretchableObstacle.hpp"
 #include "GlobalNamespace/SimpleColorSO.hpp"
 #include "GlobalNamespace/ParametricBoxFakeGlowController.hpp"
+#include "GlobalNamespace/ParametricBoxFrameController.hpp"
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
 
-#include "CustomJSONData/CustomBeatmapData.h"
-#include "NoodleExtensions/NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+#include "NEHooks.h"
 
 using namespace GlobalNamespace;
 

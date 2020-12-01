@@ -4,8 +4,7 @@
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
 #include "custom-types/shared/logging.hpp"
 
-#include "NoodleExtensions/NEHooks.h"
-#include "CustomJSONData/CustomJSONDataHooks.h"
+#include "NEHooks.h"
 #include "NELogger.h"
 
 #include <string>
@@ -34,7 +33,6 @@ extern "C" void load() {
 
     // Install hooks
 
-    CustomJSONData::InstallHooks();
     NoodleExtensions::InstallHooks();
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");

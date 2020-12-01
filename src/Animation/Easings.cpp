@@ -1,4 +1,4 @@
-#include "NoodleExtensions/Animation/Easings.h"
+#include "Animation/Easings.h"
 #include <cmath>
 
 using namespace NoodleExtensions::Animation;

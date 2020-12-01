@@ -1,8 +1,8 @@
-#include "NoodleExtensions/FakeNoteHelper.h"
+#include "FakeNoteHelper.h"
 
 #include "GlobalNamespace/NoteController.hpp"
 
-#include "CustomJSONData/CustomBeatmapData.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
 using namespace NoodleExtensions;

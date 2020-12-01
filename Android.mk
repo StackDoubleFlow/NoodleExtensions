@@ -44,6 +44,12 @@ LOCAL_MODULE := custom-types
 LOCAL_EXPORT_C_INCLUDES := extern/custom-types
 LOCAL_SRC_FILES := extern/libcustom-types.so
 include $(PREBUILT_SHARED_LIBRARY)
+# custom-json-data
+include $(CLEAR_VARS)
+LOCAL_MODULE := custom-json-data
+LOCAL_EXPORT_C_INCLUDES := extern/custom-json-data
+LOCAL_SRC_FILES := extern/libcustom-json-data.so
+include $(PREBUILT_SHARED_LIBRARY)
 
 # If you would like to use more shared libraries (such as custom UI, utils, or more) add them here, following the format above.
 # In addition, ensure that you add them to the shared library build below.
@@ -57,6 +63,7 @@ LOCAL_SHARED_LIBRARIES += modloader
 LOCAL_SHARED_LIBRARIES += beatsaber-hook_0_8_4
 LOCAL_SHARED_LIBRARIES += codegen_0_4_0
 LOCAL_SHARED_LIBRARIES += custom-types
+LOCAL_SHARED_LIBRARIES += custom-json-data
 LOCAL_LDLIBS += -llog
 LOCAL_CFLAGS += -isystem"./extern/libil2cpp/il2cpp/libil2cpp" -isystem"extern" -isystem"./extern/codegen/include" -DVERSION='"0.2.0"'
 LOCAL_CPPFLAGS += -std=c++2a

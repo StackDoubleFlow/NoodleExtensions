@@ -12,11 +12,10 @@
 #include "System/Collections/Generic/List_1.hpp"
 #include "System/ValueType.hpp"
 
-#include "CustomJSONData/CustomBeatmapSaveData.h"
-#include "CustomJSONData/CustomBeatmapData.h"
-#include "CustomJSONData/CustomJSONDataHooks.h"
-#include "NoodleExtensions/SpawnDataHelper.h"
-#include "NoodleExtensions/NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapSaveData.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+#include "SpawnDataHelper.h"
+#include "NEHooks.h"
 #include "NELogger.h"
 
 #include <cmath>

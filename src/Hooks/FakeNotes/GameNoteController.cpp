@@ -2,9 +2,9 @@
 
 #include "GlobalNamespace/GameNoteController.hpp"
 
-#include "NoodleExtensions/NEHooks.h"
-#include "NoodleExtensions/FakeNoteHelper.h"
-#include "CustomJSONData/CustomBeatmapData.h"
+#include "NEHooks.h"
+#include "FakeNoteHelper.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
 using namespace NoodleExtensions;

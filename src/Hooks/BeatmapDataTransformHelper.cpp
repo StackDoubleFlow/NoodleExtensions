@@ -10,8 +10,8 @@
 #include "System/Collections/Generic/IEnumerable_1.hpp"
 #include "System/Linq/IOrderedEnumerable_1.hpp"
 
-#include "CustomJSONData/CustomBeatmapData.h"
-#include "NoodleExtensions/NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+#include "NEHooks.h"
 #include "NELogger.h"
 
 #include <optional>

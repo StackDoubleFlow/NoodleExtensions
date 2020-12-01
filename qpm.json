@@ -27,6 +27,11 @@
       "id": "custom-types",
       "versionRange": "^0.2.14",
       "additionalData": {}
+    },
+    {
+      "id": "custom-json-data",
+      "versionRange": "*",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

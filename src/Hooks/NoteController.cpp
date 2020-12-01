@@ -6,8 +6,8 @@
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "UnityEngine/Transform.hpp"
 
-#include "CustomJSONData/CustomBeatmapData.h"
-#include "NoodleExtensions/NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+#include "NEHooks.h"
 
 using namespace GlobalNamespace;
 
