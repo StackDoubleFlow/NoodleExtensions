@@ -49,7 +49,7 @@ List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObject
 
     // var orderedEnumerable beatmapObjectsData.OrderBy(orderFunc);
     auto orderByMethodInfo = il2cpp_utils::FindMethodUnsafe("System.Linq", "Enumerable", "OrderBy", 2);
-    auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(orderByMethodInfo, {classof(BeatmapObjectData*), classof(float)});
+    auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(orderByMethodInfo, {classof(BeatmapObjectData *), classof(float)});
     auto orderedEnumerable = CRASH_UNLESS(il2cpp_utils::RunMethod<IEnumerable_1<BeatmapObjectData*> *>(nullptr, orderByGenericMethodInfo, enumerable, orderFunc));
     // return orderedEnumerable.ToList();
     auto toListMethodInfo = il2cpp_utils::FindMethodUnsafe("System.Linq", "Enumerable", "ToList", 1);
@@ -73,7 +73,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     // loop through all objects in all lines of the beatmapData
     for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = customBeatmapData->beatmapLinesData->values[i]; 
-        for (int j = 0; j < beatmapLineData->beatmapObjectsData->get_Count(); j++) {
+        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
             BeatmapObjectData *beatmapObjectData = beatmapLineData->beatmapObjectsData->items->values[j];
             float bpm;
             float *aheadTime;
