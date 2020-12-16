@@ -19,6 +19,7 @@
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
 
+// GameplayCoreInstaller.cpp
 extern int CachedNoteJumpMovementSpeed;
 extern int CachedNoteJumpStartBeatOffset;
 

@@ -3,6 +3,7 @@
 using namespace NoodleExtensions;
 
 void NoodleExtensions::InstallHooks() {
+    InstallBeatmapObjectCallbackControllerHooks();
     InstallBeatmapObjectSpawnMovementDataHooks();
     InstallBeatmapDataTransformHelperHooks();
     InstallSpawnRotationProcessorHooks();

@@ -19,6 +19,8 @@ TARGET_ARCH_ABI := $(APP_ABI)
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 include $(CLEAR_VARS)
+# Creating prebuilt for dependency: modloader - version: 1.0.4
+include $(CLEAR_VARS)
 LOCAL_MODULE := modloader
 LOCAL_EXPORT_C_INCLUDES := extern/modloader
 LOCAL_SRC_FILES := extern/libmodloader.so
@@ -38,13 +40,13 @@ LOCAL_EXPORT_C_INCLUDES := extern/codegen
 LOCAL_SRC_FILES := extern/libcodegen_0_4_0.so
 LOCAL_CPP_FEATURES += exceptions
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: custom-types - version: 0.2.10
+# Creating prebuilt for dependency: custom-types - version: 0.2.14
 include $(CLEAR_VARS)
 LOCAL_MODULE := custom-types
 LOCAL_EXPORT_C_INCLUDES := extern/custom-types
 LOCAL_SRC_FILES := extern/libcustom-types.so
 include $(PREBUILT_SHARED_LIBRARY)
-# custom-json-data
+# Creating prebuilt for dependency: custom-json-data - version: 0.1.1
 include $(CLEAR_VARS)
 LOCAL_MODULE := custom-json-data
 LOCAL_EXPORT_C_INCLUDES := extern/custom-json-data

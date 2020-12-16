@@ -2,6 +2,7 @@
 
 namespace NoodleExtensions {
 
+void InstallBeatmapObjectCallbackControllerHooks();
 void InstallBeatmapObjectSpawnMovementDataHooks();
 void InstallBeatmapDataTransformHelperHooks();
 void InstallSpawnRotationProcessorHooks();
