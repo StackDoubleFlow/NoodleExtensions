@@ -8,6 +8,7 @@ void NoodleExtensions::InstallHooks() {
     InstallBeatmapDataTransformHelperHooks();
     InstallSpawnRotationProcessorHooks();
     InstallGameplayCoreInstallerHooks();
+    InstallBeatmapObjectManagerHooks();
     InstallObstacleControllerHooks();
     InstallGameNoteControllerHooks();
     InstallBombNoteControllerHooks();
