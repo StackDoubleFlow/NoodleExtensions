@@ -16,7 +16,7 @@ using namespace GlobalNamespace;
 
 UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
     UnityEngine::Quaternion worldRotation = UnityEngine::Quaternion::Euler(0, def, 0);
-    if (obstacleData->customData) {
+    if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         if (customData.HasMember("_rotation")) {
             if (customData["_rotation"].IsArray()) {
@@ -33,7 +33,7 @@ UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstac
 }
 
 float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData) {
-    if (obstacleData->customData) {
+    if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
         std::optional<float> width = scale.has_value() ? std::optional{(*scale.value())[0].GetFloat()} : std::nullopt;
@@ -107,8 +107,8 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
 MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
 
-void NoodleExtensions::InstallObstacleControllerHooks() {
-    INSTALL_HOOK_OFFSETLESS(ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
+void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
     // Temporary fake glow disable hook
-    INSTALL_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
+    INSTALL_HOOK_OFFSETLESS(logger, ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }

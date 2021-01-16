@@ -15,6 +15,6 @@ MAKE_HOOK_OFFSETLESS(HandleNoteWasSpawned, void, NoteCutSoundEffectManager *self
     // }
 }
 
-void NoodleExtensions::InstallNoteCutSoundEffectManagerHooks() {
-    INSTALL_HOOK_OFFSETLESS(HandleNoteWasSpawned, il2cpp_utils::FindMethodUnsafe("", "NoteCutSoundEffectManager", "HandleNoteWasSpawned", 1));
+void NoodleExtensions::InstallNoteCutSoundEffectManagerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, HandleNoteWasSpawned, il2cpp_utils::FindMethodUnsafe("", "NoteCutSoundEffectManager", "HandleNoteWasSpawned", 1));
 }

@@ -15,6 +15,6 @@ MAKE_HOOK_OFFSETLESS(NoteDidStartJump, void, GameNoteController *self) {
     }
 }
 
-void NoodleExtensions::InstallGameNoteControllerHooks() {
-    INSTALL_HOOK_OFFSETLESS(NoteDidStartJump, il2cpp_utils::FindMethodUnsafe("", "GameNoteController", "NoteDidStartJump", 0));
+void NoodleExtensions::InstallGameNoteControllerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, NoteDidStartJump, il2cpp_utils::FindMethodUnsafe("", "GameNoteController", "NoteDidStartJump", 0));
 }

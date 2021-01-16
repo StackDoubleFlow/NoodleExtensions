@@ -33,6 +33,6 @@ MAKE_HOOK_OFFSETLESS(InstallBindings, void, GameplayCoreInstaller *self) {
     InstallBindings(self);
 }
 
-void NoodleExtensions::InstallGameplayCoreInstallerHooks() {
-    INSTALL_HOOK_OFFSETLESS(InstallBindings, il2cpp_utils::FindMethodUnsafe("", "GameplayCoreInstaller", "InstallBindings", 0));
+void NoodleExtensions::InstallGameplayCoreInstallerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, InstallBindings, il2cpp_utils::FindMethodUnsafe("", "GameplayCoreInstaller", "InstallBindings", 0));
 }

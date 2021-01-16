@@ -9,7 +9,7 @@ using namespace NoodleExtensions;
 
 bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
     auto customNoteData = (CustomJSONData::CustomNoteData *) noteController->noteData;
-    if (!customNoteData->customData) {
+    if (!customNoteData->customData->value) {
         return false;
     }
     rapidjson::Value &customData = *customNoteData->customData->value;
@@ -18,7 +18,7 @@ bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
 
 bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
     auto customNoteData = (CustomJSONData::CustomNoteData *) noteData;
-    if (!customNoteData->customData) {
+    if (!customNoteData->customData->value) {
         return true;
     }
     rapidjson::Value &customData = *customNoteData->customData->value;

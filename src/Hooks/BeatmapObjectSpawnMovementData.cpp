@@ -14,6 +14,7 @@
 
 #include "custom-json-data/shared/CustomBeatmapSaveData.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "AssociatedData.h"
 #include "SpawnDataHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
@@ -39,9 +40,6 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
 
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
 
-    if (!obstacleData->customData) {
-        return result;
-    }
     if (!obstacleData->customData->value) {
         return result;
     }
@@ -89,7 +87,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
 
     result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
     // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(UnityEngine::Vector3 {1, 2, 3}, UnityEngine::Vector3 {4, 5, 6}, UnityEngine::Vector3 {7, 8, 9}, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
-    
+
     return result;
 }
 
@@ -106,7 +104,7 @@ struct BeatmapObjectSpawnMovementData_NoteSpawnData {
 MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_NoteSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomNoteData *noteData) {
     static_assert(sizeof(BeatmapObjectSpawnMovementData_NoteSpawnData) == 48, "Size is not correct");
     BeatmapObjectSpawnMovementData_NoteSpawnData result = GetJumpingNoteSpawnData(self, noteData);
-    if (!noteData->customData) {
+    if (!noteData->customData->value) {
         return result;
     }
 
@@ -162,10 +160,15 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_Not
         result = BeatmapObjectSpawnMovementData_NoteSpawnData(moveStartPos, moveEndPos, jumpEndPos, jumpGravity, result.moveDuration, jumpDuration);
     }
 
+    float startVerticalVelocity = jumpGravity * jumpDuration * 0.5f;
+    float num = jumpDuration * 0.5f;
+    float yOffset = (startVerticalVelocity * num) - (jumpGravity * num * num * 0.5f);
+    getAD(noteData->customData)->noteOffset = self->centerPos + noteOffset + UnityEngine::Vector3(0, yOffset, 0);
+    
     return result;
 }
 
-void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks() {
-    INSTALL_HOOK_OFFSETLESS(GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
-    INSTALL_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
+void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
+    INSTALL_HOOK_OFFSETLESS(logger, GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
 }

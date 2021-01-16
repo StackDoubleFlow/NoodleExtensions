@@ -9,12 +9,17 @@
 #include "System/Linq/Enumerable.hpp"
 #include "System/Collections/Generic/IEnumerable_1.hpp"
 #include "System/Linq/IOrderedEnumerable_1.hpp"
+#include "System/Collections/Generic/List_1.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
 #include <optional>
+
+template<class T>
+using List = System::Collections::Generic::List_1<T>;
 
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
@@ -31,9 +36,9 @@ System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
     auto genericClass = il2cpp_utils::MakeGeneric(il2cpp_utils::GetClassFromName("System", "Func`2"), argClasses);
     auto lambda = +[](BeatmapObjectData *n) {
         if (n->klass == customObstacleDataClass) {
-            return n->time - ((CustomJSONData::CustomObstacleData *) n)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomObstacleData *) n)->customData)->aheadTime;
         } else if (n->klass == customNoteDataClass) {
-            return n->time - ((CustomJSONData::CustomNoteData *) n)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomNoteData *) n)->customData)->aheadTime;
         } else {
             return n->time;
         }
@@ -84,19 +89,22 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 auto obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
                 bpm = obstacleData->bpm;
-                aheadTime = &obstacleData->aheadTime;
             } else if (beatmapObjectData->klass == customNoteDataClass) {
                 auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
                 customDataWrapper = noteData->customData;
                 bpm = noteData->bpm;
-                aheadTime = &noteData->aheadTime;
             } else {
                 continue;
             }
 
+            if (!customDataWrapper->associatedData['N']) {
+                customDataWrapper->associatedData['N'] = new BeatmapObjectAssociatedData();
+            }
+            aheadTime = &getAD(customDataWrapper)->aheadTime;
+
             float njs;
             float spawnOffset;
-            if (customDataWrapper) {
+            if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
                 njs = customData.HasMember("_noteJumpMovementSpeed") ? customData["_noteJumpMovementSpeed"].GetFloat() : CachedNoteJumpMovementSpeed;
                 spawnOffset = customData.HasMember("_noteJumpStartBeatOffset") ? customData["_noteJumpStartBeatOffset"].GetFloat() : CachedNoteJumpStartBeatOffset;
@@ -131,6 +139,6 @@ MAKE_HOOK_OFFSETLESS(CreateTransformedBeatmapData, IReadonlyBeatmapData *, IRead
     return CreateTransformedBeatmapData(transformedBeatmapData, gameplayModifiers, practiceSettings, leftHanded, staticLights);
 }
 
-void NoodleExtensions::InstallBeatmapDataTransformHelperHooks() {
-    INSTALL_HOOK_OFFSETLESS(CreateTransformedBeatmapData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData", 5));
+void NoodleExtensions::InstallBeatmapDataTransformHelperHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, CreateTransformedBeatmapData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData", 5));
 }

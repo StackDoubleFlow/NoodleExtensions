@@ -15,6 +15,6 @@ MAKE_HOOK_OFFSETLESS(BombNoteController_Init, void, BombNoteController *self, No
     }
 }
 
-void NoodleExtensions::InstallBombNoteControllerHooks() {
-    INSTALL_HOOK_OFFSETLESS(BombNoteController_Init, il2cpp_utils::FindMethodUnsafe("", "BombNoteController", "Init", 8));
+void NoodleExtensions::InstallBombNoteControllerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, BombNoteController_Init, il2cpp_utils::FindMethodUnsafe("", "BombNoteController", "Init", 8));
 }

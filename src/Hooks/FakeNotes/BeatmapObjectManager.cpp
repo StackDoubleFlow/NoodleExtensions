@@ -15,6 +15,6 @@ MAKE_HOOK_OFFSETLESS(HandleNoteWasMissed, void, BeatmapObjectManager *self, Note
     }
 }
 
-void NoodleExtensions::InstallBeatmapObjectManagerHooks() {
-    INSTALL_HOOK_OFFSETLESS(HandleNoteWasMissed, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectManager", "HandleNoteWasMissed", 1));
+void NoodleExtensions::InstallBeatmapObjectManagerHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, HandleNoteWasMissed, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectManager", "HandleNoteWasMissed", 1));
 }

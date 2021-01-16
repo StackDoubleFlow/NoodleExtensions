@@ -3,15 +3,16 @@
 using namespace NoodleExtensions;
 
 void NoodleExtensions::InstallHooks() {
-    InstallBeatmapObjectCallbackControllerHooks();
-    InstallBeatmapObjectSpawnMovementDataHooks();
-    InstallBeatmapDataTransformHelperHooks();
-    InstallNoteCutSoundEffectManagerHooks();
-    InstallSpawnRotationProcessorHooks();
-    InstallGameplayCoreInstallerHooks();
-    InstallBeatmapObjectManagerHooks();
-    InstallObstacleControllerHooks();
-    InstallGameNoteControllerHooks();
-    InstallBombNoteControllerHooks();
-    InstallNoteControllerHooks();
+    Logger& logger = NELogger::GetLogger();
+    InstallBeatmapObjectCallbackControllerHooks(logger);
+    InstallBeatmapObjectSpawnMovementDataHooks(logger);
+    InstallBeatmapDataTransformHelperHooks(logger);
+    InstallNoteCutSoundEffectManagerHooks(logger);
+    InstallSpawnRotationProcessorHooks(logger);
+    InstallGameplayCoreInstallerHooks(logger);
+    InstallBeatmapObjectManagerHooks(logger);
+    InstallObstacleControllerHooks(logger);
+    InstallGameNoteControllerHooks(logger);
+    InstallBombNoteControllerHooks(logger);
+    InstallNoteControllerHooks(logger);
 }

@@ -27,6 +27,6 @@ MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self
     return ProcessBeatmapEventData(self, beatmapEventData);
 }
 
-void NoodleExtensions::InstallSpawnRotationProcessorHooks() {
-    INSTALL_HOOK_OFFSETLESS(ProcessBeatmapEventData, il2cpp_utils::FindMethodUnsafe("", "SpawnRotationProcessor", "ProcessBeatmapEventData", 1));
+void NoodleExtensions::InstallSpawnRotationProcessorHooks(Logger& logger) {
+    INSTALL_HOOK_OFFSETLESS(logger, ProcessBeatmapEventData, il2cpp_utils::FindMethodUnsafe("", "SpawnRotationProcessor", "ProcessBeatmapEventData", 1));
 }
