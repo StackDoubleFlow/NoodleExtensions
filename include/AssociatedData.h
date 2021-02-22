@@ -13,4 +13,8 @@ struct BeatmapObjectAssociatedData {
     UnityEngine::Quaternion localRotation;
 };
 
+// struct BeatmapAssociatedData {
+//     std::vector<Track> tracks;
+// };
+
 BeatmapObjectAssociatedData *getAD(CustomJSONData::JSONWrapper *customData);

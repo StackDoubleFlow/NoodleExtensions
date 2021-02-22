@@ -4,14 +4,14 @@
   "info": {
     "name": "Noodle Extensions",
     "id": "NoodleExtensions",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "url": null,
     "additionalData": {}
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^1.0.9",
+      "versionRange": "^1.0.12",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -20,17 +20,17 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.5.3",
+      "versionRange": "^0.6.1",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.3.5",
+      "versionRange": "^0.4.3",
       "additionalData": {}
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.2.0",
+      "versionRange": "^0.3.1",
       "additionalData": {}
     }
   ],

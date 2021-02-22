@@ -2,6 +2,7 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/prettywriter.h"
+#include "modloader/shared/modloader.hpp"
 #include "custom-types/shared/logging.hpp"
 
 #include "NEHooks.h"
@@ -12,7 +13,7 @@
 
 void PrintJSONValue(const rapidjson::Value &json) {
     using namespace rapidjson;
-        
+
     StringBuffer sb;
     PrettyWriter<StringBuffer> writer(sb);
     json.Accept(writer);

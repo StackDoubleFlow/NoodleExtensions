@@ -21,7 +21,7 @@ adb forward tcp:42069 tcp:42069
 adb shell am start com.beatgames.beatsaber/com.unity3d.player.UnityPlayerActivity
 
 # Wait for game process to start and mods to load
-sleep 5
+sleep 7
 
 # Get pid of game process and format it into the debugger url
 debugPid=$(adb shell pidof com.beatgames.beatsaber)
@@ -40,6 +40,7 @@ debugUrl="vscode://vadimcn.vscode-lldb/launch/config?{
         'pro hand -p true -s false SIGXCPU',
         'pro hand -p true -s false SIG33',
         'target symbols add ./obj/local/arm64-v8a/libnoodleextensions.so',
+        'target symbols add ./obj/local/arm64-v8a/libcustom-json-data.so'
     ]
 }"
 

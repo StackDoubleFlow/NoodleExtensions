@@ -9,6 +9,7 @@ void InstallBeatmapDataTransformHelperHooks(Logger& logger);
 void InstallSpawnRotationProcessorHooks(Logger& logger);
 void InstallGameplayCoreInstallerHooks(Logger& logger);
 void InstallObstacleControllerHooks(Logger& logger);
+void InstallBeatmapDataLoaderHooks(Logger& logger);
 void InstallNoteControllerHooks(Logger& logger);
 
 // Fake notes

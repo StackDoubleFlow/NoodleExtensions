@@ -1,3 +1,4 @@
+#include "Animation/Events.h"
 #include "NEHooks.h"
 
 using namespace NoodleExtensions;
@@ -14,5 +15,8 @@ void NoodleExtensions::InstallHooks() {
     InstallObstacleControllerHooks(logger);
     InstallGameNoteControllerHooks(logger);
     InstallBombNoteControllerHooks(logger);
+    InstallBeatmapDataLoaderHooks(logger);
     InstallNoteControllerHooks(logger);
+
+    //Animation::AddEventCallbacks();
 }

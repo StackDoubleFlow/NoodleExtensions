@@ -45,7 +45,7 @@ float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData
 }
 
 float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleData) {
-    if (obstacleData->customData) {
+    if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
         if (scale.has_value() && scale.value()->Size() > 2) {
@@ -58,7 +58,7 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
 MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
 
-    if (!obstacleData->customData) {
+    if (!obstacleData->customData->value) {
         return;
     }
 
@@ -77,17 +77,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
     rapidjson::Value &customData = *obstacleData->customData->value;
 
-    // Chroma thing
-    UnityEngine::Color color = self->color->color;
-    if (customData.HasMember("_color")) {
-        float r = customData["_color"][0].GetFloat();
-        float g = customData["_color"][1].GetFloat();
-        float b = customData["_color"][2].GetFloat();
-        float a = customData["_color"].GetArray().Size() > 3 ? customData["_color"][3].GetFloat() : 1;
-        color = UnityEngine::Color(r, g, b, a);
-    }
-
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, color);
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, self->color->color);
     self->bounds = self->stretchableObstacle->bounds;
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
@@ -105,10 +95,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->Update();
 }
 
-MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
-
 void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
-    // Temporary fake glow disable hook
-    INSTALL_HOOK_OFFSETLESS(logger, ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }
