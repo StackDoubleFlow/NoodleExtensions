@@ -31,14 +31,14 @@ extern int CachedNoteJumpStartBeatOffset;
 Il2CppClass *customObstacleDataClass;
 Il2CppClass *customNoteDataClass;
 
-System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
-    std::vector<const Il2CppClass *> argClasses{ classof(BeatmapObjectData *), classof(float) };
+System::Func_2<BeatmapObjectData*, float> *CreateOrderFunc() {
+    std::vector<const Il2CppClass*> argClasses { classof(BeatmapObjectData*), classof(float) };
     auto genericClass = il2cpp_utils::MakeGeneric(il2cpp_utils::GetClassFromName("System", "Func`2"), argClasses);
     auto lambda = +[](BeatmapObjectData *n) {
         if (n->klass == customObstacleDataClass) {
-            return n->time - getAD(((CustomJSONData::CustomObstacleData *) n)->customData)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomObstacleData*) n)->customData)->aheadTime;
         } else if (n->klass == customNoteDataClass) {
-            return n->time - getAD(((CustomJSONData::CustomNoteData *) n)->customData)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomNoteData*) n)->customData)->aheadTime;
         } else {
             return n->time;
         }
@@ -46,7 +46,7 @@ System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
     return il2cpp_utils::MakeDelegate<System::Func_2<BeatmapObjectData *, float> *>(genericClass, static_cast<Il2CppObject*>(nullptr), lambda);
 }
 
-List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
+List<BeatmapObjectData*> *OrderObjects(List<BeatmapObjectData*> *beatmapObjectsData) {
     auto orderFunc = CreateOrderFunc();
 
     using IOrderedEnumerableT = System::Linq::IOrderedEnumerable_1<BeatmapObjectData*>*;
@@ -59,7 +59,7 @@ List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObject
     auto orderedEnumerable = CRASH_UNLESS(il2cpp_utils::RunMethod<IEnumerable_1<BeatmapObjectData*> *>(nullptr, orderByGenericMethodInfo, enumerable, orderFunc));
     // return orderedEnumerable.ToList();
     auto toListMethodInfo = il2cpp_utils::FindMethodUnsafe("System.Linq", "Enumerable", "ToList", 1);
-    auto toListGenericMethodInfo = il2cpp_utils::MakeGenericMethod(toListMethodInfo, {classof(BeatmapObjectData *)});
+    auto toListGenericMethodInfo = il2cpp_utils::MakeGenericMethod(toListMethodInfo, {classof(BeatmapObjectData*)});
     return CRASH_UNLESS(il2cpp_utils::RunMethod<List<BeatmapObjectData*>*>(nullptr, toListGenericMethodInfo, orderedEnumerable));
 }
 
