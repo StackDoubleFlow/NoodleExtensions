@@ -3,18 +3,23 @@
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Quaternion.hpp"
 
+#include "Animation/Track.h"
+
 struct BeatmapObjectAssociatedData {
     float aheadTime;
-    UnityEngine::Vector3 noteOffset;
+    Track *track;
+    UnityEngine::Quaternion worldRotation;
+    UnityEngine::Quaternion localRotation;
     UnityEngine::Vector3 moveStartPos;
     UnityEngine::Vector3 moveEndPos;
     UnityEngine::Vector3 jumpEndPos;
-    UnityEngine::Quaternion worldRotation;
-    UnityEngine::Quaternion localRotation;
+    // Note stuff
+    UnityEngine::Vector3 noteOffset;
 };
 
-// struct BeatmapAssociatedData {
-//     std::vector<Track> tracks;
-// };
+struct BeatmapAssociatedData {
+    std::unordered_map<std::string, Track> tracks;
+};
 
 BeatmapObjectAssociatedData *getAD(CustomJSONData::JSONWrapper *customData);
+BeatmapAssociatedData *getBeatmapAD(CustomJSONData::JSONWrapper *customData);

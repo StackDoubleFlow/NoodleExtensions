@@ -1,7 +1,6 @@
 #include "Animation/Easings.h"
 #include <cmath>
-
-using namespace NoodleExtensions::Animation;
+#include <unordered_map>
 
 float EaseLinear(float p) {
     return p;
@@ -191,7 +190,7 @@ float EaseInOutBounce(float p) {
     }
 }
 
-float NoodleExtensions::Animation::Interpolate(float p, Functions function) {
+float Easings::Interpolate(float p, Functions function) {
     switch (function) {
         default:
         case Functions::easeLinear: return EaseLinear(p);
@@ -226,5 +225,49 @@ float NoodleExtensions::Animation::Interpolate(float p, Functions function) {
         case Functions::easeInBounce: return EaseInBounce(p);
         case Functions::easeOutBounce: return EaseOutBounce(p);
         case Functions::easeInOutBounce: return EaseInOutBounce(p);
+    }
+}
+
+Functions FunctionFromStr(std::string str) {
+    static std::unordered_map<std::string, Functions> const functions = {
+        { "easeLinear", Functions::easeLinear },
+        { "easeStep", Functions::easeStep },
+        { "easeInQuad", Functions::easeInQuad },
+        { "easeOutQuad", Functions::easeOutQuad },
+        { "easeInOutQuad", Functions::easeInOutQuad },
+        { "easeInCubic", Functions::easeInCubic },
+        { "easeOutCubic", Functions::easeOutCubic },
+        { "easeInOutCubic", Functions::easeInOutCubic },
+        { "easeInQuart", Functions::easeInQuart },
+        { "easeOutQuart", Functions::easeOutQuart },
+        { "easeInOutQuart", Functions::easeInOutQuart },
+        { "easeInQuint", Functions::easeInQuint },
+        { "easeOutQuint", Functions::easeOutQuint },
+        { "easeInOutQuint", Functions::easeInOutQuint },
+        { "easeInSine", Functions::easeInSine },
+        { "easeOutSine", Functions::easeOutSine },
+        { "easeInOutSine", Functions::easeInOutSine },
+        { "easeInCirc", Functions::easeInCirc },
+        { "easeOutCirc", Functions::easeOutCirc },
+        { "easeInOutCirc", Functions::easeInOutCirc },
+        { "easeInExpo", Functions::easeInExpo },
+        { "easeOutExpo", Functions::easeOutExpo },
+        { "easeInOutExpo", Functions::easeInOutExpo },
+        { "easeInElastic", Functions::easeInElastic },
+        { "easeOutElastic", Functions::easeOutElastic },
+        { "easeInOutElastic", Functions::easeInOutElastic },
+        { "easeInBack", Functions::easeInBack },
+        { "easeOutBack", Functions::easeOutBack },
+        { "easeInOutBack", Functions::easeInOutBack },
+        { "easeInBounce", Functions::easeInBounce },
+        { "easeOutBounce", Functions::easeOutBounce },
+        { "easeInOutBounce", Functions::easeInOutBounce }
+    };
+
+    auto itr = functions.find(str);
+    if (itr != functions.end()) {
+        return itr->second;
+    } else {
+        // TODO: Do something if the difficulty name is invalid
     }
 }

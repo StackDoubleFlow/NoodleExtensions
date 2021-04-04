@@ -4,16 +4,18 @@
 #include "GlobalNamespace/NoteMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
 #include "GlobalNamespace/NoteFloorMovement.hpp"
+#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/Transform.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "Animation/AnimationHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation) {
-    NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation);
+MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation, float uniformScale) {
+    NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation, uniformScale);
     
     if (!noteData->customData->value) {
         return;
@@ -85,18 +87,43 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     auto customNoteData = (CustomJSONData::CustomNoteData *) self->noteData;
 
     if (!customNoteData->customData->value) {
+        NoteController_Update(self);
         return;
     }
     rapidjson::Value &customData = *customNoteData->customData->value;
 
     // TODO: Cache deserialized animation data
     if (!customData.HasMember("_animation")) {
+        NoteController_Update(self);
         return;
     }
     rapidjson::Value &animation = customData["_animation"];
+
+    BeatmapObjectAssociatedData *ad = getAD(customNoteData->customData);
+
+    NoteJump *noteJump = self->noteMovement->jump;
+    NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
+
+    float songTime = noteJump->audioTimeSyncController->get_songTime();
+    float elapsedTime = songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
+    float normalTime = elapsedTime / noteJump->jumpDuration;
+
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(animation, ad->track, normalTime);
+
+    floorMovement->startPos = ad->moveStartPos + offset.positionOffset;
+    floorMovement->endPos = ad->moveEndPos + offset.positionOffset;
+    noteJump->startPos = ad->moveEndPos + offset.positionOffset;
+    noteJump->endPos = ad->jumpEndPos + offset.positionOffset;
+
+    NELogger::GetLogger().info("scale offset is %f %f %f", offset.scaleOffset.x, offset.scaleOffset.y, offset.scaleOffset.z);
+    self->get_transform()->set_localScale(offset.scaleOffset);
+    // NELogger::GetLogger().info("Scale offset is: %f", offset.scaleOffset);
+    NELogger::GetLogger().info("position offset is %f %f %f", offset.positionOffset.x, offset.positionOffset.y, offset.positionOffset.z);
+
+    NoteController_Update(self);
 }
 
 void NoodleExtensions::InstallNoteControllerHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, NoteController_Init, il2cpp_utils::FindMethodUnsafe("", "NoteController", "Init", 9));
-    // INSTALL_HOOK_OFFSETLESS(NoteController_Update, il2cpp_utils::FindMethodUnsafe("", "NoteController", "Update", 0));
+    INSTALL_HOOK_OFFSETLESS(logger, NoteController_Init, il2cpp_utils::FindMethodUnsafe("", "NoteController", "Init", 10));
+    INSTALL_HOOK_OFFSETLESS(logger, NoteController_Update, il2cpp_utils::FindMethodUnsafe("", "NoteController", "ManualUpdate", 0));
 }

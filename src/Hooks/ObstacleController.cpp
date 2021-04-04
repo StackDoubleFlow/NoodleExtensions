@@ -7,9 +7,12 @@
 #include "GlobalNamespace/ParametricBoxFrameController.hpp"
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/GameObject.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "Animation/AnimationHelper.h"
+#include "AssociatedData.h"
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
@@ -77,7 +80,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
     rapidjson::Value &customData = *obstacleData->customData->value;
 
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, self->color->color);
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
@@ -95,6 +98,36 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->Update();
 }
 
+MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) {
+    auto *obstacleData = (CustomJSONData::CustomObstacleData*) self->obstacleData;
+
+    if (!obstacleData->customData->value) {
+        return;
+    }
+    rapidjson::Value &customData = *obstacleData->customData->value;
+
+    // TODO: Cache deserialized animation data
+    if (!customData.HasMember("_animation")) {
+        return;
+    }
+    rapidjson::Value &animation = customData["_animation"];
+
+    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+
+    float songTime = self->audioTimeSyncController->get_songTime();
+    float elapsedTime = songTime - self->startTimeOffset;
+    float normalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
+    
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(animation, ad->track, normalTime);
+
+    self->startPos = ad->moveStartPos + offset.positionOffset;
+    self->midPos = ad->moveEndPos + offset.positionOffset;
+    self->endPos = ad->jumpEndPos + offset.positionOffset;
+
+    ObstacleController_Update(self);
+}
+
 void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
+    INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Update, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "ManualUpdate", 0));
 }

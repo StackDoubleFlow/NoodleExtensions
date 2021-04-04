@@ -12,11 +12,11 @@ using namespace GlobalNamespace;
 
 MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self, CustomJSONData::CustomBeatmapEventData *beatmapEventData) {
     if (BeatmapEventTypeExtensions::IsRotationEvent(beatmapEventData->type)) {
-        if (!beatmapEventData->customData) {
+        if (!beatmapEventData->customData->value) {
             return ProcessBeatmapEventData(self, beatmapEventData);
         }
 
-        rapidjson::Value &customData = *beatmapEventData->customData;
+        rapidjson::Value& customData = *beatmapEventData->customData->value;
         std::optional<float> rotation = customData.HasMember("_rotation") ? std::optional{customData["_rotation"].GetFloat()} : std::nullopt;
 
         if (rotation.has_value()) {

@@ -88,6 +88,11 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
     result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
     // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(UnityEngine::Vector3 {1, 2, 3}, UnityEngine::Vector3 {4, 5, 6}, UnityEngine::Vector3 {7, 8, 9}, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
 
+    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+    ad->moveStartPos = moveStartPos;
+    ad->moveEndPos = moveEndPos;
+    ad->jumpEndPos = jumpEndPos;
+
     return result;
 }
 

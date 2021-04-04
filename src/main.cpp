@@ -11,6 +11,9 @@
 #include <string>
 #include <iostream>
 
+#include "System/Exception.hpp"
+#include "GlobalNamespace/BeatmapData.hpp"
+
 void PrintJSONValue(const rapidjson::Value &json) {
     using namespace rapidjson;
 
@@ -35,6 +38,10 @@ extern "C" void load() {
     // Install hooks
 
     NoodleExtensions::InstallHooks();
+
+    // const Il2CppImage *image = classof(System::Exception*)->image;
+    // Il2CppException *exception = il2cpp_functions::exception_from_name_msg(image, "System", "TypeLoadException", NULL);
+    // il2cpp_functions::raise_exception(exception);
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }

@@ -1,7 +1,19 @@
 #pragma once
+#include "NELogger.h"
+#include "Animation/PointDefinition.h"
+#include "Animation/Track.h"
 
-namespace NoodleExtensions::Animation {
+namespace Events {
 
-void AddEventCallbacks();
+void AddEventCallbacks(Logger& logger);
+void UpdateCoroutines();
 
-} // end namespace NoodleExtensions::Animation
+struct AnimateTrackContext {
+    PointDefinition *points;
+    Property *property;
+    float duration;
+    float startTime;
+    Functions easing;
+};
+
+} // end namespace Events

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace NoodleExtensions::Animation {
+#include <string>
 
 enum struct Functions {
     easeLinear,
@@ -37,6 +37,8 @@ enum struct Functions {
     easeInOutBounce,
 };
 
+namespace Easings {
 float Interpolate(float p, Functions function);
+}
 
-} // end namespace NoodleExtensions::Animation
+Functions FunctionFromStr(std::string str);

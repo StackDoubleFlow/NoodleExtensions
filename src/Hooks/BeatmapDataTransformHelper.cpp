@@ -5,6 +5,8 @@
 #include "GlobalNamespace/PracticeSettings.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
+#include "GlobalNamespace/EnvironmentEffectsFilterPreset.hpp"
+#include "GlobalNamespace/EnvironmentIntensityReductionOptions.hpp"
 #include "System/Func_2.hpp"
 #include "System/Linq/Enumerable.hpp"
 #include "System/Collections/Generic/IEnumerable_1.hpp"
@@ -28,8 +30,9 @@ using namespace System::Collections::Generic;
 extern int CachedNoteJumpMovementSpeed;
 extern int CachedNoteJumpStartBeatOffset;
 
-Il2CppClass *customObstacleDataClass;
-Il2CppClass *customNoteDataClass;
+// BeatmapDataLoader.cpp
+extern Il2CppClass *customObstacleDataClass;
+extern Il2CppClass *customNoteDataClass;
 
 System::Func_2<BeatmapObjectData*, float> *CreateOrderFunc() {
     std::vector<const Il2CppClass*> argClasses { classof(BeatmapObjectData*), classof(float) };
@@ -71,11 +74,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     float maxHalfJumpDistance = 18;
     float moveDuration = 0.5f;
 
-    if (!customObstacleDataClass) {
-        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-    }
-
     // loop through all objects in all lines of the beatmapData
     for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = customBeatmapData->beatmapLinesData->values[i]; 
@@ -97,9 +95,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 continue;
             }
 
-            if (!customDataWrapper->associatedData['N']) {
-                customDataWrapper->associatedData['N'] = new BeatmapObjectAssociatedData();
-            }
+            
             aheadTime = &getAD(customDataWrapper)->aheadTime;
 
             float njs;
@@ -134,11 +130,11 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
-MAKE_HOOK_OFFSETLESS(CreateTransformedBeatmapData, IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData, GameplayModifiers *gameplayModifiers, PracticeSettings *practiceSettings, bool leftHanded, bool staticLights) {
+MAKE_HOOK_OFFSETLESS(CreateTransformedBeatmapData, IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData, GameplayModifiers *gameplayModifiers, PracticeSettings *practiceSettings, bool leftHanded, EnvironmentEffectsFilterPreset environmentEffectsFilterPreset, EnvironmentIntensityReductionOptions *environmentIntensityReductionOptions) {
     auto transformedBeatmapData = ReorderLineData(beatmapData);
-    return CreateTransformedBeatmapData(transformedBeatmapData, gameplayModifiers, practiceSettings, leftHanded, staticLights);
+    return CreateTransformedBeatmapData(transformedBeatmapData, gameplayModifiers, practiceSettings, leftHanded, environmentEffectsFilterPreset, environmentIntensityReductionOptions);
 }
 
 void NoodleExtensions::InstallBeatmapDataTransformHelperHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, CreateTransformedBeatmapData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData", 5));
+    INSTALL_HOOK_OFFSETLESS(logger, CreateTransformedBeatmapData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData", 7));
 }

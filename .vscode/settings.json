@@ -94,6 +94,9 @@
         "filesystem": "cpp",
         "*.inc": "cpp",
         "span": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "coroutine": "cpp",
+        "__functional_03": "cpp",
+        "*.def": "cpp"
     }
 }

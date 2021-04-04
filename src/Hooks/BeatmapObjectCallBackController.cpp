@@ -1,10 +1,10 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
 #include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController_BeatmapObjectCallbackData.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController_BeatmapEventCallbackData.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController_BeatmapEventCallback.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController_BeatmapObjectCallback.hpp"
+#include "GlobalNamespace/BeatmapObjectCallbackData.hpp"
+#include "GlobalNamespace/BeatmapEventCallbackData.hpp"
+#include "GlobalNamespace/BeatmapEventCallback.hpp"
+#include "GlobalNamespace/BeatmapObjectCallback.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
@@ -13,6 +13,7 @@
 #include "System/Action.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "Animation/Events.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
@@ -21,24 +22,30 @@ template<class T>
 using List = System::Collections::Generic::List_1<T>;
 
 using namespace GlobalNamespace;
+using namespace NoodleExtensions;
 
 // BeatmapDataTransformHelper.cpp
 extern Il2CppClass *customObstacleDataClass;
 extern Il2CppClass *customNoteDataClass;
+
+BeatmapObjectCallbackController *callbackController;
 
 MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
     if (!self->beatmapData) {
         return;
     }
 
+    callbackController = self;
+    Events::UpdateCoroutines();
+
     auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());
 
     for (int i = 0; i < self->beatmapObjectCallbackData->size; i++) {
         self->beatmapObjectDataCallbackCacheList->Clear();
-        BeatmapObjectCallbackController::BeatmapObjectCallbackData *callbackData = self->beatmapObjectCallbackData->items->values[i];
+        BeatmapObjectCallbackData *callbackData = self->beatmapObjectCallbackData->items->values[i];
         for (int j = 0; j < beatmapLinesData->Length(); j++) {
             while (callbackData->nextObjectIndexInLine->values[j] < ((List<GlobalNamespace::BeatmapObjectData*>*) beatmapLinesData->values[j]->get_beatmapObjectsData())->get_Count()) {
-                BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->System_Collections_Generic_IReadOnlyList_1_get_Item(callbackData->nextObjectIndexInLine->values[j]);
+                BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->get_Item(callbackData->nextObjectIndexInLine->values[j]);
 
                 float aheadTime = callbackData->aheadTime;
                 if (callbackData->callback->method_ptr.m_value == il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "HandleBeatmapObjectCallback", 1)->methodPointer) {
@@ -74,9 +81,9 @@ MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
     }
 
     for (int l = 0; l < self->beatmapEventCallbackData->get_Count(); l++) {
-        BeatmapObjectCallbackController::BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items->values[l];
+        BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items->values[l];
         while (callbackData->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
-            BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->System_Collections_Generic_IReadOnlyList_1_get_Item(callbackData->nextEventIndex);
+            BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(callbackData->nextEventIndex);
             if (beatmapEventData->time - callbackData->aheadTime >= self->audioTimeSource->get_songTime()) {
                 break;
             }
@@ -87,7 +94,7 @@ MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
         }
     }
     while (self->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
-        BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->System_Collections_Generic_IReadOnlyList_1_get_Item(self->nextEventIndex);
+        BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(self->nextEventIndex);
         if (beatmapEventData->time >= self->audioTimeSource->get_songTime()) {
             break;
         }

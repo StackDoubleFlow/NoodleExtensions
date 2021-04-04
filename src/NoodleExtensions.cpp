@@ -18,5 +18,5 @@ void NoodleExtensions::InstallHooks() {
     InstallBeatmapDataLoaderHooks(logger);
     InstallNoteControllerHooks(logger);
 
-    //Animation::AddEventCallbacks();
+    Events::AddEventCallbacks(logger);
 }
