@@ -123,8 +123,8 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_Not
 
     bool gravityOverride = customData.HasMember("_disableNoteGravity") ? customData["_disableNoteGravity"].GetBool() : false;
 
-    std::optional<float> startRow = position.has_value() ? std::optional{(*position.value())[0].GetFloat()} : std::nullopt;
-    std::optional<float> startHeight = position.has_value() ? std::optional{(*position.value())[1].GetFloat()} : std::nullopt;
+    std::optional<float> startRow = position.has_value() ? std::optional{(**position)[0].GetFloat()} : std::nullopt;
+    std::optional<float> startHeight = position.has_value() ? std::optional{(**position)[1].GetFloat()} : std::nullopt;
 
     float jumpDuration = self->jumpDuration;
 

@@ -48,7 +48,7 @@ PathProperty *PathProperties::FindProperty(std::string name) {
         { "_rotation", PropertyName::rotation },
         { "_scale", PropertyName::scale },
         { "_localRotation", PropertyName::localRotation },
-        { "_definitePosition", PropertyName::time },
+        { "_definitePosition", PropertyName::definitePosition },
         { "_dissolve", PropertyName::dissolve },
         { "_dissolveArrow", PropertyName::dissolveArrow },
         { "_cuttable", PropertyName::cuttable },

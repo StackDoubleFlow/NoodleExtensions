@@ -1,8 +1,9 @@
 #include "Animation/PointDefinition.h"
 #include "Animation/Track.h"
+#include "Animation/Easings.h"
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Quaternion.hpp"
-#include "Animation/Easings.h"
+#include "NELogger.h"
 
 using namespace UnityEngine;
 
@@ -73,16 +74,16 @@ void PointDefinition::SearchIndex(float time, PropertyType propertyType, int& l,
     }
 }
 
-PointDefinition::PointDefinition(rapidjson::Value& value) {
+PointDefinition::PointDefinition(const rapidjson::Value& value) {
     for (int i = 0; i < value.Size(); i++) {
-        rapidjson::Value& rawPoint = value[i];
+        const rapidjson::Value& rawPoint = value[i];
 
         std::vector<float> copiedList;
         bool spline = false;
         Functions easing = Functions::easeLinear;
 
         for (int j = 0; j < rawPoint.Size(); j++) {
-            rapidjson::Value& rawPointItem = rawPoint[j];
+            const rapidjson::Value& rawPointItem = rawPoint[j];
 
             switch (rawPointItem.GetType()) {
             case rapidjson::kNumberType:
@@ -134,12 +135,12 @@ Vector3 PointDefinition::Interpolate(float time) {
     int r;
     SearchIndex(time, PropertyType::vector3, l, r);
 
-    float normalTime = (time - points[1].point.w) / (points[r].point.w - points[1].point.w);
+    float normalTime = (time - points[l].point.w) / (points[r].point.w - points[l].point.w);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
     if (points[r].smooth) {
         return SmoothVectorLerp(points, l, r, normalTime);
     } else {
-        return Vector3::LerpUnclamped(v423(points[1].point), v423(points[r].point), normalTime);
+        return Vector3::LerpUnclamped(v423(points[l].point), v423(points[r].point), normalTime);
     }
 }
 
@@ -162,7 +163,7 @@ Quaternion PointDefinition::InterpolateQuaternion(float time) {
 
     Quaternion quaternionOne = Quaternion::Euler(v423(points[l].point));
     Quaternion quaternionTwo = Quaternion::Euler(v423(points[r].point));
-    float normalTime = (time - points[1].point.w) / (points[r].point.w - points[1].point.w);
+    float normalTime = (time - points[l].point.w) / (points[r].point.w - points[l].point.w);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
     return Quaternion::SlerpUnclamped(quaternionOne, quaternionTwo, normalTime);
 }
@@ -184,9 +185,9 @@ float PointDefinition::InterpolateLinear(float time) {
     int r;
     SearchIndex(time, PropertyType::linear, l, r);
 
-    float normalTime = (time - points[1].linearPoint.y) / (points[r].linearPoint.y - points[1].linearPoint.y);
+    float normalTime = (time - points[l].linearPoint.y) / (points[r].linearPoint.y - points[l].linearPoint.y);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
-    return std::lerp(points[1].linearPoint.x, points[r].linearPoint.x, normalTime);
+    return std::lerp(points[l].linearPoint.x, points[r].linearPoint.x, normalTime);
 }
 
 Vector4 PointDefinition::InterpolateVector4(float time) {
@@ -206,7 +207,15 @@ Vector4 PointDefinition::InterpolateVector4(float time) {
     int r;
     SearchIndex(time, PropertyType::linear, l, r);
 
-    float normalTime = (time - points[1].vector4Point.v) / (points[r].vector4Point.v - points[1].vector4Point.v);
+    float normalTime = (time - points[l].vector4Point.v) / (points[r].vector4Point.v - points[l].vector4Point.v);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
-    return v4lerp(v524(points[1].vector4Point), v524(points[r].vector4Point), normalTime);
+    return v4lerp(v524(points[l].vector4Point), v524(points[r].vector4Point), normalTime);
 }
+
+void PointDefinitionManager::AddPoint(std::string pointDataName, PointDefinition pointData) {
+    if (this->pointData.find(pointDataName) != this->pointData.end()) {
+        NELogger::GetLogger().error("Duplicate point defintion name, %s could not be registered!", pointDataName.c_str());
+    } else {
+        this->pointData.emplace(pointDataName, pointData);
+    }
+} 

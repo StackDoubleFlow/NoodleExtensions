@@ -7,18 +7,18 @@
 
 namespace AnimationHelper {
 struct ObjectOffset {
-    ObjectOffset() : positionOffset{UnityEngine::Vector3(0, 0, 0)}, scaleOffset{UnityEngine::Vector3(1, 1, 1)} {}
-    UnityEngine::Vector3 positionOffset;
-    UnityEngine::Quaternion rotationOffset;
-    UnityEngine::Vector3 scaleOffset;
-    UnityEngine::Quaternion localRotationOffset;
-    float dissolve;
-    float dissolveArrow;
-    float cuttable;
+    // ObjectOffset() : positionOffset{UnityEngine::Vector3(0, 0, 0)}, scaleOffset{UnityEngine::Vector3(1, 1, 1)} {}
+    std::optional<UnityEngine::Vector3> positionOffset;
+    std::optional<UnityEngine::Quaternion> rotationOffset;
+    std::optional<UnityEngine::Vector3> scaleOffset;
+    std::optional<UnityEngine::Quaternion> localRotationOffset;
+    std::optional<float> dissolve;
+    std::optional<float> dissolveArrow;
+    std::optional<float> cuttable;
 };
 
-PointDefinition *TryGetPointData(rapidjson::Value& customData, std::string pointName);
-ObjectOffset GetObjectOffset(rapidjson::Value& customData, Track *track, float time);
+PointDefinition *TryGetPointData(const rapidjson::Value& customData, std::string pointName);
+ObjectOffset GetObjectOffset(const rapidjson::Value& customData, Track *track, float time);
 void OnTrackCreated(Track *track);
 
 } // end namespace AnimationHelper

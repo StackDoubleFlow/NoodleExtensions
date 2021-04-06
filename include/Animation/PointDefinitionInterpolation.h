@@ -11,6 +11,8 @@ public:
     UnityEngine::Quaternion InterpolateQuaternion(float time);
     float InterpolateLinear(float time);
     UnityEngine::Vector4 InterpolateVector4(float time);
+    void Init(PointDefinition *newPointData);
+    void Finish();
 
     float time;
 private:

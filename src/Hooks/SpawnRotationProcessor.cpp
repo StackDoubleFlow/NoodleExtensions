@@ -20,7 +20,7 @@ MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self
         std::optional<float> rotation = customData.HasMember("_rotation") ? std::optional{customData["_rotation"].GetFloat()} : std::nullopt;
 
         if (rotation.has_value()) {
-            self->rotation = rotation.value();
+            self->rotation = *rotation;
             return true;
         }
     }

@@ -26,7 +26,7 @@ struct PointData {
 
 class PointDefinition {
 public:
-    PointDefinition(rapidjson::Value& value);
+    PointDefinition(const rapidjson::Value& value);
     UnityEngine::Vector3 Interpolate(float time);
     UnityEngine::Quaternion InterpolateQuaternion(float time);
     float InterpolateLinear(float time);
@@ -34,4 +34,11 @@ public:
 private:
     void SearchIndex(float time, PropertyType propertyType, int& l, int& r);
     std::vector<PointData> points;
+};
+
+class PointDefinitionManager {
+public:
+    std::unordered_map<std::string, PointDefinition> pointData;
+
+    void AddPoint(std::string pointDataName, PointDefinition pointData);
 };

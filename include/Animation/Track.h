@@ -25,30 +25,31 @@ union PropertyValue {
 };
 
 struct Property {
-    Property(PropertyType t, UnityEngine::Vector4 v) : type{t}, value{} { value.vector4 = v; };
-    Property(PropertyType t, UnityEngine::Vector3 v) : type{t}, value{} { value.vector3 = v; };
-    Property(PropertyType t, UnityEngine::Quaternion v) : type{t}, value{} { value.quaternion = v; };
-    Property(PropertyType t, float v) : type{t}, value{v} {};
+    // Property(PropertyType t, UnityEngine::Vector4 v) : type{t}, value{{}} { value.value().vector4 = v; };
+    // Property(PropertyType t, UnityEngine::Vector3 v) : type{t}, value{} { value.value().vector3 = v; };
+    // Property(PropertyType t, UnityEngine::Quaternion v) : type{t}, value{} { value.value().quaternion = v; };
+    // Property(PropertyType t, float v) : type{t}, value{v} {};
+    Property(PropertyType t) : type{t}, value{std::nullopt} {};
     PropertyType type;
-    PropertyValue value;
-    Events::AnimateTrackContext *coroutine;
+    std::optional<PropertyValue> value;
 };
 
 struct PathProperty {
+    PathProperty(PropertyType t) : type{t}, value{std::nullopt} {};
     PropertyType type;
-    PointDefinitionInterpolation value;
+    std::optional<PointDefinitionInterpolation> value;
 };
 
 class Properties {
 public:
-    Properties() : position{Property(PropertyType::vector3, UnityEngine::Vector3())},
-                   rotation{Property(PropertyType::quaternion, UnityEngine::Quaternion())},
-                   scale{Property(PropertyType::vector3, UnityEngine::Vector3(1, 1, 1))},
-                   localRotation{Property(PropertyType::quaternion, UnityEngine::Quaternion())},
-                   dissolve{Property(PropertyType::linear, 1)},
-                   dissolveArrow{Property(PropertyType::linear, 1)},
-                   time{Property(PropertyType::linear, UnityEngine::Quaternion())},
-                   cuttable{Property(PropertyType::linear, 1)} {};
+    Properties() : position{Property(PropertyType::vector3)},
+                   rotation{Property(PropertyType::quaternion)},
+                   scale{Property(PropertyType::vector3)},
+                   localRotation{Property(PropertyType::quaternion)},
+                   dissolve{Property(PropertyType::linear)},
+                   dissolveArrow{Property(PropertyType::linear)},
+                   time{Property(PropertyType::linear)},
+                   cuttable{Property(PropertyType::linear)} {};
     Property *FindProperty(std::string name);
     
     Property position;
@@ -63,14 +64,14 @@ public:
 
 class PathProperties {
 public:
-    PathProperties() : position{PropertyType::vector3, PointDefinitionInterpolation()},
-                       rotation{PropertyType::quaternion, PointDefinitionInterpolation()},
-                       scale{PropertyType::vector3, PointDefinitionInterpolation()},
-                       localRotation{PropertyType::quaternion, PointDefinitionInterpolation()},
-                       definitePosition{PropertyType::linear, PointDefinitionInterpolation()},
-                       dissolve{PropertyType::linear, PointDefinitionInterpolation()},
-                       dissolveArrow{PropertyType::linear, PointDefinitionInterpolation()},
-                       cuttable{PropertyType::linear, PointDefinitionInterpolation()} {};
+    PathProperties() : position{PropertyType::vector3},
+                       rotation{PropertyType::quaternion},
+                       scale{PropertyType::vector3},
+                       localRotation{PropertyType::quaternion},
+                       definitePosition{PropertyType::linear},
+                       dissolve{PropertyType::linear},
+                       dissolveArrow{PropertyType::linear},
+                       cuttable{PropertyType::linear} {};
     PathProperty *FindProperty(std::string name);
 
     PathProperty position;

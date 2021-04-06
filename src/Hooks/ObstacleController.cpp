@@ -16,9 +16,10 @@
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
+using namespace UnityEngine;
 
-UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
-    UnityEngine::Quaternion worldRotation = UnityEngine::Quaternion::Euler(0, def, 0);
+Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
+    Quaternion worldRotation = Quaternion::Euler(0, def, 0);
     if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         if (customData.HasMember("_rotation")) {
@@ -26,9 +27,9 @@ UnityEngine::Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstac
                 float x = customData["_rotation"][0].GetFloat();
                 float y = customData["_rotation"][1].GetFloat();
                 float z = customData["_rotation"][2].GetFloat();
-                worldRotation = UnityEngine::Quaternion::Euler(x, y, z);
+                worldRotation = Quaternion::Euler(x, y, z);
             } else {
-                worldRotation = UnityEngine::Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
+                worldRotation = Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
             }
         }
     }
@@ -58,19 +59,19 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
     return def;
 }
 
-MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, UnityEngine::Vector3 startPos, UnityEngine::Vector3 midPos, UnityEngine::Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
+MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
 
     if (!obstacleData->customData->value) {
         return;
     }
 
-    UnityEngine::Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
+    Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
-    self->inverseWorldRotation = UnityEngine::Quaternion::Euler(-rotation.get_eulerAngles());
+    self->inverseWorldRotation = Quaternion::Euler(-rotation.get_eulerAngles());
 
     float width = GetCustomWidth(obstacleData->width, obstacleData) * 0.6;// * singleLineWidth;
-    UnityEngine::Vector3 b = UnityEngine::Vector3 { (width - singleLineWidth) * 0.5f, 0, 0 };
+    Vector3 b = Vector3 { (width - singleLineWidth) * 0.5f, 0, 0 };
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
@@ -85,15 +86,15 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
 
-    UnityEngine::Transform *transform = self->get_transform();
+    Transform *transform = self->get_transform();
 
-    UnityEngine::Quaternion localRotation = UnityEngine::Quaternion::get_identity();
+    Quaternion localRotation = Quaternion::get_identity();
     if (localrot.has_value()) {
-        localRotation = UnityEngine::Quaternion::Euler((*localrot.value())[0].GetFloat(), (*localrot.value())[1].GetFloat(), (*localrot.value())[2].GetFloat());
+        localRotation = Quaternion::Euler((*localrot.value())[0].GetFloat(), (*localrot.value())[1].GetFloat(), (*localrot.value())[2].GetFloat());
         transform->set_localRotation(self->worldRotation * localRotation);
     }
 
-    transform->set_localScale(UnityEngine::Vector3::get_one());
+    transform->set_localScale(Vector3::get_one());
 
     self->Update();
 }
@@ -102,14 +103,16 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     auto *obstacleData = (CustomJSONData::CustomObstacleData*) self->obstacleData;
 
     if (!obstacleData->customData->value) {
+        ObstacleController_Update(self);
         return;
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
 
     // TODO: Cache deserialized animation data
-    if (!customData.HasMember("_animation")) {
-        return;
-    }
+    // if (!customData.HasMember("_animation")) {
+    //     ObstacleController_Update(self);
+    //     return;
+    // }
     rapidjson::Value &animation = customData["_animation"];
 
     BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
@@ -120,14 +123,45 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(animation, ad->track, normalTime);
 
-    self->startPos = ad->moveStartPos + offset.positionOffset;
-    self->midPos = ad->moveEndPos + offset.positionOffset;
-    self->endPos = ad->jumpEndPos + offset.positionOffset;
+    if (offset.positionOffset.has_value()) {
+        self->startPos = ad->moveStartPos + *offset.positionOffset;
+        self->midPos = ad->moveEndPos + *offset.positionOffset;
+        self->endPos = ad->jumpEndPos + *offset.positionOffset;
+    }
+
+    if (offset.scaleOffset.has_value()) {
+        self->get_transform()->set_localScale(*offset.scaleOffset);
+    }
+
+    if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
+        Quaternion worldRotation = ad->worldRotation;
+        Quaternion localRotation = ad->localRotation;
+
+        Quaternion worldRotationQuaternion = worldRotation;
+        if (offset.rotationOffset.has_value()) {
+            worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
+            Quaternion inverseWorldRotation = Quaternion::Euler(-worldRotationQuaternion.get_eulerAngles());
+            self->worldRotation = worldRotationQuaternion;
+            self->inverseWorldRotation = inverseWorldRotation;
+        }
+
+        worldRotationQuaternion = worldRotationQuaternion * localRotation;
+
+        if (offset.localRotationOffset.has_value()) {
+            worldRotationQuaternion = worldRotationQuaternion * *offset.localRotationOffset;
+        }
+
+        self->get_transform()->set_localRotation(worldRotationQuaternion);
+    }
 
     ObstacleController_Update(self);
 }
 
+MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
+
 void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
-    INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Update, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "ManualUpdate", 0));
+    INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Update, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "ManualUpdate", 0));    
+    // Temporary fake glow disable hook
+    INSTALL_HOOK_OFFSETLESS(logger, ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }

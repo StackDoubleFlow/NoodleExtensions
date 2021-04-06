@@ -1,4 +1,5 @@
 #include "Animation/Easings.h"
+#include "NELogger.h"
 #include <cmath>
 #include <unordered_map>
 
@@ -268,6 +269,7 @@ Functions FunctionFromStr(std::string str) {
     if (itr != functions.end()) {
         return itr->second;
     } else {
+        NELogger::GetLogger().error("Invalid function with name %s", str.c_str());
         // TODO: Do something if the difficulty name is invalid
     }
 }

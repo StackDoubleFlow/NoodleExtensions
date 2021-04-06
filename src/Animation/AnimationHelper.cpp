@@ -3,10 +3,12 @@
 #include "Animation/AnimationHelper.h"
 #include "Animation/PointDefinition.h"
 #include "AssociatedData.h"
+#include "NELogger.h"
 
 using namespace AnimationHelper;
 using namespace GlobalNamespace;
 using namespace UnityEngine;
+using namespace CustomJSONData;
 
 // BeatmapObjectCallbackController.cpp
 extern BeatmapObjectCallbackController *callbackController;
@@ -15,18 +17,73 @@ Vector3 vmult(Vector3 a, Vector3 b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-PointDefinition *AnimationHelper::TryGetPointData(rapidjson::Value& customData, std::string pointName) {
+Quaternion qmult(Quaternion a, Quaternion b) {
+    return Quaternion(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+}
+
+std::optional<Vector3> vsumNullable(std::optional<Vector3> a, std::optional<Vector3> b) {
+    if (!a.has_value() && !b.has_value()) {
+        return std::nullopt;
+    }
+
+    Vector3 total = Vector3::get_zero();
+    if (a.has_value()) {
+        total = total + *a;
+    }
+
+    if (b.has_value()) {
+        total = total + *b;
+    }
+
+    return total;
+}
+
+std::optional<Vector3> vmultNullable(std::optional<Vector3> a, std::optional<Vector3> b) {
+    if (a.has_value()) {
+        if (b.has_value()) {
+            return vmult(*a, *b);
+        } else {
+            return a;
+        }
+    } else if (b.has_value()) {
+        return b;
+    }
+    
+    return std::nullopt;
+}
+
+std::optional<Quaternion> qmultNullable(std::optional<Quaternion> a, std::optional<Quaternion> b) {
+    if (a.has_value()) {
+        if (b.has_value()) {
+            return qmult(*a, *b);
+        } else {
+            return a;
+        }
+    } else if (b.has_value()) {
+        return b;
+    }
+    
+    return std::nullopt;
+}
+
+PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
     if (!customData.HasMember(pointName.c_str())) return pointData;
-    rapidjson::Value& pointString = customData[pointName.c_str()];
+    const rapidjson::Value& pointString = customData[pointName.c_str()];
 
     switch (pointString.GetType()) {
     case rapidjson::kNullType:
         return pointData;
-    case rapidjson::kStringType:
-        // TODO: Find global point data
-        return pointData;
+    case rapidjson::kStringType: {
+        auto *ad = getBeatmapAD(reinterpret_cast<CustomBeatmapData*>(callbackController->beatmapData)->customData);
+        for (auto const& pair : ad->pointDefinitions) {
+        }
+        if (ad->pointDefinitions.find(pointString.GetString()) != ad->pointDefinitions.end()) {
+            pointData = &ad->pointDefinitions.at(pointString.GetString());
+        }
+        break;
+    }
     default:
         pointData = new PointDefinition(pointString);
     }
@@ -34,45 +91,73 @@ PointDefinition *AnimationHelper::TryGetPointData(rapidjson::Value& customData, 
     return pointData;
 }
 
-ObjectOffset AnimationHelper::GetObjectOffset(rapidjson::Value& customData, Track *track, float time) {
+std::optional<PointDefinitionInterpolation> GetPathInterpolation(Track *track, std::string name, PropertyType type) {
+    return track ? track->pathProperties.FindProperty(name)->value : std::nullopt;
+}
+
+std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string name, float time) {
+    std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::quaternion);
+    if (pointDataInterpolation.has_value()) {
+        return pointDataInterpolation->InterpolateQuaternion(time);
+    }
+    return std::nullopt;
+}
+
+std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name, float time) {
+    std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::vector3);
+    if (pointDataInterpolation.has_value()) {
+        return pointDataInterpolation->Interpolate(time);
+    }
+    return std::nullopt;
+}
+
+ObjectOffset AnimationHelper::GetObjectOffset(const rapidjson::Value& customData, Track *track, float time) {
     ObjectOffset offset;
 
     // getBeatmapAD(((CustomJSONData::CustomBeatmapData*) callbackController->beatmapData)->customData);
 
     PointDefinition *position = TryGetPointData(customData, "_position");
-    if (position) {
-        offset.positionOffset = vmult(position->Interpolate(time), track ? track->properties.position.value.vector3 : Vector3());
-    }
+    std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
+    std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
+        std::optional{ track->properties.position.value->vector3 } : std::nullopt;
+    offset.positionOffset = vsumNullable(pathPosition, trackPosition);
+
+    PointDefinition *rotation = TryGetPointData(customData, "_rotation");
+    std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);
+    std::optional<Quaternion> trackRotation = track && track->properties.rotation.value.has_value() ?
+        std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
+    offset.rotationOffset = qmultNullable(pathRotation, trackRotation);
 
     PointDefinition *scale = TryGetPointData(customData, "_scale");
-    if (scale) {
-        offset.scaleOffset = vmult(scale->Interpolate(time), track ? track->properties.scale.value.vector3 : Vector3(1, 1, 1));
-    }
+    std::optional<Vector3> pathScale = scale ? std::optional{ scale->Interpolate(time) } : TryGetVector3PathProperty(track, "_scale", time);
+    std::optional<Vector3> trackScale = track && track->properties.scale.value.has_value() ?
+        std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
+    offset.scaleOffset = vmultNullable(pathScale, trackScale);
 
-    PointDefinition *cuttable = TryGetPointData(customData, "_cuttable");
-    if (cuttable) {
-        offset.cuttable = cuttable->InterpolateLinear(time) * ( track ? track->properties.cuttable.value.linear : 1);
-    }
+    PointDefinition *localRotation = TryGetPointData(customData, "_localRotation");
+    std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
+    std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value.has_value() ?
+        std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
+    offset.localRotationOffset = qmultNullable(pathLocalRotation, trackLocalRotation);
 
     return offset;
 }
 
 void AnimationHelper::OnTrackCreated(Track *track) {
-    // track->properties.emplace("_position", Property(PropertyType::vector3, Vector3()));
-    // track->properties.emplace("_rotation", Property(PropertyType::quaternion, Quaternion()));
-    // track->properties.emplace("_scale", Property(PropertyType::vector3, Vector3(1, 1, 1)));
-    // track->properties.emplace("_localRotation", Property(PropertyType::quaternion, Quaternion()));
-    // track->properties.emplace("_dissolve", Property(PropertyType::linear, 1));
-    // track->properties.emplace("_dissolveArrow", Property(PropertyType::linear, 1));
-    // track->properties.emplace("_time", Property(PropertyType::linear, Quaternion()));
-    // track->properties.emplace("_cuttable", Property(PropertyType::linear, 1));
+    track->properties.position = Property(PropertyType::vector3);
+    track->properties.rotation = Property(PropertyType::quaternion);
+    track->properties.scale = Property(PropertyType::vector3);
+    track->properties.localRotation = Property(PropertyType::quaternion);
+    track->properties.dissolve = Property(PropertyType::linear);
+    track->properties.dissolveArrow = Property(PropertyType::linear);
+    track->properties.time = Property(PropertyType::linear);
+    track->properties.cuttable = Property(PropertyType::linear);
 
-    // track->pathProperties.emplace("_position", Property(PropertyType::vector3, Vector3()));
-    // track->pathProperties.emplace("_rotation", Property(PropertyType::quaternion, Quaternion()));
-    // track->pathProperties.emplace("_scale", Property(PropertyType::vector3, Vector3(1, 1, 1)));
-    // track->pathProperties.emplace("_localRotation", Property(PropertyType::quaternion, Quaternion()));
-    // track->pathProperties.emplace("_definitePosition", Property(PropertyType::vector3, Vector3()));
-    // track->pathProperties.emplace("_dissolve", Property(PropertyType::linear, 1));
-    // track->pathProperties.emplace("_dissolveArrow", Property(PropertyType::linear, 1));
-    // track->pathProperties.emplace("_cuttable", Property(PropertyType::linear, 1));
+    track->pathProperties.position = PathProperty(PropertyType::vector3);
+    track->pathProperties.rotation = PathProperty(PropertyType::quaternion);
+    track->pathProperties.scale = PathProperty(PropertyType::vector3);
+    track->pathProperties.localRotation = PathProperty(PropertyType::quaternion);
+    track->pathProperties.dissolve = PathProperty(PropertyType::linear);
+    track->pathProperties.dissolveArrow = PathProperty(PropertyType::linear);
+    track->pathProperties.cuttable = PathProperty(PropertyType::linear);
 }
