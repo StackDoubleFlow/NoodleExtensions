@@ -1,4 +1,6 @@
 #include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/PointDefinition.h"
@@ -12,6 +14,9 @@ using namespace CustomJSONData;
 
 // BeatmapObjectCallbackController.cpp
 extern BeatmapObjectCallbackController *callbackController;
+
+// Events.cpp
+extern BeatmapObjectSpawnController *spawnController;
 
 Vector3 vmult(Vector3 a, Vector3 b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
@@ -121,6 +126,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const rapidjson::Value& customData
     std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
     offset.positionOffset = vsumNullable(pathPosition, trackPosition);
+    if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
     PointDefinition *rotation = TryGetPointData(customData, "_rotation");
     std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);

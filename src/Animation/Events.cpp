@@ -128,6 +128,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                 } else {
                     NELogger::GetLogger().warning("Could not find track property with name %s", name);
                 }
+                break;
             }
             case EventType::assignPathAnimation:
                 PathProperty *property = pathProperties.FindProperty(name);
