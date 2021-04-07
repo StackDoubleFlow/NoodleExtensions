@@ -116,6 +116,26 @@ std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name,
     return std::nullopt;
 }
 
+std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const rapidjson::Value& customData, Track *track, float time) {
+    PointDefinition *localDefinitePosition = TryGetPointData(customData, "_definitePosition");
+
+    std::optional<Vector3> pathDefinitePosition = localDefinitePosition ? std::optional{ localDefinitePosition->Interpolate(time) } : TryGetVector3PathProperty(track, "_definitePosition", time);
+
+    if (pathDefinitePosition.has_value()) {
+        PointDefinition *position = TryGetPointData(customData, "_position");
+        std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
+        std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
+        std::optional{ track->properties.position.value->vector3 } : std::nullopt;
+        std::optional<Vector3> positionOffset = vsumNullable(pathPosition, trackPosition);
+        std::optional<Vector3> definitePosition = vsumNullable(positionOffset, pathDefinitePosition);
+        if (definitePosition) definitePosition = *definitePosition * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+        return definitePosition;
+    } else {
+        return std::nullopt;
+    }
+}
+
+
 ObjectOffset AnimationHelper::GetObjectOffset(const rapidjson::Value& customData, Track *track, float time) {
     ObjectOffset offset;
 

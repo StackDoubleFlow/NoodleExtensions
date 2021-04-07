@@ -13,8 +13,8 @@ struct BeatmapObjectAssociatedData {
     UnityEngine::Vector3 moveStartPos;
     UnityEngine::Vector3 moveEndPos;
     UnityEngine::Vector3 jumpEndPos;
-    // Note stuff
     UnityEngine::Vector3 noteOffset;
+    float xOffset;
 };
 
 struct BeatmapAssociatedData {

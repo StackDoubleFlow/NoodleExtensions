@@ -22,6 +22,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
         return;
     }
     rapidjson::Value &customData = *noteData->customData->value;
+    BeatmapObjectAssociatedData *ad = getAD(noteData->customData);
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -74,7 +75,6 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
 
     transform->set_localScale(Vector3::get_one()); // This is a fix for animation due to notes being recycled
 
-    BeatmapObjectAssociatedData *ad = getAD(noteData->customData);
     ad->moveStartPos = startPos;
     ad->moveEndPos = midPos;
     ad->jumpEndPos = endPos;

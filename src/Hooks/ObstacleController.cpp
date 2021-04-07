@@ -80,6 +80,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     float length = GetCustomLength(defaultLength, obstacleData);
 
     rapidjson::Value &customData = *obstacleData->customData->value;
+    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
@@ -93,6 +94,8 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
         localRotation = Quaternion::Euler((*localrot.value())[0].GetFloat(), (*localrot.value())[1].GetFloat(), (*localrot.value())[2].GetFloat());
         transform->set_localRotation(self->worldRotation * localRotation);
     }
+    ad->localRotation = localRotation;
+    ad->worldRotation = rotation;
 
     transform->set_localScale(Vector3::get_one());
 
@@ -157,11 +160,39 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     ObstacleController_Update(self);
 }
 
+MAKE_HOOK_OFFSETLESS(ObstacleController_GetPosForTime, Vector3, ObstacleController *self, float time) {
+    auto *obstacleData = (CustomJSONData::CustomObstacleData*) self->obstacleData;
+
+    if (!obstacleData->customData->value) {
+        return ObstacleController_GetPosForTime(self, time);
+    }
+    rapidjson::Value &customData = *obstacleData->customData->value;
+    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+
+    float jumpTime = std::clamp((time - self->move1Duration) / (self->move2Duration + self->obstacleDuration), 0.0f, 1.0f);
+    std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(customData["_animation"], ad->track, jumpTime);
+
+    if (position.has_value()) {
+        Vector3 noteOffset = ad->noteOffset;
+        Vector3 definitePosition = *position + noteOffset;
+        definitePosition.x += ad->xOffset;
+        if (time < self->move1Duration) {
+            Vector3 result = Vector3::LerpUnclamped(self->startPos, self->midPos, time / self->move1Duration);
+            return result + definitePosition - self->midPos;
+        } else {
+            return definitePosition;
+        }
+    }
+
+    return ObstacleController_GetPosForTime(self, time);
+}
+
 MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
 
 void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Update, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "ManualUpdate", 0));    
+    INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_GetPosForTime, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "GetPosForTime", 1));  
     // Temporary fake glow disable hook
     INSTALL_HOOK_OFFSETLESS(logger, ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }
