@@ -9,6 +9,8 @@
 #include "UnityEngine/Transform.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/GameObject.hpp"
+#include "GlobalNamespace/CutoutAnimateEffect.hpp"
+#include "GlobalNamespace/ObstacleDissolve.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/AnimationHelper.h"
@@ -65,22 +67,25 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     if (!obstacleData->customData->value) {
         return;
     }
+    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
 
     Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
     self->inverseWorldRotation = Quaternion::Euler(-rotation.get_eulerAngles());
 
-    float width = GetCustomWidth(obstacleData->width, obstacleData) * 0.6;// * singleLineWidth;
+    float width = GetCustomWidth(obstacleData->width, obstacleData) * singleLineWidth;
     Vector3 b = Vector3 { (width - singleLineWidth) * 0.5f, 0, 0 };
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
+    ad->moveStartPos = self->startPos;
+    ad->moveEndPos = self->midPos;
+    ad->jumpEndPos = self->endPos;
 
     float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
     float length = GetCustomLength(defaultLength, obstacleData);
 
     rapidjson::Value &customData = *obstacleData->customData->value;
-    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length, self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
@@ -92,8 +97,9 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     Quaternion localRotation = Quaternion::get_identity();
     if (localrot.has_value()) {
         localRotation = Quaternion::Euler((*localrot.value())[0].GetFloat(), (*localrot.value())[1].GetFloat(), (*localrot.value())[2].GetFloat());
-        transform->set_localRotation(self->worldRotation * localRotation);
     }
+    transform->set_localPosition(startPos);
+    transform->set_localRotation(self->worldRotation * localRotation);
     ad->localRotation = localRotation;
     ad->worldRotation = rotation;
 
@@ -156,6 +162,18 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
 
         self->get_transform()->set_localRotation(worldRotationQuaternion);
     }
+
+    // if (offset.dissolve.has_value()) {
+    //     CutoutAnimateEffect *cutoutAnimationEffect = ad->cutoutAnimationEffect;
+    //     if (!cutoutAnimationEffect) {
+    //         ObstacleDissolve *obstacleDissolve = self->get_gameObject()->GetComponent<ObstacleDissolve*>();
+    //         cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
+    //         ad->cutoutAnimationEffect = cutoutAnimationEffect;
+    //     }
+
+    //     cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
+    //     // cutoutAnimationEffect->SetCutout(0.75);
+    // }
 
     ObstacleController_Update(self);
 }

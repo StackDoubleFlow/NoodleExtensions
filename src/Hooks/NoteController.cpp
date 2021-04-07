@@ -86,7 +86,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
 
 MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     auto customNoteData = (CustomJSONData::CustomNoteData *) self->noteData;
-
+    NELogger::GetLogger().info("noteData class %s", customNoteData->klass->name);
     if (!customNoteData->customData->value) {
         NoteController_Update(self);
         return;

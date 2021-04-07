@@ -5,6 +5,10 @@
 
 #include "Animation/Track.h"
 
+namespace GlobalNamespace {
+    class CutoutAnimateEffect;
+}
+
 struct BeatmapObjectAssociatedData {
     float aheadTime;
     Track *track;
@@ -15,6 +19,7 @@ struct BeatmapObjectAssociatedData {
     UnityEngine::Vector3 jumpEndPos;
     UnityEngine::Vector3 noteOffset;
     float xOffset;
+    GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
 };
 
 struct BeatmapAssociatedData {

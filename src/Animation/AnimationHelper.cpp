@@ -71,6 +71,20 @@ std::optional<Quaternion> qmultNullable(std::optional<Quaternion> a, std::option
     return std::nullopt;
 }
 
+std::optional<float> fmultNullable(std::optional<float> a, std::optional<float> b) {
+    if (a.has_value()) {
+        if (b.has_value()) {
+            return *a * *b;
+        } else {
+            return a;
+        }
+    } else if (b.has_value()) {
+        return b;
+    }
+    
+    return std::nullopt;
+}
+
 PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
@@ -112,6 +126,14 @@ std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name,
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::vector3);
     if (pointDataInterpolation.has_value()) {
         return pointDataInterpolation->Interpolate(time);
+    }
+    return std::nullopt;
+}
+
+std::optional<float> TryGetLinearPathProperty(Track *track, std::string name, float time) {
+    std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::linear);
+    if (pointDataInterpolation.has_value()) {
+        return pointDataInterpolation->InterpolateLinear(time);
     }
     return std::nullopt;
 }
@@ -165,6 +187,12 @@ ObjectOffset AnimationHelper::GetObjectOffset(const rapidjson::Value& customData
     std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value.has_value() ?
         std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
     offset.localRotationOffset = qmultNullable(pathLocalRotation, trackLocalRotation);
+
+    PointDefinition *dissolve = TryGetPointData(customData, "_dissolve");
+    std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
+    std::optional<float> trackDissolve = track && track->properties.dissolve.value.has_value() ?
+        std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
+    offset.dissolve = fmultNullable(pathDissolve, trackDissolve);
 
     return offset;
 }

@@ -90,9 +90,9 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
     // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(Vector3 {1, 2, 3}, Vector3 {4, 5, 6}, Vector3 {7, 8, 9}, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
 
     BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
-    ad->moveStartPos = moveStartPos;
-    ad->moveEndPos = moveEndPos;
-    ad->jumpEndPos = jumpEndPos;
+    // ad->moveStartPos = moveStartPos;
+    // ad->moveEndPos = moveEndPos;
+    // ad->jumpEndPos = jumpEndPos;
 
     if (!finalNoteOffset.has_value()) {
         Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
