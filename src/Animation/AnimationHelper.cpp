@@ -22,10 +22,6 @@ Vector3 vmult(Vector3 a, Vector3 b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-Quaternion qmult(Quaternion a, Quaternion b) {
-    return Quaternion(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
-}
-
 std::optional<Vector3> vsumNullable(std::optional<Vector3> a, std::optional<Vector3> b) {
     if (!a.has_value() && !b.has_value()) {
         return std::nullopt;
@@ -60,7 +56,7 @@ std::optional<Vector3> vmultNullable(std::optional<Vector3> a, std::optional<Vec
 std::optional<Quaternion> qmultNullable(std::optional<Quaternion> a, std::optional<Quaternion> b) {
     if (a.has_value()) {
         if (b.has_value()) {
-            return qmult(*a, *b);
+            return *a * *b;
         } else {
             return a;
         }

@@ -1,4 +1,6 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
+
 
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteMovement.hpp"
@@ -85,8 +87,10 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
 }
 
 MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
-    auto customNoteData = (CustomJSONData::CustomNoteData *) self->noteData;
-    NELogger::GetLogger().info("noteData class %s", customNoteData->klass->name);
+    // Excuse me what the fuck
+    if (!self->noteData) return;
+
+    auto customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData*>(self->noteData);
     if (!customNoteData->customData->value) {
         NoteController_Update(self);
         return;

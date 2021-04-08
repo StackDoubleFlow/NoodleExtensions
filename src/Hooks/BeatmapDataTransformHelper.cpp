@@ -94,7 +94,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             } else {
                 continue;
             }
-
             
             aheadTime = &getAD(customDataWrapper)->aheadTime;
 

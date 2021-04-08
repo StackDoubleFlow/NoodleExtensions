@@ -41,7 +41,6 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
 
     BeatmapAssociatedData *beatmapAD = new BeatmapAssociatedData();
     result->customData->associatedData['N'] = beatmapAD;
-
     
     auto& tracks = beatmapAD->tracks;
 
@@ -92,12 +91,9 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
     return result;
 }
 
-MAKE_HOOK_OFFSETLESS(Assert_IsTrue, void, bool condition, Il2CppString *message, Array<Il2CppObject> *args) {
-    Assert_IsTrue(true, message, args);
-} 
-
+MAKE_HOOK_OFFSETLESS(Assert_IsTrue, void, bool condition, Il2CppString *message, Array<Il2CppObject> *args) {}
 
 void NoodleExtensions::InstallBeatmapDataLoaderHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, GetBeatmapDataFromBeatmapSaveData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataLoader", "GetBeatmapDataFromBeatmapSaveData", 8));
-    INSTALL_HOOK_OFFSETLESS(logger, Assert_IsTrue, il2cpp_utils::FindMethodUnsafe("NUnit.Framework", "Assert", "IsTrue", 3));
+    INSTALL_HOOK_ORIG(logger, Assert_IsTrue, il2cpp_utils::FindMethodUnsafe("NUnit.Framework", "Assert", "IsTrue", 3));
 }

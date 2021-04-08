@@ -25,19 +25,8 @@ using namespace NoodleExtensions;
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-struct BeatmapObjectSpawnMovementData_ObstacleSpawnData {
-    Vector3 moveStartPos;
-    Vector3 moveEndPos;
-    Vector3 jumpEndPos;
-    float obstacleHeight;
-    float moveDuration;
-    float jumpDuration;
-    float noteLinesDistance;
-    constexpr BeatmapObjectSpawnMovementData_ObstacleSpawnData(Vector3 moveStartPos_ = {}, Vector3 moveEndPos_ = {}, Vector3 jumpEndPos_ = {}, float obstacleHeight_ = {}, float moveDuration_ = {}, float jumpDuration_ = {}, float noteLinesDistance_ = {}) noexcept : moveStartPos{moveStartPos_}, moveEndPos{moveEndPos_}, jumpEndPos{jumpEndPos_}, obstacleHeight{obstacleHeight_}, moveDuration{moveDuration_}, jumpDuration{jumpDuration_}, noteLinesDistance{noteLinesDistance_} {}
-};
-
-MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
-    BeatmapObjectSpawnMovementData_ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
+MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomObstacleData *obstacleData) {
+    BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
 
@@ -86,7 +75,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
         obstacleHeight = height.value() * self->noteLinesDistance;
     }
 
-    result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
+    result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
     // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(Vector3 {1, 2, 3}, Vector3 {4, 5, 6}, Vector3 {7, 8, 9}, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
 
     BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
@@ -107,19 +96,8 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData_Obstac
     return result;
 }
 
-struct BeatmapObjectSpawnMovementData_NoteSpawnData {
-    Vector3 moveStartPos;
-    Vector3 moveEndPos;
-    Vector3 jumpEndPos;
-    float jumpGravity;
-    float moveDuration;
-    float jumpDuration;
-    constexpr BeatmapObjectSpawnMovementData_NoteSpawnData(Vector3 moveStartPos_ = {}, Vector3 moveEndPos_ = {}, Vector3 jumpEndPos_ = {}, float jumpGravity_ = {}, float moveDuration_ = {}, float jumpDuration_ = {}) noexcept : moveStartPos{moveStartPos_}, moveEndPos{moveEndPos_}, jumpEndPos{jumpEndPos_}, jumpGravity{jumpGravity_}, moveDuration{moveDuration_}, jumpDuration{jumpDuration_} {}
-};
-
-MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_NoteSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomNoteData *noteData) {
-    static_assert(sizeof(BeatmapObjectSpawnMovementData_NoteSpawnData) == 48, "Size is not correct");
-    BeatmapObjectSpawnMovementData_NoteSpawnData result = GetJumpingNoteSpawnData(self, noteData);
+MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::NoteSpawnData, BeatmapObjectSpawnMovementData *self, CustomJSONData::CustomNoteData *noteData) {
+    BeatmapObjectSpawnMovementData::NoteSpawnData result = GetJumpingNoteSpawnData(self, noteData);
     if (!noteData->customData->value) {
         return result;
     }
@@ -173,7 +151,7 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData_Not
         moveStartPos = localMoveStartPos + noteOffset2;
         moveEndPos = localMoveEndPos + noteOffset2;
 
-        result = BeatmapObjectSpawnMovementData_NoteSpawnData(moveStartPos, moveEndPos, jumpEndPos, jumpGravity, result.moveDuration, jumpDuration);
+        result = BeatmapObjectSpawnMovementData::NoteSpawnData(moveStartPos, moveEndPos, jumpEndPos, jumpGravity, result.moveDuration, jumpDuration);
     }
 
     float startVerticalVelocity = jumpGravity * jumpDuration * 0.5f;
