@@ -18,6 +18,8 @@ extern BeatmapObjectCallbackController *callbackController;
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
 
+static inline PointDefinition *pointDataCache = 0;
+
 Vector3 vmult(Vector3 a, Vector3 b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
@@ -100,7 +102,9 @@ PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& custom
         break;
     }
     default:
-        pointData = new PointDefinition(pointString);
+        delete pointDataCache;
+        pointDataCache = new PointDefinition(pointString);
+        pointData = pointDataCache;
     }
 
     return pointData;

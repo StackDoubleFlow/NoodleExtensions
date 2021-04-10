@@ -15,6 +15,7 @@
 #include "Animation/Track.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
+#include "Animation/PlayerTrack.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
 
@@ -141,6 +142,9 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
 
         ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot, startScale);
         return;
+    } else if (customEventData->type == "AssignPlayerToTrack") {
+        Track *track = &ad->tracks[eventData["_track"].GetString()];
+        PlayerTrack::AssignTrack(track);
     } else {
         return;
     }
@@ -208,8 +212,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
 
 void Events::AddEventCallbacks(Logger& logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
-    custom_types::Register::RegisterTypes<ParentObject>();
+    custom_types::Register::RegisterTypes<ParentObject, PlayerTrack>();
 
     INSTALL_HOOK_OFFSETLESS(logger, BeatmapObjectSpawnController_Start, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "Start", 0));
 }
-

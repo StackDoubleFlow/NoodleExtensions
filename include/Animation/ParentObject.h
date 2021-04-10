@@ -9,7 +9,7 @@ DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_CTOR(ctor);
     DECLARE_METHOD(void, Update);
 
-    REGISTER_FUNCTION(ParentObject,
+    REGISTER_FUNCTION(
         NELogger::GetLogger().debug("Registering ParentObject!");
 
         // Register constructor

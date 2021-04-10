@@ -18,6 +18,9 @@ void InstallBeatmapObjectManagerHooks(Logger& logger);
 void InstallGameNoteControllerHooks(Logger& logger);
 void InstallBombNoteControllerHooks(Logger& logger);
 
+// Temporary
+void InstallClampPatches(Logger& logger);
+
 void InstallHooks();
 
 }
