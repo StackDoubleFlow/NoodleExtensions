@@ -102,7 +102,7 @@ PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& custom
         break;
     }
     default:
-        delete pointDataCache;
+        //delete pointDataCache;
         pointDataCache = new PointDefinition(pointString);
         pointData = pointDataCache;
     }
