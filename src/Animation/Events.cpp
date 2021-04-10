@@ -2,20 +2,26 @@
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
+#include "UnityEngine/Quaternion.hpp"
+#include "UnityEngine/Vector3.hpp"
 
 #include "custom-json-data/shared/CustomEventData.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-types/shared/register.hpp"
 
 #include "Animation/Easings.h"
 #include "Animation/Events.h"
 #include "Animation/Easings.h"
 #include "Animation/Track.h"
 #include "Animation/AnimationHelper.h"
+#include "Animation/ParentObject.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
 
 using namespace Events;
 using namespace GlobalNamespace;
+using namespace TrackParenting;
+using namespace UnityEngine;
 
 // BeatmapObjectCallbackController.cpp
 extern BeatmapObjectCallbackController *callbackController;
@@ -82,19 +88,62 @@ void Events::UpdateCoroutines() {
 }
 
 void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
+    auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
+    BeatmapAssociatedData *ad = getBeatmapAD(customBeatmapData->customData);
+    rapidjson::Value& eventData = *customEventData->data;
+
     EventType type;
     if (customEventData->type == "AnimateTrack") {
         type = EventType::animateTrack;
     } else if (customEventData->type == "AssignPathAnimation") {
         type = EventType::assignPathAnimation;
+    } else if (customEventData->type == "AssignTrackParent") {
+        Track *track = &ad->tracks[eventData["_parentTrack"].GetString()];
+
+        rapidjson::Value& rawChildrenTracks = eventData["_childrenTracks"];
+        std::vector<Track*> childrenTracks;
+        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin(); itr != rawChildrenTracks.End(); itr++) {
+            childrenTracks.push_back(&ad->tracks[itr->GetString()]);
+        }
+
+        std::optional<Vector3> startPos; 
+        std::optional<Quaternion> startRot;
+        std::optional<Quaternion> startLocalRot;
+        std::optional<Vector3> startScale;
+
+        if (eventData.HasMember("_position")) {
+            float x = eventData["_position"][0].GetFloat();
+            float y = eventData["_position"][1].GetFloat();
+            float z = eventData["_position"][2].GetFloat();
+            startPos = Vector3(x, y, z);
+        }
+
+        if (eventData.HasMember("_rotation")) {
+            float x = eventData["_rotation"][0].GetFloat();
+            float y = eventData["_rotation"][1].GetFloat();
+            float z = eventData["_rotation"][2].GetFloat();
+            startRot = Quaternion::Euler(x, y, z);
+        }
+
+        if (eventData.HasMember("_localRotation")) {
+            float x = eventData["_localRotation"][0].GetFloat();
+            float y = eventData["_localRotation"][1].GetFloat();
+            float z = eventData["_localRotation"][2].GetFloat();
+            startLocalRot = Quaternion::Euler(x, y, z);
+        }
+
+        if (eventData.HasMember("_scale")) {
+            float x = eventData["_scale"][0].GetFloat();
+            float y = eventData["_scale"][1].GetFloat();
+            float z = eventData["_scale"][2].GetFloat();
+            startScale = Vector3(x, y, z);
+        }
+
+        ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot, startScale);
+        return;
     } else {
         return;
     }
-
-    auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
-    BeatmapAssociatedData *ad = getBeatmapAD(customBeatmapData->customData);
-
-    rapidjson::Value& eventData = *customEventData->data;
 
     Track *track = &ad->tracks[eventData["_track"].GetString()];
     float duration = customEventData->data->HasMember("_duration") ? eventData["_duration"].GetFloat() : 0;
@@ -159,6 +208,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
 
 void Events::AddEventCallbacks(Logger& logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
+    custom_types::Register::RegisterTypes<ParentObject>();
 
     INSTALL_HOOK_OFFSETLESS(logger, BeatmapObjectSpawnController_Start, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "Start", 0));
 }

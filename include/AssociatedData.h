@@ -27,5 +27,14 @@ struct BeatmapAssociatedData {
     std::unordered_map<std::string, PointDefinition> pointDefinitions;
 };
 
+// struct ParentTrackAssociatedData {
+//     Track *parentTrack;
+//     std::vector<Track*> childrenTracks;
+// };
+
+// struct PlayerTrackAssociatedData {
+//     Track *track;
+// };
+
 BeatmapObjectAssociatedData *getAD(CustomJSONData::JSONWrapper *customData);
 BeatmapAssociatedData *getBeatmapAD(CustomJSONData::JSONWrapper *customData);
