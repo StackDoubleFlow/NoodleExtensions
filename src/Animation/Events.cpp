@@ -174,7 +174,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                         }
                     }
 
-                    auto *pointData = AnimationHelper::TryGetPointData(eventData, name);
+                    auto *pointData = AnimationHelper::TryGetPointData(ad, eventData, name);
                     if (pointData) {
                         coroutines.push_back(AnimateTrackContext { pointData, property, duration, customEventData->time, easing });
                     }
@@ -194,7 +194,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                         }
                     }
 
-                    auto *pointData = AnimationHelper::TryGetPointData(eventData, name);
+                    auto *pointData = AnimationHelper::TryGetPointData(ad, eventData, name);
                     if (pointData) {
                         if (!property->value.has_value()) property->value = PointDefinitionInterpolation();
                         property->value->Init(pointData);

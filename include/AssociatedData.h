@@ -9,6 +9,15 @@ namespace GlobalNamespace {
     class CutoutAnimateEffect;
 }
 
+struct AnimationObjectData {
+    PointDefinition *position;
+    PointDefinition *rotation;
+    PointDefinition *scale;
+    PointDefinition *localRotation;
+    PointDefinition *dissolve;
+    PointDefinition *definitePosition;
+};
+
 struct BeatmapObjectAssociatedData {
     float aheadTime;
     Track *track;
@@ -20,6 +29,7 @@ struct BeatmapObjectAssociatedData {
     UnityEngine::Vector3 noteOffset;
     float xOffset;
     GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
+    AnimationObjectData animationData;
 };
 
 struct BeatmapAssociatedData {

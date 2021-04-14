@@ -122,7 +122,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     //     ObstacleController_Update(self);
     //     return;
     // }
-    rapidjson::Value &animation = customData["_animation"];
 
     BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
 
@@ -130,7 +129,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     float elapsedTime = songTime - self->startTimeOffset;
     float normalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     
-    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(animation, ad->track, normalTime);
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad->animationData, ad->track, normalTime);
 
     if (offset.positionOffset.has_value()) {
         self->startPos = ad->moveStartPos + *offset.positionOffset;
@@ -188,7 +187,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_GetPosForTime, Vector3, ObstacleControll
     BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
 
     float jumpTime = std::clamp((time - self->move1Duration) / (self->move2Duration + self->obstacleDuration), 0.0f, 1.0f);
-    std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(customData["_animation"], ad->track, jumpTime);
+    std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(ad->animationData, ad->track, jumpTime);
 
     if (position.has_value()) {
         Vector3 noteOffset = ad->noteOffset;

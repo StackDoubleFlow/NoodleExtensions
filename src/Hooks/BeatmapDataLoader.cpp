@@ -44,6 +44,21 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
     
     auto& tracks = beatmapAD->tracks;
 
+    if (!result->customData->value) {
+        rapidjson::Value &customData = *result->customData->value;
+
+        PointDefinitionManager pointDataManager;
+        if (result->customData->value->HasMember("_pointDefinitions")) {
+            const rapidjson::Value& pointDefinitions = customData["_pointDefinitions"]; 
+            for (rapidjson::Value::ConstValueIterator itr = pointDefinitions.Begin(); itr != pointDefinitions.End(); itr++) {
+                std::string pointName = (*itr)["_name"].GetString();
+                PointDefinition pointData((*itr)["_points"]);
+                pointDataManager.AddPoint(pointName, pointData);
+            }
+        }
+        beatmapAD->pointDefinitions = pointDataManager.pointData;
+    }
+
     for (int i = 0; i < result->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = result->beatmapLinesData->values[i]; 
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
@@ -62,31 +77,24 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
 
             if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
+                BeatmapObjectAssociatedData *ad = getAD(customDataWrapper);
                 if (customData.HasMember("_track")) {
                     std::string trackName = customData["_track"].GetString();
                     Track *track = &tracks[trackName];
                     AnimationHelper::OnTrackCreated(track);
-                    getAD(customDataWrapper)->track = track;
+                    ad->track = track;
                 }
+
+                rapidjson::Value &animation = customData["_animation"];
+                ad->animationData.position = AnimationHelper::TryGetPointData(beatmapAD, animation, "_position");
+                ad->animationData.rotation = AnimationHelper::TryGetPointData(beatmapAD, animation, "_rotation");
+                ad->animationData.scale = AnimationHelper::TryGetPointData(beatmapAD, animation, "_scale");
+                ad->animationData.localRotation = AnimationHelper::TryGetPointData(beatmapAD, animation, "_localRotation");
+                ad->animationData.dissolve = AnimationHelper::TryGetPointData(beatmapAD, animation, "_dissolve");
+                ad->animationData.definitePosition = AnimationHelper::TryGetPointData(beatmapAD, animation, "_definitePosition");
             }
         }
     }
-
-    if (!result->customData->value) {
-        return result;
-    }
-    rapidjson::Value &customData = *result->customData->value;
-
-    PointDefinitionManager pointDataManager;
-    if (result->customData->value->HasMember("_pointDefinitions")) {
-        const rapidjson::Value& pointDefinitions = customData["_pointDefinitions"]; 
-        for (rapidjson::Value::ConstValueIterator itr = pointDefinitions.Begin(); itr != pointDefinitions.End(); itr++) {
-            std::string pointName = (*itr)["_name"].GetString();
-            PointDefinition pointData((*itr)["_points"]);
-            pointDataManager.AddPoint(pointName, pointData);
-        }
-    }
-    beatmapAD->pointDefinitions = pointDataManager.pointData;
 
     return result;
 }

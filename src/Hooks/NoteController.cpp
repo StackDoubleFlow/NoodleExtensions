@@ -113,7 +113,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     float elapsedTime = songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
     float normalTime = elapsedTime / noteJump->jumpDuration;
 
-    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(animation, ad->track, normalTime);
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad->animationData, ad->track, normalTime);
 
     if (offset.positionOffset.has_value()) {
     //   {"_time":1,"_type":"AnimateTrack","_data":{"_track":"secondLeftStart","_position":[[-30,0,0,1]],"_dissolve":[[0,0]],"_dissolveArrow":[[0,0]]}},

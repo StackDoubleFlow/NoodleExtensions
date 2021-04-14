@@ -11,7 +11,8 @@
         "${workspaceFolder}/extern/**",
         "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
         "${workspaceFolder}/extern/codegen/include/**",
-        "${workspaceFolder}/../../android-ndk-r21d/**"
+        "${workspaceFolder}/../android-ndk-r21d/sysroot/usr/include",
+        "${workspaceFolder}/../android-ndk-r21d/cxx-stl/llvm-libc++/include"
       ],
       "name": "Quest",
       "cStandard": "c11",

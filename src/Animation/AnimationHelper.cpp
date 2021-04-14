@@ -18,8 +18,6 @@ extern BeatmapObjectCallbackController *callbackController;
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
 
-static inline PointDefinition *pointDataCache = 0;
-
 Vector3 vmult(Vector3 a, Vector3 b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
@@ -83,7 +81,7 @@ std::optional<float> fmultNullable(std::optional<float> a, std::optional<float> 
     return std::nullopt;
 }
 
-PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& customData, std::string pointName) {
+PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData *beatmapAD, const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
     if (!customData.HasMember(pointName.c_str())) return pointData;
@@ -93,7 +91,7 @@ PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& custom
     case rapidjson::kNullType:
         return pointData;
     case rapidjson::kStringType: {
-        auto *ad = getBeatmapAD(reinterpret_cast<CustomBeatmapData*>(callbackController->beatmapData)->customData);
+        auto *ad = beatmapAD;
         for (auto const& pair : ad->pointDefinitions) {
         }
         if (ad->pointDefinitions.find(pointString.GetString()) != ad->pointDefinitions.end()) {
@@ -102,9 +100,7 @@ PointDefinition *AnimationHelper::TryGetPointData(const rapidjson::Value& custom
         break;
     }
     default:
-        //delete pointDataCache;
-        pointDataCache = new PointDefinition(pointString);
-        pointData = pointDataCache;
+        pointData = new PointDefinition(pointString);
     }
 
     return pointData;
@@ -138,13 +134,13 @@ std::optional<float> TryGetLinearPathProperty(Track *track, std::string name, fl
     return std::nullopt;
 }
 
-std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const rapidjson::Value& customData, Track *track, float time) {
-    PointDefinition *localDefinitePosition = TryGetPointData(customData, "_definitePosition");
+std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, Track *track, float time) {
+    PointDefinition *localDefinitePosition = animationData.definitePosition;
 
     std::optional<Vector3> pathDefinitePosition = localDefinitePosition ? std::optional{ localDefinitePosition->Interpolate(time) } : TryGetVector3PathProperty(track, "_definitePosition", time);
 
     if (pathDefinitePosition.has_value()) {
-        PointDefinition *position = TryGetPointData(customData, "_position");
+        PointDefinition *position = animationData.position;
         std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
         std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
@@ -158,37 +154,37 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const rapidjso
 }
 
 
-ObjectOffset AnimationHelper::GetObjectOffset(const rapidjson::Value& customData, Track *track, float time) {
+ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, Track *track, float time) {
     ObjectOffset offset;
 
     // getBeatmapAD(((CustomJSONData::CustomBeatmapData*) callbackController->beatmapData)->customData);
 
-    PointDefinition *position = TryGetPointData(customData, "_position");
+    PointDefinition *position = animationData.position;
     std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
     std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
     offset.positionOffset = vsumNullable(pathPosition, trackPosition);
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-    PointDefinition *rotation = TryGetPointData(customData, "_rotation");
+    PointDefinition *rotation = animationData.rotation;
     std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);
     std::optional<Quaternion> trackRotation = track && track->properties.rotation.value.has_value() ?
         std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
     offset.rotationOffset = qmultNullable(pathRotation, trackRotation);
 
-    PointDefinition *scale = TryGetPointData(customData, "_scale");
+    PointDefinition *scale = animationData.scale;
     std::optional<Vector3> pathScale = scale ? std::optional{ scale->Interpolate(time) } : TryGetVector3PathProperty(track, "_scale", time);
     std::optional<Vector3> trackScale = track && track->properties.scale.value.has_value() ?
         std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
     offset.scaleOffset = vmultNullable(pathScale, trackScale);
 
-    PointDefinition *localRotation = TryGetPointData(customData, "_localRotation");
+    PointDefinition *localRotation = animationData.localRotation;
     std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
     std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value.has_value() ?
         std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
     offset.localRotationOffset = qmultNullable(pathLocalRotation, trackLocalRotation);
 
-    PointDefinition *dissolve = TryGetPointData(customData, "_dissolve");
+    PointDefinition *dissolve = animationData.dissolve;
     std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
     std::optional<float> trackDissolve = track && track->properties.dissolve.value.has_value() ?
         std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
