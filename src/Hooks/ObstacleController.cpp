@@ -66,6 +66,7 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
 MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
 
+    Transform *transform = self->get_transform();
     transform->set_localScale(Vector3::get_one());
 
     if (!obstacleData->customData->value) {
@@ -95,8 +96,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->bounds = self->stretchableObstacle->bounds;
 
     std::optional<rapidjson::Value*> localrot = customData.HasMember("_localRotation") ? std::optional{&customData["_localRotation"]} : std::nullopt;
-
-    Transform *transform = self->get_transform();
 
     Quaternion localRotation = Quaternion::get_identity();
     if (localrot.has_value()) {

@@ -24,6 +24,7 @@ BeatmapObjectAssociatedData *noteUpdateAD;
 MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation, float uniformScale) {
     NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation, uniformScale);
 
+    Transform *transform = self->get_transform();
     transform->set_localScale(Vector3::get_one()); // This is a fix for animation due to notes being recycled
     
     if (!noteData->customData->value) {
@@ -45,8 +46,6 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
         Quaternion midrotation = Quaternion::Euler(vector);
         noteJump->middleRotation = midrotation;
     }
-
-    Transform *transform = self->get_transform();
 
     Quaternion localRotation = Quaternion::get_identity();
     if (customData.HasMember("_rotation") || customData.HasMember("_localRotation")) {
