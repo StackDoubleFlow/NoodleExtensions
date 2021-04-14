@@ -11,11 +11,13 @@
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/AnimationHelper.h"
+#include "Animation/ParentObject.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
+using namespace TrackParenting;
 
 MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation, float uniformScale) {
     NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation, uniformScale);
@@ -76,6 +78,18 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
     }
 
     transform->set_localScale(Vector3::get_one()); // This is a fix for animation due to notes being recycled
+
+    Track *track = ad->track;
+    if (track) {
+        ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
+        if (parentObject) {
+            parentObject->ParentToObject(transform);
+        } else {
+            ParentObject::ResetTransformParent(transform);
+        }
+    } else {
+        ParentObject::ResetTransformParent(transform);
+    }
 
     ad->moveStartPos = startPos;
     ad->moveEndPos = midPos;

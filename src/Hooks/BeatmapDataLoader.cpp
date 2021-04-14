@@ -41,8 +41,6 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
 
     BeatmapAssociatedData *beatmapAD = new BeatmapAssociatedData();
     result->customData->associatedData['N'] = beatmapAD;
-    
-    auto& tracks = beatmapAD->tracks;
 
     if (!result->customData->value) {
         rapidjson::Value &customData = *result->customData->value;
@@ -58,6 +56,8 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
         }
         beatmapAD->pointDefinitions = pointDataManager.pointData;
     }
+    
+    auto& tracks = beatmapAD->tracks;
 
     for (int i = 0; i < result->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = result->beatmapLinesData->values[i]; 

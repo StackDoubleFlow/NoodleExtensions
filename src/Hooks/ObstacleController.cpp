@@ -14,11 +14,13 @@
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/AnimationHelper.h"
+#include "Animation/ParentObject.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
+using namespace TrackParenting;
 
 Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
     Quaternion worldRotation = Quaternion::Euler(0, def, 0);
@@ -104,6 +106,18 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     ad->worldRotation = rotation;
 
     transform->set_localScale(Vector3::get_one());
+
+    Track *track = ad->track;
+    if (track) {
+        ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
+        if (parentObject) {
+            parentObject->ParentToObject(transform);
+        } else {
+            ParentObject::ResetTransformParent(transform);
+        }
+    } else {
+        ParentObject::ResetTransformParent(transform);
+    }
 
     self->Update();
 }
