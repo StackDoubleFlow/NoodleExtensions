@@ -15,6 +15,7 @@ void NoodleExtensions::InstallHooks() {
     InstallObstacleControllerHooks(logger);
     InstallGameNoteControllerHooks(logger);
     InstallBombNoteControllerHooks(logger);
+    InstallNoteFloorMovementHooks(logger);
     InstallBeatmapDataLoaderHooks(logger);
     InstallNoteControllerHooks(logger);
     InstallClampPatches(logger);

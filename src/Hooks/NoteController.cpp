@@ -19,6 +19,8 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
+BeatmapObjectAssociatedData *noteUpdateAD; 
+
 MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation, float uniformScale) {
     NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation, uniformScale);
     
@@ -119,6 +121,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     rapidjson::Value &animation = customData["_animation"];
 
     BeatmapObjectAssociatedData *ad = getAD(customNoteData->customData);
+    noteUpdateAD = ad;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;

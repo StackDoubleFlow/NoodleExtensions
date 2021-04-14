@@ -11,6 +11,7 @@ void InstallGameplayCoreInstallerHooks(Logger& logger);
 void InstallObstacleControllerHooks(Logger& logger);
 void InstallBeatmapDataLoaderHooks(Logger& logger);
 void InstallNoteControllerHooks(Logger& logger);
+void InstallNoteFloorMovementHooks(Logger& logger);
 
 // Fake notes
 void InstallNoteCutSoundEffectManagerHooks(Logger& logger);

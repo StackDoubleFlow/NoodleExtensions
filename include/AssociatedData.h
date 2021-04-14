@@ -1,5 +1,7 @@
 #pragma once
 
+#include "custom-json-data/shared/JSONWrapper.h"
+
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Quaternion.hpp"
 
