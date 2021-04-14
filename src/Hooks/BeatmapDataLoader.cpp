@@ -42,7 +42,7 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
     BeatmapAssociatedData *beatmapAD = new BeatmapAssociatedData();
     result->customData->associatedData['N'] = beatmapAD;
 
-    if (!result->customData->value) {
+    if (result->customData->value) {
         rapidjson::Value &customData = *result->customData->value;
 
         PointDefinitionManager pointDataManager;
