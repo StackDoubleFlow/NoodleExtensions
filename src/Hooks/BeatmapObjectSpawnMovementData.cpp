@@ -90,7 +90,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
     }
 
     ad->noteOffset = self->centerPos + *finalNoteOffset;
-    std::optional<float> width = scale.has_value() ? std::optional{(**scale)[1].GetFloat()} : std::nullopt;
+    std::optional<float> width = scale.has_value() ? std::optional{(**scale)[0].GetFloat()} : std::nullopt;
     ad->xOffset = ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->noteLinesDistance;
 
     return result;
