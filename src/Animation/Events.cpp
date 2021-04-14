@@ -35,6 +35,7 @@ std::vector<AssignPathAnimationContext> pathCoroutines;
 MAKE_HOOK_OFFSETLESS(BeatmapObjectSpawnController_Start, void, BeatmapObjectSpawnController *self) {
     spawnController = self;
     coroutines.clear();
+    pathCoroutines.clear();
     BeatmapObjectSpawnController_Start(self);
 }
 
