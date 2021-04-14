@@ -66,6 +66,8 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
 MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, CustomJSONData::CustomObstacleData *obstacleData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float singleLineWidth, float height) {
     ObstacleController_Init(self, obstacleData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, singleLineWidth, height);
 
+    transform->set_localScale(Vector3::get_one());
+
     if (!obstacleData->customData->value) {
         return;
     }
@@ -104,8 +106,6 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     transform->set_localRotation(self->worldRotation * localRotation);
     ad->localRotation = localRotation;
     ad->worldRotation = rotation;
-
-    transform->set_localScale(Vector3::get_one());
 
     Track *track = ad->track;
     if (track) {

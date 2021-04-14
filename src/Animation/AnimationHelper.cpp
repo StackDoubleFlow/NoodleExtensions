@@ -101,6 +101,7 @@ PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData *beatmap
     }
     default:
         pointData = new PointDefinition(pointString);
+        beatmapAD->anonPointDefinitions.push_back(pointData);
     }
 
     return pointData;

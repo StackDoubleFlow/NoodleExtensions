@@ -34,9 +34,13 @@ struct BeatmapObjectAssociatedData {
     AnimationObjectData animationData;
 };
 
-struct BeatmapAssociatedData {
+class BeatmapAssociatedData {
+public:
     std::unordered_map<std::string, Track> tracks;
     std::unordered_map<std::string, PointDefinition> pointDefinitions;
+    std::vector<PointDefinition*> anonPointDefinitions;
+
+    ~BeatmapAssociatedData();
 };
 
 // struct ParentTrackAssociatedData {
