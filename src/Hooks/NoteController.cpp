@@ -1,7 +1,6 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
 
-
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
@@ -31,7 +30,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
         return;
     }
     rapidjson::Value &customData = *noteData->customData->value;
-    BeatmapObjectAssociatedData *ad = getAD(noteData->customData);
+    BeatmapObjectAssociatedData& ad = getAD(noteData->customData);
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -80,7 +79,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
         }
     }
 
-    Track *track = ad->track;
+    Track *track = ad.track;
     if (track) {
         ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
         if (parentObject) {
@@ -92,11 +91,11 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
         ParentObject::ResetTransformParent(transform);
     }
 
-    ad->moveStartPos = startPos;
-    ad->moveEndPos = midPos;
-    ad->jumpEndPos = endPos;
-    ad->worldRotation = self->get_worldRotation();
-    ad->localRotation = localRotation;
+    ad.moveStartPos = startPos;
+    ad.moveEndPos = midPos;
+    ad.jumpEndPos = endPos;
+    ad.worldRotation = self->get_worldRotation();
+    ad.localRotation = localRotation;
 
     self->Update();
 }
@@ -119,8 +118,8 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     // }
     rapidjson::Value &animation = customData["_animation"];
 
-    BeatmapObjectAssociatedData *ad = getAD(customNoteData->customData);
-    noteUpdateAD = ad;
+    BeatmapObjectAssociatedData& ad = getAD(customNoteData->customData);
+    noteUpdateAD = &ad;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -129,17 +128,17 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     float elapsedTime = songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
     float normalTime = elapsedTime / noteJump->jumpDuration;
 
-    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad->animationData, ad->track, normalTime);
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad.animationData, ad.track, normalTime);
 
     if (offset.positionOffset.has_value()) {
     //   {"_time":1,"_type":"AnimateTrack","_data":{"_track":"secondLeftStart","_position":[[-30,0,0,1]],"_dissolve":[[0,0]],"_dissolveArrow":[[0,0]]}},
     //   {"_time":1,"_type":"AnimateTrack","_data":{"_track":"secondRightStart","_position":[[30,0,0,1]],"_dissolve":[[0,0]],"_dissolveArrow":[[0,0]]}},
         //     {"_time":17.5,"_lineIndex":2,"_lineLayer":0,"_type":1,"_cutDirection":5,"_customData":{"_track":"secondRightStart","_noteJumpStartBeatOffset":2,"_disableSpawnEffect":true,"_flip":[0,0]}}
 
-        floorMovement->startPos = ad->moveStartPos + *offset.positionOffset;
-        floorMovement->endPos = ad->moveEndPos + *offset.positionOffset;
-        noteJump->startPos = ad->moveEndPos + *offset.positionOffset;
-        noteJump->endPos = ad->jumpEndPos + *offset.positionOffset;
+        floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;
+        floorMovement->endPos = ad.moveEndPos + *offset.positionOffset;
+        noteJump->startPos = ad.moveEndPos + *offset.positionOffset;
+        noteJump->endPos = ad.jumpEndPos + *offset.positionOffset;
     }
 
     if (offset.scaleOffset.has_value()) {
@@ -147,8 +146,8 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     }
 
     if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
-        Quaternion worldRotation = ad->worldRotation;
-        Quaternion localRotation = ad->localRotation;
+        Quaternion worldRotation = ad.worldRotation;
+        Quaternion localRotation = ad.localRotation;
 
         Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {

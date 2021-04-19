@@ -81,7 +81,7 @@ std::optional<float> fmultNullable(std::optional<float> a, std::optional<float> 
     return std::nullopt;
 }
 
-PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData *beatmapAD, const rapidjson::Value& customData, std::string pointName) {
+PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
     if (!customData.HasMember(pointName.c_str())) return pointData;
@@ -91,17 +91,17 @@ PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData *beatmap
     case rapidjson::kNullType:
         return pointData;
     case rapidjson::kStringType: {
-        auto *ad = beatmapAD;
-        for (auto const& pair : ad->pointDefinitions) {
+        auto& ad = beatmapAD;
+        for (auto const& pair : ad.pointDefinitions) {
         }
-        if (ad->pointDefinitions.find(pointString.GetString()) != ad->pointDefinitions.end()) {
-            pointData = &ad->pointDefinitions.at(pointString.GetString());
+        if (ad.pointDefinitions.find(pointString.GetString()) != ad.pointDefinitions.end()) {
+            pointData = &ad.pointDefinitions.at(pointString.GetString());
         }
         break;
     }
     default:
         pointData = new PointDefinition(pointString);
-        beatmapAD->anonPointDefinitions.push_back(pointData);
+        beatmapAD.anonPointDefinitions.push_back(pointData);
     }
 
     return pointData;

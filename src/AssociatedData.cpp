@@ -8,13 +8,18 @@ BeatmapAssociatedData::~BeatmapAssociatedData() {
     }
 }
 
-BeatmapObjectAssociatedData *getAD(CustomJSONData::JSONWrapper *customData) {
-    if (customData->associatedData.find('N') == customData->associatedData.end()) {
-        customData->associatedData['N'] = new BeatmapObjectAssociatedData();
+BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData) {
+    auto itr = customData->associatedData.find('N');
+    if (itr == customData->associatedData.end()) {
+        itr = customData->associatedData.emplace('N', BeatmapObjectAssociatedData()).first;
     }
-    return (BeatmapObjectAssociatedData *) customData->associatedData['N'];
+    return std::any_cast<BeatmapObjectAssociatedData&>(itr->second);
 }
 
-BeatmapAssociatedData *getBeatmapAD(CustomJSONData::JSONWrapper *customData) {
-    return (BeatmapAssociatedData *) customData->associatedData['N'];
+BeatmapAssociatedData& getBeatmapAD(CustomJSONData::JSONWrapper *customData) {
+    auto itr = customData->associatedData.find('N');
+    if (itr == customData->associatedData.end()) {
+        itr = customData->associatedData.emplace('N', BeatmapAssociatedData()).first;
+    }
+    return std::any_cast<BeatmapAssociatedData&>(itr->second);
 }

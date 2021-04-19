@@ -72,7 +72,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     if (!obstacleData->customData->value) {
         return;
     }
-    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+    BeatmapObjectAssociatedData& ad = getAD(obstacleData->customData);
 
     Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
@@ -83,9 +83,9 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
-    ad->moveStartPos = self->startPos;
-    ad->moveEndPos = self->midPos;
-    ad->jumpEndPos = self->endPos;
+    ad.moveStartPos = self->startPos;
+    ad.moveEndPos = self->midPos;
+    ad.jumpEndPos = self->endPos;
 
     float defaultLength = (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
     float length = GetCustomLength(defaultLength, obstacleData);
@@ -103,10 +103,10 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
     }
     transform->set_localPosition(startPos);
     transform->set_localRotation(self->worldRotation * localRotation);
-    ad->localRotation = localRotation;
-    ad->worldRotation = rotation;
+    ad.localRotation = localRotation;
+    ad.worldRotation = rotation;
 
-    Track *track = ad->track;
+    Track *track = ad.track;
     if (track) {
         ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
         if (parentObject) {
@@ -136,18 +136,18 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     //     return;
     // }
 
-    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+    BeatmapObjectAssociatedData& ad = getAD(obstacleData->customData);
 
     float songTime = self->audioTimeSyncController->get_songTime();
     float elapsedTime = songTime - self->startTimeOffset;
     float normalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     
-    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad->animationData, ad->track, normalTime);
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad.animationData, ad.track, normalTime);
 
     if (offset.positionOffset.has_value()) {
-        self->startPos = ad->moveStartPos + *offset.positionOffset;
-        self->midPos = ad->moveEndPos + *offset.positionOffset;
-        self->endPos = ad->jumpEndPos + *offset.positionOffset;
+        self->startPos = ad.moveStartPos + *offset.positionOffset;
+        self->midPos = ad.moveEndPos + *offset.positionOffset;
+        self->endPos = ad.jumpEndPos + *offset.positionOffset;
     }
 
     if (offset.scaleOffset.has_value()) {
@@ -155,8 +155,8 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     }
 
     if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
-        Quaternion worldRotation = ad->worldRotation;
-        Quaternion localRotation = ad->localRotation;
+        Quaternion worldRotation = ad.worldRotation;
+        Quaternion localRotation = ad.localRotation;
 
         Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
@@ -176,11 +176,11 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     }
 
     // if (offset.dissolve.has_value()) {
-    //     CutoutAnimateEffect *cutoutAnimationEffect = ad->cutoutAnimationEffect;
+    //     CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
     //     if (!cutoutAnimationEffect) {
     //         ObstacleDissolve *obstacleDissolve = self->get_gameObject()->GetComponent<ObstacleDissolve*>();
     //         cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
-    //         ad->cutoutAnimationEffect = cutoutAnimationEffect;
+    //         ad.cutoutAnimationEffect = cutoutAnimationEffect;
     //     }
 
     //     cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
@@ -197,15 +197,15 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_GetPosForTime, Vector3, ObstacleControll
         return ObstacleController_GetPosForTime(self, time);
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
-    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+    BeatmapObjectAssociatedData& ad = getAD(obstacleData->customData);
 
     float jumpTime = std::clamp((time - self->move1Duration) / (self->move2Duration + self->obstacleDuration), 0.0f, 1.0f);
-    std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(ad->animationData, ad->track, jumpTime);
+    std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(ad.animationData, ad.track, jumpTime);
 
     if (position.has_value()) {
-        Vector3 noteOffset = ad->noteOffset;
+        Vector3 noteOffset = ad.noteOffset;
         Vector3 definitePosition = *position + noteOffset;
-        definitePosition.x += ad->xOffset;
+        definitePosition.x += ad.xOffset;
         if (time < self->move1Duration) {
             Vector3 result = Vector3::LerpUnclamped(self->startPos, self->midPos, time / self->move1Duration);
             return result + definitePosition - self->midPos;

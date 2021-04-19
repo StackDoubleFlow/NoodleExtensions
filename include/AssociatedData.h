@@ -52,5 +52,5 @@ public:
 //     Track *track;
 // };
 
-BeatmapObjectAssociatedData *getAD(CustomJSONData::JSONWrapper *customData);
-BeatmapAssociatedData *getBeatmapAD(CustomJSONData::JSONWrapper *customData);
+BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData);
+BeatmapAssociatedData& getBeatmapAD(CustomJSONData::JSONWrapper *customData);

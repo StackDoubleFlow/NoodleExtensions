@@ -30,7 +30,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
 
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
 
-    if (!obstacleData->customData->value) {
+    if (!obstacleData->customData->value.has_value()) {
         return result;
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
@@ -78,7 +78,7 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
     result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
     // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(Vector3 {1, 2, 3}, Vector3 {4, 5, 6}, Vector3 {7, 8, 9}, obstacleHeight, result.moveDuration, jumpDuration, self->noteLinesDistance);
 
-    BeatmapObjectAssociatedData *ad = getAD(obstacleData->customData);
+    BeatmapObjectAssociatedData& ad = getAD(obstacleData->customData);
     // ad->moveStartPos = moveStartPos;
     // ad->moveEndPos = moveEndPos;
     // ad->jumpEndPos = jumpEndPos;
@@ -89,9 +89,9 @@ MAKE_HOOK_OFFSETLESS(GetObstacleSpawnData, BeatmapObjectSpawnMovementData::Obsta
         finalNoteOffset = noteOffset;
     }
 
-    ad->noteOffset = self->centerPos + *finalNoteOffset;
+    ad.noteOffset = self->centerPos + *finalNoteOffset;
     std::optional<float> width = scale.has_value() ? std::optional{(**scale)[0].GetFloat()} : std::nullopt;
-    ad->xOffset = ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->noteLinesDistance;
+    ad.xOffset = ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->noteLinesDistance;
 
     return result;
 }
@@ -157,7 +157,7 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::No
     float startVerticalVelocity = jumpGravity * jumpDuration * 0.5f;
     float num = jumpDuration * 0.5f;
     float yOffset = (startVerticalVelocity * num) - (jumpGravity * num * num * 0.5f);
-    getAD(noteData->customData)->noteOffset = self->centerPos + noteOffset + Vector3(0, yOffset, 0);
+    getAD(noteData->customData).noteOffset = self->centerPos + noteOffset + Vector3(0, yOffset, 0);
     
     return result;
 }

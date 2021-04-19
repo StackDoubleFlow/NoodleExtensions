@@ -91,7 +91,7 @@ void Events::UpdateCoroutines() {
 
 void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
     auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
-    BeatmapAssociatedData *ad = getBeatmapAD(customBeatmapData->customData);
+    BeatmapAssociatedData& ad = getBeatmapAD(customBeatmapData->customData);
     rapidjson::Value& eventData = *customEventData->data;
 
     EventType type;
@@ -100,12 +100,12 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
     } else if (customEventData->type == "AssignPathAnimation") {
         type = EventType::assignPathAnimation;
     } else if (customEventData->type == "AssignTrackParent") {
-        Track *track = &ad->tracks[eventData["_parentTrack"].GetString()];
+        Track *track = &ad.tracks[eventData["_parentTrack"].GetString()];
 
         rapidjson::Value& rawChildrenTracks = eventData["_childrenTracks"];
         std::vector<Track*> childrenTracks;
         for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin(); itr != rawChildrenTracks.End(); itr++) {
-            childrenTracks.push_back(&ad->tracks[itr->GetString()]);
+            childrenTracks.push_back(&ad.tracks[itr->GetString()]);
         }
 
         std::optional<Vector3> startPos; 
@@ -144,13 +144,13 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
         ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot, startScale);
         return;
     } else if (customEventData->type == "AssignPlayerToTrack") {
-        Track *track = &ad->tracks[eventData["_track"].GetString()];
+        Track *track = &ad.tracks[eventData["_track"].GetString()];
         PlayerTrack::AssignTrack(track);
     } else {
         return;
     }
 
-    Track *track = &ad->tracks[eventData["_track"].GetString()];
+    Track *track = &ad.tracks[eventData["_track"].GetString()];
     float duration = customEventData->data->HasMember("_duration") ? eventData["_duration"].GetFloat() : 0;
     Functions easing = customEventData->data->HasMember("_easing") ? FunctionFromStr(eventData["_easing"].GetString()) : Functions::easeLinear;
 

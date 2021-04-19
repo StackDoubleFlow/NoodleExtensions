@@ -39,9 +39,9 @@ System::Func_2<BeatmapObjectData*, float> *CreateOrderFunc() {
     auto genericClass = il2cpp_utils::MakeGeneric(il2cpp_utils::GetClassFromName("System", "Func`2"), argClasses);
     auto lambda = +[](BeatmapObjectData *n) {
         if (n->klass == customObstacleDataClass) {
-            return n->time - getAD(((CustomJSONData::CustomObstacleData*) n)->customData)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomObstacleData*) n)->customData).aheadTime;
         } else if (n->klass == customNoteDataClass) {
-            return n->time - getAD(((CustomJSONData::CustomNoteData*) n)->customData)->aheadTime;
+            return n->time - getAD(((CustomJSONData::CustomNoteData*) n)->customData).aheadTime;
         } else {
             return n->time;
         }
@@ -95,7 +95,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 continue;
             }
             
-            aheadTime = &getAD(customDataWrapper)->aheadTime;
+            aheadTime = &getAD(customDataWrapper).aheadTime;
 
             float njs;
             float spawnOffset;

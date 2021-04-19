@@ -51,11 +51,11 @@ MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
                 if (callbackData->callback->method_ptr.m_value == il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "HandleBeatmapObjectCallback", 1)->methodPointer) {
                     if (beatmapObjectData->klass == customObstacleDataClass) {
                         auto obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
-                        aheadTime = getAD(obstacleData->customData)->aheadTime;
+                        aheadTime = getAD(obstacleData->customData).aheadTime;
                     } else if (beatmapObjectData->klass == customNoteDataClass) {
                         auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
                         // NELogger::GetLogger().info("noteData aheadTime: %f", noteData->aheadTime);
-                        aheadTime = getAD(noteData->customData)->aheadTime;
+                        aheadTime = getAD(noteData->customData).aheadTime;
                     }
                 }
                 // NELogger::GetLogger().info("Method name: %s", callbackData->callback->method_info->get_Name());
