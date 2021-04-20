@@ -18,11 +18,11 @@ extern BeatmapObjectCallbackController *callbackController;
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
 
-Vector3 vmult(Vector3 a, Vector3 b) {
+Vector3 operator*(const Vector3& a, const Vector3& b) {
     return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-std::optional<Vector3> vsumNullable(std::optional<Vector3> a, std::optional<Vector3> b) {
+std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3> b) {
     if (!a.has_value() && !b.has_value()) {
         return std::nullopt;
     }
@@ -39,35 +39,8 @@ std::optional<Vector3> vsumNullable(std::optional<Vector3> a, std::optional<Vect
     return total;
 }
 
-std::optional<Vector3> vmultNullable(std::optional<Vector3> a, std::optional<Vector3> b) {
-    if (a.has_value()) {
-        if (b.has_value()) {
-            return vmult(*a, *b);
-        } else {
-            return a;
-        }
-    } else if (b.has_value()) {
-        return b;
-    }
-    
-    return std::nullopt;
-}
-
-std::optional<Quaternion> qmultNullable(std::optional<Quaternion> a, std::optional<Quaternion> b) {
-    if (a.has_value()) {
-        if (b.has_value()) {
-            return *a * *b;
-        } else {
-            return a;
-        }
-    } else if (b.has_value()) {
-        return b;
-    }
-    
-    return std::nullopt;
-}
-
-std::optional<float> fmultNullable(std::optional<float> a, std::optional<float> b) {
+template<typename T>
+std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
     if (a.has_value()) {
         if (b.has_value()) {
             return *a * *b;
@@ -145,8 +118,8 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
         std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
         std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
-        std::optional<Vector3> positionOffset = vsumNullable(pathPosition, trackPosition);
-        std::optional<Vector3> definitePosition = vsumNullable(positionOffset, pathDefinitePosition);
+        std::optional<Vector3> positionOffset = pathPosition + trackPosition;
+        std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
         if (definitePosition) definitePosition = *definitePosition * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
         return definitePosition;
     } else {
@@ -164,32 +137,32 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
     std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
-    offset.positionOffset = vsumNullable(pathPosition, trackPosition);
+    offset.positionOffset = pathPosition + trackPosition;
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
     PointDefinition *rotation = animationData.rotation;
     std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);
     std::optional<Quaternion> trackRotation = track && track->properties.rotation.value.has_value() ?
         std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
-    offset.rotationOffset = qmultNullable(pathRotation, trackRotation);
+    offset.rotationOffset = pathRotation * trackRotation;
 
     PointDefinition *scale = animationData.scale;
     std::optional<Vector3> pathScale = scale ? std::optional{ scale->Interpolate(time) } : TryGetVector3PathProperty(track, "_scale", time);
     std::optional<Vector3> trackScale = track && track->properties.scale.value.has_value() ?
         std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
-    offset.scaleOffset = vmultNullable(pathScale, trackScale);
+    offset.scaleOffset = pathScale * trackScale;
 
     PointDefinition *localRotation = animationData.localRotation;
     std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
     std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value.has_value() ?
         std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
-    offset.localRotationOffset = qmultNullable(pathLocalRotation, trackLocalRotation);
+    offset.localRotationOffset = pathLocalRotation * trackLocalRotation;
 
     PointDefinition *dissolve = animationData.dissolve;
     std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
     std::optional<float> trackDissolve = track && track->properties.dissolve.value.has_value() ?
         std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
-    offset.dissolve = fmultNullable(pathDissolve, trackDissolve);
+    offset.dissolve = pathDissolve * trackDissolve;
 
     return offset;
 }
