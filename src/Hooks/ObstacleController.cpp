@@ -44,9 +44,9 @@ float GetCustomWidth(float def, CustomJSONData::CustomObstacleData *obstacleData
     if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
-        std::optional<float> width = scale.has_value() ? std::optional{(*scale.value())[0].GetFloat()} : std::nullopt;
+        std::optional<float> width = scale.has_value() ? std::optional{(**scale)[0].GetFloat()} : std::nullopt;
         if (width.has_value()) {
-            return width.value();
+            return *width;
         }
     }
     return def;
@@ -57,7 +57,7 @@ float GetCustomLength(float def, CustomJSONData::CustomObstacleData *obstacleDat
         rapidjson::Value &customData = *obstacleData->customData->value;
         std::optional<rapidjson::Value*> scale = customData.HasMember("_scale") ? std::optional{&customData["_scale"]} : std::nullopt;
         if (scale.has_value() && scale.value()->Size() > 2) {
-            return (*scale.value())[2].GetFloat() * /*NoteLinesDistace*/ 0.6;
+            return (**scale)[2].GetFloat() * /*NoteLinesDistace*/ 0.6;
         }
     }
     return def;
@@ -99,7 +99,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
 
     Quaternion localRotation = Quaternion::get_identity();
     if (localrot.has_value()) {
-        localRotation = Quaternion::Euler((*localrot.value())[0].GetFloat(), (*localrot.value())[1].GetFloat(), (*localrot.value())[2].GetFloat());
+        localRotation = Quaternion::Euler((**localrot)[0].GetFloat(), (**localrot)[1].GetFloat(), (**localrot)[2].GetFloat());
     }
     transform->set_localPosition(startPos);
     transform->set_localRotation(self->worldRotation * localRotation);
@@ -150,8 +150,10 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
         self->endPos = ad.jumpEndPos + *offset.positionOffset;
     }
 
+    Transform *transform = self->get_transform();
+
     if (offset.scaleOffset.has_value()) {
-        self->get_transform()->set_localScale(*offset.scaleOffset);
+        transform->set_localScale(*offset.scaleOffset);
     }
 
     if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
@@ -161,7 +163,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
         Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
             worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
-            Quaternion inverseWorldRotation = Quaternion::Euler(-worldRotationQuaternion.get_eulerAngles());
+            Quaternion inverseWorldRotation = Quaternion::Inverse(worldRotationQuaternion);
             self->worldRotation = worldRotationQuaternion;
             self->inverseWorldRotation = inverseWorldRotation;
         }
@@ -172,7 +174,7 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
             worldRotationQuaternion = worldRotationQuaternion * *offset.localRotationOffset;
         }
 
-        self->get_transform()->set_localRotation(worldRotationQuaternion);
+        transform->set_localRotation(worldRotationQuaternion);
     }
 
     // if (offset.dissolve.has_value()) {

@@ -104,7 +104,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     // Excuse me what the fuck
     if (!self->noteData) return;
 
-    auto customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData*>(self->noteData);
+    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData*>(self->noteData);
     if (!customNoteData->customData->value) {
         NoteController_Update(self);
         return;
@@ -116,7 +116,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     //     NoteController_Update(self);
     //     return;
     // }
-    rapidjson::Value &animation = customData["_animation"];
+    rapidjson::Value& animation = customData["_animation"];
 
     BeatmapObjectAssociatedData& ad = getAD(customNoteData->customData);
     noteUpdateAD = &ad;
@@ -152,7 +152,7 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
         Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
             worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
-            Quaternion inverseWorldRotation = Quaternion::Euler(-worldRotationQuaternion.get_eulerAngles());
+            Quaternion inverseWorldRotation = Quaternion::Inverse(worldRotationQuaternion);
             noteJump->worldRotation = worldRotationQuaternion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuaternion;
