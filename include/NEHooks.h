@@ -3,6 +3,7 @@
 
 namespace NoodleExtensions {
 
+void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger);
 void InstallBeatmapObjectCallbackControllerHooks(Logger& logger);
 void InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger);
 void InstallBeatmapDataTransformHelperHooks(Logger& logger);

@@ -5,6 +5,7 @@ using namespace NoodleExtensions;
 
 void NoodleExtensions::InstallHooks() {
     Logger& logger = NELogger::GetLogger();
+    InstallStandardLevelScenesTransitionSetupDataSOHooks(logger);
     InstallBeatmapObjectCallbackControllerHooks(logger);
     InstallBeatmapObjectSpawnMovementDataHooks(logger);
     InstallBeatmapDataTransformHelperHooks(logger);

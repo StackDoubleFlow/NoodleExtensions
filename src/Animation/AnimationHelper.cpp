@@ -117,7 +117,7 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
         PointDefinition *position = animationData.position;
         std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
         std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
-        std::optional{ track->properties.position.value->vector3 } : std::nullopt;
+            std::optional{ track->properties.position.value->vector3 } : std::nullopt;
         std::optional<Vector3> positionOffset = pathPosition + trackPosition;
         std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
         if (definitePosition) definitePosition = *definitePosition * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;

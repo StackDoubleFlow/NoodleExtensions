@@ -131,10 +131,6 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad.animationData, ad.track, normalTime);
 
     if (offset.positionOffset.has_value()) {
-    //   {"_time":1,"_type":"AnimateTrack","_data":{"_track":"secondLeftStart","_position":[[-30,0,0,1]],"_dissolve":[[0,0]],"_dissolveArrow":[[0,0]]}},
-    //   {"_time":1,"_type":"AnimateTrack","_data":{"_track":"secondRightStart","_position":[[30,0,0,1]],"_dissolve":[[0,0]],"_dissolveArrow":[[0,0]]}},
-        //     {"_time":17.5,"_lineIndex":2,"_lineLayer":0,"_type":1,"_cutDirection":5,"_customData":{"_track":"secondRightStart","_noteJumpStartBeatOffset":2,"_disableSpawnEffect":true,"_flip":[0,0]}}
-
         floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;
         floorMovement->endPos = ad.moveEndPos + *offset.positionOffset;
         noteJump->startPos = ad.moveEndPos + *offset.positionOffset;
