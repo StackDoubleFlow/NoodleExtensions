@@ -116,7 +116,6 @@ void ParentObject::AssignTrack(std::vector<Track*> tracks, Track *parentTrack, s
             }
         }
 
-        NELogger::GetLogger().info("INSERRTINGNGNG INTO THE THINGYGY NOW");
         instance->childrenTracks.insert(track);
     }
 
