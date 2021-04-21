@@ -13,14 +13,6 @@ extern BeatmapObjectSpawnController *spawnController;
 
 DEFINE_TYPE(ParentObject);
 
-void ParentObject::ctor() {
-    char buff[sizeof(UnityEngine::MonoBehaviour)];
-    memcpy(buff, this, sizeof(UnityEngine::MonoBehaviour));
-    new (this) ParentObject();
-    memcpy(this, buff, sizeof(UnityEngine::MonoBehaviour));
-    // INVOKE_CTOR(ParentObject);
-}
-
 void ParentObject::Update() {
     float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 

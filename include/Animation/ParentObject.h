@@ -6,14 +6,14 @@
 #include "NELogger.h"
 
 DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour, 
-    DECLARE_CTOR(ctor);
+    DECLARE_DEFAULT_CTOR();
     DECLARE_METHOD(void, Update);
 
     REGISTER_FUNCTION(
         NELogger::GetLogger().debug("Registering ParentObject!");
 
         // Register constructor
-        REGISTER_METHOD(ctor);
+        REGISTER_DEFAULT_CTOR();
 
         // Register methods
         REGISTER_METHOD(Update);
