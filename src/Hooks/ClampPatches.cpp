@@ -55,6 +55,35 @@ MAKE_HOOK_OFFSETLESS(NoteProcessorClampPatch, void,
             item->lineIndex = extendedLanesMap[i];
         }
     }
+
+    if (std::find_if(notes->items->values, notes->items->values + notes->get_Count(), [](NoteData *x) {
+        return x->lineIndex > 3 || x->lineIndex < 0;
+    }) == notes->items->values + notes->get_Count()) {
+        return;
+    }
+    std::unordered_map<int, std::vector<NoteData*>> notesInColumn;
+
+    for (int j = 0; j < notes->get_Count(); j++) {
+        NoteData *noteData = notes->items->values[j];
+        std::vector<NoteData*>& list = notesInColumn[noteData->lineIndex];
+        bool flag = false;
+        for (int k = 0; k < list.size(); k++) {
+            if (list[k]->noteLineLayer > noteData->noteLineLayer) {
+                list.insert(list.begin() + k, noteData);
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            list.push_back(noteData);
+        }
+    }
+    for (auto& pair : notesInColumn) {
+        auto& list = pair.second;
+        for (int m = 0; m < list.size(); m++) {
+            list[m]->SetNoteStartLineLayer(m);
+        }
+    }
 }
 
 MAKE_HOOK_OFFSETLESS(BeatmapObjectsDataClampPatch, bool, BeatmapData::$get_beatmapObjectsData$d__31 *self) {

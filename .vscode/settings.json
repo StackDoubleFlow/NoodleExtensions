@@ -97,6 +97,7 @@
         "csignal": "cpp",
         "coroutine": "cpp",
         "__functional_03": "cpp",
-        "*.def": "cpp"
+        "*.def": "cpp",
+        "any": "cpp"
     }
 }

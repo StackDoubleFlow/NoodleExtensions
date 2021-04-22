@@ -185,8 +185,11 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
     //         ad.cutoutAnimationEffect = cutoutAnimationEffect;
     //     }
 
-    //     cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
-    //     // cutoutAnimationEffect->SetCutout(0.75);
+    //     if (offset.dissolve > 0) {
+    //         cutoutAnimationEffect->SetCutout(1);
+    //     } else {
+    //         cutoutAnimationEffect->SetCutout(0);
+    //     }
     // }
 
     ObstacleController_Update(self);
