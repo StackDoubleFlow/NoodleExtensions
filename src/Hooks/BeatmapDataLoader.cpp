@@ -4,7 +4,6 @@
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapDataLoader.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
-#include "System/Collections/Generic/List_1.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/Track.h"
@@ -14,9 +13,6 @@
 #include "NELogger.h"
 
 #include <optional>
-
-template<class T>
-using List = System::Collections::Generic::List_1<T>;
 
 using namespace GlobalNamespace;
 

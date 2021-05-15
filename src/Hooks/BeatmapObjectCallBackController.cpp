@@ -8,7 +8,6 @@
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
-#include "System/Collections/Generic/List_1.hpp"
 #include "System/Collections/Generic/HashSet_1.hpp"
 #include "System/Action.hpp"
 
@@ -17,9 +16,6 @@
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
-
-template<class T>
-using List = System::Collections::Generic::List_1<T>;
 
 using namespace GlobalNamespace;
 using namespace NoodleExtensions;

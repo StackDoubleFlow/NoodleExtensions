@@ -11,7 +11,6 @@
 #include "System/Linq/Enumerable.hpp"
 #include "System/Collections/Generic/IEnumerable_1.hpp"
 #include "System/Linq/IOrderedEnumerable_1.hpp"
-#include "System/Collections/Generic/List_1.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "AssociatedData.h"
@@ -19,9 +18,6 @@
 #include "NELogger.h"
 
 #include <optional>
-
-template<class T>
-using List = System::Collections::Generic::List_1<T>;
 
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;

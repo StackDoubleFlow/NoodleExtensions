@@ -9,7 +9,6 @@
 #include "GlobalNamespace/BeatmapObjectType.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteSpawnData.hpp"
-#include "System/Collections/Generic/List_1.hpp"
 #include "System/ValueType.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapSaveData.h"

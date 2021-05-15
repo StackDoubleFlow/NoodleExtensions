@@ -20,17 +20,17 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.7.0",
+      "versionRange": "^0.8.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.7.0",
+      "versionRange": "^0.8.2",
       "additionalData": {}
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.5.0",
+      "versionRange": "^0.6.0",
       "additionalData": {}
     }
   ],

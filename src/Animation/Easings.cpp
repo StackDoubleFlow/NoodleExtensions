@@ -270,6 +270,8 @@ Functions FunctionFromStr(std::string str) {
         return itr->second;
     } else {
         NELogger::GetLogger().error("Invalid function with name %s", str.c_str());
-        // TODO: Do something if the difficulty name is invalid
+        // TODO: Do something if the function name is invalid
+        // Use linear by default
+        return Functions::easeLinear;
     }
 }
