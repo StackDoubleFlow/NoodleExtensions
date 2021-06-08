@@ -130,6 +130,8 @@ MAKE_HOOK_OFFSETLESS(CreateTransformedBeatmapData, IReadonlyBeatmapData *, IRead
     return CreateTransformedBeatmapData(transformedBeatmapData, gameplayModifiers, practiceSettings, leftHanded, environmentEffectsFilterPreset, environmentIntensityReductionOptions);
 }
 
-void NoodleExtensions::InstallBeatmapDataTransformHelperHooks(Logger& logger) {
+void InstallBeatmapDataTransformHelperHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, CreateTransformedBeatmapData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData", 7));
 }
+
+NEInstallHooks(InstallBeatmapDataTransformHelperHooks);

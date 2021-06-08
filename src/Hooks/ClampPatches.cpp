@@ -126,7 +126,7 @@ MAKE_HOOK_OFFSETLESS(BeatmapObjectsDataClampPatch, bool, BeatmapData::$get_beatm
     return true;
 }
 
-void NoodleExtensions::InstallClampPatches(Logger& logger) {
+void InstallClampPatches(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, BeatmapObjectsDataClampPatch, 
         il2cpp_utils::FindMethodUnsafe("", "BeatmapData/<get_beatmapObjectsData>d__31", "MoveNext", 0));
     INSTALL_HOOK_OFFSETLESS(logger, NoteProcessorClampPatch, 
@@ -136,3 +136,5 @@ void NoodleExtensions::InstallClampPatches(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, BeatmapLineData_AddBeatmapObjectData, 
         il2cpp_utils::FindMethodUnsafe("", "BeatmapLineData", "AddBeatmapObjectData", 1));
 }
+
+NEInstallHooks(InstallClampPatches);

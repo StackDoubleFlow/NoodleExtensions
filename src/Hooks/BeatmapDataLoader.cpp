@@ -96,7 +96,9 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
 
 MAKE_HOOK_OFFSETLESS(Assert_IsTrue, void, bool condition, Il2CppString *message, Array<Il2CppObject> *args) {}
 
-void NoodleExtensions::InstallBeatmapDataLoaderHooks(Logger& logger) {
+void InstallBeatmapDataLoaderHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, GetBeatmapDataFromBeatmapSaveData, il2cpp_utils::FindMethodUnsafe("", "BeatmapDataLoader", "GetBeatmapDataFromBeatmapSaveData", 8));
     INSTALL_HOOK_ORIG(logger, Assert_IsTrue, il2cpp_utils::FindMethodUnsafe("NUnit.Framework", "Assert", "IsTrue", 3));
 }
+
+NEInstallHooks(InstallBeatmapDataLoaderHooks);

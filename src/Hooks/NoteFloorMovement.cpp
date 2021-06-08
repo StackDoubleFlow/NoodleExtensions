@@ -41,6 +41,8 @@ MAKE_HOOK_OFFSETLESS(NoteFloorMovement_ManualUpdate, Vector3, NoteFloorMovement 
     return vector; 
 }
 
-void NoodleExtensions::InstallNoteFloorMovementHooks(Logger& logger) {
+void InstallNoteFloorMovementHooks(Logger& logger) {
     INSTALL_HOOK_ORIG(logger, NoteFloorMovement_ManualUpdate, il2cpp_utils::FindMethodUnsafe("", "NoteFloorMovement", "ManualUpdate", 0));
 }
+
+NEInstallHooks(InstallNoteFloorMovementHooks);

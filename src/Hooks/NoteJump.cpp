@@ -30,6 +30,8 @@ MAKE_HOOK_OFFSETLESS(NoteJump_ManualUpdate, Vector3, NoteJump *self) {
     return result;
 } 
 
-void NoodleExtensions::InstallNoteJumpHooks(Logger& logger) {
+void InstallNoteJumpHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, NoteJump_ManualUpdate, il2cpp_utils::FindMethodUnsafe("", "NoteJump", "ManualUpdate", 0));
 }
+
+NEInstallHooks(InstallNoteJumpHooks);

@@ -7,7 +7,6 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
-using namespace NoodleExtensions;
 
 MAKE_HOOK_OFFSETLESS(NoteDidStartJump, void, GameNoteController *self) {
     if (FakeNoteHelper::GetCuttable(self->noteData)) {
@@ -15,6 +14,7 @@ MAKE_HOOK_OFFSETLESS(NoteDidStartJump, void, GameNoteController *self) {
     }
 }
 
-void NoodleExtensions::InstallGameNoteControllerHooks(Logger& logger) {
+void InstallGameNoteControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, NoteDidStartJump, il2cpp_utils::FindMethodUnsafe("", "GameNoteController", "NoteDidStartJump", 0));
 }
+NEInstallHooks(InstallGameNoteControllerHooks);

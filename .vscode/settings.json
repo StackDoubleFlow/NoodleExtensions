@@ -98,6 +98,8 @@
         "coroutine": "cpp",
         "__functional_03": "cpp",
         "*.def": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "semaphore": "cpp",
+        "numbers": "cpp"
     }
 }

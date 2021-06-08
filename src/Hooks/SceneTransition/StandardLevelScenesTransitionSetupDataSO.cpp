@@ -30,7 +30,7 @@ MAKE_HOOK_OFFSETLESS(StandardLevelScenesTransitionSetupDataSO_Init, void, Standa
     }
 }
 
-void NoodleExtensions::InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
+void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, StandardLevelScenesTransitionSetupDataSO_Init, 
         il2cpp_utils::FindMethodUnsafe("", "StandardLevelScenesTransitionSetupDataSO", "Init", 10));
 }

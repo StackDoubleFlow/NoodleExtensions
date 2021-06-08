@@ -8,7 +8,6 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
-using namespace NoodleExtensions;
 
 
 MAKE_HOOK_OFFSETLESS(HandleNoteControllerNoteWasMissed, void, BeatmapObjectManager *self, NoteController *noteController) {
@@ -19,6 +18,8 @@ MAKE_HOOK_OFFSETLESS(HandleNoteControllerNoteWasMissed, void, BeatmapObjectManag
     }
 }
 
-void NoodleExtensions::InstallBeatmapObjectManagerHooks(Logger& logger) {
+void InstallBeatmapObjectManagerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, HandleNoteControllerNoteWasMissed, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectManager", "HandleNoteControllerNoteWasMissed", 1));
 }
+
+NEInstallHooks(InstallBeatmapObjectManagerHooks);

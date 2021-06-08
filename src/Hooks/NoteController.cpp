@@ -167,7 +167,9 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     NoteController_Update(self);
 }
 
-void NoodleExtensions::InstallNoteControllerHooks(Logger& logger) {
+void InstallNoteControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, NoteController_Init, il2cpp_utils::FindMethodUnsafe("", "NoteController", "Init", 10));
     INSTALL_HOOK_OFFSETLESS(logger, NoteController_Update, il2cpp_utils::FindMethodUnsafe("", "NoteController", "ManualUpdate", 0));
 }
+
+NEInstallHooks(InstallNoteControllerHooks);

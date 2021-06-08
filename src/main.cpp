@@ -37,7 +37,7 @@ extern "C" void load() {
 
     // Install hooks
 
-    NoodleExtensions::InstallHooks();
+    InstallAndRegisterAll();
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }

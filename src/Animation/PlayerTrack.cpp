@@ -18,11 +18,6 @@ static Action *didPauseEventAction;
 DEFINE_TYPE(PlayerTrack);
 
 void PlayerTrack::ctor() {
-    // char buff[sizeof(UnityEngine::MonoBehaviour)];
-    // memcpy(buff, this, sizeof(UnityEngine::MonoBehaviour));
-    // new (this) PlayerTrack();
-    // memcpy(this, buff, sizeof(UnityEngine::MonoBehaviour));
-    // INVOKE_CTOR(PlayerTrack);
     startPos = UnityEngine::Vector3::get_zero();
     startRot = UnityEngine::Quaternion::get_identity();
     startLocalRot = UnityEngine::Quaternion::get_identity();

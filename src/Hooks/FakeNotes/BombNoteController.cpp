@@ -7,7 +7,6 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
-using namespace NoodleExtensions;
 
 MAKE_HOOK_OFFSETLESS(BombNoteController_Init, void, BombNoteController *self, NoteData *noteData, float worldRotation, UnityEngine::Vector3 moveStartPos, UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos, float moveDuration, float jumpDuration, float jumpGravity) {
     if (FakeNoteHelper::GetCuttable(noteData)) {
@@ -15,6 +14,7 @@ MAKE_HOOK_OFFSETLESS(BombNoteController_Init, void, BombNoteController *self, No
     }
 }
 
-void NoodleExtensions::InstallBombNoteControllerHooks(Logger& logger) {
+void InstallBombNoteControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, BombNoteController_Init, il2cpp_utils::FindMethodUnsafe("", "BombNoteController", "Init", 8));
 }
+NEInstallHooks(InstallBombNoteControllerHooks);

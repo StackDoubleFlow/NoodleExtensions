@@ -7,7 +7,6 @@
 #include "NELogger.h"
 
 using namespace GlobalNamespace;
-using namespace NoodleExtensions;
 
 bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
     // NELogger::GetLogger().info("In GetFakeNote");

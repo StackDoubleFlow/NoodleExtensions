@@ -224,10 +224,12 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_GetPosForTime, Vector3, ObstacleControll
 
 MAKE_HOOK_OFFSETLESS(ParametricBoxFakeGlowController_OnEnable, void, Il2CppObject *self) {}
 
-void NoodleExtensions::InstallObstacleControllerHooks(Logger& logger) {
+void InstallObstacleControllerHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Init, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "Init", 9));
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_Update, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "ManualUpdate", 0));    
     INSTALL_HOOK_OFFSETLESS(logger, ObstacleController_GetPosForTime, il2cpp_utils::FindMethodUnsafe("", "ObstacleController", "GetPosForTime", 1));  
     // Temporary fake glow disable hook
     INSTALL_HOOK_OFFSETLESS(logger, ParametricBoxFakeGlowController_OnEnable, il2cpp_utils::FindMethodUnsafe("", "ParametricBoxFakeGlowController", "OnEnable", 0));
 }
+
+NEInstallHooks(InstallObstacleControllerHooks);

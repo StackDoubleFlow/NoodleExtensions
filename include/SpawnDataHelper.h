@@ -11,7 +11,7 @@ namespace GlobalNamespace {
     class BeatmapObjectData;
 }
 
-namespace NoodleExtensions::SpawnDataHelper {
+namespace SpawnDataHelper {
 
 UnityEngine::Vector3 GetNoteOffset(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, GlobalNamespace::BeatmapObjectData *beatmapObjectData, std::optional<float> startRow, std::optional<float> startHeight);
 

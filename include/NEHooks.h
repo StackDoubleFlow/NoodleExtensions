@@ -1,29 +1,27 @@
 #pragma once
 #include "NELogger.h"
 
-namespace NoodleExtensions {
+class Hooks {
+private:
+    static std::vector<void (*)(Logger& logger)> installFuncs;
+public:
+    static void AddInstallFunc(void (*installFunc)(Logger& logger)) {
+        installFuncs.push_back(installFunc);
+    }
 
-void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger);
-void InstallBeatmapObjectCallbackControllerHooks(Logger& logger);
-void InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger);
-void InstallBeatmapDataTransformHelperHooks(Logger& logger);
-void InstallSpawnRotationProcessorHooks(Logger& logger);
-void InstallGameplayCoreInstallerHooks(Logger& logger);
-void InstallObstacleControllerHooks(Logger& logger);
-void InstallBeatmapDataLoaderHooks(Logger& logger);
-void InstallNoteControllerHooks(Logger& logger);
-void InstallNoteFloorMovementHooks(Logger& logger);
-void InstallNoteJumpHooks(Logger& logger);
+    static void InstallHooks(Logger& logger) {
+        for (auto installFunc : installFuncs) {
+            installFunc(logger);
+        }
+    }
+};
 
-// Fake notes
-void InstallNoteCutSoundEffectManagerHooks(Logger& logger);
-void InstallBeatmapObjectManagerHooks(Logger& logger);
-void InstallGameNoteControllerHooks(Logger& logger);
-void InstallBombNoteControllerHooks(Logger& logger);
+#define NEInstallHooks(func) \
+struct __NERegister##func { \
+    __NERegister##func() { \
+        Hooks::AddInstallFunc(func); \
+    } \
+}; \
+static __NERegister##func __NERegisterInstance##func;
 
-// Temporary
-void InstallClampPatches(Logger& logger);
-
-void InstallHooks();
-
-}
+void InstallAndRegisterAll();

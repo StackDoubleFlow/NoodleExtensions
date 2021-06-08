@@ -5,7 +5,7 @@ namespace GlobalNamespace {
     class NoteData;
 }
 
-namespace NoodleExtensions::FakeNoteHelper {
+namespace FakeNoteHelper {
 
 bool GetFakeNote(GlobalNamespace::NoteController *noteController);
 bool GetCuttable(GlobalNamespace::NoteData *noteData);

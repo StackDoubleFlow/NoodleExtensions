@@ -18,7 +18,6 @@
 #include "NELogger.h"
 
 using namespace GlobalNamespace;
-using namespace NoodleExtensions;
 
 // BeatmapDataTransformHelper.cpp
 extern Il2CppClass *customObstacleDataClass;
@@ -105,6 +104,8 @@ MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
 }
 
 
-void NoodleExtensions::InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
+void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
     INSTALL_HOOK_ORIG(logger, LateUpdate, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectCallbackController", "LateUpdate", 0));
 }
+
+NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

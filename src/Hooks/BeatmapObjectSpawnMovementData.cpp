@@ -20,7 +20,6 @@
 
 #include <cmath>
 
-using namespace NoodleExtensions;
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
@@ -161,7 +160,9 @@ MAKE_HOOK_OFFSETLESS(GetJumpingNoteSpawnData, BeatmapObjectSpawnMovementData::No
     return result;
 }
 
-void NoodleExtensions::InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger) {
+void InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger) {
     INSTALL_HOOK_OFFSETLESS(logger, GetObstacleSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetObstacleSpawnData", 1));
     INSTALL_HOOK_OFFSETLESS(logger, GetJumpingNoteSpawnData, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnMovementData", "GetJumpingNoteSpawnData", 1));
 }
+
+NEInstallHooks(InstallBeatmapObjectSpawnMovementDataHooks);
