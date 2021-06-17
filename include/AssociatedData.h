@@ -18,6 +18,7 @@ struct AnimationObjectData {
     PointDefinition *localRotation;
     PointDefinition *dissolve;
     PointDefinition *definitePosition;
+    PointDefinition *cuttable;
 };
 
 struct BeatmapObjectAssociatedData {

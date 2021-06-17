@@ -177,20 +177,24 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
         transform->set_localRotation(worldRotationQuaternion);
     }
 
-    // if (offset.dissolve.has_value()) {
-    //     CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
-    //     if (!cutoutAnimationEffect) {
-    //         ObstacleDissolve *obstacleDissolve = self->get_gameObject()->GetComponent<ObstacleDissolve*>();
-    //         cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
-    //         ad.cutoutAnimationEffect = cutoutAnimationEffect;
-    //     }
+    if (offset.cuttable.has_value() && !*offset.cuttable) {
+        self->bounds.set_size(Vector3::get_zero());
+    }
 
-    //     if (offset.dissolve > 0) {
-    //         cutoutAnimationEffect->SetCutout(1);
-    //     } else {
-    //         cutoutAnimationEffect->SetCutout(0);
-    //     }
-    // }
+    if (offset.dissolve.has_value()) {
+        CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
+        if (!cutoutAnimationEffect) {
+            ObstacleDissolve *obstacleDissolve = self->get_gameObject()->GetComponent<ObstacleDissolve*>();
+            cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
+            ad.cutoutAnimationEffect = cutoutAnimationEffect;
+        }
+
+        if (offset.dissolve <= 0) {
+            cutoutAnimationEffect->SetCutout(1);
+        } else {
+            cutoutAnimationEffect->SetCutout(0);
+        }
+    }
 
     ObstacleController_Update(self);
 }

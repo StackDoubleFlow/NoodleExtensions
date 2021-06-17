@@ -15,7 +15,7 @@ extern BeatmapObjectSpawnController *spawnController;
 
 static Action *didPauseEventAction;
 
-DEFINE_TYPE(PlayerTrack);
+DEFINE_TYPE(TrackParenting, PlayerTrack);
 
 void PlayerTrack::ctor() {
     startPos = UnityEngine::Vector3::get_zero();

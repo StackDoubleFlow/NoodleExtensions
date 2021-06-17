@@ -11,19 +11,8 @@ namespace GlobalNamespace {
 
 DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour, 
     DECLARE_CTOR(ctor);
-    DECLARE_METHOD(void, Update);
-    DECLARE_METHOD(void, OnDestroy);
-
-    REGISTER_FUNCTION(
-        NELogger::GetLogger().debug("Registering PlayerTrack!");
-
-        // Register constructor
-        REGISTER_METHOD(ctor);
-
-        // Register methods
-        REGISTER_METHOD(Update);
-        REGISTER_METHOD(OnDestroy);
-    )
+    DECLARE_INSTANCE_METHOD(void, Update);
+    DECLARE_INSTANCE_METHOD(void, OnDestroy);
 public:
     static void AssignTrack(Track *track);
 private:

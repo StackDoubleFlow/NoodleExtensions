@@ -11,7 +11,7 @@ using namespace GlobalNamespace;
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
 
-DEFINE_TYPE(ParentObject);
+DEFINE_TYPE(TrackParenting, ParentObject);
 
 void ParentObject::Update() {
     float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;

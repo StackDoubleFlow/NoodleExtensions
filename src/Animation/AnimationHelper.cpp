@@ -164,6 +164,12 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
         std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
     offset.dissolve = pathDissolve * trackDissolve;
 
+    PointDefinition *cuttable = animationData.cuttable;
+    std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
+    std::optional<float> trackCuttable = track && track->properties.cuttable.value.has_value() ?
+        std::optional{ track->properties.cuttable.value->linear } : std::nullopt;
+    offset.cuttable = pathCuttable * trackCuttable;
+
     return offset;
 }
 

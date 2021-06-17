@@ -213,7 +213,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
 
 void Events::AddEventCallbacks(Logger& logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
-    custom_types::Register::RegisterTypes<ParentObject, PlayerTrack>();
+    custom_types::Register::AutoRegister();
 
     INSTALL_HOOK_OFFSETLESS(logger, BeatmapObjectSpawnController_Start, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "Start", 0));
 }
