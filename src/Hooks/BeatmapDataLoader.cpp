@@ -81,12 +81,7 @@ MAKE_HOOK_OFFSETLESS(GetBeatmapDataFromBeatmapSaveData, BeatmapData*, BeatmapDat
                 }
 
                 rapidjson::Value &animation = customData["_animation"];
-                ad.animationData.position = AnimationHelper::TryGetPointData(beatmapAD, animation, "_position");
-                ad.animationData.rotation = AnimationHelper::TryGetPointData(beatmapAD, animation, "_rotation");
-                ad.animationData.scale = AnimationHelper::TryGetPointData(beatmapAD, animation, "_scale");
-                ad.animationData.localRotation = AnimationHelper::TryGetPointData(beatmapAD, animation, "_localRotation");
-                ad.animationData.dissolve = AnimationHelper::TryGetPointData(beatmapAD, animation, "_dissolve");
-                ad.animationData.definitePosition = AnimationHelper::TryGetPointData(beatmapAD, animation, "_definitePosition");
+                ad.animationData = AnimationObjectData(beatmapAD, animation);
             }
         }
     }

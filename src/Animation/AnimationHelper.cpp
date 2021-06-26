@@ -23,16 +23,16 @@ Vector3 operator*(const Vector3& a, const Vector3& b) {
 }
 
 std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3> b) {
-    if (!a.has_value() && !b.has_value()) {
+    if (!a && !b) {
         return std::nullopt;
     }
 
     Vector3 total = Vector3::get_zero();
-    if (a.has_value()) {
+    if (a) {
         total = total + *a;
     }
 
-    if (b.has_value()) {
+    if (b) {
         total = total + *b;
     }
 
@@ -41,13 +41,13 @@ std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3
 
 template<typename T>
 std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
-    if (a.has_value()) {
-        if (b.has_value()) {
+    if (a) {
+        if (b) {
             return *a * *b;
         } else {
             return a;
         }
-    } else if (b.has_value()) {
+    } else if (b) {
         return b;
     }
     
@@ -86,7 +86,7 @@ std::optional<PointDefinitionInterpolation> GetPathInterpolation(Track *track, s
 
 std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::quaternion);
-    if (pointDataInterpolation.has_value()) {
+    if (pointDataInterpolation) {
         return pointDataInterpolation->InterpolateQuaternion(time);
     }
     return std::nullopt;
@@ -94,7 +94,7 @@ std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string
 
 std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::vector3);
-    if (pointDataInterpolation.has_value()) {
+    if (pointDataInterpolation) {
         return pointDataInterpolation->Interpolate(time);
     }
     return std::nullopt;
@@ -102,7 +102,7 @@ std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name,
 
 std::optional<float> TryGetLinearPathProperty(Track *track, std::string name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::linear);
-    if (pointDataInterpolation.has_value()) {
+    if (pointDataInterpolation) {
         return pointDataInterpolation->InterpolateLinear(time);
     }
     return std::nullopt;
@@ -113,10 +113,10 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
 
     std::optional<Vector3> pathDefinitePosition = localDefinitePosition ? std::optional{ localDefinitePosition->Interpolate(time) } : TryGetVector3PathProperty(track, "_definitePosition", time);
 
-    if (pathDefinitePosition.has_value()) {
+    if (pathDefinitePosition) {
         PointDefinition *position = animationData.position;
         std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
-        std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
+        std::optional<Vector3> trackPosition = track && track->properties.position.value ?
             std::optional{ track->properties.position.value->vector3 } : std::nullopt;
         std::optional<Vector3> positionOffset = pathPosition + trackPosition;
         std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
@@ -131,42 +131,48 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
 ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, Track *track, float time) {
     ObjectOffset offset;
 
-    // getBeatmapAD(((CustomJSONData::CustomBeatmapData*) callbackController->beatmapData)->customData);
-
     PointDefinition *position = animationData.position;
+    PointDefinition *rotation = animationData.rotation;
+    PointDefinition *scale = animationData.scale;
+    PointDefinition *localRotation = animationData.localRotation;
+    PointDefinition *dissolve = animationData.dissolve;
+    PointDefinition *dissolveArrow = animationData.dissolveArrow;
+    PointDefinition *cuttable = animationData.cuttable;
+
     std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : TryGetVector3PathProperty(track, "_position", time);
-    std::optional<Vector3> trackPosition = track && track->properties.position.value.has_value() ?
+    std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);
+    std::optional<Vector3> pathScale = scale ? std::optional{ scale->Interpolate(time) } : TryGetVector3PathProperty(track, "_scale", time);
+    std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
+    std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
+    std::optional<float> pathDissolveArrow = dissolveArrow ? std::optional{ dissolveArrow->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolveArrow", time);
+    std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
+
+    std::optional<Vector3> trackPosition = track && track->properties.position.value ?
         std::optional{ track->properties.position.value->vector3 } : std::nullopt;
     offset.positionOffset = pathPosition + trackPosition;
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-    PointDefinition *rotation = animationData.rotation;
-    std::optional<Quaternion> pathRotation = rotation ? std::optional{ rotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_rotation", time);
-    std::optional<Quaternion> trackRotation = track && track->properties.rotation.value.has_value() ?
+    std::optional<Quaternion> trackRotation = track && track->properties.rotation.value ?
         std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
     offset.rotationOffset = pathRotation * trackRotation;
 
-    PointDefinition *scale = animationData.scale;
-    std::optional<Vector3> pathScale = scale ? std::optional{ scale->Interpolate(time) } : TryGetVector3PathProperty(track, "_scale", time);
-    std::optional<Vector3> trackScale = track && track->properties.scale.value.has_value() ?
+    std::optional<Vector3> trackScale = track && track->properties.scale.value ?
         std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
     offset.scaleOffset = pathScale * trackScale;
 
-    PointDefinition *localRotation = animationData.localRotation;
-    std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
-    std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value.has_value() ?
+    std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value ?
         std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
     offset.localRotationOffset = pathLocalRotation * trackLocalRotation;
 
-    PointDefinition *dissolve = animationData.dissolve;
-    std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
-    std::optional<float> trackDissolve = track && track->properties.dissolve.value.has_value() ?
+    std::optional<float> trackDissolve = track && track->properties.dissolve.value ?
         std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
     offset.dissolve = pathDissolve * trackDissolve;
 
-    PointDefinition *cuttable = animationData.cuttable;
-    std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
-    std::optional<float> trackCuttable = track && track->properties.cuttable.value.has_value() ?
+    std::optional<float> trackDissolveArrow = track && track->properties.dissolveArrow.value ?
+        std::optional{ track->properties.dissolveArrow.value->linear } : std::nullopt;
+    offset.dissolveArrow = pathDissolveArrow * trackDissolveArrow;
+
+    std::optional<float> trackCuttable = track && track->properties.cuttable.value ?
         std::optional{ track->properties.cuttable.value->linear } : std::nullopt;
     offset.cuttable = pathCuttable * trackCuttable;
 
@@ -174,20 +180,22 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
 }
 
 void AnimationHelper::OnTrackCreated(Track *track) {
-    track->properties.position = Property(PropertyType::vector3);
-    track->properties.rotation = Property(PropertyType::quaternion);
-    track->properties.scale = Property(PropertyType::vector3);
-    track->properties.localRotation = Property(PropertyType::quaternion);
-    track->properties.dissolve = Property(PropertyType::linear);
-    track->properties.dissolveArrow = Property(PropertyType::linear);
-    track->properties.time = Property(PropertyType::linear);
-    track->properties.cuttable = Property(PropertyType::linear);
+    // These are all done in the constructors now
 
-    track->pathProperties.position = PathProperty(PropertyType::vector3);
-    track->pathProperties.rotation = PathProperty(PropertyType::quaternion);
-    track->pathProperties.scale = PathProperty(PropertyType::vector3);
-    track->pathProperties.localRotation = PathProperty(PropertyType::quaternion);
-    track->pathProperties.dissolve = PathProperty(PropertyType::linear);
-    track->pathProperties.dissolveArrow = PathProperty(PropertyType::linear);
-    track->pathProperties.cuttable = PathProperty(PropertyType::linear);
+    // track->properties.position = Property(PropertyType::vector3);
+    // track->properties.rotation = Property(PropertyType::quaternion);
+    // track->properties.scale = Property(PropertyType::vector3);
+    // track->properties.localRotation = Property(PropertyType::quaternion);
+    // track->properties.dissolve = Property(PropertyType::linear);
+    // track->properties.dissolveArrow = Property(PropertyType::linear);
+    // track->properties.time = Property(PropertyType::linear);
+    // track->properties.cuttable = Property(PropertyType::linear);
+
+    // track->pathProperties.position = PathProperty(PropertyType::vector3);
+    // track->pathProperties.rotation = PathProperty(PropertyType::quaternion);
+    // track->pathProperties.scale = PathProperty(PropertyType::vector3);
+    // track->pathProperties.localRotation = PathProperty(PropertyType::quaternion);
+    // track->pathProperties.dissolve = PathProperty(PropertyType::linear);
+    // track->pathProperties.dissolveArrow = PathProperty(PropertyType::linear);
+    // track->pathProperties.cuttable = PathProperty(PropertyType::linear);
 }

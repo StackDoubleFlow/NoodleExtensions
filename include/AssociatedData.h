@@ -11,14 +11,27 @@ namespace GlobalNamespace {
     class CutoutAnimateEffect;
 }
 
+class BeatmapAssociatedData {
+public:
+    std::unordered_map<std::string, Track> tracks;
+    std::unordered_map<std::string, PointDefinition> pointDefinitions;
+    std::vector<PointDefinition*> anonPointDefinitions;
+
+    ~BeatmapAssociatedData();
+};
+
 struct AnimationObjectData {
     PointDefinition *position;
     PointDefinition *rotation;
     PointDefinition *scale;
     PointDefinition *localRotation;
     PointDefinition *dissolve;
-    PointDefinition *definitePosition;
+    PointDefinition *dissolveArrow;
     PointDefinition *cuttable;
+    PointDefinition *definitePosition;
+
+    AnimationObjectData() {}
+    AnimationObjectData(BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
 };
 
 struct BeatmapObjectAssociatedData {
@@ -33,15 +46,6 @@ struct BeatmapObjectAssociatedData {
     float xOffset;
     GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
     AnimationObjectData animationData;
-};
-
-class BeatmapAssociatedData {
-public:
-    std::unordered_map<std::string, Track> tracks;
-    std::unordered_map<std::string, PointDefinition> pointDefinitions;
-    std::vector<PointDefinition*> anonPointDefinitions;
-
-    ~BeatmapAssociatedData();
 };
 
 // struct ParentTrackAssociatedData {
