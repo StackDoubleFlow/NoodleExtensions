@@ -118,6 +118,11 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Init, void, ObstacleController *self, Cu
         ParentObject::ResetTransformParent(transform);
     }
 
+    std::optional<bool> cuttable = customData.HasMember("_cuttable") ? std::optional{customData["_cuttable"].GetBool()} : std::nullopt;
+    if (cuttable && !*cuttable) {
+        self->bounds.set_size(Vector3::get_zero());
+    }
+
     self->Update();
 }
 
@@ -189,11 +194,11 @@ MAKE_HOOK_OFFSETLESS(ObstacleController_Update, void, ObstacleController *self) 
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
 
-        if (offset.dissolve <= 0) {
-            cutoutAnimationEffect->SetCutout(1);
-        } else {
-            cutoutAnimationEffect->SetCutout(0);
-        }
+        // if (offset.dissolve <= 0) {
+        //     cutoutAnimationEffect->SetCutout(1);
+        // } else {
+        //     cutoutAnimationEffect->SetCutout(0);
+        // }
     }
 
     ObstacleController_Update(self);
