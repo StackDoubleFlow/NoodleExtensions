@@ -162,15 +162,15 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
     offset.rotationOffset = pathRotation * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
-    offset.scaleOffset = pathScale * mapTrack(track, track->properties.position.value, [](auto const& p) { return p.vector3; });
-    offset.localRotationOffset = pathLocalRotation * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
-    offset.dissolve = pathDissolve * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
-    offset.dissolveArrow = pathDissolveArrow * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
-    offset.cuttable = pathCuttable * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.scaleOffset = pathScale * mapTrack(track, track->properties.scale.value, [](auto const& p) { return p.vector3; });
+    offset.localRotationOffset = pathLocalRotation * mapTrack(track, track->properties.localRotation.value, [](auto const& p) { return p.quaternion; });
+    offset.dissolve = pathDissolve * mapTrack(track, track->properties.dissolve.value, [](auto const& p) { return p.linear; });
+    offset.dissolveArrow = pathDissolveArrow * mapTrack(track, track->properties.dissolveArrow.value, [](auto const& p) { return p.linear; });
+    offset.cuttable = pathCuttable * mapTrack(track, track->properties.cuttable.value, [](auto const& p) { return p.linear; });
 
     return offset;
 }
 
 void AnimationHelper::OnTrackCreated(Track *track) {
-    
+
 }
