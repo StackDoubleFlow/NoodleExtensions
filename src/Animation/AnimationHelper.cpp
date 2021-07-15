@@ -127,6 +127,12 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
     }
 }
 
+namespace {
+    template<typename T, typename F>
+    constexpr auto map(std::optional<T> const& v, F&& func) noexcept {
+        return v.has_value() ? std::optional{ std::invoke(std::forward<F>(func), *v) } : std::nullopt;
+    }
+}
 
 ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, Track *track, float time) {
     ObjectOffset offset;
@@ -147,34 +153,19 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     std::optional<float> pathDissolveArrow = dissolveArrow ? std::optional{ dissolveArrow->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolveArrow", time);
     std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
 
-    std::optional<Vector3> trackPosition = track && track->properties.position.value ?
-        std::optional{ track->properties.position.value->vector3 } : std::nullopt;
-    offset.positionOffset = pathPosition + trackPosition;
+    if (!track) {
+        return offset;
+    }
+
+    offset.positionOffset = pathPosition + map(track->properties.position.value, [](auto const& p) { return p.vector3; });
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-    std::optional<Quaternion> trackRotation = track && track->properties.rotation.value ?
-        std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
-    offset.rotationOffset = pathRotation * trackRotation;
-
-    std::optional<Vector3> trackScale = track && track->properties.scale.value ?
-        std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
-    offset.scaleOffset = pathScale * trackScale;
-
-    std::optional<Quaternion> trackLocalRotation = track && track->properties.localRotation.value ?
-        std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
-    offset.localRotationOffset = pathLocalRotation * trackLocalRotation;
-
-    std::optional<float> trackDissolve = track && track->properties.dissolve.value ?
-        std::optional{ track->properties.dissolve.value->linear } : std::nullopt;
-    offset.dissolve = pathDissolve * trackDissolve;
-
-    std::optional<float> trackDissolveArrow = track && track->properties.dissolveArrow.value ?
-        std::optional{ track->properties.dissolveArrow.value->linear } : std::nullopt;
-    offset.dissolveArrow = pathDissolveArrow * trackDissolveArrow;
-
-    std::optional<float> trackCuttable = track && track->properties.cuttable.value ?
-        std::optional{ track->properties.cuttable.value->linear } : std::nullopt;
-    offset.cuttable = pathCuttable * trackCuttable;
+    offset.rotationOffset = pathRotation * map(track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
+    offset.scaleOffset = pathScale * map(track->properties.position.value, [](auto const& p) { return p.vector3; });
+    offset.localRotationOffset = pathLocalRotation * map(track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
+    offset.dissolve = pathDissolve * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.dissolveArrow = pathDissolveArrow * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.cuttable = pathCuttable * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
 
     return offset;
 }

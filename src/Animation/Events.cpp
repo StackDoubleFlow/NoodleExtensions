@@ -5,6 +5,7 @@
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Vector3.hpp"
 
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "custom-json-data/shared/CustomEventData.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "custom-types/shared/register.hpp"
@@ -32,7 +33,7 @@ BeatmapObjectSpawnController *spawnController;
 std::vector<AnimateTrackContext> coroutines;
 std::vector<AssignPathAnimationContext> pathCoroutines;
 
-MAKE_HOOK_OFFSETLESS(BeatmapObjectSpawnController_Start, void, BeatmapObjectSpawnController *self) {
+MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
     spawnController = self;
     coroutines.clear();
     pathCoroutines.clear();
@@ -205,8 +206,6 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                     NELogger::GetLogger().warning("Could not find track property with name %s", name);
                 }
             }
-            
-            
         }
     }
 }
@@ -215,5 +214,5 @@ void Events::AddEventCallbacks(Logger& logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
     custom_types::Register::AutoRegister();
 
-    INSTALL_HOOK_OFFSETLESS(logger, BeatmapObjectSpawnController_Start, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "Start", 0));
+    INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start);
 }

@@ -1,8 +1,9 @@
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
 #include "GlobalNamespace/BeatmapEventData.hpp"
-#include "GlobalNamespace/SpawnRotationProcessor.hpp"
 #include "GlobalNamespace/BeatmapEventTypeExtensions.hpp"
+#include "GlobalNamespace/SpawnRotationProcessor.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
@@ -10,14 +11,21 @@
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self, CustomJSONData::CustomBeatmapEventData *beatmapEventData) {
+MAKE_HOOK_MATCH(ProcessBeatmapEventData,
+                &SpawnRotationProcessor::ProcessBeatmapEventData, bool,
+                SpawnRotationProcessor *self,
+                BeatmapEventData *normalEventData) {
+    auto *beatmapEventData = reinterpret_cast<CustomJSONData::CustomBeatmapEventData *>(normalEventData);
     if (BeatmapEventTypeExtensions::IsRotationEvent(beatmapEventData->type)) {
         if (!beatmapEventData->customData->value) {
             return ProcessBeatmapEventData(self, beatmapEventData);
         }
 
-        rapidjson::Value& customData = *beatmapEventData->customData->value;
-        std::optional<float> rotation = customData.HasMember("_rotation") ? std::optional{customData["_rotation"].GetFloat()} : std::nullopt;
+        rapidjson::Value &customData = *beatmapEventData->customData->value;
+        std::optional<float> rotation =
+            customData.HasMember("_rotation")
+                ? std::optional{customData["_rotation"].GetFloat()}
+                : std::nullopt;
 
         if (rotation.has_value()) {
             self->rotation = *rotation;
@@ -27,8 +35,8 @@ MAKE_HOOK_OFFSETLESS(ProcessBeatmapEventData, bool, SpawnRotationProcessor *self
     return ProcessBeatmapEventData(self, beatmapEventData);
 }
 
-void InstallSpawnRotationProcessorHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, ProcessBeatmapEventData, il2cpp_utils::FindMethodUnsafe("", "SpawnRotationProcessor", "ProcessBeatmapEventData", 1));
+void InstallSpawnRotationProcessorHooks(Logger &logger) {
+    INSTALL_HOOK(logger, ProcessBeatmapEventData);
 }
 
 NEInstallHooks(InstallSpawnRotationProcessorHooks);

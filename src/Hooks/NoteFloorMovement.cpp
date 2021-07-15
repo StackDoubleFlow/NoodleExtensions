@@ -1,4 +1,5 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
@@ -15,7 +16,7 @@ using namespace System;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
 
-MAKE_HOOK_OFFSETLESS(NoteFloorMovement_ManualUpdate, Vector3, NoteFloorMovement *self) {
+MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
     float num = self->audioTimeSyncController->get_songTime() - self->startTime;
 
     Vector3 localPosition = Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
@@ -42,7 +43,7 @@ MAKE_HOOK_OFFSETLESS(NoteFloorMovement_ManualUpdate, Vector3, NoteFloorMovement 
 }
 
 void InstallNoteFloorMovementHooks(Logger& logger) {
-    INSTALL_HOOK_ORIG(logger, NoteFloorMovement_ManualUpdate, il2cpp_utils::FindMethodUnsafe("", "NoteFloorMovement", "ManualUpdate", 0));
+    INSTALL_HOOK_ORIG(logger, NoteFloorMovement_ManualUpdate);
 }
 
 NEInstallHooks(InstallNoteFloorMovementHooks);

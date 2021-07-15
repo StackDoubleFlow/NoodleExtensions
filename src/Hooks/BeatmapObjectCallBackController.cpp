@@ -1,4 +1,5 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapObjectCallbackData.hpp"
@@ -25,7 +26,7 @@ extern Il2CppClass *customNoteDataClass;
 
 BeatmapObjectCallbackController *callbackController;
 
-MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
+MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallbackController::LateUpdate, void, BeatmapObjectCallbackController *self) {
     if (!self->beatmapData) {
         return;
     }
@@ -105,7 +106,7 @@ MAKE_HOOK_OFFSETLESS(LateUpdate, void, BeatmapObjectCallbackController *self) {
 
 
 void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
-    INSTALL_HOOK_ORIG(logger, LateUpdate, il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectCallbackController", "LateUpdate", 0));
+    INSTALL_HOOK_ORIG(logger, BeatmapObjectCallbackController_LateUpdate);
 }
 
 NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

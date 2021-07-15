@@ -1,4 +1,5 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/NoteJump.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
@@ -12,7 +13,7 @@ using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
 
-MAKE_HOOK_OFFSETLESS(NoteJump_ManualUpdate, Vector3, NoteJump *self) {
+MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump *self) {
     Vector3 result = NoteJump_ManualUpdate(self);
 
     if (noteUpdateAD) {
@@ -31,7 +32,7 @@ MAKE_HOOK_OFFSETLESS(NoteJump_ManualUpdate, Vector3, NoteJump *self) {
 } 
 
 void InstallNoteJumpHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, NoteJump_ManualUpdate, il2cpp_utils::FindMethodUnsafe("", "NoteJump", "ManualUpdate", 0));
+    INSTALL_HOOK(logger, NoteJump_ManualUpdate);
 }
 
 NEInstallHooks(InstallNoteJumpHooks);

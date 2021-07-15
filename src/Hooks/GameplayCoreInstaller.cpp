@@ -1,4 +1,5 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/GameplayCoreInstaller.hpp"
 #include "GlobalNamespace/IDifficultyBeatmap.hpp"
@@ -15,7 +16,7 @@ using namespace GlobalNamespace;
 int CachedNoteJumpMovementSpeed;
 int CachedNoteJumpStartBeatOffset;
 
-MAKE_HOOK_OFFSETLESS(InstallBindings, void, GameplayCoreInstaller *self) {
+MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, GameplayCoreInstaller *self) {
     IDifficultyBeatmap *difficultyBeatmap = self->sceneSetupData->difficultyBeatmap;
     GameplayModifiers *gameplayModifiers = self->sceneSetupData->gameplayModifiers;
 
@@ -34,7 +35,7 @@ MAKE_HOOK_OFFSETLESS(InstallBindings, void, GameplayCoreInstaller *self) {
 }
 
 void InstallGameplayCoreInstallerHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, InstallBindings, il2cpp_utils::FindMethodUnsafe("", "GameplayCoreInstaller", "InstallBindings", 0));
+    INSTALL_HOOK(logger, InstallBindings);
 }
 
 NEInstallHooks(InstallGameplayCoreInstallerHooks);

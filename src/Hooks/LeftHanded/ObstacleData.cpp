@@ -1,4 +1,5 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/ObstacleData.hpp"
 
@@ -7,14 +8,14 @@
 
 using namespace GlobalNamespace;
 
-
-MAKE_HOOK_OFFSETLESS(ObstacleData_MirrorLineIndex, void, ObstacleData *self, int lineCount) {
+MAKE_HOOK_MATCH(ObstacleData_MirrorLineIndex, &ObstacleData::MirrorLineIndex,
+                void, ObstacleData *self, int lineCount) {
     // TODO
     return ObstacleData_MirrorLineIndex(self, lineCount);
 }
 
-void InstallObstacleDataHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, ObstacleData_MirrorLineIndex, il2cpp_utils::FindMethodUnsafe("", "ObstacleData", "MirrorLineIndex", 1));
+void InstallObstacleDataHooks(Logger &logger) {
+    INSTALL_HOOK(logger, ObstacleData_MirrorLineIndex);
 }
 
 NEInstallHooks(InstallObstacleDataHooks);

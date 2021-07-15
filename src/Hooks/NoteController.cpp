@@ -1,53 +1,70 @@
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
 
-#include "GlobalNamespace/NoteController.hpp"
-#include "GlobalNamespace/NoteMovement.hpp"
-#include "GlobalNamespace/NoteJump.hpp"
-#include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
+#include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/NoteFloorMovement.hpp"
+#include "GlobalNamespace/NoteJump.hpp"
+#include "GlobalNamespace/NoteMovement.hpp"
 #include "UnityEngine/Transform.hpp"
 
-#include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-BeatmapObjectAssociatedData *noteUpdateAD; 
+BeatmapObjectAssociatedData *noteUpdateAD;
 
-MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSONData::CustomNoteData *noteData, float worldRotation, Vector3 startPos, Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration, float jumpGravity, float endRotation, float uniformScale) {
-    NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos, move1Duration, move2Duration, jumpGravity, endRotation, uniformScale);
+MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
+                NoteController *self, NoteData *noteData, float worldRotation,
+                Vector3 startPos, Vector3 midPos, Vector3 endPos,
+                float move1Duration, float move2Duration, float jumpGravity,
+                float endRotation, float uniformScale) {
+    NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos,
+                        move1Duration, move2Duration, jumpGravity, endRotation,
+                        uniformScale);
+    auto *customNoteData =
+        reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
 
     Transform *transform = self->get_transform();
-    transform->set_localScale(Vector3::get_one()); // This is a fix for animation due to notes being recycled
-    
-    if (!noteData->customData->value) {
+    transform->set_localScale(
+        Vector3::get_one()); // This is a fix for animation due to notes being
+                             // recycled
+
+    if (!customNoteData->customData->value) {
         return;
     }
-    rapidjson::Value &customData = *noteData->customData->value;
-    BeatmapObjectAssociatedData& ad = getAD(noteData->customData);
+    rapidjson::Value &customData = *customNoteData->customData->value;
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
-    
-    std::optional<float> curDir = customData.HasMember("_cutDirection") ? std::optional{customData["_cutDirection"].GetFloat()} : std::nullopt;
+
+    std::optional<float> curDir =
+        customData.HasMember("_cutDirection")
+            ? std::optional{customData["_cutDirection"].GetFloat()}
+            : std::nullopt;
 
     if (curDir.has_value()) {
         Quaternion cutQuaternion = Quaternion::Euler(0, 0, curDir.value());
         noteJump->endRotation = cutQuaternion;
         Vector3 vector = cutQuaternion.get_eulerAngles();
-        vector = vector + noteJump->randomRotations->values[noteJump->randomRotationIdx] * 20;
+        vector =
+            vector +
+            noteJump->randomRotations->values[noteJump->randomRotationIdx] * 20;
         Quaternion midrotation = Quaternion::Euler(vector);
         noteJump->middleRotation = midrotation;
     }
 
     Quaternion localRotation = Quaternion::get_identity();
-    if (customData.HasMember("_rotation") || customData.HasMember("_localRotation")) {
+    if (customData.HasMember("_rotation") ||
+        customData.HasMember("_localRotation")) {
         if (customData.HasMember("_localRotation")) {
             float x = customData["_localRotation"][0].GetFloat();
             float y = customData["_localRotation"][1].GetFloat();
@@ -63,10 +80,12 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
                 float z = customData["_rotation"][2].GetFloat();
                 worldRotationQuatnerion = Quaternion::Euler(x, y, z);
             } else {
-                worldRotationQuatnerion = Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
+                worldRotationQuatnerion =
+                    Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
             }
 
-            Quaternion inverseWorldRotation = Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
+            Quaternion inverseWorldRotation =
+                Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
             noteJump->worldRotation = worldRotationQuatnerion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuatnerion;
@@ -81,7 +100,8 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
 
     Track *track = ad.track;
     if (track) {
-        ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
+        ParentObject *parentObject =
+            ParentController::GetParentObjectTrack(track);
         if (parentObject) {
             parentObject->ParentToObject(transform);
         } else {
@@ -100,11 +120,14 @@ MAKE_HOOK_OFFSETLESS(NoteController_Init, void, NoteController *self, CustomJSON
     self->Update();
 }
 
-MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
+MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
+                NoteController *self) {
     // Excuse me what the fuck
-    if (!self->noteData) return;
+    if (!self->noteData)
+        return;
 
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData*>(self->noteData);
+    auto *customNoteData =
+        reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
     if (!customNoteData->customData->value) {
         NoteController_Update(self);
         return;
@@ -116,19 +139,21 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     //     NoteController_Update(self);
     //     return;
     // }
-    rapidjson::Value& animation = customData["_animation"];
+    rapidjson::Value &animation = customData["_animation"];
 
-    BeatmapObjectAssociatedData& ad = getAD(customNoteData->customData);
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
     noteUpdateAD = &ad;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
     float songTime = noteJump->audioTimeSyncController->get_songTime();
-    float elapsedTime = songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
+    float elapsedTime =
+        songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
     float normalTime = elapsedTime / noteJump->jumpDuration;
 
-    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad.animationData, ad.track, normalTime);
+    AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
+        ad.animationData, ad.track, normalTime);
 
     if (offset.positionOffset.has_value()) {
         floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;
@@ -141,14 +166,17 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
         self->get_transform()->set_localScale(*offset.scaleOffset);
     }
 
-    if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
+    if (offset.rotationOffset.has_value() ||
+        offset.localRotationOffset.has_value()) {
         Quaternion worldRotation = ad.worldRotation;
         Quaternion localRotation = ad.localRotation;
 
         Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
-            worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
-            Quaternion inverseWorldRotation = Quaternion::Inverse(worldRotationQuaternion);
+            worldRotationQuaternion =
+                worldRotationQuaternion * *offset.rotationOffset;
+            Quaternion inverseWorldRotation =
+                Quaternion::Inverse(worldRotationQuaternion);
             noteJump->worldRotation = worldRotationQuaternion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuaternion;
@@ -158,7 +186,8 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
         worldRotationQuaternion = worldRotationQuaternion * localRotation;
 
         if (offset.localRotationOffset.has_value()) {
-            worldRotationQuaternion = worldRotationQuaternion * *offset.localRotationOffset;
+            worldRotationQuaternion =
+                worldRotationQuaternion * *offset.localRotationOffset;
         }
 
         self->get_transform()->set_localRotation(worldRotationQuaternion);
@@ -167,9 +196,9 @@ MAKE_HOOK_OFFSETLESS(NoteController_Update, void, NoteController *self) {
     NoteController_Update(self);
 }
 
-void InstallNoteControllerHooks(Logger& logger) {
-    INSTALL_HOOK_OFFSETLESS(logger, NoteController_Init, il2cpp_utils::FindMethodUnsafe("", "NoteController", "Init", 10));
-    INSTALL_HOOK_OFFSETLESS(logger, NoteController_Update, il2cpp_utils::FindMethodUnsafe("", "NoteController", "ManualUpdate", 0));
+void InstallNoteControllerHooks(Logger &logger) {
+    INSTALL_HOOK(logger, NoteController_Init);
+    INSTALL_HOOK(logger, NoteController_Update);
 }
 
 NEInstallHooks(InstallNoteControllerHooks);
