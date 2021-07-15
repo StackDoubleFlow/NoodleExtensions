@@ -160,13 +160,13 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
     self->Update();
 }
 
-MAKE_HOOK_MATCH(ObstacleController_Update, &ObstacleController::Update, void,
+MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
     auto *obstacleData =
-        (CustomJSONData::CustomObstacleData *)self->obstacleData;
+        reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     if (!obstacleData->customData->value) {
-        ObstacleController_Update(self);
+        ObstacleController_ManualUpdate(self);
         return;
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
@@ -244,7 +244,7 @@ MAKE_HOOK_MATCH(ObstacleController_Update, &ObstacleController::Update, void,
         // }
     }
 
-    ObstacleController_Update(self);
+    ObstacleController_ManualUpdate(self);
 }
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime,
@@ -289,7 +289,7 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
 
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);
-    INSTALL_HOOK(logger, ObstacleController_Update);
+    INSTALL_HOOK(logger, ObstacleController_ManualUpdate);
     INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
     // Temporary fake glow disable hook
     INSTALL_HOOK(logger, ParametricBoxFakeGlowController_OnEnable);
