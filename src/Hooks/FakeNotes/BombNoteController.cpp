@@ -2,6 +2,7 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/BombNoteController.hpp"
+#include "GlobalNamespace/CuttableBySaber.hpp"
 
 #include "FakeNoteHelper.h"
 #include "NEHooks.h"
@@ -15,10 +16,11 @@ MAKE_HOOK_MATCH(BombNoteController_Init, &BombNoteController::Init, void,
                 UnityEngine::Vector3 moveEndPos,
                 UnityEngine::Vector3 jumpEndPos, float moveDuration,
                 float jumpDuration, float jumpGravity) {
+    BombNoteController_Init(self, noteData, worldRotation, moveStartPos,
+                            moveEndPos, jumpEndPos, moveDuration,
+                            jumpDuration, jumpGravity);
     if (FakeNoteHelper::GetCuttable(noteData)) {
-        BombNoteController_Init(self, noteData, worldRotation, moveStartPos,
-                                moveEndPos, jumpEndPos, moveDuration,
-                                jumpDuration, jumpGravity);
+        self->cuttableBySaber->set_canBeCut(false);
     }
 }
 

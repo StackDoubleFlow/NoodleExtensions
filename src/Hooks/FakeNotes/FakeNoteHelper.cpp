@@ -9,10 +9,7 @@
 using namespace GlobalNamespace;
 
 bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
-    // NELogger::GetLogger().info("In GetFakeNote");
-    // NELogger::GetLogger().info("noteData pointer %p", noteController->noteData);
-    // NELogger::GetLogger().info("GetFakeNote noteData klass %s", noteController->noteData->klass->name);
-    auto customNoteData = (CustomJSONData::CustomNoteData *) noteController->noteData;
+    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->get_noteData());
     if (!customNoteData->customData->value) {
         return false;
     }
@@ -21,7 +18,7 @@ bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
 }
 
 bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
-    auto customNoteData = (CustomJSONData::CustomNoteData *) noteData;
+    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
     if (!customNoteData->customData->value) {
         return true;
     }

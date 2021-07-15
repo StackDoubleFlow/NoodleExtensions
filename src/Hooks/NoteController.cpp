@@ -122,9 +122,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
 MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
                 NoteController *self) {
-    // Excuse me what the fuck
-    if (!self->noteData)
-        return;
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);

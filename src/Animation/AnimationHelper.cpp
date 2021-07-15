@@ -129,8 +129,13 @@ std::optional<Vector3> AnimationHelper::GetDefinitePositionOffset(const Animatio
 
 namespace {
     template<typename T, typename F>
-    constexpr auto map(std::optional<T> const& v, F&& func) noexcept {
-        return v.has_value() ? std::optional{ std::invoke(std::forward<F>(func), *v) } : std::nullopt;
+    constexpr auto map(T const& v, F&& func) noexcept {
+        return v ? std::optional{ std::invoke(std::forward<F>(func), *v) } : std::nullopt;
+    }
+
+    template<typename T, typename F>
+    constexpr auto mapTrack(Track *track, std::optional<T> const& v, F&& func) noexcept {
+        return track ? map(v, func) : std::nullopt;
     }
 }
 
@@ -153,40 +158,19 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     std::optional<float> pathDissolveArrow = dissolveArrow ? std::optional{ dissolveArrow->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolveArrow", time);
     std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
 
-    if (!track) {
-        return offset;
-    }
-
-    offset.positionOffset = pathPosition + map(track->properties.position.value, [](auto const& p) { return p.vector3; });
+    offset.positionOffset = pathPosition + mapTrack(track, track->properties.position.value, [](auto const& p) { return p.vector3; });
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-    offset.rotationOffset = pathRotation * map(track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
-    offset.scaleOffset = pathScale * map(track->properties.position.value, [](auto const& p) { return p.vector3; });
-    offset.localRotationOffset = pathLocalRotation * map(track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
-    offset.dissolve = pathDissolve * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
-    offset.dissolveArrow = pathDissolveArrow * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
-    offset.cuttable = pathCuttable * map(track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.rotationOffset = pathRotation * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
+    offset.scaleOffset = pathScale * mapTrack(track, track->properties.position.value, [](auto const& p) { return p.vector3; });
+    offset.localRotationOffset = pathLocalRotation * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.quaternion; });
+    offset.dissolve = pathDissolve * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.dissolveArrow = pathDissolveArrow * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
+    offset.cuttable = pathCuttable * mapTrack(track, track->properties.rotation.value, [](auto const& p) { return p.linear; });
 
     return offset;
 }
 
 void AnimationHelper::OnTrackCreated(Track *track) {
-    // These are all done in the constructors now
-
-    // track->properties.position = Property(PropertyType::vector3);
-    // track->properties.rotation = Property(PropertyType::quaternion);
-    // track->properties.scale = Property(PropertyType::vector3);
-    // track->properties.localRotation = Property(PropertyType::quaternion);
-    // track->properties.dissolve = Property(PropertyType::linear);
-    // track->properties.dissolveArrow = Property(PropertyType::linear);
-    // track->properties.time = Property(PropertyType::linear);
-    // track->properties.cuttable = Property(PropertyType::linear);
-
-    // track->pathProperties.position = PathProperty(PropertyType::vector3);
-    // track->pathProperties.rotation = PathProperty(PropertyType::quaternion);
-    // track->pathProperties.scale = PathProperty(PropertyType::vector3);
-    // track->pathProperties.localRotation = PathProperty(PropertyType::quaternion);
-    // track->pathProperties.dissolve = PathProperty(PropertyType::linear);
-    // track->pathProperties.dissolveArrow = PathProperty(PropertyType::linear);
-    // track->pathProperties.cuttable = PathProperty(PropertyType::linear);
+    
 }
