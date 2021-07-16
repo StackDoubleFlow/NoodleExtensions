@@ -7,7 +7,13 @@
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
 #include "GlobalNamespace/NoteMovement.hpp"
+#include "GlobalNamespace/BaseNoteVisuals.hpp"
+#include "GlobalNamespace/CutoutAnimateEffect.hpp"
+#include "GlobalNamespace/CutoutEffect.hpp"
+#include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
+#include "GlobalNamespace/GameNoteController.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "UnityEngine/GameObject.hpp"
 
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
@@ -188,6 +194,34 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         }
 
         self->get_transform()->set_localRotation(worldRotationQuaternion);
+    }
+
+    if (offset.dissolve.has_value()) {
+        CutoutEffect *cutoutEffect = ad.cutoutEffect;
+        if (!cutoutEffect) {
+            BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
+            CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
+            Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
+            for (int i = 0; i < cuttoutEffects->Length(); i++) {
+                CutoutEffect *effect = cuttoutEffects->get(i);
+                if (to_utf8(csstrtostr(effect->get_name())) != "NoteArrow") {
+                    cutoutEffect = effect;
+                    break;
+                }
+            }
+        }
+
+        cutoutEffect->SetCutout(1 - *offset.dissolve);
+    }
+
+    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
+        DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController = ad.disappearingArrowController;
+        if (!disappearingArrowController) {
+            disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
+            ad.disappearingArrowController = disappearingArrowController;
+        }
+
+        disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
     }
 
     NoteController_Update(self);

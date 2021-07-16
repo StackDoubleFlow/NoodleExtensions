@@ -9,6 +9,10 @@
 
 namespace GlobalNamespace {
     class CutoutAnimateEffect;
+    class CutoutEffect;
+    template<typename T>
+    class DisappearingArrowControllerBase_1;
+    class GameNoteController;
 }
 
 class BeatmapAssociatedData {
@@ -44,7 +48,11 @@ struct BeatmapObjectAssociatedData {
     UnityEngine::Vector3 jumpEndPos;
     UnityEngine::Vector3 noteOffset;
     float xOffset;
+    // cutout for obstacles
     GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
+    // cutout for notes
+    GlobalNamespace::CutoutEffect *cutoutEffect;
+    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
     AnimationObjectData animationData;
 };
 
