@@ -202,6 +202,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
         if (!materialSwitcher) {
             materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+            ad.materialSwitcher = materialSwitcher;
         }
         if (!materialSwitcher->value->get_value()) {
             materialSwitcher->value->set_value(true);
@@ -221,6 +222,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
                     break;
                 }
             }
+            ad.cutoutEffect = cutoutEffect;
         }
 
         cutoutEffect->SetCutout(1 - *offset.dissolve);
