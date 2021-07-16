@@ -71,3 +71,7 @@ PathProperty *PathProperties::FindProperty(std::string name) {
         return nullptr;
     }
 }
+
+void Track::ResetVariables() {
+    *this = Track();
+}

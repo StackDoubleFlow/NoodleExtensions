@@ -131,5 +131,6 @@ ParentObject *ParentController::GetParentObjectTrack(Track *track) {
 }
 
 void ParentController::OnDestroy() {
+    NELogger::GetLogger().debug("Clearing parent objects");
     parentObjects.clear();
 }

@@ -26,8 +26,7 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     auto *beatmapData = reinterpret_cast<CustomBeatmapData*>(difficultyBeatmap->get_beatmapData());
     auto& ad = getBeatmapAD(beatmapData->customData);
     for (auto& pair : ad.tracks) {
-        // TODO: Make this work
-        // pair.second.ResetVariables();
+        pair.second.ResetVariables();
     }
 }
 

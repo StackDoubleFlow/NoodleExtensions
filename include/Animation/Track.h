@@ -87,4 +87,5 @@ public:
 struct Track {
     Properties properties;
     PathProperties pathProperties;
+    void ResetVariables();
 };
