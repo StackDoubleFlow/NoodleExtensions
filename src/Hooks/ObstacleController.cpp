@@ -231,13 +231,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     if (offset.dissolve.has_value()) {
-        // ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-        // if (!materialSwitcher) {
-        //     materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-        // }
-        // if (!materialSwitcher->value->get_value()) {
-        //     materialSwitcher->value->set_value(true);
-        // }
+        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
+        if (!materialSwitcher) {
+            materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+        }
+        if (!materialSwitcher->value->get_value()) {
+            materialSwitcher->value->set_value(true);
+        }
 
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
         if (!cutoutAnimationEffect) {
@@ -247,7 +247,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
 
-        // cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
+        cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
 
         // if (offset.dissolve <= 0) {
         //     cutoutAnimationEffect->SetCutout(1);

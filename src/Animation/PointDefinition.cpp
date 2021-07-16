@@ -169,11 +169,11 @@ float PointDefinition::InterpolateLinear(float time) {
         return 0;
     }
 
-    if (points[0].point.w >= time) {
+    if (points[0].linearPoint.y >= time) {
         return points[0].linearPoint.x;
     }
 
-    if (points[points.size() - 1].point.w <= time) {
+    if (points[points.size() - 1].linearPoint.y <= time) {
         return points[points.size() - 1].linearPoint.x;
     }
 
@@ -191,11 +191,11 @@ Vector4 PointDefinition::InterpolateVector4(float time) {
         return Vector4::get_zero();
     }
 
-    if (points[0].point.w >= time) {
+    if (points[0].vector4Point.w >= time) {
         return v524(points[0].vector4Point);
     }
 
-    if (points[points.size() - 1].point.w <= time) {
+    if (points[points.size() - 1].vector4Point.w <= time) {
         return v524(points[points.size() - 1].vector4Point);
     }
 
