@@ -12,6 +12,8 @@
 #include "GlobalNamespace/CutoutEffect.hpp"
 #include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
+#include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
+#include "GlobalNamespace/BoolSO.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
 
@@ -194,6 +196,16 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         }
 
         self->get_transform()->set_localRotation(worldRotationQuaternion);
+    }
+
+    if (offset.dissolve.has_value() || offset.dissolveArrow.has_value()) {
+        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
+        if (!materialSwitcher) {
+            materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+        }
+        if (!materialSwitcher->value->get_value()) {
+            materialSwitcher->value->set_value(true);
+        }
     }
 
     if (offset.dissolve.has_value()) {

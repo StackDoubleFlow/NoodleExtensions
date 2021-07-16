@@ -13,6 +13,7 @@ namespace GlobalNamespace {
     template<typename T>
     class DisappearingArrowControllerBase_1;
     class GameNoteController;
+    class ConditionalMaterialSwitcher;
 }
 
 class BeatmapAssociatedData {
@@ -53,6 +54,8 @@ struct BeatmapObjectAssociatedData {
     // cutout for notes
     GlobalNamespace::CutoutEffect *cutoutEffect;
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
+    // conditional material switch for dissolve
+    GlobalNamespace::ConditionalMaterialSwitcher *materialSwitcher;
     AnimationObjectData animationData;
 };
 

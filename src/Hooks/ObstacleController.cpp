@@ -12,6 +12,8 @@
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "GlobalNamespace/BoolSO.hpp"
+#include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
@@ -229,6 +231,14 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     if (offset.dissolve.has_value()) {
+        // ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
+        // if (!materialSwitcher) {
+        //     materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+        // }
+        // if (!materialSwitcher->value->get_value()) {
+        //     materialSwitcher->value->set_value(true);
+        // }
+
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
         if (!cutoutAnimationEffect) {
             ObstacleDissolve *obstacleDissolve =
@@ -236,6 +246,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
+
+        // cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
 
         // if (offset.dissolve <= 0) {
         //     cutoutAnimationEffect->SetCutout(1);
