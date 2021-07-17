@@ -15,6 +15,7 @@
 #include "GlobalNamespace/BoolSO.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 
+#include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
@@ -230,7 +231,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         self->bounds.set_size(Vector3::get_zero());
     }
 
-    if (offset.dissolve.has_value()) {
+    if (offset.dissolve.has_value() && getNEConfig().enableObstacleDissolve.GetValue()) {
         ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
         if (!materialSwitcher) {
             materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();

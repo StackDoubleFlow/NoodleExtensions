@@ -100,6 +100,7 @@
         "*.def": "cpp",
         "any": "cpp",
         "semaphore": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "__functional_base_03": "cpp"
     }
 }

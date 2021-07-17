@@ -17,6 +17,7 @@
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
 
+#include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
@@ -211,18 +212,21 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         self->get_transform()->set_localRotation(worldRotationQuaternion);
     }
 
-    if (offset.dissolve.has_value() || offset.dissolveArrow.has_value()) {
-        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-        if (!materialSwitcher) {
-            materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-            ad.materialSwitcher = materialSwitcher;
-        }
-        if (!materialSwitcher->value->get_value()) {
-            materialSwitcher->value->set_value(true);
+    if (getNEConfig().enableNoteDissolve.GetValue()) {
+        if (offset.dissolve.has_value() || offset.dissolveArrow.has_value()) {
+            ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
+            if (!materialSwitcher) {
+                materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+                ad.materialSwitcher = materialSwitcher;
+            }
+            if (!materialSwitcher->value->get_value()) {
+                materialSwitcher->value->set_value(true);
+            }
         }
     }
+    
 
-    if (offset.dissolve.has_value()) {
+    if (offset.dissolve.has_value() && getNEConfig().enableNoteDissolve.GetValue()) {
         CutoutEffect *cutoutEffect = ad.cutoutEffect;
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
@@ -241,7 +245,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         cutoutEffect->SetCutout(1 - *offset.dissolve);
     }
 
-    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
+    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None && getNEConfig().enableNoteDissolve.GetValue()) {
         DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController = ad.disappearingArrowController;
         if (!disappearingArrowController) {
             disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
