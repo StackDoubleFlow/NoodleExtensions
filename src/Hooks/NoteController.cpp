@@ -29,6 +29,18 @@ using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
 
+float noteTimeAdjust(float original, float jumpDuration) {
+    if (noteUpdateAD->track) {
+        Property &timeProperty = noteUpdateAD->track->properties.time;
+        if (timeProperty.value) {
+            float time = timeProperty.value->linear;
+            return time * jumpDuration;
+        }
+    }
+
+    return original;
+}
+
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 NoteController *self, NoteData *noteData, float worldRotation,
                 Vector3 startPos, Vector3 midPos, Vector3 endPos,
@@ -155,6 +167,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
     float songTime = noteJump->audioTimeSyncController->get_songTime();
     float elapsedTime =
         songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
+    elapsedTime = noteTimeAdjust(elapsedTime, noteJump->jumpDuration);
     float normalTime = elapsedTime / noteJump->jumpDuration;
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
