@@ -20,6 +20,7 @@ public:
 struct __NERegister##func { \
     __NERegister##func() { \
         Hooks::AddInstallFunc(func); \
+        __android_log_print(ANDROID_LOG_DEBUG, "NEInstallHooks", "Registered install func: " #func); \
     } \
 }; \
 static __NERegister##func __NERegisterInstance##func;

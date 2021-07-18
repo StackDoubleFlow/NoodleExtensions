@@ -34,6 +34,8 @@ extern "C" void setup(ModInfo &info) {
     getNEConfig().Init(info);
 }
 
+void InstallNEConfigHooks(Logger& logger);
+
 extern "C" void load() {
     NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
     // This prevents any and all Utils logging
@@ -42,6 +44,9 @@ extern "C" void load() {
     // Install hooks
 
     InstallAndRegisterAll();
+
+    // what the fuck
+    InstallNEConfigHooks(NELogger::GetLogger());
 
     NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
 }
