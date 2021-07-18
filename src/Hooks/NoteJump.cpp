@@ -48,7 +48,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
                                   baseTransform->get_rotation() * self->middleRotation,
                                   std::sin(normalTime * M_PI * 4));
         } else {
-            a = Quaternion::Slerp(baseTransform->get_rotation() * self->startRotation, 
+            a = Quaternion::Slerp(baseTransform->get_rotation() * self->middleRotation, 
                                   baseTransform->get_rotation() * self->endRotation,
                                   std::sin((normalTime - 0.125) * M_PI * 2));
         }
