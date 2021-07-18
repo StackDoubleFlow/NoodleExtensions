@@ -12,6 +12,7 @@
 #include "GlobalNamespace/PracticeSettings.hpp"
 
 #include "Animation/ParentObject.h"
+#include "Animation/PointDefinition.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 
@@ -33,3 +34,4 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
 void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
     INSTALL_HOOK(logger, StandardLevelScenesTransitionSetupDataSO_Init);
 }
+NEInstallHooks(InstallStandardLevelScenesTransitionSetupDataSOHooks);

@@ -5,7 +5,7 @@
 
 DECLARE_CONFIG(NEConfig, 
     CONFIG_VALUE(enableNoteDissolve, bool, "Enable note dissolve", true);
-    CONFIG_VALUE(enableObstacleDissolve, bool, "Enable obstacle dissolve", true);
+    CONFIG_VALUE(enableObstacleDissolve, bool, "Enable obstacle dissolve", false);
 
     CONFIG_INIT_FUNCTION(
         CONFIG_INIT_VALUE(enableNoteDissolve);

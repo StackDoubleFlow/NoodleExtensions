@@ -1,3 +1,6 @@
+// It doesn't like it if i include this after
+#include "NEConfig.h"
+
 #include "beatsaber-hook/shared/utils/logging.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
@@ -28,6 +31,7 @@ extern "C" void setup(ModInfo &info) {
     info.id = "NoodleExtensions";
     info.version = VERSION;
     NELogger::modInfo = info;
+    getNEConfig().Init(info);
 }
 
 extern "C" void load() {

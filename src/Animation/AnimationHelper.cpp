@@ -54,7 +54,7 @@ std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
     return std::nullopt;
 }
 
-PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData, std::string pointName) {
+PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, std::vector<PointDefinition*>& anonPool, const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
     if (!customData.HasMember(pointName.c_str())) return pointData;
@@ -74,7 +74,7 @@ PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmap
     }
     default:
         pointData = new PointDefinition(pointString);
-        beatmapAD.anonPointDefinitions.push_back(pointData);
+        anonPool.push_back(pointData);
     }
 
     return pointData;
