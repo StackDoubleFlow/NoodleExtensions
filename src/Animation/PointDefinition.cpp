@@ -19,7 +19,7 @@ Vector4 v4lerp(Vector4 a, Vector4 b, float t) {
     return Vector4(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, a.w + (b.w - a.w) * t);
 }
 
-Vector3 SmoothVectorLerp(std::vector<PointData> points, int a, int b, float time) {
+Vector3 SmoothVectorLerp(std::vector<PointData>& points, int a, int b, float time) {
     // Catmull-Rom Spline
     Vector3 p0 = v423(a - 1 < 0 ? points[a].point : points[a - 1].point);
     Vector3 p1 = v423(points[a].point);

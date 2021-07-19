@@ -30,7 +30,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     if (self->startPos.x == self->endPos.x) {
         self->localPosition.x = self->startPos.x;
     } else if (normalTime < 0.25) {
-        self->localPosition.x = self->startPos.x + (self->endPos.x - self->startPos.x) + Easing::InOutQuad(normalTime * 4);
+        self->localPosition.x = self->startPos.x + (self->endPos.x - self->startPos.x) * Easing::InOutQuad(normalTime * 4);
     } else {
         self->localPosition.x = self->endPos.x;
     }
