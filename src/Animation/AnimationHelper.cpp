@@ -41,17 +41,15 @@ std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3
 
 template<typename T>
 std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
-    if (a) {
-        if (b) {
-            return *a * *b;
-        } else {
-            return a;
-        }
+    if (a && b) {
+        return *a * *b;
+    } else if (a) {
+        return a;
     } else if (b) {
         return b;
+    } else {
+        return std::nullopt;
     }
-    
-    return std::nullopt;
 }
 
 PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, std::vector<PointDefinition*>& anonPool, const rapidjson::Value& customData, std::string pointName) {
