@@ -104,7 +104,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
 
     float width =
         GetCustomWidth(obstacleData->width, obstacleData) * singleLineWidth;
-    Vector3 b = Vector3{(width - singleLineWidth) * 0.5f, 0, 0};
+    NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
@@ -204,14 +204,14 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     if (offset.rotationOffset.has_value() ||
         offset.localRotationOffset.has_value()) {
-        Quaternion worldRotation = ad.worldRotation;
-        Quaternion localRotation = ad.localRotation;
+        NEVector::Quaternion worldRotation = ad.worldRotation;
+        NEVector::Quaternion localRotation = ad.localRotation;
 
-        Quaternion worldRotationQuaternion = worldRotation;
+        NEVector::Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
             worldRotationQuaternion =
                 worldRotationQuaternion * *offset.rotationOffset;
-            Quaternion inverseWorldRotation =
+            NEVector::Quaternion inverseWorldRotation =
                 Quaternion::Inverse(worldRotationQuaternion);
             self->worldRotation = worldRotationQuaternion;
             self->inverseWorldRotation = inverseWorldRotation;
@@ -286,7 +286,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime,
         Vector3 definitePosition = *position + noteOffset;
         definitePosition.x += ad.xOffset;
         if (time < self->move1Duration) {
-            Vector3 result = Vector3::LerpUnclamped(
+            Vector3 result = NEVector::Vector3::LerpUnclamped(
                 self->startPos, self->midPos, time / self->move1Duration);
             return result + definitePosition - self->midPos;
         } else {

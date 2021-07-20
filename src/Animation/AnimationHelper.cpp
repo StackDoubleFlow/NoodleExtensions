@@ -9,7 +9,7 @@
 
 using namespace AnimationHelper;
 using namespace GlobalNamespace;
-using namespace UnityEngine;
+using namespace NEVector;
 using namespace CustomJSONData;
 
 // BeatmapObjectCallbackController.cpp
@@ -17,10 +17,6 @@ extern BeatmapObjectCallbackController *callbackController;
 
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
-
-Vector3 operator*(const Vector3& a, const Vector3& b) {
-    return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
-}
 
 std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3> b) {
     if (!a && !b) {

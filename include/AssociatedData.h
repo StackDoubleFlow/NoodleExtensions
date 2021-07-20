@@ -2,8 +2,7 @@
 
 #include "custom-json-data/shared/JSONWrapper.h"
 
-#include "UnityEngine/Vector3.hpp"
-#include "UnityEngine/Quaternion.hpp"
+#include "Vector.h"
 
 #include "Animation/Track.h"
 
@@ -47,12 +46,12 @@ struct AnimationObjectData {
 struct BeatmapObjectAssociatedData {
     float aheadTime;
     Track *track;
-    UnityEngine::Quaternion worldRotation;
-    UnityEngine::Quaternion localRotation;
-    UnityEngine::Vector3 moveStartPos;
-    UnityEngine::Vector3 moveEndPos;
-    UnityEngine::Vector3 jumpEndPos;
-    UnityEngine::Vector3 noteOffset;
+    NEVector::Quaternion worldRotation;
+    NEVector::Quaternion localRotation;
+    NEVector::Vector3 moveStartPos;
+    NEVector::Vector3 moveEndPos;
+    NEVector::Vector3 jumpEndPos;
+    NEVector::Vector3 noteOffset;
     float xOffset;
     // cutout for obstacles
     GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;

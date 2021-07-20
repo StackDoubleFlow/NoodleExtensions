@@ -208,7 +208,7 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                         pathCoroutines.push_back(AssignPathAnimationContext { property, duration, customEventData->time, easing });
                     }
                 } else {
-                    NELogger::GetLogger().warning("Could not find track property with name %s", name);
+                    NELogger::GetLogger().warning("Could not find track path property with name %s", name);
                 }
             }
         }

@@ -1,9 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
-#include "UnityEngine/Vector3.hpp"
-#include "UnityEngine/Vector4.hpp"
-#include "UnityEngine/Quaternion.hpp"
+#include "Vector.h"
 #include "Animation/PointDefinitionInterpolation.h"
 
 namespace Events {
@@ -19,9 +17,9 @@ enum struct PropertyType {
 
 union PropertyValue {
     float linear;
-    UnityEngine::Vector3 vector3;
-    UnityEngine::Vector4 vector4;
-    UnityEngine::Quaternion quaternion;
+    NEVector::Vector3 vector3;
+    NEVector::Vector4 vector4;
+    NEVector::Quaternion quaternion;
 };
 
 struct Property {

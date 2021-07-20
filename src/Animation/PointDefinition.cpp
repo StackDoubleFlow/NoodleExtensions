@@ -1,19 +1,9 @@
 #include "Animation/PointDefinition.h"
 #include "Animation/Track.h"
 #include "Animation/Easings.h"
-#include "UnityEngine/Vector3.hpp"
-#include "UnityEngine/Quaternion.hpp"
 #include "NELogger.h"
 
-using namespace UnityEngine;
-
-Vector3 v423(Vector4 v) {
-    return Vector3(v.x, v.y, v.z);
-}
-
-Vector4 v524(Vector5 v) {
-    return Vector4(v.x, v.y, v.z, v.w);
-}
+using namespace NEVector;
 
 Vector4 v4lerp(Vector4 a, Vector4 b, float t) {
     return Vector4(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, a.w + (b.w - a.w) * t);
@@ -21,10 +11,10 @@ Vector4 v4lerp(Vector4 a, Vector4 b, float t) {
 
 Vector3 SmoothVectorLerp(std::vector<PointData>& points, int a, int b, float time) {
     // Catmull-Rom Spline
-    Vector3 p0 = v423(a - 1 < 0 ? points[a].point : points[a - 1].point);
-    Vector3 p1 = v423(points[a].point);
-    Vector3 p2 = v423(points[b].point);
-    Vector3 p3 = v423(b + 1 > points.size() - 1 ? points[b].point : points[b + 1].point);
+    Vector3 p0 = a - 1 < 0 ? points[a].point : points[a - 1].point;
+    Vector3 p1 = points[a].point;
+    Vector3 p2 = points[b].point;
+    Vector3 p3 = b + 1 > points.size() - 1 ? points[b].point : points[b + 1].point;
 
     float t = time;
 
@@ -120,11 +110,11 @@ Vector3 PointDefinition::Interpolate(float time) {
     }
 
     if (points[0].point.w >= time) {
-        return v423(points[0].point);
+        return points[0].point;
     }
 
     if (points[points.size() - 1].point.w <= time) {
-        return v423(points[points.size() - 1].point);
+        return points[points.size() - 1].point;
     }
 
     int l;
@@ -136,7 +126,7 @@ Vector3 PointDefinition::Interpolate(float time) {
     if (points[r].smooth) {
         return SmoothVectorLerp(points, l, r, normalTime);
     } else {
-        return Vector3::LerpUnclamped(v423(points[l].point), v423(points[r].point), normalTime);
+        return Vector3::LerpUnclamped(points[l].point, points[r].point, normalTime);
     }
 }
 
@@ -146,19 +136,19 @@ Quaternion PointDefinition::InterpolateQuaternion(float time) {
     }
 
     if (points[0].point.w >= time) {
-        return Quaternion::Euler(v423(points[0].point));
+        return Quaternion::Euler(points[0].point);
     }
 
     if (points[points.size() - 1].point.w <= time) {
-        return Quaternion::Euler(v423(points[points.size() - 1].point));
+        return Quaternion::Euler(points[points.size() - 1].point);
     }
 
     int l;
     int r;
     SearchIndex(time, PropertyType::vector3, l, r);
 
-    Quaternion quaternionOne = Quaternion::Euler(v423(points[l].point));
-    Quaternion quaternionTwo = Quaternion::Euler(v423(points[r].point));
+    Quaternion quaternionOne = Quaternion::Euler(points[l].point);
+    Quaternion quaternionTwo = Quaternion::Euler(points[r].point);
     float normalTime = (time - points[l].point.w) / (points[r].point.w - points[l].point.w);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
     return Quaternion::SlerpUnclamped(quaternionOne, quaternionTwo, normalTime);
@@ -192,11 +182,11 @@ Vector4 PointDefinition::InterpolateVector4(float time) {
     }
 
     if (points[0].vector4Point.w >= time) {
-        return v524(points[0].vector4Point);
+        return points[0].vector4Point;
     }
 
     if (points[points.size() - 1].vector4Point.w <= time) {
-        return v524(points[points.size() - 1].vector4Point);
+        return points[points.size() - 1].vector4Point;
     }
 
     int l;
@@ -205,7 +195,7 @@ Vector4 PointDefinition::InterpolateVector4(float time) {
 
     float normalTime = (time - points[l].vector4Point.v) / (points[r].vector4Point.v - points[l].vector4Point.v);
     normalTime = Easings::Interpolate(normalTime, points[r].easing);
-    return v4lerp(v524(points[l].vector4Point), v524(points[r].vector4Point), normalTime);
+    return v4lerp(points[l].vector4Point, points[r].vector4Point, normalTime);
 }
 
 void PointDefinitionManager::AddPoint(std::string pointDataName, PointDefinition pointData) {
