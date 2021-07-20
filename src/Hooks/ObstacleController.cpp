@@ -235,6 +235,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
         if (!materialSwitcher) {
             materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+            ad.materialSwitcher = materialSwitcher;
         }
         if (!materialSwitcher->value->get_value()) {
             materialSwitcher->value->set_value(true);
