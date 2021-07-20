@@ -55,7 +55,6 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
                     }
                 }
                 // NELogger::GetLogger().info("Method name: %s", callbackData->callback->method_info->get_Name());
-                
 
                 if (beatmapObjectData->time - aheadTime >= self->audioTimeSource->get_songTime()) {
                     break;

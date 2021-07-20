@@ -13,3 +13,4 @@ public:
 };
 
 void PrintJSONValue(const rapidjson::Value &json);
+void PrintBacktrace(size_t maxLines);
