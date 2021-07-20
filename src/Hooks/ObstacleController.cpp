@@ -1,6 +1,8 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
+#include "GlobalNamespace/BoolSO.hpp"
+#include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/ObstacleController.hpp"
@@ -12,13 +14,11 @@
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Transform.hpp"
-#include "GlobalNamespace/BoolSO.hpp"
-#include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 
-#include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
+#include "NEConfig.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
@@ -32,14 +32,14 @@ Quaternion GetWorldRotation(float def,
     if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         if (customData.HasMember("_rotation")) {
-            if (customData["_rotation"].IsArray()) {
-                float x = customData["_rotation"][0].GetFloat();
-                float y = customData["_rotation"][1].GetFloat();
-                float z = customData["_rotation"][2].GetFloat();
+            rapidjson::Value &rotVal = customData["_rotation"];
+            if (rotVal.IsArray()) {
+                float x = rotVal[0].GetFloat();
+                float y = rotVal[1].GetFloat();
+                float z = rotVal[2].GetFloat();
                 worldRotation = Quaternion::Euler(x, y, z);
             } else {
-                worldRotation =
-                    Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
+                worldRotation = Quaternion::Euler(0, rotVal.GetFloat(), 0);
             }
         }
     }
@@ -104,7 +104,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
 
     float width =
         GetCustomWidth(obstacleData->width, obstacleData) * singleLineWidth;
-    NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
+    NEVector::Vector3 b =
+        NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = startPos + b;
     self->midPos = midPos + b;
     self->endPos = endPos + b;
@@ -163,10 +164,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
     self->Update();
 }
 
-MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpdate, void,
+MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
+                &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
-    auto *obstacleData =
-        reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
+    auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(
+        self->obstacleData);
 
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);
@@ -231,10 +233,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         self->bounds.set_size(Vector3::get_zero());
     }
 
-    if (offset.dissolve.has_value() && getNEConfig().enableObstacleDissolve.GetValue()) {
+    if (offset.dissolve.has_value() &&
+        getNEConfig().enableObstacleDissolve.GetValue()) {
         ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
         if (!materialSwitcher) {
-            materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+            materialSwitcher =
+                self->get_gameObject()
+                    ->GetComponentInChildren<ConditionalMaterialSwitcher *>();
             ad.materialSwitcher = materialSwitcher;
         }
         if (!materialSwitcher->value->get_value()) {
@@ -273,22 +278,22 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime,
     rapidjson::Value &customData = *obstacleData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    float jumpTime =
-        std::clamp((time - self->move1Duration) /
-                       (self->move2Duration + self->obstacleDuration),
-                   0.0f, 1.0f);
-    std::optional<Vector3> position =
+    float jumpTime = (time - self->move1Duration) /
+                     (self->move2Duration + self->obstacleDuration);
+    jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
+    std::optional<NEVector::Vector3> position =
         AnimationHelper::GetDefinitePositionOffset(ad.animationData, ad.track,
                                                    jumpTime);
 
     if (position.has_value()) {
-        Vector3 noteOffset = ad.noteOffset;
-        Vector3 definitePosition = *position + noteOffset;
+        NEVector::Vector3 noteOffset = ad.noteOffset;
+        NEVector::Vector3 definitePosition = *position + noteOffset;
         definitePosition.x += ad.xOffset;
         if (time < self->move1Duration) {
-            Vector3 result = NEVector::Vector3::LerpUnclamped(
+            NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
                 self->startPos, self->midPos, time / self->move1Duration);
-            return result + definitePosition - self->midPos;
+            return result + definitePosition -
+                   static_cast<NEVector::Vector3>(self->midPos);
         } else {
             return definitePosition;
         }

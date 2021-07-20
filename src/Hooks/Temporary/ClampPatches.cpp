@@ -2,16 +2,14 @@
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapData_-get_beatmapObjectsData-d__31.hpp"
-#include "GlobalNamespace/NotesInTimeRowProcessor.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
-#include "System/Int32.hpp"
+#include "GlobalNamespace/NotesInTimeRowProcessor.hpp"
 
 #include "NEHooks.h"
 #include "NELogger.h"
 
-#include <limits>
 #include <map>
 
 using namespace GlobalNamespace;
@@ -62,15 +60,17 @@ MAKE_HOOK_MATCH(NoteProcessorClampPatch,
         }
     }
 
-    if (std::find_if(notes->items->values,
-                     notes->items->values + notes->get_Count(),
-                     [](NoteData *x) {
-                         return x->lineIndex > 3 || x->lineIndex < 0;
-                     }) == notes->items->values + notes->get_Count()) {
+    NoteData **begin = notes->items->values;
+    NoteData **end = begin + notes->get_Count();
+    NoteData **any = std::find_if(begin, end, [](NoteData *x) {
+        return x->lineIndex > 3 || x->lineIndex < 0;
+    });
+    if (any != end) {
+        // No notes are out of range
         return;
     }
-    std::unordered_map<int, std::vector<NoteData *>> notesInColumn;
 
+    std::unordered_map<int, std::vector<NoteData *>> notesInColumn;
     for (int j = 0; j < notes->get_Count(); j++) {
         NoteData *noteData = notes->items->values[j];
         std::vector<NoteData *> &list = notesInColumn[noteData->lineIndex];
@@ -106,15 +106,14 @@ MAKE_HOOK_MATCH(BeatmapObjectsDataClampPatch,
         self->$$1__state = -1;
         // Increment index in idxs with clamped lineIndex
         int lineIndex = self->$minBeatmapObjectData$5__4->lineIndex;
-        int clampedLineIndex = lineIndex > 3   ? 3
-                               : lineIndex < 0 ? 0
-                                               : lineIndex;
+        int clampedLineIndex = std::clamp(lineIndex, 0, 3);
         self->$idxs$5__3->values[clampedLineIndex]++;
         self->$minBeatmapObjectData$5__4 = nullptr;
     } else {
         self->$$1__state = -1;
-        self->$beatmapLinesData$5__2 =
-            (Array<BeatmapLineData *> *)beatmapData->get_beatmapLinesData();
+        auto *arr = reinterpret_cast<Array<BeatmapLineData *> *>(
+            beatmapData->get_beatmapLinesData());
+        self->$beatmapLinesData$5__2 = arr;
         self->$idxs$5__3 =
             Array<int>::NewLength(self->$beatmapLinesData$5__2->Length());
     }
@@ -147,5 +146,4 @@ void InstallClampPatches(Logger &logger) {
     INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData);
     INSTALL_HOOK(logger, BeatmapLineData_AddBeatmapObjectData);
 }
-
 NEInstallHooks(InstallClampPatches);
