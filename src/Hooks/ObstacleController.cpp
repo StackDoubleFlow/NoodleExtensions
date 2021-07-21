@@ -15,10 +15,10 @@
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Transform.hpp"
 
+#include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
-#include "NEConfig.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
@@ -164,9 +164,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
     self->Update();
 }
 
+bool test = false;
 MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
                 &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
+    test = true;
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(
         self->obstacleData);
 
@@ -264,6 +266,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
     }
 
     ObstacleController_ManualUpdate(self);
+    test = false;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime,
@@ -306,12 +309,27 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
                 &ParametricBoxFakeGlowController::OnEnable, void,
                 ParametricBoxFakeGlowController *self) {}
 
+// #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
+// MAKE_HOOK(Object_New, nullptr, Il2CppObject*, Il2CppClass* klass) {
+//     if (test && klass && klass->name && klass->namespaze) {
+//         NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
+//         PrintBacktrace(10);
+//     }
+//     return Object_New(klass);
+// }
+
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);
     INSTALL_HOOK(logger, ObstacleController_ManualUpdate);
     INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
     // Temporary fake glow disable hook
     INSTALL_HOOK(logger, ParametricBoxFakeGlowController_OnEnable);
+
+    // Instruction on((const int32_t*) HookTracker::GetOrig(il2cpp_functions::object_new));
+    // Instruction j2Ob_N_thunk(CRASH_UNLESS(on.findNthCall(1)->label));
+    // logger.info("thunk addr %p %x", j2Ob_N_thunk.addr, *j2Ob_N_thunk.addr);
+    // auto *j2Ob_N = CRASH_UNLESS(j2Ob_N_thunk.findNthDirectBranchWithoutLink(1));
+    // INSTALL_HOOK_DIRECT(logger, Object_New, (void*) *j2Ob_N->label);
 }
 
 NEInstallHooks(InstallObstacleControllerHooks);

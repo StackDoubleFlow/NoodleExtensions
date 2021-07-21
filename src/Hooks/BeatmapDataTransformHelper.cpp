@@ -64,7 +64,7 @@ OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
     // Used as a parameter for OrderBy
     auto enumerable = (IEnumerable_1<BeatmapObjectData *> *)beatmapObjectsData;
 
-    // var orderedEnumerable beatmapObjectsData.OrderBy(orderFunc);
+    // var orderedEnumerable = beatmapObjectsData.OrderBy(orderFunc);
     auto orderByMethodInfo = il2cpp_utils::FindMethodUnsafe(
         "System.Linq", "Enumerable", "OrderBy", 2);
     auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(
@@ -153,6 +153,25 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
+// This doesn't need to be included with `MAKE_HOOK_MATCH`
+// #include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
+
+// TODO: Fix when codegen is updated
+// MAKE_HOOK_FIND_CLASS(CreateTransformedBeatmapData, "", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData",
+//                 IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData,
+//                 IPreviewBeatmapLevel *beatmapLevel,
+//                 GameplayModifiers *gameplayModifiers,
+//                 PracticeSettings *practiceSettings, bool leftHanded,
+//                 EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
+//                 EnvironmentIntensityReductionOptions
+//                     *environmentIntensityReductionOptions, 
+//                 bool screenDisplacementEffectsEnabled) {
+//     auto transformedBeatmapData = ReorderLineData(beatmapData);
+//     return CreateTransformedBeatmapData(
+//         beatmapData, beatmapLevel, gameplayModifiers, practiceSettings,
+//         leftHanded, environmentEffectsFilterPreset,
+//         environmentIntensityReductionOptions, screenDisplacementEffectsEnabled);
+// }
 MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData,
                 IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData,
@@ -169,8 +188,14 @@ MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
         environmentIntensityReductionOptions);
 }
 
+// Skip obstacle merging, I have no clue how much this can fuck things
+// MAKE_HOOK_FIND_CLASS(BeatmapDataObstaclesMergingTransform_CreateTransformedData, "", "BeatmapDataObstaclesMergingTransform", "CreateTransformedData", IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
+//     return beatmapData;
+// }
+
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
     INSTALL_HOOK(logger, CreateTransformedBeatmapData);
+    // INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
 }
 
 NEInstallHooks(InstallBeatmapDataTransformHelperHooks);
