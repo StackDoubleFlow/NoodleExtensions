@@ -4,7 +4,6 @@
 #include "GlobalNamespace/BoolSO.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
-#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/ObstacleDissolve.hpp"
 #include "GlobalNamespace/ParametricBoxFakeGlowController.hpp"
@@ -18,6 +17,7 @@
 #include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
+#include "TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -28,7 +28,7 @@ using namespace TrackParenting;
 
 Quaternion GetWorldRotation(float def,
                             CustomJSONData::CustomObstacleData *obstacleData) {
-    Quaternion worldRotation = Quaternion::Euler(0, def, 0);
+    Quaternion worldRotation = NEVector::Quaternion::Euler(0, def, 0);
     if (obstacleData->customData->value) {
         rapidjson::Value &customData = *obstacleData->customData->value;
         if (customData.HasMember("_rotation")) {
@@ -37,9 +37,9 @@ Quaternion GetWorldRotation(float def,
                 float x = rotVal[0].GetFloat();
                 float y = rotVal[1].GetFloat();
                 float z = rotVal[2].GetFloat();
-                worldRotation = Quaternion::Euler(x, y, z);
+                worldRotation = NEVector::Quaternion::Euler(x, y, z);
             } else {
-                worldRotation = Quaternion::Euler(0, rotVal.GetFloat(), 0);
+                worldRotation = NEVector::Quaternion::Euler(0, rotVal.GetFloat(), 0);
             }
         }
     }
@@ -100,7 +100,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
 
     Quaternion rotation = GetWorldRotation(worldRotation, obstacleData);
     self->worldRotation = rotation;
-    self->inverseWorldRotation = Quaternion::Euler(-rotation.get_eulerAngles());
+    self->inverseWorldRotation = NEVector::Quaternion::Euler(-rotation.get_eulerAngles());
 
     float width =
         GetCustomWidth(obstacleData->width, obstacleData) * singleLineWidth;
@@ -129,9 +129,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
             ? std::optional{&customData["_localRotation"]}
             : std::nullopt;
 
-    Quaternion localRotation = Quaternion::get_identity();
+    Quaternion localRotation = NEVector::Quaternion::get_identity();
     if (localrot.has_value()) {
-        localRotation = Quaternion::Euler((**localrot)[0].GetFloat(),
+        localRotation = NEVector::Quaternion::Euler((**localrot)[0].GetFloat(),
                                           (**localrot)[1].GetFloat(),
                                           (**localrot)[2].GetFloat());
     }
@@ -186,7 +186,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    float songTime = self->audioTimeSyncController->get_songTime();
+    float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - self->startTimeOffset;
     float normalTime = (elapsedTime - self->move1Duration) /
                        (self->move2Duration + self->obstacleDuration);
@@ -216,7 +216,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
             worldRotationQuaternion =
                 worldRotationQuaternion * *offset.rotationOffset;
             NEVector::Quaternion inverseWorldRotation =
-                Quaternion::Inverse(worldRotationQuaternion);
+                NEVector::Quaternion::Inverse(worldRotationQuaternion);
             self->worldRotation = worldRotationQuaternion;
             self->inverseWorldRotation = inverseWorldRotation;
         }
@@ -309,14 +309,14 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
                 &ParametricBoxFakeGlowController::OnEnable, void,
                 ParametricBoxFakeGlowController *self) {}
 
-// #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
-// MAKE_HOOK(Object_New, nullptr, Il2CppObject*, Il2CppClass* klass) {
-//     if (test && klass && klass->name && klass->namespaze) {
-//         NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
-//         PrintBacktrace(10);
-//     }
-//     return Object_New(klass);
-// }
+#include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
+MAKE_HOOK(Object_New, nullptr, Il2CppObject*, Il2CppClass* klass) {
+    if (test && klass && klass->name && klass->namespaze) {
+        NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
+        PrintBacktrace(10);
+    }
+    return Object_New(klass);
+}
 
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);

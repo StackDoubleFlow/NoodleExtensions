@@ -2,11 +2,11 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/NoteFloorMovement.hpp"
-#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "System/Action.hpp"
 
 #include "Animation/AnimationHelper.h"
+#include "TimeSourceHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
@@ -17,7 +17,7 @@ using namespace System;
 extern BeatmapObjectAssociatedData *noteUpdateAD;
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
-    float num = self->audioTimeSyncController->get_songTime() - self->startTime;
+    float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
     Vector3 localPosition = Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
     if (noteUpdateAD) {

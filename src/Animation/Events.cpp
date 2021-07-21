@@ -1,7 +1,6 @@
 #include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
-#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Vector3.hpp"
 
@@ -17,13 +16,15 @@
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "Animation/PlayerTrack.h"
+#include "TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
+#include "Vector.h"
 
 using namespace Events;
 using namespace GlobalNamespace;
 using namespace TrackParenting;
-using namespace UnityEngine;
+using namespace NEVector;
 
 // BeatmapObjectCallbackController.cpp
 extern BeatmapObjectCallbackController *callbackController;
@@ -46,7 +47,7 @@ MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnControlle
 }
 
 bool UpdateCoroutine(AnimateTrackContext& context) {
-    float elapsedTime = callbackController->audioTimeSource->get_songTime() - context.startTime;
+    float elapsedTime = TimeSourceHelper::getSongTime(callbackController->audioTimeSource) - context.startTime;
     float time = Easings::Interpolate(std::min(elapsedTime / context.duration, 1.0f), context.easing);
     if (!context.property->value.has_value()) {
         context.property->value = { 0 };
@@ -70,7 +71,7 @@ bool UpdateCoroutine(AnimateTrackContext& context) {
 }
 
 bool UpdatePathCoroutine(AssignPathAnimationContext& context) {
-    float elapsedTime = callbackController->audioTimeSource->get_songTime() - context.startTime;
+    float elapsedTime = TimeSourceHelper::getSongTime(callbackController->audioTimeSource) - context.startTime;
     context.property->value->time = Easings::Interpolate(std::min(elapsedTime / context.duration, 1.0f), context.easing);
 
     return elapsedTime < context.duration;

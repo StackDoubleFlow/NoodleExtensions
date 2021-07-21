@@ -2,7 +2,6 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
 
-#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
@@ -20,6 +19,7 @@
 #include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
+#include "TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -165,7 +165,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
-    float songTime = noteJump->audioTimeSyncController->get_songTime();
+    float songTime = TimeSourceHelper::getSongTime(noteJump->audioTimeSyncController);
     float elapsedTime =
         songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
     elapsedTime = noteTimeAdjust(elapsedTime, noteJump->jumpDuration);

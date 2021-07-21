@@ -7,7 +7,6 @@
 #include "GlobalNamespace/BeatmapEventCallback.hpp"
 #include "GlobalNamespace/BeatmapObjectCallback.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
-#include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "System/Collections/Generic/HashSet_1.hpp"
 #include "System/Action.hpp"
@@ -15,6 +14,7 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/Events.h"
 #include "AssociatedData.h"
+#include "TimeSourceHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
@@ -34,6 +34,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
     callbackController = self;
     Events::UpdateCoroutines();
 
+    float songTime = TimeSourceHelper::getSongTime(self->audioTimeSource);
     auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());
 
     for (int i = 0; i < self->beatmapObjectCallbackData->size; i++) {
@@ -56,7 +57,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
                 }
                 // NELogger::GetLogger().info("Method name: %s", callbackData->callback->method_info->get_Name());
 
-                if (beatmapObjectData->time - aheadTime >= self->audioTimeSource->get_songTime()) {
+                if (beatmapObjectData->time - aheadTime >= songTime) {
                     break;
                 }
                 if (beatmapObjectData->time >= self->spawningStartTime) {
@@ -79,7 +80,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
         BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items->values[l];
         while (callbackData->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
             BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(callbackData->nextEventIndex);
-            if (beatmapEventData->time - callbackData->aheadTime >= self->audioTimeSource->get_songTime()) {
+            if (beatmapEventData->time - callbackData->aheadTime >= songTime) {
                 break;
             }
             if (self->validEvents->Contains(beatmapEventData->type)) {
@@ -90,7 +91,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
     }
     while (self->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
         BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(self->nextEventIndex);
-        if (beatmapEventData->time >= self->audioTimeSource->get_songTime()) {
+        if (beatmapEventData->time >= songTime) {
             break;
         }
         self->SendBeatmapEventDidTriggerEvent(beatmapEventData);

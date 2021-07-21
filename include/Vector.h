@@ -19,19 +19,21 @@ struct Vector3 : public UnityEngine::Vector3 {
 
     static Vector3 get_zero() { return Vector3(0, 0, 0); }
 
-    Vector3 operator+(const Vector3 &rhs) {
+    Vector3 operator+(const Vector3 &rhs) const {
         return Vector3(x + rhs.x, y + rhs.y, z + rhs.z);
     }
 
-    Vector3 operator-(const Vector3 &rhs) {
+    Vector3 operator-(const Vector3 &rhs) const {
         return Vector3(x - rhs.x, y - rhs.y, z - rhs.z);
     }
 
-    Vector3 operator*(const Vector3 &rhs) {
+    Vector3 operator*(const Vector3 &rhs) const {
         return Vector3(x * rhs.x, y * rhs.y, z * rhs.z);
     }
 
-    Vector3 operator*(float rhs) { return Vector3(x * rhs, y * rhs, z * rhs); }
+    Vector3 operator*(const float &rhs) const {
+        return Vector3(x * rhs, y * rhs, z * rhs);
+    }
 
     static Vector3 LerpUnclamped(const Vector3 &a, const Vector3 &b, float t) {
         return Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t,
@@ -58,6 +60,71 @@ struct Quaternion : public UnityEngine::Quaternion {
                           w * rhs.y + y * rhs.w + z * rhs.x - x * rhs.z,
                           w * rhs.z + z * rhs.w + x * rhs.y - y * rhs.x,
                           w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z);
+    }
+
+    static Quaternion get_identity() { return Quaternion(0, 0, 0, 1); }
+
+    static float Dot(const Quaternion &a, const Quaternion &b) {
+        return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+    }
+
+    static Quaternion Inverse(const Quaternion &a) {
+        Quaternion conj = {-a.x, -a.y, -a.z, a.w};
+        float norm2 = Quaternion::Dot(a, a);
+        return Quaternion(conj.x / norm2, conj.y / norm2, conj.z / norm2,
+                          conj.w / norm2);
+    }
+
+    static Quaternion Euler(const Vector3 &euler) {
+        Vector3 rad = euler * 0.017453292f;
+        float yaw = rad.z;
+        float pitch = rad.y;
+        float roll = rad.x;
+        float cy = std::cosf(yaw * 0.5);
+        float sy = std::sinf(yaw * 0.5);
+        float cp = std::cosf(pitch * 0.5);
+        float sp = std::sinf(pitch * 0.5);
+        float cr = std::cosf(roll * 0.5);
+        float sr = std::sinf(roll * 0.5);
+
+        Quaternion q;
+        q.w = cr * cp * cy + sr * sp * sy;
+        q.x = sr * cp * cy - cr * sp * sy;
+        q.y = cr * sp * cy + sr * cp * sy;
+        q.z = cr * cp * sy - sr * sp * cy;
+
+        return q;
+    }
+
+    // static Quaternion SlerpUnclamped(const Quaternion &q1, const Quaternion &q2, double lambda) {
+    //     Quaternion qr;
+    //     float dotproduct = Quaternion::Dot(q1, q2);
+    //     float theta, st, sut, sout, coeff1, coeff2;
+
+    //     // algorithm adapted from Shoemake's paper
+    //     lambda = lambda / 2.0;
+
+    //     theta = acosf(dotproduct);
+    //     if (theta < 0.0)
+    //         theta = -theta;
+
+    //     st = sinf(theta);
+    //     sut = sinf(lambda * theta);
+    //     sout = sinf((1 - lambda) * theta);
+    //     coeff1 = sout / st;
+    //     coeff2 = sut / st;
+
+    //     qr.x = coeff1 * q1.x + coeff2 * q2.x;
+    //     qr.y = coeff1 * q1.y + coeff2 * q2.y;
+    //     qr.z = coeff1 * q1.z + coeff2 * q2.z;
+    //     qr.w = coeff1 * q1.w + coeff2 * q2.w;
+
+    //     // qr.Normalize();
+    //     return qr;
+    // }
+
+    static Quaternion Euler(float x, float y, float z) {
+        return Quaternion::Euler(Vector3(x, y, z));
     }
 };
 

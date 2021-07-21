@@ -2,13 +2,13 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/NoteJump.hpp"
-#include "GlobalNamespace/AudioTimeSyncController.hpp"
 #include "GlobalNamespace/Easing.hpp"
 #include "GlobalNamespace/PlayerTransforms.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "System/Action.hpp"
 #include "System/Action_1.hpp"
 
+#include "TimeSourceHelper.h"
 #include "Animation/AnimationHelper.h"
 #include "NEHooks.h"
 
@@ -20,7 +20,7 @@ extern BeatmapObjectAssociatedData *noteUpdateAD;
 float noteTimeAdjust(float original, float jumpDuration);
 
 MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump *self) {
-    float songTime = self->audioTimeSyncController->get_songTime();
+    float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - (self->beatTime - self->jumpDuration * 0.5f);
     if (noteUpdateAD) {
         elapsedTime = noteTimeAdjust(elapsedTime, self->jumpDuration);

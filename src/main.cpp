@@ -1,8 +1,6 @@
-// It doesn't like it if i include this after
-#include "NEConfig.h"
-
 #include "modloader/shared/modloader.hpp"
 
+#include "NEConfig.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
