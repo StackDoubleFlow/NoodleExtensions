@@ -64,37 +64,37 @@ struct Quaternion : public UnityEngine::Quaternion {
 
     static Quaternion get_identity() { return Quaternion(0, 0, 0, 1); }
 
-    static float Dot(const Quaternion &a, const Quaternion &b) {
-        return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-    }
+    // static float Dot(const Quaternion &a, const Quaternion &b) {
+    //     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+    // }
 
-    static Quaternion Inverse(const Quaternion &a) {
-        Quaternion conj = {-a.x, -a.y, -a.z, a.w};
-        float norm2 = Quaternion::Dot(a, a);
-        return Quaternion(conj.x / norm2, conj.y / norm2, conj.z / norm2,
-                          conj.w / norm2);
-    }
+    // static Quaternion Inverse(const Quaternion &a) {
+    //     Quaternion conj = {-a.x, -a.y, -a.z, a.w};
+    //     float norm2 = Quaternion::Dot(a, a);
+    //     return Quaternion(conj.x / norm2, conj.y / norm2, conj.z / norm2,
+    //                       conj.w / norm2);
+    // }
 
-    static Quaternion Euler(const Vector3 &euler) {
-        Vector3 rad = euler * 0.017453292f;
-        float yaw = rad.z;
-        float pitch = rad.y;
-        float roll = rad.x;
-        float cy = std::cosf(yaw * 0.5);
-        float sy = std::sinf(yaw * 0.5);
-        float cp = std::cosf(pitch * 0.5);
-        float sp = std::sinf(pitch * 0.5);
-        float cr = std::cosf(roll * 0.5);
-        float sr = std::sinf(roll * 0.5);
+    // static Quaternion Euler(const Vector3 &euler) {
+    //     Vector3 rad = euler * 0.017453292f;
+    //     float yaw = rad.z;
+    //     float pitch = rad.y;
+    //     float roll = rad.x;
+    //     float cy = std::cosf(yaw * 0.5);
+    //     float sy = std::sinf(yaw * 0.5);
+    //     float cp = std::cosf(pitch * 0.5);
+    //     float sp = std::sinf(pitch * 0.5);
+    //     float cr = std::cosf(roll * 0.5);
+    //     float sr = std::sinf(roll * 0.5);
 
-        Quaternion q;
-        q.w = cr * cp * cy + sr * sp * sy;
-        q.x = sr * cp * cy - cr * sp * sy;
-        q.y = cr * sp * cy + sr * cp * sy;
-        q.z = cr * cp * sy - sr * sp * cy;
+    //     Quaternion q;
+    //     q.w = cr * cp * cy + sr * sp * sy;
+    //     q.x = sr * cp * cy - cr * sp * sy;
+    //     q.y = cr * sp * cy + sr * cp * sy;
+    //     q.z = cr * cp * sy - sr * sp * cy;
 
-        return q;
-    }
+    //     return q;
+    // }
 
     // static Quaternion SlerpUnclamped(const Quaternion &q1, const Quaternion &q2, double lambda) {
     //     Quaternion qr;
@@ -123,9 +123,9 @@ struct Quaternion : public UnityEngine::Quaternion {
     //     return qr;
     // }
 
-    static Quaternion Euler(float x, float y, float z) {
-        return Quaternion::Euler(Vector3(x, y, z));
-    }
+    // static Quaternion Euler(float x, float y, float z) {
+    //     return Quaternion::Euler(Vector3(x, y, z));
+    // }
 };
 
 struct Vector5 {
