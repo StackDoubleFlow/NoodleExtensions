@@ -8,10 +8,12 @@
         "VERSION=\"0.3.0\""
       ],
       "includePath": [
-        "${workspaceFolder}/**",
-        // "${workspaceFolder}/extern/**",
-        // "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
-        // "${workspaceFolder}/extern/codegen/include",
+        "${workspaceFolder}/",
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/shared",
+        "${workspaceFolder}/extern",
+        "${workspaceFolder}/extern/codegen/include",
+        "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
         "${workspaceFolder}/../../android-ndk-r22b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include",
         "${workspaceFolder}/../../android-ndk-r22b/sources/cxx-stl/llvm-libc++/include",
         "${workspaceFolder}/../../android-ndk-r22b/sources/cxx-stl/llvm-libc++abi/include"

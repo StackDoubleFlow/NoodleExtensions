@@ -9,6 +9,7 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/IReadonlyBeatmapData.hpp"
 #include "GlobalNamespace/PracticeSettings.hpp"
+#include "GlobalNamespace/BeatmapDataObstaclesMergingTransform.hpp"
 #include "System/Collections/Generic/IEnumerable_1.hpp"
 #include "System/Func_2.hpp"
 #include "System/Linq/Enumerable.hpp"
@@ -153,25 +154,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
-// This doesn't need to be included with `MAKE_HOOK_MATCH`
-// #include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
-
-// TODO: Fix when codegen is updated
-// MAKE_HOOK_FIND_CLASS(CreateTransformedBeatmapData, "", "BeatmapDataTransformHelper", "CreateTransformedBeatmapData",
-//                 IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData,
-//                 IPreviewBeatmapLevel *beatmapLevel,
-//                 GameplayModifiers *gameplayModifiers,
-//                 PracticeSettings *practiceSettings, bool leftHanded,
-//                 EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
-//                 EnvironmentIntensityReductionOptions
-//                     *environmentIntensityReductionOptions, 
-//                 bool screenDisplacementEffectsEnabled) {
-//     auto transformedBeatmapData = ReorderLineData(beatmapData);
-//     return CreateTransformedBeatmapData(
-//         beatmapData, beatmapLevel, gameplayModifiers, practiceSettings,
-//         leftHanded, environmentEffectsFilterPreset,
-//         environmentIntensityReductionOptions, screenDisplacementEffectsEnabled);
-// }
 MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData,
                 IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData,
@@ -180,22 +162,23 @@ MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
                 PracticeSettings *practiceSettings, bool leftHanded,
                 EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
                 EnvironmentIntensityReductionOptions
-                    *environmentIntensityReductionOptions) {
+                    *environmentIntensityReductionOptions, 
+                bool screenDisplacementEffectsEnabled) {
     auto transformedBeatmapData = ReorderLineData(beatmapData);
     return CreateTransformedBeatmapData(
         beatmapData, beatmapLevel, gameplayModifiers, practiceSettings,
         leftHanded, environmentEffectsFilterPreset,
-        environmentIntensityReductionOptions);
+        environmentIntensityReductionOptions, screenDisplacementEffectsEnabled);
 }
 
 // Skip obstacle merging, I have no clue how much this can fuck things
-// MAKE_HOOK_FIND_CLASS(BeatmapDataObstaclesMergingTransform_CreateTransformedData, "", "BeatmapDataObstaclesMergingTransform", "CreateTransformedData", IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
-//     return beatmapData;
-// }
+MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData, &BeatmapDataObstaclesMergingTransform::CreateTransformedData, IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
+    return beatmapData;
+}
 
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
     INSTALL_HOOK(logger, CreateTransformedBeatmapData);
-    // INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
+    INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
 }
 
 NEInstallHooks(InstallBeatmapDataTransformHelperHooks);
