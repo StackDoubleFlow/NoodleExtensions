@@ -104,14 +104,8 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
     return result;
 }
 
-// MAKE_HOOK_MATCH(Assert_IsTrue, void, bool condition, Il2CppString *message,
-//                 Array<Il2CppObject> *args) {}
-
 void InstallBeatmapDataLoaderHooks(Logger &logger) {
     INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
-    // INSTALL_HOOK_ORIG(logger, Assert_IsTrue,
-    //                   il2cpp_utils::FindMethodUnsafe("NUnit.Framework",
-    //                                                  "Assert", "IsTrue", 3));
 }
 
 NEInstallHooks(InstallBeatmapDataLoaderHooks);

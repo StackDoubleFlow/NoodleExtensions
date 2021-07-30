@@ -106,18 +106,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
 
 
 void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
-    auto *info = Hook_BeatmapObjectCallbackController_LateUpdate::getInfo();
-    auto *hooks = const_cast<std::unordered_map<const void*, std::list<HookInfo>>*>(HookTracker::GetHooks());
-    void *orig = (void*) info->methodPointer;
-    auto itr = hooks->find(orig);
-    if (itr != hooks->end() && itr->second.size() > 0) {
-        for (auto& hookInfo : itr->second) {
-            NELogger::GetLogger().info("Already installed hook %s with orig at %p", hookInfo.name.c_str(), hookInfo.orig);
-        }
-        orig = (void*) itr->second.front().orig;
-    }
-    INSTALL_HOOK_DIRECT(logger, BeatmapObjectCallbackController_LateUpdate, orig);
-    // INSTALL_HOOK_ORIG(logger, BeatmapObjectCallbackController_LateUpdate);
+    INSTALL_HOOK_ORIG(logger, BeatmapObjectCallbackController_LateUpdate);
 }
 
 NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

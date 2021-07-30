@@ -11,7 +11,7 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "2.2.2",
+      "versionRange": "^2.2.2",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -20,7 +20,7 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.12.2",
+      "versionRange": "^0.12.5",
       "additionalData": {}
     },
     {
@@ -35,12 +35,12 @@
     },
     {
       "id": "questui",
-      "versionRange": "^0.10.0",
+      "versionRange": "^0.10.1",
       "additionalData": {}
     },
     {
       "id": "config-utils",
-      "versionRange": "^0.5.0",
+      "versionRange": "^0.5.1",
       "additionalData": {}
     }
   ],
