@@ -1,11 +1,10 @@
 {
   "configurations": [
     {
-      "name": "Quest",
       "defines": [
         "__GNUC__",
         "__aarch64__",
-        "VERSION=\"0.3.0\""
+        "VERSION=\"0.4.0\""
       ],
       "includePath": [
         "${workspaceFolder}/",
@@ -18,6 +17,7 @@
         "${workspaceFolder}/../../android-ndk-r22b/sources/cxx-stl/llvm-libc++/include",
         "${workspaceFolder}/../../android-ndk-r22b/sources/cxx-stl/llvm-libc++abi/include"
       ],
+      "name": "Quest",
       "compilerPath": "${workspaceFolder}/../../android-ndk-r22b/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++",
       "cStandard": "gnu17",
       "cppStandard": "gnu++20",

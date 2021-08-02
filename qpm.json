@@ -4,9 +4,11 @@
   "info": {
     "name": "Noodle Extensions",
     "id": "NoodleExtensions",
-    "version": "0.2.2",
+    "version": "0.4.0",
     "url": null,
-    "additionalData": {}
+    "additionalData": {
+      "overrideSoName": "libnoodleextensions.so"
+    }
   },
   "dependencies": [
     {
