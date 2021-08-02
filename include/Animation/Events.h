@@ -19,6 +19,7 @@ struct AnimateTrackContext {
     float duration;
     float startTime;
     Functions easing;
+    PointDefinition *anonPointDef;
 };
 
 struct AssignPathAnimationContext {
@@ -26,7 +27,6 @@ struct AssignPathAnimationContext {
     float duration;
     float startTime;
     Functions easing;
-    PointDefinitionInterpolation pointDataInterpolation;
 };
 
 } // end namespace Events

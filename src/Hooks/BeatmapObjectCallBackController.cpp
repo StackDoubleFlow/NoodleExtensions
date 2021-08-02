@@ -98,8 +98,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
         self->nextEventIndex++;
     }
     if (self->callbacksForThisFrameWereProcessedEvent) {
-        il2cpp_utils::RunMethod(self->callbacksForThisFrameWereProcessedEvent, il2cpp_utils::FindMethodUnsafe("System", "Action", "Invoke", 0));
-        // self->callbacksForThisFrameWereProcessedEvent->Invoke();
+        self->callbacksForThisFrameWereProcessedEvent->Invoke();
     }
 
 }

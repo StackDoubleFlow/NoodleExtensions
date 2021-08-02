@@ -48,7 +48,7 @@ std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
     }
 }
 
-PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, std::vector<PointDefinition*>& anonPool, const rapidjson::Value& customData, std::string pointName) {
+PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, PointDefinition*& anon, const rapidjson::Value& customData, std::string pointName) {
     PointDefinition *pointData = nullptr;
 
     if (!customData.HasMember(pointName.c_str())) return pointData;
@@ -59,26 +59,25 @@ PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmap
         return pointData;
     case rapidjson::kStringType: {
         auto& ad = beatmapAD;
-        for (auto const& pair : ad.pointDefinitions) {
-        }
-        if (ad.pointDefinitions.find(pointString.GetString()) != ad.pointDefinitions.end()) {
-            pointData = &ad.pointDefinitions.at(pointString.GetString());
+        auto itr = ad.pointDefinitions.find(pointString.GetString());
+        if (itr != ad.pointDefinitions.end()) {
+            pointData = &itr->second;
         }
         break;
     }
     default:
         pointData = new PointDefinition(pointString);
-        anonPool.push_back(pointData);
+        anon = pointData;
     }
 
     return pointData;
 }
 
-std::optional<PointDefinitionInterpolation> GetPathInterpolation(Track *track, std::string name, PropertyType type) {
+std::optional<PointDefinitionInterpolation> GetPathInterpolation(Track *track, std::string_view name, PropertyType type) {
     return track ? track->pathProperties.FindProperty(name)->value : std::nullopt;
 }
 
-std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string name, float time) {
+std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string_view name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::quaternion);
     if (pointDataInterpolation) {
         return pointDataInterpolation->InterpolateQuaternion(time);
@@ -86,7 +85,7 @@ std::optional<Quaternion> TryGetQuaternionPathProperty(Track *track, std::string
     return std::nullopt;
 }
 
-std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name, float time) {
+std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string_view name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::vector3);
     if (pointDataInterpolation) {
         return pointDataInterpolation->Interpolate(time);
@@ -94,7 +93,7 @@ std::optional<Vector3> TryGetVector3PathProperty(Track *track, std::string name,
     return std::nullopt;
 }
 
-std::optional<float> TryGetLinearPathProperty(Track *track, std::string name, float time) {
+std::optional<float> TryGetLinearPathProperty(Track *track, std::string_view name, float time) {
     std::optional<PointDefinitionInterpolation> pointDataInterpolation = GetPathInterpolation(track, name, PropertyType::linear);
     if (pointDataInterpolation) {
         return pointDataInterpolation->InterpolateLinear(time);

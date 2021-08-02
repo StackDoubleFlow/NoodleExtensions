@@ -18,7 +18,7 @@ struct ObjectOffset {
 };
 
 std::optional<NEVector::Vector3> GetDefinitePositionOffset(const AnimationObjectData& animationData, Track *track, float time);
-PointDefinition *TryGetPointData(BeatmapAssociatedData& beatmapAD, std::vector<PointDefinition*>& anonPool, const rapidjson::Value& customData, std::string pointName);
+PointDefinition *TryGetPointData(BeatmapAssociatedData& beatmapAD, PointDefinition*& anon, const rapidjson::Value& customData, std::string pointName);
 ObjectOffset GetObjectOffset(const AnimationObjectData& customData, Track *track, float time);
 void OnTrackCreated(Track *track);
 

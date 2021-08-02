@@ -70,7 +70,7 @@ public:
                        dissolve{PropertyType::linear},
                        dissolveArrow{PropertyType::linear},
                        cuttable{PropertyType::linear} {};
-    PathProperty *FindProperty(std::string name);
+    PathProperty *FindProperty(std::string_view name);
 
     PathProperty position;
     PathProperty rotation;

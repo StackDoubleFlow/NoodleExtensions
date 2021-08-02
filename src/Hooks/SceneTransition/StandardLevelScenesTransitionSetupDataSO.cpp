@@ -10,6 +10,7 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 #include "GlobalNamespace/PracticeSettings.hpp"
+#include "GlobalNamespace/BeatmapLineData.hpp"
 
 #include "Animation/ParentObject.h"
 #include "Animation/PointDefinition.h"
@@ -20,6 +21,9 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
+extern Il2CppClass *customObstacleDataClass;
+extern Il2CppClass *customNoteDataClass;
+
 MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO *self, Il2CppString *gameMode, IDifficultyBeatmap *difficultyBeatmap, IPreviewBeatmapLevel *previewBeatmapLevel, OverrideEnvironmentSettings *overrideEnvironmentSettings, ColorScheme *overrideColorScheme, GameplayModifiers *gameplayModifiers, PlayerSpecificSettings *playerSpecificSettings, PracticeSettings *practiceSettings, Il2CppString *backButtonText, bool useTestNoteCutSoundEffects) {
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects);
     ParentController::OnDestroy();
@@ -28,6 +32,33 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     auto& ad = getBeatmapAD(beatmapData->customData);
     for (auto& pair : ad.tracks) {
         pair.second.ResetVariables();
+    }
+
+    for (int i = 0; i < beatmapData->beatmapLinesData->Length(); i++) {
+        BeatmapLineData *beatmapLineData = beatmapData->beatmapLinesData->values[i];
+        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
+            BeatmapObjectData *beatmapObjectData =
+                beatmapLineData->beatmapObjectsData->items->values[j];
+            
+            CustomJSONData::JSONWrapper *customDataWrapper;
+            if (beatmapObjectData->klass == customObstacleDataClass) {
+                auto obstacleData =
+                    (CustomJSONData::CustomObstacleData *)beatmapObjectData;
+                customDataWrapper = obstacleData->customData;
+            } else if (beatmapObjectData->klass == customNoteDataClass) {
+                auto noteData =
+                    (CustomJSONData::CustomNoteData *)beatmapObjectData;
+                customDataWrapper = noteData->customData;
+            } else {
+                continue;
+            }
+
+            if (customDataWrapper->value) {
+                rapidjson::Value &customData = *customDataWrapper->value;
+                BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+                ad.ResetState();
+            }
+        }
     }
 }
 

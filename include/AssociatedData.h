@@ -65,6 +65,8 @@ struct BeatmapObjectAssociatedData {
     GlobalNamespace::ConditionalMaterialSwitcher *materialSwitcher;
     UnityEngine::Renderer *mirroredRenderer;
     AnimationObjectData animationData;
+
+    void ResetState();
 };
 
 // struct ParentTrackAssociatedData {

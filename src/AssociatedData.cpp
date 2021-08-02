@@ -1,17 +1,44 @@
-#include "custom-json-data/shared/CustomBeatmapData.h"
-#include "Animation/PointDefinition.h"
-#include "Animation/AnimationHelper.h"
 #include "AssociatedData.h"
+#include "Animation/AnimationHelper.h"
+#include "Animation/PointDefinition.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
 
-AnimationObjectData::AnimationObjectData(BeatmapAssociatedData& beatmapAD, const rapidjson::Value& animation) {
-    position = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_position");
-    rotation = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_rotation");
-    scale = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_scale");
-    localRotation = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_localRotation");
-    dissolve = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_dissolve");
-    dissolveArrow = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_dissolveArrow");
-    cuttable = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_cuttable");
-    definitePosition = AnimationHelper::TryGetPointData(beatmapAD, beatmapAD.anonPointDefinitions, animation, "_definitePosition");
+namespace {
+
+PointDefinition *TryGetPointData(BeatmapAssociatedData &beatmapAD,
+                                 const rapidjson::Value &animation, const char *name) {
+    PointDefinition *anonPointDef;
+    PointDefinition *pointDef =
+        AnimationHelper::TryGetPointData(beatmapAD, anonPointDef, animation, name);
+    if (anonPointDef) {
+        beatmapAD.anonPointDefinitions.push_back(anonPointDef);
+    }
+    return pointDef;
+}
+
+} // namespace
+
+AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
+                                         const rapidjson::Value &animation) {
+    position = TryGetPointData(beatmapAD, animation, "_position");
+    rotation = TryGetPointData(beatmapAD, animation, "_rotation");
+    scale = TryGetPointData(beatmapAD, animation, "_scale");
+    localRotation = TryGetPointData(beatmapAD, animation, "_localRotation");
+    dissolve = TryGetPointData(beatmapAD, animation, "_dissolve");
+    dissolveArrow = TryGetPointData(beatmapAD, animation, "_dissolveArrow");
+    cuttable = TryGetPointData(beatmapAD, animation, "_cuttable");
+    definitePosition = TryGetPointData(beatmapAD, animation, "_definitePosition");
+}
+
+void BeatmapObjectAssociatedData::ResetState() {
+    cutoutAnimationEffect = nullptr;
+    mirroredCutoutAnimationEffect = nullptr;
+    cutoutEffect = nullptr;
+    mirroredCutoutEffect = nullptr;
+    disappearingArrowController = nullptr;
+    mirroredDisappearingArrowController = nullptr;
+    materialSwitcher = nullptr;
+    mirroredRenderer = nullptr;
 }
 
 BeatmapAssociatedData::~BeatmapAssociatedData() {
@@ -20,18 +47,16 @@ BeatmapAssociatedData::~BeatmapAssociatedData() {
     }
 }
 
-BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData) {
-    auto itr = customData->associatedData.find('N');
-    if (itr == customData->associatedData.end()) {
-        itr = customData->associatedData.emplace('N', BeatmapObjectAssociatedData()).first;
-    }
-    return std::any_cast<BeatmapObjectAssociatedData&>(itr->second);
+BeatmapObjectAssociatedData &getAD(CustomJSONData::JSONWrapper *customData) {
+    std::any &ad = customData->associatedData['N'];
+    if (!ad.has_value())
+        ad = std::make_any<BeatmapObjectAssociatedData>();
+    return std::any_cast<BeatmapObjectAssociatedData &>(ad);
 }
 
-BeatmapAssociatedData& getBeatmapAD(CustomJSONData::JSONWrapper *customData) {
-    auto itr = customData->associatedData.find('N');
-    if (itr == customData->associatedData.end()) {
-        itr = customData->associatedData.emplace('N', BeatmapAssociatedData()).first;
-    }
-    return std::any_cast<BeatmapAssociatedData&>(itr->second);
+BeatmapAssociatedData &getBeatmapAD(CustomJSONData::JSONWrapper *customData) {
+    std::any &ad = customData->associatedData['N'];
+    if (!ad.has_value())
+        ad = std::make_any<BeatmapAssociatedData>();
+    return std::any_cast<BeatmapAssociatedData &>(ad);
 }

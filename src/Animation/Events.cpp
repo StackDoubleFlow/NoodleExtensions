@@ -31,9 +31,9 @@ extern BeatmapObjectCallbackController *callbackController;
 
 BeatmapObjectSpawnController *spawnController;
 
-std::vector<AnimateTrackContext> coroutines;
-std::vector<AssignPathAnimationContext> pathCoroutines;
-std::vector<PointDefinition*> anonPointDefinitions;
+static std::vector<AnimateTrackContext> coroutines;
+static std::vector<AssignPathAnimationContext> pathCoroutines;
+static std::vector<PointDefinition*> anonPointDefinitions;
 
 MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
     spawnController = self;
@@ -82,6 +82,7 @@ void Events::UpdateCoroutines() {
         if (UpdateCoroutine(*it)) {
             it++;
         } else {
+            // delete it->anonPointDef;
             coroutines.erase(it);
         }
     }
@@ -182,9 +183,10 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                         }
                     }
 
-                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDefinitions, eventData, name);
+                    PointDefinition *anonPointDef = nullptr;;
+                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDef, eventData, name);
                     if (pointData) {
-                        coroutines.push_back(AnimateTrackContext { pointData, property, duration, customEventData->time, easing });
+                        coroutines.push_back(AnimateTrackContext { pointData, property, duration, customEventData->time, easing, anonPointDef });
                     }
                 } else {
                     NELogger::GetLogger().warning("Could not find track property with name %s", name);
@@ -202,8 +204,12 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
                         }
                     }
 
-                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDefinitions, eventData, name);
+                    PointDefinition *anonPointDef = nullptr;
+                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDef, eventData, name);
                     if (pointData) {
+                        if (anonPointDef) {
+                            anonPointDefinitions.push_back(anonPointDef);
+                        }
                         if (!property->value.has_value()) property->value = PointDefinitionInterpolation();
                         property->value->Init(pointData);
                         pathCoroutines.push_back(AssignPathAnimationContext { property, duration, customEventData->time, easing });
