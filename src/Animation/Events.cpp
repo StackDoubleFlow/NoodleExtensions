@@ -39,10 +39,13 @@ MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnControlle
     spawnController = self;
     coroutines.clear();
     pathCoroutines.clear();
+    NELogger::GetLogger().debug("coroutines and pathCoroutines capacity: %lu and %lu", coroutines.capacity(), pathCoroutines.capacity());
     for (auto *pointDefinition : anonPointDefinitions) {
         delete pointDefinition;
     }
-    anonPointDefinitions.clear();
+    NELogger::GetLogger().debug("Swapping anonPointDefinitions from old capacity: %lu", anonPointDefinitions.capacity());
+    std::vector<PointDefinition*>().swap(anonPointDefinitions);
+    NELogger::GetLogger().debug("to new capacity: %lu", anonPointDefinitions.capacity());
     BeatmapObjectSpawnController_Start(self);
 }
 

@@ -47,7 +47,8 @@ public:
                    dissolve{Property(PropertyType::linear)},
                    dissolveArrow{Property(PropertyType::linear)},
                    time{Property(PropertyType::linear)},
-                   cuttable{Property(PropertyType::linear)} {};
+                   cuttable{Property(PropertyType::linear)},
+                   color{Property(PropertyType::vector4)} {};
     Property *FindProperty(std::string name);
     
     Property position;
@@ -58,6 +59,7 @@ public:
     Property dissolveArrow;
     Property time;
     Property cuttable;
+    Property color;
 };
 
 class PathProperties {
@@ -69,7 +71,8 @@ public:
                        definitePosition{PropertyType::linear},
                        dissolve{PropertyType::linear},
                        dissolveArrow{PropertyType::linear},
-                       cuttable{PropertyType::linear} {};
+                       cuttable{PropertyType::linear},
+                       color{PropertyType::vector4} {};
     PathProperty *FindProperty(std::string_view name);
 
     PathProperty position;
@@ -80,6 +83,7 @@ public:
     PathProperty dissolve;
     PathProperty dissolveArrow;
     PathProperty cuttable;
+    PathProperty color;
 };
 
 struct Track {

@@ -9,7 +9,8 @@ enum class PropertyName {
     dissolve,
     dissolveArrow,
     time,
-    cuttable
+    cuttable,
+    color
 };
 
 Property *Properties::FindProperty(std::string name) {
@@ -22,6 +23,7 @@ Property *Properties::FindProperty(std::string name) {
         { "_dissolveArrow", PropertyName::dissolveArrow },
         { "_time", PropertyName::time },
         { "_cuttable", PropertyName::cuttable },
+        { "_color", PropertyName::color }
     };
 
     auto itr = functions.find(name);
@@ -35,6 +37,7 @@ Property *Properties::FindProperty(std::string name) {
             case PropertyName::dissolveArrow: return &dissolveArrow;
             case PropertyName::time: return &time;
             case PropertyName::cuttable: return &cuttable;
+            case PropertyName::color: return &color;
             default: return nullptr;
         }
     } else {
@@ -52,6 +55,7 @@ PathProperty *PathProperties::FindProperty(std::string_view name) {
         { "_dissolve", PropertyName::dissolve },
         { "_dissolveArrow", PropertyName::dissolveArrow },
         { "_cuttable", PropertyName::cuttable },
+        { "_color", PropertyName::color }
     };
 
     auto itr = functions.find(name);
@@ -65,6 +69,7 @@ PathProperty *PathProperties::FindProperty(std::string_view name) {
             case PropertyName::dissolve: return &dissolve;
             case PropertyName::dissolveArrow: return &dissolveArrow;
             case PropertyName::cuttable: return &cuttable;
+            case PropertyName::color: return &color;
             default: return nullptr;
         }
     } else {
