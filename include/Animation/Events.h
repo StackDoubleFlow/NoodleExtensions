@@ -1,32 +1,9 @@
 #pragma once
 #include "NELogger.h"
-#include "Animation/PointDefinition.h"
-#include "Animation/Track.h"
+#include "tracks/shared/Animation/PointDefinition.h"
 
-namespace Events {
+namespace NEEvents {
 
-void AddEventCallbacks(Logger& logger);
-void UpdateCoroutines();
+void AddEventCallbacks(Logger &logger);
 
-enum class EventType {
-    animateTrack,
-    assignPathAnimation
-};
-
-struct AnimateTrackContext {
-    PointDefinition *points;
-    Property *property;
-    float duration;
-    float startTime;
-    Functions easing;
-    PointDefinition *anonPointDef;
-};
-
-struct AssignPathAnimationContext {
-    PathProperty *property;
-    float duration;
-    float startTime;
-    Functions easing;
-};
-
-} // end namespace Events
+} // namespace NEEvents

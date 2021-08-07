@@ -14,15 +14,11 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "Animation/Events.h"
 #include "AssociatedData.h"
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
 using namespace GlobalNamespace;
-
-// BeatmapDataTransformHelper.cpp
-extern Il2CppClass *customObstacleDataClass;
-extern Il2CppClass *customNoteDataClass;
 
 BeatmapObjectCallbackController *callbackController;
 
@@ -32,7 +28,9 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
     }
 
     callbackController = self;
-    Events::UpdateCoroutines();
+
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSource);
     auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());

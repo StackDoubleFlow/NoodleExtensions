@@ -3,7 +3,7 @@
 obj/
 libs/
 ndkpath.txt
-*.zip
+*.qmod
 
 # QPM
 qpm.shared.json

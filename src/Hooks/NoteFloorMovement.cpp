@@ -6,7 +6,7 @@
 #include "System/Action.hpp"
 
 #include "Animation/AnimationHelper.h"
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
 
@@ -15,13 +15,14 @@ using namespace UnityEngine;
 using namespace System;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
+extern Track *noteTrack;
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
     Vector3 localPosition = Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
     if (noteUpdateAD) {
-        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteUpdateAD->track, 0);
+        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTrack, 0);
         if (position.has_value()) {
             Vector3 noteOffset = noteUpdateAD->noteOffset;
             Vector3 endPos = self->endPos;

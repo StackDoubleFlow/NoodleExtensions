@@ -17,7 +17,8 @@
 #include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
+#include "tracks/shared/AssociatedData.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -140,7 +141,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
-    Track *track = ad.track;
+    Track *track = TracksAD::getAD(obstacleData->customData).track;
     if (track) {
         ParentObject *parentObject =
             ParentController::GetParentObjectTrack(track);
@@ -185,6 +186,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
     // }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+    Track *track = TracksAD::getAD(obstacleData->customData).track;
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - self->startTimeOffset;
@@ -192,7 +194,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
                        (self->move2Duration + self->obstacleDuration);
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
-        ad.animationData, ad.track, normalTime);
+        ad.animationData, track, normalTime);
 
     if (offset.positionOffset.has_value()) {
         self->startPos = ad.moveStartPos + *offset.positionOffset;
@@ -280,12 +282,13 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime,
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+    Track *track = TracksAD::getAD(obstacleData->customData).track;
 
     float jumpTime = (time - self->move1Duration) /
                      (self->move2Duration + self->obstacleDuration);
     jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
     std::optional<NEVector::Vector3> position =
-        AnimationHelper::GetDefinitePositionOffset(ad.animationData, ad.track,
+        AnimationHelper::GetDefinitePositionOffset(ad.animationData, track,
                                                    jumpTime);
 
     if (position.has_value()) {

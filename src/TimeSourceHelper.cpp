@@ -1,4 +1,4 @@
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
 
 using namespace GlobalNamespace;

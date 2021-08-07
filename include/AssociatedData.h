@@ -2,9 +2,10 @@
 
 #include "custom-json-data/shared/JSONWrapper.h"
 
-#include "Vector.h"
+#include "tracks/shared/Vector.h"
 
-#include "Animation/Track.h"
+#include "tracks/shared/Animation/Track.h"
+#include "tracks/shared/AssociatedData.h"
 
 namespace GlobalNamespace {
     class CutoutAnimateEffect;
@@ -20,15 +21,6 @@ namespace UnityEngine {
     class Renderer;
 }
 
-class BeatmapAssociatedData {
-public:
-    std::unordered_map<std::string, Track> tracks;
-    std::unordered_map<std::string, PointDefinition> pointDefinitions;
-    std::vector<PointDefinition*> anonPointDefinitions;
-
-    ~BeatmapAssociatedData();
-};
-
 struct AnimationObjectData {
     PointDefinition *position;
     PointDefinition *rotation;
@@ -40,12 +32,11 @@ struct AnimationObjectData {
     PointDefinition *definitePosition;
 
     AnimationObjectData() {}
-    AnimationObjectData(BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
+    AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
 };
 
 struct BeatmapObjectAssociatedData {
     float aheadTime;
-    Track *track;
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
     NEVector::Vector3 moveStartPos;
@@ -69,14 +60,4 @@ struct BeatmapObjectAssociatedData {
     void ResetState();
 };
 
-// struct ParentTrackAssociatedData {
-//     Track *parentTrack;
-//     std::vector<Track*> childrenTracks;
-// };
-
-// struct PlayerTrackAssociatedData {
-//     Track *track;
-// };
-
 BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData);
-BeatmapAssociatedData& getBeatmapAD(CustomJSONData::JSONWrapper *customData);

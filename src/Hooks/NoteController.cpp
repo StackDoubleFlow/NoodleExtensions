@@ -19,7 +19,7 @@
 #include "NEConfig.h"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -29,10 +29,11 @@ using namespace UnityEngine;
 using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
+Track *noteTrack;
 
 float noteTimeAdjust(float original, float jumpDuration) {
-    if (noteUpdateAD->track) {
-        Property &timeProperty = noteUpdateAD->track->properties.time;
+    if (noteTrack) {
+        Property &timeProperty = noteTrack->properties.time;
         if (timeProperty.value) {
             float time = timeProperty.value->linear;
             return time * jumpDuration;
@@ -119,7 +120,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         }
     }
 
-    Track *track = ad.track;
+    Track *track = TracksAD::getAD(customNoteData->customData).track;
     if (track) {
         ParentObject *parentObject =
             ParentController::GetParentObjectTrack(track);
@@ -160,7 +161,9 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
     rapidjson::Value &animation = customData["_animation"];
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    Track *track = TracksAD::getAD(customNoteData->customData).track;
     noteUpdateAD = &ad;
+    noteTrack = track;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -172,7 +175,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
     float normalTime = elapsedTime / noteJump->jumpDuration;
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
-        ad.animationData, ad.track, normalTime);
+        ad.animationData, track, normalTime);
 
     if (offset.positionOffset.has_value()) {
         floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;

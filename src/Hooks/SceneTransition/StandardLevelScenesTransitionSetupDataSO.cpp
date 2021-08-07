@@ -13,7 +13,7 @@
 #include "GlobalNamespace/BeatmapLineData.hpp"
 
 #include "Animation/ParentObject.h"
-#include "Animation/PointDefinition.h"
+#include "tracks/shared/Animation/PointDefinition.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 
@@ -21,18 +21,14 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-extern Il2CppClass *customObstacleDataClass;
-extern Il2CppClass *customNoteDataClass;
-
 MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO *self, Il2CppString *gameMode, IDifficultyBeatmap *difficultyBeatmap, IPreviewBeatmapLevel *previewBeatmapLevel, OverrideEnvironmentSettings *overrideEnvironmentSettings, ColorScheme *overrideColorScheme, GameplayModifiers *gameplayModifiers, PlayerSpecificSettings *playerSpecificSettings, PracticeSettings *practiceSettings, Il2CppString *backButtonText, bool useTestNoteCutSoundEffects) {
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects);
     ParentController::OnDestroy();
 
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+
     auto *beatmapData = reinterpret_cast<CustomBeatmapData*>(difficultyBeatmap->get_beatmapData());
-    auto& ad = getBeatmapAD(beatmapData->customData);
-    for (auto& pair : ad.tracks) {
-        pair.second.ResetVariables();
-    }
 
     for (int i = 0; i < beatmapData->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = beatmapData->beatmapLinesData->values[i];

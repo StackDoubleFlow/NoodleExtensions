@@ -8,7 +8,7 @@
 #include "System/Action.hpp"
 #include "System/Action_1.hpp"
 
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "Animation/AnimationHelper.h"
 #include "NEHooks.h"
 
@@ -16,6 +16,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
+extern Track *noteTrack;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
@@ -104,7 +105,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     }
 
     if (noteUpdateAD) {
-        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteUpdateAD->track, normalTime);
+        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTrack, normalTime);
         if (position.has_value()) {
             self->localPosition = *position + noteUpdateAD->noteOffset;
             result = self->worldRotation * self->localPosition;

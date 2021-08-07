@@ -1,7 +1,7 @@
 
 #pragma once
 #include "beatsaber-hook/shared/utils/logging.hpp"
-#include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
+#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
 
 class NELogger {
 public:

@@ -29,9 +29,8 @@ using namespace System::Collections::Generic;
 extern int CachedNoteJumpMovementSpeed;
 extern int CachedNoteJumpStartBeatOffset;
 
-// BeatmapDataLoader.cpp
-extern Il2CppClass *customObstacleDataClass;
-extern Il2CppClass *customNoteDataClass;
+static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
 
 System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
     std::vector<const Il2CppClass *> argClasses{classof(BeatmapObjectData *),

@@ -7,7 +7,7 @@
 #include "GlobalNamespace/BeatmapLineData.hpp"
 
 #include "Animation/AnimationHelper.h"
-#include "Animation/Track.h"
+#include "tracks/shared/Animation/Track.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
@@ -16,9 +16,6 @@
 #include <optional>
 
 using namespace GlobalNamespace;
-
-Il2CppClass *customObstacleDataClass;
-Il2CppClass *customNoteDataClass;
 
 MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
                 &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,
@@ -39,32 +36,10 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
     NELogger::GetLogger().info("BeatmapData klass name is %s",
                                result->klass->name);
 
-    if (!customObstacleDataClass) {
-        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-    }
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
 
-    BeatmapAssociatedData &beatmapAD = getBeatmapAD(result->customData);
-
-    if (result->customData->value) {
-        rapidjson::Value &customData = *result->customData->value;
-
-        PointDefinitionManager pointDataManager;
-        if (customData.HasMember("_pointDefinitions")) {
-            const rapidjson::Value &pointDefinitions =
-                customData["_pointDefinitions"];
-            for (rapidjson::Value::ConstValueIterator itr =
-                     pointDefinitions.Begin();
-                 itr != pointDefinitions.End(); itr++) {
-                std::string pointName = (*itr)["_name"].GetString();
-                PointDefinition pointData((*itr)["_points"]);
-                pointDataManager.AddPoint(pointName, pointData);
-            }
-        }
-        beatmapAD.pointDefinitions = pointDataManager.pointData;
-    }
-
-    auto &tracks = beatmapAD.tracks;
+    auto &beatmapAD = TracksAD::getBeatmapAD(result->customData);
 
     for (int i = 0; i < result->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = result->beatmapLinesData->values[i];
@@ -88,12 +63,6 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
             if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
                 BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-                if (customData.HasMember("_track")) {
-                    std::string trackName = customData["_track"].GetString();
-                    Track *track = &tracks[trackName];
-                    AnimationHelper::OnTrackCreated(track);
-                    ad.track = track;
-                }
 
                 rapidjson::Value &animation = customData["_animation"];
                 ad.animationData = AnimationObjectData(beatmapAD, animation);

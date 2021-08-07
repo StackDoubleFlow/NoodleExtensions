@@ -44,6 +44,11 @@
       "id": "config-utils",
       "versionRange": "^0.5.1",
       "additionalData": {}
+    },
+    {
+      "id": "tracks",
+      "versionRange": "^0.1.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

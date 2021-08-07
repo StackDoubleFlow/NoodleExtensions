@@ -1,5 +1,5 @@
 #pragma once
-#include "Animation/Track.h"
+#include "tracks/shared/Animation/Track.h"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "custom-types/shared/macros.hpp"

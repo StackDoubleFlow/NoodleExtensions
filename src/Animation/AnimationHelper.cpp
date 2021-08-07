@@ -2,8 +2,8 @@
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "tracks/shared/Animation/PointDefinition.h"
 #include "Animation/AnimationHelper.h"
-#include "Animation/PointDefinition.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
 
@@ -46,31 +46,6 @@ std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
     } else {
         return std::nullopt;
     }
-}
-
-PointDefinition *AnimationHelper::TryGetPointData(BeatmapAssociatedData& beatmapAD, PointDefinition*& anon, const rapidjson::Value& customData, std::string pointName) {
-    PointDefinition *pointData = nullptr;
-
-    if (!customData.HasMember(pointName.c_str())) return pointData;
-    const rapidjson::Value& pointString = customData[pointName.c_str()];
-
-    switch (pointString.GetType()) {
-    case rapidjson::kNullType:
-        return pointData;
-    case rapidjson::kStringType: {
-        auto& ad = beatmapAD;
-        auto itr = ad.pointDefinitions.find(pointString.GetString());
-        if (itr != ad.pointDefinitions.end()) {
-            pointData = &itr->second;
-        }
-        break;
-    }
-    default:
-        pointData = new PointDefinition(pointString);
-        anon = pointData;
-    }
-
-    return pointData;
 }
 
 std::optional<PointDefinitionInterpolation> GetPathInterpolation(Track *track, std::string_view name, PropertyType type) {
@@ -162,8 +137,4 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     offset.cuttable = pathCuttable * mapTrack(track, track->properties.cuttable.value, [](auto const& p) { return p.linear; });
 
     return offset;
-}
-
-void AnimationHelper::OnTrackCreated(Track *track) {
-
 }

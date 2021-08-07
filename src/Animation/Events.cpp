@@ -1,3 +1,4 @@
+#include "Animation/Events.h"
 #include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
@@ -9,17 +10,12 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "custom-types/shared/register.hpp"
 
-#include "Animation/Easings.h"
-#include "Animation/Events.h"
-#include "Animation/Easings.h"
-#include "Animation/Track.h"
-#include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "Animation/PlayerTrack.h"
-#include "TimeSourceHelper.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
-#include "Vector.h"
+#include "tracks/shared/Vector.h"
 
 using namespace Events;
 using namespace GlobalNamespace;
@@ -31,86 +27,17 @@ extern BeatmapObjectCallbackController *callbackController;
 
 BeatmapObjectSpawnController *spawnController;
 
-static std::vector<AnimateTrackContext> coroutines;
-static std::vector<AssignPathAnimationContext> pathCoroutines;
-static std::vector<PointDefinition*> anonPointDefinitions;
-
 MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
     spawnController = self;
-    coroutines.clear();
-    pathCoroutines.clear();
-    NELogger::GetLogger().debug("coroutines and pathCoroutines capacity: %lu and %lu", coroutines.capacity(), pathCoroutines.capacity());
-    for (auto *pointDefinition : anonPointDefinitions) {
-        delete pointDefinition;
-    }
-    NELogger::GetLogger().debug("Swapping anonPointDefinitions from old capacity: %lu", anonPointDefinitions.capacity());
-    std::vector<PointDefinition*>().swap(anonPointDefinitions);
-    NELogger::GetLogger().debug("to new capacity: %lu", anonPointDefinitions.capacity());
     BeatmapObjectSpawnController_Start(self);
-}
-
-bool UpdateCoroutine(AnimateTrackContext& context) {
-    float elapsedTime = TimeSourceHelper::getSongTime(callbackController->audioTimeSource) - context.startTime;
-    float time = Easings::Interpolate(std::min(elapsedTime / context.duration, 1.0f), context.easing);
-    if (!context.property->value.has_value()) {
-        context.property->value = { 0 };
-    }
-    switch (context.property->type) {
-    case PropertyType::linear:
-        context.property->value->linear = context.points->InterpolateLinear(time);
-        break;
-    case PropertyType::vector3:
-        context.property->value->vector3 = context.points->Interpolate(time);
-        break;
-    case PropertyType::vector4:
-        context.property->value->vector4 = context.points->InterpolateVector4(time);
-        break;
-    case PropertyType::quaternion:
-        context.property->value->quaternion = context.points->InterpolateQuaternion(time);
-        break;
-    }
-
-    return elapsedTime < context.duration;
-}
-
-bool UpdatePathCoroutine(AssignPathAnimationContext& context) {
-    float elapsedTime = TimeSourceHelper::getSongTime(callbackController->audioTimeSource) - context.startTime;
-    context.property->value->time = Easings::Interpolate(std::min(elapsedTime / context.duration, 1.0f), context.easing);
-
-    return elapsedTime < context.duration;
-}
-
-void Events::UpdateCoroutines() {
-    for (auto it = coroutines.begin(); it != coroutines.end();) {
-        if (UpdateCoroutine(*it)) {
-            it++;
-        } else {
-            // delete it->anonPointDef;
-            coroutines.erase(it);
-        }
-    }
-
-    for (auto it = pathCoroutines.begin(); it != pathCoroutines.end();) {
-        if (UpdatePathCoroutine(*it)) {
-            it++;
-        } else {
-            it->property->value->Finish();
-            pathCoroutines.erase(it);
-        }
-    }
 }
 
 void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
     auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
-    BeatmapAssociatedData& ad = getBeatmapAD(customBeatmapData->customData);
+    TracksAD::BeatmapAssociatedData& ad = TracksAD::getBeatmapAD(customBeatmapData->customData);
     rapidjson::Value& eventData = *customEventData->data;
-
-    EventType type;
-    if (customEventData->type == "AnimateTrack") {
-        type = EventType::animateTrack;
-    } else if (customEventData->type == "AssignPathAnimation") {
-        type = EventType::assignPathAnimation;
-    } else if (customEventData->type == "AssignTrackParent") {
+    
+    if (customEventData->type == "AssignTrackParent") {
         Track *track = &ad.tracks[eventData["_parentTrack"].GetString()];
 
         rapidjson::Value& rawChildrenTracks = eventData["_childrenTracks"];
@@ -160,72 +87,9 @@ void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
     } else {
         return;
     }
-
-    Track *track = &ad.tracks[eventData["_track"].GetString()];
-    float duration = customEventData->data->HasMember("_duration") ? eventData["_duration"].GetFloat() : 0;
-    Functions easing = customEventData->data->HasMember("_easing") ? FunctionFromStr(eventData["_easing"].GetString()) : Functions::easeLinear;
-
-    duration = 60 * duration / spawnController->get_currentBpm();
-
-    auto& properties = track->properties;
-    auto& pathProperties = track->pathProperties;
-
-    rapidjson::Value::ConstMemberIterator itr;
-    for (itr = eventData.MemberBegin(); itr < eventData.MemberEnd(); itr++) {
-        const char *name = (*itr).name.GetString();
-        if (strcmp(name, "_track") && strcmp(name, "_duration") && strcmp(name, "_easing")) {
-            switch (type) {
-            case EventType::animateTrack: {
-                Property *property = properties.FindProperty(name);
-                if (property) {
-                    for (auto it = coroutines.begin(); it != coroutines.end();) {
-                        if (it->property == property) {
-                            coroutines.erase(it);
-                        } else {
-                            it++;
-                        }
-                    }
-
-                    PointDefinition *anonPointDef = nullptr;;
-                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDef, eventData, name);
-                    if (pointData) {
-                        coroutines.push_back(AnimateTrackContext { pointData, property, duration, customEventData->time, easing, anonPointDef });
-                    }
-                } else {
-                    NELogger::GetLogger().warning("Could not find track property with name %s", name);
-                }
-                break;
-            }
-            case EventType::assignPathAnimation:
-                PathProperty *property = pathProperties.FindProperty(name);
-                if (property) {
-                    for (auto it = pathCoroutines.begin(); it != pathCoroutines.end();) {
-                        if (it->property == property) {
-                            pathCoroutines.erase(it);
-                        } else {
-                            it++;
-                        }
-                    }
-
-                    PointDefinition *anonPointDef = nullptr;
-                    auto *pointData = AnimationHelper::TryGetPointData(ad, anonPointDef, eventData, name);
-                    if (pointData) {
-                        if (anonPointDef) {
-                            anonPointDefinitions.push_back(anonPointDef);
-                        }
-                        if (!property->value.has_value()) property->value = PointDefinitionInterpolation();
-                        property->value->Init(pointData);
-                        pathCoroutines.push_back(AssignPathAnimationContext { property, duration, customEventData->time, easing });
-                    }
-                } else {
-                    NELogger::GetLogger().warning("Could not find track path property with name %s", name);
-                }
-            }
-        }
-    }
 }
 
-void Events::AddEventCallbacks(Logger& logger) {
+void NEEvents::AddEventCallbacks(Logger& logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
     custom_types::Register::AutoRegister();
 
