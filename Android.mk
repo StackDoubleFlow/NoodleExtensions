@@ -31,7 +31,7 @@ LOCAL_MODULE := custom-types
 LOCAL_EXPORT_C_INCLUDES := extern/custom-types
 LOCAL_SRC_FILES := extern/libcustom-types.so
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: custom-json-data - version: 0.11.3
+# Creating prebuilt for dependency: custom-json-data - version: 0.11.4
 include $(CLEAR_VARS)
 LOCAL_MODULE := custom-json-data
 LOCAL_EXPORT_C_INCLUDES := extern/custom-json-data
@@ -67,7 +67,7 @@ LOCAL_MODULE := cryptopp
 LOCAL_EXPORT_C_INCLUDES := extern/libcryptopp
 LOCAL_SRC_FILES := extern/libcryptopp.a
 include $(PREBUILT_STATIC_LIBRARY)
-# Creating prebuilt for dependency: tracks - version: 0.1.0
+# Creating prebuilt for dependency: tracks - version: 0.1.2
 include $(CLEAR_VARS)
 LOCAL_MODULE := tracks
 LOCAL_EXPORT_C_INCLUDES := extern/tracks

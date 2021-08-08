@@ -20,14 +20,10 @@
 
 using namespace GlobalNamespace;
 
-BeatmapObjectCallbackController *callbackController;
-
 MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallbackController::LateUpdate, void, BeatmapObjectCallbackController *self) {
     if (!self->beatmapData) {
         return;
     }
-
-    callbackController = self;
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);

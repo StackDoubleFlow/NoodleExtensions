@@ -22,9 +22,6 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace NEVector;
 
-// BeatmapObjectCallbackController.cpp
-extern BeatmapObjectCallbackController *callbackController;
-
 BeatmapObjectSpawnController *spawnController;
 
 MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
@@ -32,7 +29,7 @@ MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnControlle
     BeatmapObjectSpawnController_Start(self);
 }
 
-void CustomEventCallback(CustomJSONData::CustomEventData *customEventData) {
+void CustomEventCallback(BeatmapObjectCallbackController *callbackController, CustomJSONData::CustomEventData *customEventData) {
     auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
     TracksAD::BeatmapAssociatedData& ad = TracksAD::getBeatmapAD(customBeatmapData->customData);
     rapidjson::Value& eventData = *customEventData->data;
