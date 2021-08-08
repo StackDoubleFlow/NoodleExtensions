@@ -3,7 +3,7 @@
 
 class Hooks {
 private:
-    static std::vector<void (*)(Logger& logger)> installFuncs;
+    static inline std::vector<void (*)(Logger& logger)> installFuncs;
 public:
     static void AddInstallFunc(void (*installFunc)(Logger& logger)) {
         installFuncs.push_back(installFunc);
