@@ -145,7 +145,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             float jumpDuration = num * num2 * 2;
             *aheadTime = moveDuration + (jumpDuration * 0.5f);
-            NELogger::GetLogger().info("Set aheadTime to %f", *aheadTime);
         }
 
         beatmapLineData->beatmapObjectsData =

@@ -1,20 +1,20 @@
 #include "Animation/Events.h"
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
+#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Vector3.hpp"
 
 #include "beatsaber-hook/shared/utils/hooking.hpp"
-#include "custom-json-data/shared/CustomEventData.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-json-data/shared/CustomEventData.h"
 #include "custom-types/shared/register.hpp"
 
 #include "Animation/ParentObject.h"
 #include "Animation/PlayerTrack.h"
-#include "tracks/shared/TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
+#include "tracks/shared/TimeSourceHelper.h"
 #include "tracks/shared/Vector.h"
 
 using namespace Events;
@@ -24,26 +24,29 @@ using namespace NEVector;
 
 BeatmapObjectSpawnController *spawnController;
 
-MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
+MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void,
+                BeatmapObjectSpawnController *self) {
     spawnController = self;
     BeatmapObjectSpawnController_Start(self);
 }
 
-void CustomEventCallback(BeatmapObjectCallbackController *callbackController, CustomJSONData::CustomEventData *customEventData) {
-    auto *customBeatmapData = (CustomJSONData::CustomBeatmapData*) callbackController->beatmapData;
-    TracksAD::BeatmapAssociatedData& ad = TracksAD::getBeatmapAD(customBeatmapData->customData);
-    rapidjson::Value& eventData = *customEventData->data;
-    
+void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
+                         CustomJSONData::CustomEventData *customEventData) {
+    auto *customBeatmapData = (CustomJSONData::CustomBeatmapData *)callbackController->beatmapData;
+    TracksAD::BeatmapAssociatedData &ad = TracksAD::getBeatmapAD(customBeatmapData->customData);
+    rapidjson::Value &eventData = *customEventData->data;
+
     if (customEventData->type == "AssignTrackParent") {
         Track *track = &ad.tracks[eventData["_parentTrack"].GetString()];
 
-        rapidjson::Value& rawChildrenTracks = eventData["_childrenTracks"];
-        std::vector<Track*> childrenTracks;
-        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin(); itr != rawChildrenTracks.End(); itr++) {
+        rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
+        std::vector<Track *> childrenTracks;
+        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
+             itr != rawChildrenTracks.End(); itr++) {
             childrenTracks.push_back(&ad.tracks[itr->GetString()]);
         }
 
-        std::optional<Vector3> startPos; 
+        std::optional<Vector3> startPos;
         std::optional<Quaternion> startRot;
         std::optional<Quaternion> startLocalRot;
         std::optional<Vector3> startScale;
@@ -76,17 +79,17 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController, Cu
             startScale = Vector3(x, y, z);
         }
 
-        ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot, startScale);
-        return;
+        ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot,
+                                  startScale);
     } else if (customEventData->type == "AssignPlayerToTrack") {
         Track *track = &ad.tracks[eventData["_track"].GetString()];
+        NELogger::GetLogger().debug("Assigning player to track %s at %p",
+                                    eventData["_track"].GetString(), track);
         PlayerTrack::AssignTrack(track);
-    } else {
-        return;
     }
 }
 
-void NEEvents::AddEventCallbacks(Logger& logger) {
+void NEEvents::AddEventCallbacks(Logger &logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
     custom_types::Register::AutoRegister();
 

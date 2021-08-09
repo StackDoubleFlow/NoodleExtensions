@@ -52,6 +52,8 @@ void PlayerTrack::OnDidPauseEvent() {
 }
 
 void PlayerTrack::OnDestroy() {
+    NELogger::GetLogger().debug("PlayerTrack::OnDestroy");
+    instance = nullptr;
     if (pauseController) {
         pauseController->remove_didPauseEvent(didPauseEventAction);
     }
