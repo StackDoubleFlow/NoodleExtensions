@@ -45,7 +45,6 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
                         aheadTime = getAD(obstacleData->customData).aheadTime;
                     } else if (beatmapObjectData->klass == customNoteDataClass) {
                         auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
-                        // NELogger::GetLogger().info("noteData aheadTime: %f", noteData->aheadTime);
                         aheadTime = getAD(noteData->customData).aheadTime;
                     }
                 }

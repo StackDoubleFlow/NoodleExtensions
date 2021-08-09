@@ -29,10 +29,9 @@ using namespace System::Collections::Generic;
 extern int CachedNoteJumpMovementSpeed;
 extern int CachedNoteJumpStartBeatOffset;
 
-static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
-
 System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
     std::vector<const Il2CppClass *> argClasses{classof(BeatmapObjectData *),
                                                 classof(float)};
     auto genericClass = il2cpp_utils::MakeGeneric(
@@ -83,6 +82,8 @@ OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
 
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     BeatmapData *customBeatmapData = beatmapData->GetCopy();
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
 
     float startHalfJumpDurationInBeats = 4;
     float maxHalfJumpDistance = 18;
@@ -144,6 +145,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             float jumpDuration = num * num2 * 2;
             *aheadTime = moveDuration + (jumpDuration * 0.5f);
+            NELogger::GetLogger().info("Set aheadTime to %f", *aheadTime);
         }
 
         beatmapLineData->beatmapObjectsData =

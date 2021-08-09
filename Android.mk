@@ -67,7 +67,7 @@ LOCAL_MODULE := cryptopp
 LOCAL_EXPORT_C_INCLUDES := extern/libcryptopp
 LOCAL_SRC_FILES := extern/libcryptopp.a
 include $(PREBUILT_STATIC_LIBRARY)
-# Creating prebuilt for dependency: tracks - version: 0.1.2
+# Creating prebuilt for dependency: tracks - version: 0.1.3
 include $(CLEAR_VARS)
 LOCAL_MODULE := tracks
 LOCAL_EXPORT_C_INCLUDES := extern/tracks
