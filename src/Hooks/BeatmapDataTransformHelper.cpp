@@ -31,7 +31,7 @@ extern int CachedNoteJumpStartBeatOffset;
 
 System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
     std::vector<const Il2CppClass *> argClasses{classof(BeatmapObjectData *),
                                                 classof(float)};
     auto genericClass = il2cpp_utils::MakeGeneric(
@@ -83,7 +83,7 @@ OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     BeatmapData *customBeatmapData = beatmapData->GetCopy();
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
     float startHalfJumpDurationInBeats = 4;
     float maxHalfJumpDistance = 18;

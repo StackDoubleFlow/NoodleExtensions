@@ -26,7 +26,7 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     ParentController::OnDestroy();
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
     auto *beatmapData = reinterpret_cast<CustomBeatmapData*>(difficultyBeatmap->get_beatmapData());
 

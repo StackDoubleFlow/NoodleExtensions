@@ -37,7 +37,7 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
                                result->klass->name);
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
     auto &beatmapAD = TracksAD::getBeatmapAD(result->customData);
 

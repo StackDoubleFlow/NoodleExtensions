@@ -26,7 +26,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
     }
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSource);
     auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());
