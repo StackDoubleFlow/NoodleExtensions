@@ -34,7 +34,7 @@ void PlayerTrack::AssignTrack(Track *track) {
 
         instance = noodleObject->AddComponent<PlayerTrack*>();
         pauseController = Object::FindObjectOfType<PauseController*>();
-        if (!pauseController) {
+        if (pauseController) {
             didPauseEventAction = il2cpp_utils::MakeAction<Action*>(PlayerTrack::OnDidPauseEvent);
             pauseController->add_didPauseEvent(didPauseEventAction);
         }
@@ -47,6 +47,7 @@ void PlayerTrack::AssignTrack(Track *track) {
 }
 
 void PlayerTrack::OnDidPauseEvent() {
+    NELogger::GetLogger().debug("PlayerTrack::OnDidPauseEvent");
     origin->set_localRotation(startLocalRot);
     origin->set_localPosition(startPos);
 }
