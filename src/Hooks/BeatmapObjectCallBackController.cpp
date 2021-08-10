@@ -17,6 +17,7 @@
 #include "tracks/shared/TimeSourceHelper.h"
 #include "NEHooks.h"
 #include "NELogger.h"
+#include "SharedUpdate.h"
 
 using namespace GlobalNamespace;
 
@@ -24,6 +25,8 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
     if (!self->beatmapData) {
         return;
     }
+
+    NESharedUpdate::TriggerUpdate();
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
