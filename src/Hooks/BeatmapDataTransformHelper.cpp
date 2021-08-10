@@ -46,13 +46,10 @@ bool ObjectTimeCompare(BeatmapObjectData *a, BeatmapObjectData *b) {
     return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
-List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
-    auto *enumerable = reinterpret_cast<IEnumerable_1<BeatmapObjectData *> *>(beatmapObjectsData);
-    auto *newList = List<BeatmapObjectData *>::New_ctor(enumerable);
-    BeatmapObjectData **begin = newList->items->values;
-    BeatmapObjectData **end = begin + newList->get_Count();
+void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
+    BeatmapObjectData **begin = beatmapObjectsData->items->values;
+    BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
     std::sort(begin, end, ObjectTimeCompare);
-    return newList;
 }
 
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
@@ -118,22 +115,22 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             *aheadTime = moveDuration + (jumpDuration * 0.5f);
         }
 
-        beatmapLineData->beatmapObjectsData = OrderObjects(beatmapLineData->beatmapObjectsData);
+        OrderObjects(beatmapLineData->beatmapObjectsData);
     }
 
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
-MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
+MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData, IReadonlyBeatmapData *,
                 IReadonlyBeatmapData *beatmapData, IPreviewBeatmapLevel *beatmapLevel,
                 GameplayModifiers *gameplayModifiers, PracticeSettings *practiceSettings,
                 bool leftHanded, EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
                 EnvironmentIntensityReductionOptions *environmentIntensityReductionOptions,
                 bool screenDisplacementEffectsEnabled) {
-    auto transformedBeatmapData = ReorderLineData(beatmapData);
-    return CreateTransformedBeatmapData(
-        beatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
+    auto *transformedBeatmapData = ReorderLineData(beatmapData);
+    return BeatmapDataTransformHelper_CreateTransformedBeatmapData(
+        transformedBeatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
         screenDisplacementEffectsEnabled);
 }
@@ -146,7 +143,7 @@ MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData,
 }
 
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
-    INSTALL_HOOK(logger, CreateTransformedBeatmapData);
+    INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
     INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
 }
 
