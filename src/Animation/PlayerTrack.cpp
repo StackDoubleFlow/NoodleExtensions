@@ -54,10 +54,11 @@ void PlayerTrack::OnDidPauseEvent() {
 
 void PlayerTrack::OnDestroy() {
     NELogger::GetLogger().debug("PlayerTrack::OnDestroy");
-    instance = nullptr;
     if (pauseController) {
-        pauseController->remove_didPauseEvent(didPauseEventAction);
+        // NELogger::GetLogger().debug("Removing action didPauseEvent %p", didPauseEventAction);
+        // pauseController->remove_didPauseEvent(didPauseEventAction);
     }
+    instance = nullptr;
 }
 
 void PlayerTrack::Update() {
