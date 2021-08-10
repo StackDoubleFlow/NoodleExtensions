@@ -1,0 +1,63 @@
+name: NDK build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout
+      with:
+        submodules: true
+        lfs: true
+
+    - name: Get QPM
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: main.yml
+        name: QPM-ubuntu-x64
+        path: QPM
+        repo: sc2ad/QuestPackageManager
+        
+    - name: QPM Collect
+      run: |
+        chmod +x ./QPM/QPM
+        ./QPM/QPM collect
+      
+    - name: QPM Restore
+      run: ./QPM/QPM restore
+    - name: List Post Restore
+      run: |
+        ls -la ${GITHUB_WORKSPACE}/extern/
+        ls -la QPM_Temp
+    - name: Build
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        pwsh -Command ./scripts/build.ps1
+    - name: Get Library Name
+      id: libname
+      run: |
+        cd ./libs/arm64-v8a/
+        pattern="libnoodleextensions.so"
+        files=( $pattern )
+        echo ::set-output name=NAME::"${files[0]}"
+    - name: Upload non-debug artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.libname.outputs.NAME }}
+        path: ./libs/arm64-v8a/${{ steps.libname.outputs.NAME }}
+        if-no-files-found: error
+    - name: Upload debug artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: debug_${{ steps.libname.outputs.NAME }}
+        path: ./obj/local/arm64-v8a/${{ steps.libname.outputs.NAME }}
+        if-no-files-found: error
+    # TODO: Add auto-populating releases, auto update versions, auto publish package on release
