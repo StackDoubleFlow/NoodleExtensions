@@ -2,6 +2,7 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
 #include "GlobalNamespace/BeatmapData.hpp"
+#include "GlobalNamespace/BeatmapDataObstaclesMergingTransform.hpp"
 #include "GlobalNamespace/BeatmapDataTransformHelper.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/EnvironmentEffectsFilterPreset.hpp"
@@ -9,7 +10,6 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/IReadonlyBeatmapData.hpp"
 #include "GlobalNamespace/PracticeSettings.hpp"
-#include "GlobalNamespace/BeatmapDataObstaclesMergingTransform.hpp"
 #include "System/Collections/Generic/IEnumerable_1.hpp"
 #include "System/Func_2.hpp"
 #include "System/Linq/Enumerable.hpp"
@@ -29,61 +29,36 @@ using namespace System::Collections::Generic;
 extern int CachedNoteJumpMovementSpeed;
 extern int CachedNoteJumpStartBeatOffset;
 
-System::Func_2<BeatmapObjectData *, float> *CreateOrderFunc() {
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-    std::vector<const Il2CppClass *> argClasses{classof(BeatmapObjectData *),
-                                                classof(float)};
-    auto genericClass = il2cpp_utils::MakeGeneric(
-        il2cpp_utils::GetClassFromName("System", "Func`2"), argClasses);
-    auto lambda = +[](BeatmapObjectData *n) {
-        if (n->klass == customObstacleDataClass) {
-            return n->time -
-                   getAD(((CustomJSONData::CustomObstacleData *)n)->customData)
-                       .aheadTime;
-        } else if (n->klass == customNoteDataClass) {
-            return n->time -
-                   getAD(((CustomJSONData::CustomNoteData *)n)->customData)
-                       .aheadTime;
-        } else {
-            return n->time;
-        }
-    };
-    return il2cpp_utils::MakeDelegate<
-        System::Func_2<BeatmapObjectData *, float> *>(
-        genericClass, static_cast<Il2CppObject *>(nullptr), lambda);
+static Il2CppClass *customObstacleDataClass;
+static Il2CppClass *customNoteDataClass;
+
+float ObjectSortGetTime(BeatmapObjectData *n) {
+    if (n->klass == customObstacleDataClass) {
+        return n->time - getAD(((CustomJSONData::CustomObstacleData *)n)->customData).aheadTime;
+    } else if (n->klass == customNoteDataClass) {
+        return n->time - getAD(((CustomJSONData::CustomNoteData *)n)->customData).aheadTime;
+    } else {
+        return n->time;
+    }
 }
 
-List<BeatmapObjectData *> *
-OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
-    auto orderFunc = CreateOrderFunc();
+bool ObjectTimeCompare(BeatmapObjectData *a, BeatmapObjectData *b) {
+    return ObjectSortGetTime(a) < ObjectSortGetTime(b);
+}
 
-    using IOrderedEnumerableT =
-        System::Linq::IOrderedEnumerable_1<BeatmapObjectData *> *;
-    // Used as a parameter for OrderBy
-    auto enumerable = (IEnumerable_1<BeatmapObjectData *> *)beatmapObjectsData;
-
-    // var orderedEnumerable = beatmapObjectsData.OrderBy(orderFunc);
-    auto orderByMethodInfo = il2cpp_utils::FindMethodUnsafe(
-        "System.Linq", "Enumerable", "OrderBy", 2);
-    auto orderByGenericMethodInfo = il2cpp_utils::MakeGenericMethod(
-        orderByMethodInfo, {classof(BeatmapObjectData *), classof(float)});
-    auto orderedEnumerable = CRASH_UNLESS(
-        il2cpp_utils::RunMethod<IEnumerable_1<BeatmapObjectData *> *>(
-            nullptr, orderByGenericMethodInfo, enumerable, orderFunc));
-    // return orderedEnumerable.ToList();
-    auto toListMethodInfo = il2cpp_utils::FindMethodUnsafe(
-        "System.Linq", "Enumerable", "ToList", 1);
-    auto toListGenericMethodInfo = il2cpp_utils::MakeGenericMethod(
-        toListMethodInfo, {classof(BeatmapObjectData *)});
-    return CRASH_UNLESS(il2cpp_utils::RunMethod<List<BeatmapObjectData *> *>(
-        nullptr, toListGenericMethodInfo, orderedEnumerable));
+List<BeatmapObjectData *> *OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
+    auto *enumerable = reinterpret_cast<IEnumerable_1<BeatmapObjectData *> *>(beatmapObjectsData);
+    auto *newList = List<BeatmapObjectData *>::New_ctor(enumerable);
+    BeatmapObjectData **begin = newList->items->values;
+    BeatmapObjectData **end = begin + newList->get_Count();
+    std::sort(begin, end, ObjectTimeCompare);
+    return newList;
 }
 
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     BeatmapData *customBeatmapData = beatmapData->GetCopy();
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
     float startHalfJumpDurationInBeats = 4;
     float maxHalfJumpDistance = 18;
@@ -91,8 +66,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
     // loop through all objects in all lines of the beatmapData
     for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData =
-            customBeatmapData->beatmapLinesData->values[i];
+        BeatmapLineData *beatmapLineData = customBeatmapData->beatmapLinesData->values[i];
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
             BeatmapObjectData *beatmapObjectData =
                 beatmapLineData->beatmapObjectsData->items->values[j];
@@ -101,13 +75,11 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto obstacleData =
-                    (CustomJSONData::CustomObstacleData *)beatmapObjectData;
+                auto obstacleData = (CustomJSONData::CustomObstacleData *)beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
                 bpm = obstacleData->bpm;
             } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto noteData =
-                    (CustomJSONData::CustomNoteData *)beatmapObjectData;
+                auto noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
                 customDataWrapper = noteData->customData;
                 bpm = noteData->bpm;
             } else {
@@ -123,10 +95,9 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 njs = customData.HasMember("_noteJumpMovementSpeed")
                           ? customData["_noteJumpMovementSpeed"].GetFloat()
                           : CachedNoteJumpMovementSpeed;
-                spawnOffset =
-                    customData.HasMember("_noteJumpStartBeatOffset")
-                        ? customData["_noteJumpStartBeatOffset"].GetFloat()
-                        : CachedNoteJumpStartBeatOffset;
+                spawnOffset = customData.HasMember("_noteJumpStartBeatOffset")
+                                  ? customData["_noteJumpStartBeatOffset"].GetFloat()
+                                  : CachedNoteJumpStartBeatOffset;
             } else {
                 njs = CachedNoteJumpMovementSpeed;
                 spawnOffset = CachedNoteJumpStartBeatOffset;
@@ -147,32 +118,30 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             *aheadTime = moveDuration + (jumpDuration * 0.5f);
         }
 
-        beatmapLineData->beatmapObjectsData =
-            OrderObjects(beatmapLineData->beatmapObjectsData);
+        beatmapLineData->beatmapObjectsData = OrderObjects(beatmapLineData->beatmapObjectsData);
     }
 
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
 MAKE_HOOK_MATCH(CreateTransformedBeatmapData,
-                &BeatmapDataTransformHelper::CreateTransformedBeatmapData,
-                IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData,
-                IPreviewBeatmapLevel *beatmapLevel,
-                GameplayModifiers *gameplayModifiers,
-                PracticeSettings *practiceSettings, bool leftHanded,
-                EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
-                EnvironmentIntensityReductionOptions
-                    *environmentIntensityReductionOptions, 
+                &BeatmapDataTransformHelper::CreateTransformedBeatmapData, IReadonlyBeatmapData *,
+                IReadonlyBeatmapData *beatmapData, IPreviewBeatmapLevel *beatmapLevel,
+                GameplayModifiers *gameplayModifiers, PracticeSettings *practiceSettings,
+                bool leftHanded, EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
+                EnvironmentIntensityReductionOptions *environmentIntensityReductionOptions,
                 bool screenDisplacementEffectsEnabled) {
     auto transformedBeatmapData = ReorderLineData(beatmapData);
     return CreateTransformedBeatmapData(
-        beatmapData, beatmapLevel, gameplayModifiers, practiceSettings,
-        leftHanded, environmentEffectsFilterPreset,
-        environmentIntensityReductionOptions, screenDisplacementEffectsEnabled);
+        beatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
+        environmentEffectsFilterPreset, environmentIntensityReductionOptions,
+        screenDisplacementEffectsEnabled);
 }
 
 // Skip obstacle merging, I have no clue how much this can fuck things
-MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData, &BeatmapDataObstaclesMergingTransform::CreateTransformedData, IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
+MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData,
+                &BeatmapDataObstaclesMergingTransform::CreateTransformedData,
+                IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
     return beatmapData;
 }
 
