@@ -18,25 +18,33 @@ using namespace TrackParenting;
 MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
                 &MirroredObstacleController::UpdatePositionAndRotation, void,
                 MirroredObstacleController *self) {
-    if (self->followedTransform->get_position().y < 0) {
-        // Hide without disabling update
-        self->transform->set_position(Vector3(0, 100, 0));
-    }
+    // static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    // if (self->followedObstacle && self->followedObstacle->obstacleData->klass == customObstacleDataClass) {
+    // TODO: Check if NE is enabled on this map
+    self->set_hide(true);
+    // }
 
-    Vector3 position = self->followedTransform->get_position();
-    Quaternion quaternion = self->followedTransform->get_rotation();
-    position.y = -position.y;
+    // if (self->followedTransform->get_position().y < 0) {
+    //     // Hide without disabling update
+    //     self->transform->set_position(Vector3(0, 100, 0));
+    // }
 
-    // TODO:
-    // quaternion = quaternion.Reflect(Vector3::get_up());
+    // Vector3 position = self->followedTransform->get_position();
+    // Quaternion quaternion = self->followedTransform->get_rotation();
+    // position.y = -position.y;
 
-    self->transform->SetPositionAndRotation(position, quaternion);
+    // // TODO:
+    // // quaternion = quaternion.Reflect(Vector3::get_up());
 
-    if (self->followedTransform->get_localScale() !=
-        self->transform->get_localScale()) {
-        self->transform->set_localScale(
-            self->followedTransform->get_localScale());
-    }
+    // self->transform->SetPositionAndRotation(position, quaternion);
+
+    // if (self->followedTransform->get_localScale() !=
+    //     self->transform->get_localScale()) {
+    //     self->transform->set_localScale(
+    //         self->followedTransform->get_localScale());
+    // }
+
+    MirroredObstacleController_UpdatePositionAndRotation(self);
 }
 
 void InstallMirroredObstacleControllerHooks(Logger &logger) {
