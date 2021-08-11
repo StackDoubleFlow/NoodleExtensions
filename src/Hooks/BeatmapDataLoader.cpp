@@ -41,6 +41,10 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
 
     auto &beatmapAD = TracksAD::getBeatmapAD(result->customData);
 
+    if (!beatmapAD.valid) {
+        TracksAD::readBeatmapDataAD(result);
+    }
+
     for (int i = 0; i < result->beatmapLinesData->Length(); i++) {
         BeatmapLineData *beatmapLineData = result->beatmapLinesData->values[i];
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
