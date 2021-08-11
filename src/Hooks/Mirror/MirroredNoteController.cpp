@@ -52,6 +52,9 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
     // }
 
     if (ad.cutoutEffect) {
+        // rekt
+        self->set_hide(true);
+
         CutoutEffect *cutoutEffect = ad.mirroredCutoutEffect;
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();

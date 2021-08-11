@@ -227,7 +227,6 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
             }
         }
     }
-    
 
     if (offset.dissolve.has_value() && getNEConfig().enableNoteDissolve.GetValue()) {
         CutoutEffect *cutoutEffect = ad.cutoutEffect;
