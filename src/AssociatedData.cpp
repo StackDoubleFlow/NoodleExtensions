@@ -27,7 +27,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
     localRotation = TryGetPointData(beatmapAD, animation, "_localRotation");
     dissolve = TryGetPointData(beatmapAD, animation, "_dissolve");
     dissolveArrow = TryGetPointData(beatmapAD, animation, "_dissolveArrow");
-    cuttable = TryGetPointData(beatmapAD, animation, "_cuttable");
+    cuttable = TryGetPointData(beatmapAD, animation, "_interactable");
     definitePosition = TryGetPointData(beatmapAD, animation, "_definitePosition");
 }
 

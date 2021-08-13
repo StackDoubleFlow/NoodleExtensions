@@ -124,7 +124,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{ localRotation->InterpolateQuaternion(time) } : TryGetQuaternionPathProperty(track, "_localRotation", time);
     std::optional<float> pathDissolve = dissolve ? std::optional{ dissolve->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolve", time);
     std::optional<float> pathDissolveArrow = dissolveArrow ? std::optional{ dissolveArrow->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_dissolveArrow", time);
-    std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_cuttable", time);
+    std::optional<float> pathCuttable = cuttable ? std::optional{ cuttable->InterpolateLinear(time) } : TryGetLinearPathProperty(track, "_interactable", time);
 
     offset.positionOffset = pathPosition + mapTrack(track, track->properties.position.value, [](auto const& p) { return p.vector3; });
     if (offset.positionOffset) offset.positionOffset = *offset.positionOffset * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;

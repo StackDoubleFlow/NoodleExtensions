@@ -155,8 +155,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
     }
 
     std::optional<bool> cuttable =
-        customData.HasMember("_cuttable")
-            ? std::optional{customData["_cuttable"].GetBool()}
+        customData.HasMember("_interactable")
+            ? std::optional{customData["_interactable"].GetBool()}
             : std::nullopt;
     if (cuttable && !*cuttable) {
         self->bounds.set_size(Vector3::get_zero());
