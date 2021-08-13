@@ -1,7 +1,6 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
-#include "GlobalNamespace/BoolSO.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
 #include "GlobalNamespace/ObstacleController.hpp"
@@ -10,6 +9,7 @@
 #include "GlobalNamespace/ParametricBoxFrameController.hpp"
 #include "GlobalNamespace/SimpleColorSO.hpp"
 #include "GlobalNamespace/StretchableObstacle.hpp"
+#include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Transform.hpp"
@@ -245,9 +245,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
                 self->get_gameObject()
                     ->GetComponentInChildren<ConditionalMaterialSwitcher *>();
             ad.materialSwitcher = materialSwitcher;
-        }
-        if (!materialSwitcher->value->get_value()) {
-            materialSwitcher->value->set_value(true);
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
         }
 
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;

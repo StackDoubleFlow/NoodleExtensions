@@ -14,7 +14,7 @@
 #include "GlobalNamespace/BombNoteController.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 #include "GlobalNamespace/BoxCuttableBySaber.hpp"
-#include "GlobalNamespace/BoolSO.hpp"
+#include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
 
@@ -223,9 +223,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
             if (!materialSwitcher) {
                 materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
                 ad.materialSwitcher = materialSwitcher;
-            }
-            if (!materialSwitcher->value->get_value()) {
-                materialSwitcher->value->set_value(true);
+                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
             }
         }
     }

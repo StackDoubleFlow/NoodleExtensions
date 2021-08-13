@@ -31,7 +31,7 @@ LOCAL_MODULE := custom-types
 LOCAL_EXPORT_C_INCLUDES := extern/custom-types
 LOCAL_SRC_FILES := extern/libcustom-types.so
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: custom-json-data - version: 0.11.5
+# Creating prebuilt for dependency: custom-json-data - version: 0.11.7
 include $(CLEAR_VARS)
 LOCAL_MODULE := custom-json-data
 LOCAL_EXPORT_C_INCLUDES := extern/custom-json-data
@@ -49,13 +49,13 @@ LOCAL_MODULE := beatsaber-hook_2_2_5
 LOCAL_EXPORT_C_INCLUDES := extern/beatsaber-hook
 LOCAL_SRC_FILES := extern/libbeatsaber-hook_2_2_5.so
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: questui - version: 0.10.1
+# Creating prebuilt for dependency: questui - version: 0.10.2
 include $(CLEAR_VARS)
 LOCAL_MODULE := questui
 LOCAL_EXPORT_C_INCLUDES := extern/questui
 LOCAL_SRC_FILES := extern/libquestui.so
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: songloader - version: 0.6.1
+# Creating prebuilt for dependency: songloader - version: 0.6.2
 include $(CLEAR_VARS)
 LOCAL_MODULE := songloader
 LOCAL_EXPORT_C_INCLUDES := extern/songloader
