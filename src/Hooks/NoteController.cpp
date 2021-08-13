@@ -11,7 +11,9 @@
 #include "GlobalNamespace/CutoutEffect.hpp"
 #include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
+#include "GlobalNamespace/BombNoteController.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
+#include "GlobalNamespace/BoxCuttableBySaber.hpp"
 #include "GlobalNamespace/BoolSO.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/GameObject.hpp"
@@ -255,6 +257,34 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         }
 
         disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
+    }
+
+    static auto *gameNoteControllerClass = classof(GameNoteController *);
+    static auto *bombNoteControllerClass = classof(BombNoteController *);
+    if (offset.cuttable.has_value()) {
+        bool enabled = *offset.cuttable >= 1;
+
+        if (self->klass == gameNoteControllerClass) {
+            auto *gameNoteController = reinterpret_cast<GameNoteController *>(self);
+            Array<BoxCuttableBySaber *> *bigCuttable = gameNoteController->bigCuttableBySaberList;
+            for (int i = 0; i < bigCuttable->Length(); i++) {
+                if (bigCuttable->values[i]->canBeCut != enabled) {
+                    bigCuttable->values[i]->set_canBeCut(enabled);
+                }
+            }
+            Array<BoxCuttableBySaber *> *smallCuttable = gameNoteController->smallCuttableBySaberList;
+            for (int i = 0; i < smallCuttable->Length(); i++) {
+                if (smallCuttable->values[i]->canBeCut != enabled) {
+                    smallCuttable->values[i]->set_canBeCut(enabled);
+                }
+            }
+        } else if(self->klass == bombNoteControllerClass) {
+            auto *bombNoteController = reinterpret_cast<BombNoteController *>(self);
+            CuttableBySaber *cuttable = bombNoteController->cuttableBySaber;
+            if (cuttable->get_canBeCut() != enabled) {
+                cuttable->set_canBeCut(enabled);
+            }
+        }
     }
 
     NoteController_Update(self);
