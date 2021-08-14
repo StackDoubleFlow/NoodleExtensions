@@ -34,9 +34,11 @@ static Il2CppClass *customNoteDataClass;
 
 float ObjectSortGetTime(BeatmapObjectData *n) {
     if (n->klass == customObstacleDataClass) {
-        return n->time - getAD(((CustomJSONData::CustomObstacleData *)n)->customData).aheadTime;
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData *>(n);
+        return n->time - getAD(obstacle->customData).aheadTime;
     } else if (n->klass == customNoteDataClass) {
-        return n->time - getAD(((CustomJSONData::CustomNoteData *)n)->customData).aheadTime;
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData *>(n);
+        return n->time - getAD(note->customData).aheadTime;
     } else {
         return n->time;
     }
@@ -103,7 +105,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             float num = 60 / bpm;
             float num2 = startHalfJumpDurationInBeats;
             while (njs * num * num2 > maxHalfJumpDistance) {
-                num /= 2;
+                num2 /= 2;
             }
 
             num2 += spawnOffset;
