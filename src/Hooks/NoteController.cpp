@@ -141,6 +141,15 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.worldRotation = self->get_worldRotation();
     ad.localRotation = localRotation;
 
+    if (getNEConfig().enableNoteDissolve.GetValue()) {
+        ConditionalMaterialSwitcher *materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+        ad.materialSwitcher = materialSwitcher;
+        ad.dissolveEnabled = false;
+    }
+
     self->Update();
 }
 
@@ -217,18 +226,15 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         self->get_transform()->set_localRotation(worldRotationQuaternion);
     }
 
-    if (getNEConfig().enableNoteDissolve.GetValue()) {
-        if (offset.dissolve.has_value() || offset.dissolveArrow.has_value()) {
-            ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-            if (!materialSwitcher) {
-                materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-                ad.materialSwitcher = materialSwitcher;
-                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
-            }
-        }
+    bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
+    bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
+    if (hasDissolveOffset && !ad.dissolveEnabled && noteDissolveConfig) {
+        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
+        materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+        ad.dissolveEnabled = true;
     }
 
-    if (offset.dissolve.has_value() && getNEConfig().enableNoteDissolve.GetValue()) {
+    if (offset.dissolve.has_value() && noteDissolveConfig) {
         CutoutEffect *cutoutEffect = ad.cutoutEffect;
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
@@ -247,7 +253,7 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         cutoutEffect->SetCutout(1 - *offset.dissolve);
     }
 
-    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None && getNEConfig().enableNoteDissolve.GetValue()) {
+    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None && noteDissolveConfig) {
         DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController = ad.disappearingArrowController;
         if (!disappearingArrowController) {
             disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();

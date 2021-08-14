@@ -44,6 +44,8 @@ struct BeatmapObjectAssociatedData {
     NEVector::Vector3 jumpEndPos;
     NEVector::Vector3 noteOffset;
     float xOffset;
+    // set to true is the dissolve material is currently in use
+    bool dissolveEnabled;
     // cutout for obstacles
     GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
     GlobalNamespace::CutoutAnimateEffect *mirroredCutoutAnimationEffect;
@@ -54,7 +56,6 @@ struct BeatmapObjectAssociatedData {
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
     // conditional material switch for dissolve
     GlobalNamespace::ConditionalMaterialSwitcher *materialSwitcher;
-    UnityEngine::Renderer *mirroredRenderer;
     AnimationObjectData animationData;
 
     void ResetState();

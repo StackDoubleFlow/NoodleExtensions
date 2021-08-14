@@ -162,6 +162,15 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void,
         self->bounds.set_size(Vector3::get_zero());
     }
 
+    if (getNEConfig().enableObstacleDissolve.GetValue()) {
+        ConditionalMaterialSwitcher *materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+        ad.materialSwitcher = materialSwitcher;
+        ad.dissolveEnabled = false;
+    }
+
     self->Update();
 }
 
@@ -237,15 +246,12 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
         self->bounds.set_size(Vector3::get_zero());
     }
 
-    if (offset.dissolve.has_value() &&
-        getNEConfig().enableObstacleDissolve.GetValue()) {
-        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-        if (!materialSwitcher) {
-            materialSwitcher =
-                self->get_gameObject()
-                    ->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-            ad.materialSwitcher = materialSwitcher;
+    bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
+    if (offset.dissolve.has_value() && obstacleDissolveConfig) {
+        if (!ad.dissolveEnabled) {
+            ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            ad.dissolveEnabled = true;
         }
 
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
@@ -257,12 +263,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate,
         }
 
         cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
-
-        // if (offset.dissolve <= 0) {
-        //     cutoutAnimationEffect->SetCutout(1);
-        // } else {
-        //     cutoutAnimationEffect->SetCutout(0);
-        // }
     }
 
     ObstacleController_ManualUpdate(self);
