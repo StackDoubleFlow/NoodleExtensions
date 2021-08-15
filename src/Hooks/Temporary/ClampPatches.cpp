@@ -51,7 +51,37 @@ MAKE_HOOK_MATCH(NoteProcessorClampPatch,
         }
     }
 
-    NoteProcessorClampPatch(self, notes);
+    // NotesInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
+	// Instead, we have a reimplementation of the hooked method to deal with precision
+	// noteLineLayers:
+	for (il2cpp_array_size_t i = 0; i < self->notesInColumns->Length(); i++) {
+		self->notesInColumns->values[i]->Clear();
+	}
+	for (int j = 0; j < notes->size; j++) {
+		auto *noteData = notes->items->values[j];
+		auto *list = self->notesInColumns->values[noteData->lineIndex];
+
+		bool flag = false;
+		for (int k = 0; k < list->size; k++) {
+			if (list->items->values[k]->noteLineLayer.value > noteData->noteLineLayer.value) {
+				list->Insert(k, noteData);
+				flag = true;
+				break;
+			}
+		}
+		if (!flag) {
+			list->Add(noteData);
+		}
+	}
+	for (il2cpp_array_size_t l = 0; l < self->notesInColumns->Length(); l++) {
+		auto *list2 = self->notesInColumns->values[l];
+		for (int m = 0; m < list2->size; m++) {
+			auto *note = list2->items->values[m];
+			if (note->noteLineLayer.value >= 0 && note->noteLineLayer.value <= 2) {
+				note->SetNoteStartLineLayer(m);
+			}
+		}
+	}
 
     for (int i = 0; i < notes->size; ++i) {
         if (extendedLanesMap.find(i) != extendedLanesMap.end()) {
@@ -63,9 +93,9 @@ MAKE_HOOK_MATCH(NoteProcessorClampPatch,
     NoteData **begin = notes->items->values;
     NoteData **end = begin + notes->get_Count();
     NoteData **any = std::find_if(begin, end, [](NoteData *x) {
-        return x->lineIndex > 3 || x->lineIndex < 0;
+        return x->lineIndex < 0 || x->lineIndex > 3;
     });
-    if (any != end) {
+    if (any == end) {
         // No notes are out of range
         return;
     }

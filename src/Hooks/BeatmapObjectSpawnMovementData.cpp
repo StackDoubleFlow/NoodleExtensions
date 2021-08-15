@@ -170,10 +170,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData,
         customData.HasMember("_noteJumpStartBeatOffset")
             ? std::optional{customData["_noteJumpStartBeatOffset"].GetFloat()}
             : std::nullopt;
-    std::optional<float> startLineLayer =
-        customData.HasMember("startNoteLineLayer")
-            ? std::optional{customData["startNoteLineLayer"].GetFloat()}
-            : std::nullopt;
+    std::optional<float> startLineLayer = getAD(noteData->customData).startNoteLineLayer;
 
     bool gravityOverride = customData.HasMember("_disableNoteGravity")
                                ? customData["_disableNoteGravity"].GetBool()

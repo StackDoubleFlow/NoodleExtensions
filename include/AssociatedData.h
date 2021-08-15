@@ -36,6 +36,9 @@ struct AnimationObjectData {
 };
 
 struct BeatmapObjectAssociatedData {
+    // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
+    int startNoteLineLayer;
+
     float aheadTime;
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
