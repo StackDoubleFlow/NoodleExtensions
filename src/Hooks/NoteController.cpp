@@ -153,13 +153,13 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     self->Update();
 }
 
-MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
+MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void,
                 NoteController *self) {
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
     if (!customNoteData->customData->value) {
-        NoteController_Update(self);
+        NoteController_ManualUpdate(self);
         return;
     }
     rapidjson::Value &customData = *customNoteData->customData->value;
@@ -169,7 +169,6 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
     //     NoteController_Update(self);
     //     return;
     // }
-    rapidjson::Value &animation = customData["_animation"];
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
     Track *track = TracksAD::getAD(customNoteData->customData).track;
@@ -291,12 +290,12 @@ MAKE_HOOK_MATCH(NoteController_Update, &NoteController::Update, void,
         }
     }
 
-    NoteController_Update(self);
+    NoteController_ManualUpdate(self);
 }
 
 void InstallNoteControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, NoteController_Init);
-    INSTALL_HOOK(logger, NoteController_Update);
+    INSTALL_HOOK(logger, NoteController_ManualUpdate);
 }
 
 NEInstallHooks(InstallNoteControllerHooks);

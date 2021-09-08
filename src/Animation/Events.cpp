@@ -43,7 +43,9 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
         std::vector<Track *> childrenTracks;
         for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
              itr != rawChildrenTracks.End(); itr++) {
-            childrenTracks.push_back(&ad.tracks[itr->GetString()]);
+            Track *child = &ad.tracks[itr->GetString()];
+            // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
+            childrenTracks.push_back(child);
         }
 
         std::optional<Vector3> startPos;

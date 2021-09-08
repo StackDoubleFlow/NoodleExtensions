@@ -78,7 +78,7 @@ MAKE_HOOK_MATCH(NoteProcessorClampPatch,
 		for (int m = 0; m < list2->size; m++) {
 			auto *note = list2->items->values[m];
 			if (note->noteLineLayer.value >= 0 && note->noteLineLayer.value <= 2) {
-				note->SetNoteStartLineLayer(m);
+                note->SetBeforeJumpNoteLineLayer(m);
 			}
 		}
 	}
@@ -119,7 +119,7 @@ MAKE_HOOK_MATCH(NoteProcessorClampPatch,
     for (auto &pair : notesInColumn) {
         auto &list = pair.second;
         for (int m = 0; m < list.size(); m++) {
-            list[m]->SetNoteStartLineLayer(m);
+            list[m]->SetBeforeJumpNoteLineLayer(m);
         }
     }
 }
@@ -176,4 +176,4 @@ void InstallClampPatches(Logger &logger) {
     INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData);
     INSTALL_HOOK(logger, BeatmapLineData_AddBeatmapObjectData);
 }
-NEInstallHooks(InstallClampPatches);
+// NEInstallHooks(InstallClampPatches);

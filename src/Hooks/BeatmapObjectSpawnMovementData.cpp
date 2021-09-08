@@ -192,7 +192,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData,
 
     Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(
         self, noteData, startRow,
-        startLineLayer.value_or(noteData->startNoteLineLayer));
+        startLineLayer.value_or(noteData->beforeJumpNoteLineLayer));
 
     if (position.has_value() || flipLineIndex.has_value() || njs.has_value() ||
         spawnOffset.has_value() || startLineLayer.has_value() ||
@@ -212,7 +212,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData,
 
         float startLayerLineYPos = SpawnDataHelper::LineYPosForLineLayer(
             self, noteData,
-            startLineLayer.value_or(noteData->startNoteLineLayer));
+            startLineLayer.value_or(noteData->beforeJumpNoteLineLayer));
         float lineYPos =
             SpawnDataHelper::LineYPosForLineLayer(self, noteData, startHeight);
 
@@ -236,7 +236,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData,
                 : (startLineLayer.has_value()
                        ? startLineLayer
                        : std::optional{
-                             (float)noteData->startNoteLineLayer.value});
+                             (float)noteData->beforeJumpNoteLineLayer.value});
         Vector3 noteOffset2 = SpawnDataHelper::GetNoteOffset(
             self, noteData, offsetStartRow, offsetStartHeight);
         moveStartPos = localMoveStartPos + noteOffset2;

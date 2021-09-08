@@ -8,14 +8,14 @@
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_MATCH(ObstacleData_MirrorLineIndex, &ObstacleData::MirrorLineIndex,
+MAKE_HOOK_MATCH(ObstacleData_Mirror, &ObstacleData::Mirror,
                 void, ObstacleData *self, int lineCount) {
     // TODO
-    return ObstacleData_MirrorLineIndex(self, lineCount);
+    return ObstacleData_Mirror(self, lineCount);
 }
 
 void InstallObstacleDataHooks(Logger &logger) {
-    INSTALL_HOOK(logger, ObstacleData_MirrorLineIndex);
+    INSTALL_HOOK(logger, ObstacleData_Mirror);
 }
 
 NEInstallHooks(InstallObstacleDataHooks);

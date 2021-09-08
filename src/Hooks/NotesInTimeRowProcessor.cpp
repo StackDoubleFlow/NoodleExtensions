@@ -1,7 +1,7 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
-#include "GlobalNamespace/NotesInTimeRowProcessor.hpp"
+#include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor.hpp"
 
 #include "AssociatedData.h"
 #include "NEHooks.h"
@@ -9,10 +9,10 @@
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
 
-MAKE_HOOK_MATCH(NotesInTimeRowProcessor_ProcessAllNotesInTimeRow,
-                &NotesInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
-                NotesInTimeRowProcessor *self, List<NoteData *> *notes) {
-    NotesInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
+MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
+                &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
+                BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
+    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
     auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
     std::unordered_map<int, std::vector<CustomNoteData *>> notesInColumn;
@@ -71,8 +71,8 @@ MAKE_HOOK_MATCH(NotesInTimeRowProcessor_ProcessAllNotesInTimeRow,
     }
 }
 
-void InstallNotesInTimeRowProcessorHooks(Logger &logger) {
-    INSTALL_HOOK(logger, NotesInTimeRowProcessor_ProcessAllNotesInTimeRow);
+void InstallBeatmapObjectsInTimeRowProcessorHooks(Logger &logger) {
+    INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow);
 }
 
-NEInstallHooks(InstallNotesInTimeRowProcessorHooks);
+NEInstallHooks(InstallBeatmapObjectsInTimeRowProcessorHooks);
