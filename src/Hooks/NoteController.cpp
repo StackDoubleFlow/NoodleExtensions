@@ -70,11 +70,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
-    std::optional<float> curDir =
-        customData.HasMember("_cutDirection")
-            ? std::optional{customData["_cutDirection"].GetFloat()}
-            : std::nullopt;
-
+    std::optional<float> &curDir = ad.objectData.cutDirection;
     if (curDir.has_value()) {
         Quaternion cutQuaternion = Quaternion::Euler(0, 0, curDir.value());
         noteJump->endRotation = cutQuaternion;
@@ -87,26 +83,14 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     }
 
     Quaternion localRotation = Quaternion::get_identity();
-    if (customData.HasMember("_rotation") ||
-        customData.HasMember("_localRotation")) {
-        if (customData.HasMember("_localRotation")) {
-            float x = customData["_localRotation"][0].GetFloat();
-            float y = customData["_localRotation"][1].GetFloat();
-            float z = customData["_localRotation"][2].GetFloat();
-            localRotation = Quaternion::Euler(x, y, z);
+    if (ad.objectData.rotation || ad.objectData.localRotation) {
+        if (ad.objectData.localRotation) {
+            localRotation = Quaternion::Euler(*ad.objectData.localRotation);
         }
 
         Quaternion worldRotationQuatnerion;
-        if (customData.HasMember("_rotation")) {
-            if (customData["_rotation"].IsArray()) {
-                float x = customData["_rotation"][0].GetFloat();
-                float y = customData["_rotation"][1].GetFloat();
-                float z = customData["_rotation"][2].GetFloat();
-                worldRotationQuatnerion = Quaternion::Euler(x, y, z);
-            } else {
-                worldRotationQuatnerion =
-                    Quaternion::Euler(0, customData["_rotation"].GetFloat(), 0);
-            }
+        if (ad.objectData.rotation) {
+            worldRotationQuatnerion = Quaternion::Euler(*ad.objectData.rotation);
 
             Quaternion inverseWorldRotation =
                 Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
@@ -241,7 +225,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
             Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
             for (int i = 0; i < cuttoutEffects->Length(); i++) {
                 CutoutEffect *effect = cuttoutEffects->get(i);
-                if (to_utf8(csstrtostr(effect->get_name())) != "NoteArrow") {
+                if (csstrtostr(effect->get_name()) != u"NoteArrow") {
                     cutoutEffect = effect;
                     break;
                 }

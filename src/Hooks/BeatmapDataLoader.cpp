@@ -67,6 +67,7 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
             if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
                 BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+                ad.objectData = ObjectCustomData(customData);
 
                 rapidjson::Value &animation = customData["_animation"];
                 ad.animationData = AnimationObjectData(beatmapAD, animation);

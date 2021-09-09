@@ -1,6 +1,7 @@
 #include "AssociatedData.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "tracks/shared/Animation/Animation.h"
+#include "NEJSON.h"
 
 using namespace TracksAD;
 
@@ -29,6 +30,21 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
     dissolveArrow = TryGetPointData(beatmapAD, animation, "_dissolveArrow");
     cuttable = TryGetPointData(beatmapAD, animation, "_interactable");
     definitePosition = TryGetPointData(beatmapAD, animation, "_definitePosition");
+}
+
+ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
+    position = NEJSON::ReadOptionalVector2(customData, "_position");
+    rotation = NEJSON::ReadOptionalRotation(customData, "_rotation");
+    localRotation = NEJSON::ReadOptionalVector3(customData, "_localRotation");
+    noteJumpMovementSpeed = NEJSON::ReadOptionalFloat(customData, "_noteJumpMovementSpeed");
+    noteJumpStartBeatOffset = NEJSON::ReadOptionalFloat(customData, "_noteJumpStartBeatOffset");
+    fake = NEJSON::ReadOptionalBool(customData, "_fake");
+    interactable = NEJSON::ReadOptionalBool(customData, "_interactable");
+    cutDirection = NEJSON::ReadOptionalFloat(customData, "_cutDirection");
+    flip = NEJSON::ReadOptionalVector2(customData, "_flip");
+    disableNoteGravity = NEJSON::ReadOptionalBool(customData, "_disableNoteGravity");
+    disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook");
+    scale = NEJSON::ReadOptionalScale(customData, "_scale");
 }
 
 void ::BeatmapObjectAssociatedData::ResetState() {

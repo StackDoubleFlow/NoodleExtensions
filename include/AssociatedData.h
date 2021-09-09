@@ -35,6 +35,28 @@ struct AnimationObjectData {
     AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
 };
 
+struct ObjectCustomData {
+    std::optional<NEVector::Vector2> position;
+    std::optional<NEVector::Vector3> rotation;
+    std::optional<NEVector::Vector3> localRotation;
+    std::optional<float> noteJumpMovementSpeed;
+    std::optional<float> noteJumpStartBeatOffset;
+    std::optional<bool> fake;
+    std::optional<bool> interactable;
+
+    // notes
+    std::optional<float> cutDirection;
+    std::optional<NEVector::Vector2> flip;
+    std::optional<bool> disableNoteGravity;
+    std::optional<bool> disableNoteLook;
+
+    // obstacles
+    std::optional<std::array<std::optional<float>, 3>> scale;
+
+    ObjectCustomData() {}
+    ObjectCustomData(const rapidjson::Value& customData);
+};
+
 struct BeatmapObjectAssociatedData {
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     int startNoteLineLayer;
@@ -60,6 +82,7 @@ struct BeatmapObjectAssociatedData {
     // conditional material switch for dissolve
     GlobalNamespace::ConditionalMaterialSwitcher *materialSwitcher;
     AnimationObjectData animationData;
+    ObjectCustomData objectData;
 
     void ResetState();
 };

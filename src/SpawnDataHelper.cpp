@@ -42,7 +42,7 @@ float SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spaw
     float ypos = spawnMovementData->baseLinesYPos;
     if (height.has_value()) {
         ypos = (height.value() * spawnMovementData->noteLinesDistance) + spawnMovementData->baseLinesYPos;
-    } else if (beatmapObjectData->klass == classof(CustomJSONData::CustomNoteData *)) { // This check is untested
+    } else if (beatmapObjectData->klass == classof(CustomJSONData::CustomNoteData *)) {
         auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
         ypos = spawnMovementData->LineYPosForLineLayer(noteData->noteLineLayer);
     }

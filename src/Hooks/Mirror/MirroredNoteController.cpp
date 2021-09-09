@@ -62,7 +62,7 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
             Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
             for (int i = 0; i < cuttoutEffects->Length(); i++) {
                 CutoutEffect *effect = cuttoutEffects->get(i);
-                if (to_utf8(csstrtostr(effect->get_name())) != "NoteArrow") {
+                if (csstrtostr(effect->get_name()) != u"NoteArrow") {
                     cutoutEffect = effect;
                     break;
                 }
