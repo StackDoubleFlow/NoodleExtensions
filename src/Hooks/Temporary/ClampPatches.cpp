@@ -5,7 +5,7 @@
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
-#include "GlobalNamespace/NotesInTimeRowProcessor.hpp"
+#include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor.hpp"
 
 #include "NEHooks.h"
 #include "NELogger.h"
@@ -37,8 +37,8 @@ MAKE_HOOK_MATCH(BeatmapLineData_AddBeatmapObjectData,
 }
 
 MAKE_HOOK_MATCH(NoteProcessorClampPatch,
-                &NotesInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
-                NotesInTimeRowProcessor *self, List<NoteData *> *notes) {
+                &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
+                BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
     std::map<int, int> extendedLanesMap;
     for (int i = 0; i < notes->size; ++i) {
         auto *item = notes->items->values[i];

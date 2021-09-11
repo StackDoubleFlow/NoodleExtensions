@@ -70,7 +70,6 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             BeatmapObjectData *beatmapObjectData =
                 beatmapLineData->beatmapObjectsData->items->values[j];
             float bpm;
-            float *aheadTime;
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
@@ -85,18 +84,15 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 continue;
             }
 
-            aheadTime = &getAD(customDataWrapper).aheadTime;
+            BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+            float &aheadTime = ad.aheadTime;
 
             float njs;
             float spawnOffset;
             if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
-                njs = customData.HasMember("_noteJumpMovementSpeed")
-                          ? customData["_noteJumpMovementSpeed"].GetFloat()
-                          : CachedNoteJumpMovementSpeed;
-                spawnOffset = customData.HasMember("_noteJumpStartBeatOffset")
-                                  ? customData["_noteJumpStartBeatOffset"].GetFloat()
-                                  : CachedNoteJumpStartBeatOffset;
+                njs = ad.objectData.noteJumpMovementSpeed.value_or(CachedNoteJumpMovementSpeed);
+                spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(CachedNoteJumpStartBeatOffset);
             } else {
                 njs = CachedNoteJumpMovementSpeed;
                 spawnOffset = CachedNoteJumpStartBeatOffset;
@@ -114,7 +110,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             }
 
             float jumpDuration = num * num2 * 2;
-            *aheadTime = moveDuration + (jumpDuration * 0.5f);
+            aheadTime = moveDuration + (jumpDuration * 0.5f);
         }
 
         OrderObjects(beatmapLineData->beatmapObjectsData);

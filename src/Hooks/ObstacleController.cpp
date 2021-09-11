@@ -27,25 +27,6 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-Quaternion GetWorldRotation(float def, CustomJSONData::CustomObstacleData *obstacleData) {
-    Quaternion worldRotation = NEVector::Quaternion::Euler(0, def, 0);
-    if (obstacleData->customData->value) {
-        rapidjson::Value &customData = *obstacleData->customData->value;
-        if (customData.HasMember("_rotation")) {
-            rapidjson::Value &rotVal = customData["_rotation"];
-            if (rotVal.IsArray()) {
-                float x = rotVal[0].GetFloat();
-                float y = rotVal[1].GetFloat();
-                float z = rotVal[2].GetFloat();
-                worldRotation = NEVector::Quaternion::Euler(x, y, z);
-            } else {
-                worldRotation = NEVector::Quaternion::Euler(0, rotVal.GetFloat(), 0);
-            }
-        }
-    }
-    return worldRotation;
-}
-
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,
                 Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
@@ -68,7 +49,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->inverseWorldRotation = NEVector::Quaternion::Euler(-rotation.get_eulerAngles());
 
     auto &scale = ad.objectData.scale;
-
+    
     float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
     NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = startPos + b;
@@ -81,8 +62,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     float defaultLength =
         (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
     float length = (scale && scale->at(2) ? *scale->at(2) : defaultLength);
-
-    rapidjson::Value &customData = *obstacleData->customData->value;
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
                                                self->stretchableObstacle->obstacleFrame->color);
@@ -111,20 +90,19 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         ParentObject::ResetTransformParent(transform);
     }
 
-    std::optional<bool> cuttable = customData.HasMember("_interactable")
-                                       ? std::optional{customData["_interactable"].GetBool()}
-                                       : std::nullopt;
+    std::optional<bool> &cuttable = ad.objectData.interactable;
     if (cuttable && !*cuttable) {
         self->bounds.set_size(Vector3::get_zero());
     }
 
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
-        ConditionalMaterialSwitcher *materialSwitcher =
-            self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        ad.materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+        for (auto *materialSwitcher : materialSwitchers) {
+            if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+            }
         }
-        ad.materialSwitcher = materialSwitcher;
         ad.dissolveEnabled = false;
     }
 
@@ -201,8 +179,10 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value() && obstacleDissolveConfig) {
         if (!ad.dissolveEnabled) {
-            ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+            for (auto *materialSwitcher : materialSwitchers) {
+                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            }
             ad.dissolveEnabled = true;
         }
 

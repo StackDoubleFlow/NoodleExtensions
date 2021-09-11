@@ -37,7 +37,7 @@
     },
     {
       "id": "questui",
-      "versionRange": "^0.11.0",
+      "versionRange": "=0.11.0",
       "additionalData": {}
     },
     {
@@ -52,7 +52,7 @@
     },
     {
       "id": "pinkcore",
-      "versionRange": "^1.6.0",
+      "versionRange": "=1.6.0",
       "additionalData": {}
     }
   ],

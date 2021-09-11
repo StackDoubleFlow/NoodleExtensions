@@ -54,7 +54,7 @@ void ::BeatmapObjectAssociatedData::ResetState() {
     mirroredCutoutEffect = nullptr;
     disappearingArrowController = nullptr;
     mirroredDisappearingArrowController = nullptr;
-    materialSwitcher = nullptr;
+    materialSwitchers = nullptr;
 }
 
 ::BeatmapObjectAssociatedData &getAD(CustomJSONData::JSONWrapper *customData) {

@@ -8,6 +8,7 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "NEHooks.h"
+#include "AssociatedData.h"
 
 using namespace GlobalNamespace;
 

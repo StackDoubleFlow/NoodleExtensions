@@ -64,7 +64,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!customNoteData->customData->value) {
         return;
     }
-    rapidjson::Value &customData = *customNoteData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
     NoteJump *noteJump = self->noteMovement->jump;
@@ -126,11 +125,13 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.localRotation = localRotation;
 
     if (getNEConfig().enableNoteDissolve.GetValue()) {
-        ConditionalMaterialSwitcher *materialSwitcher = self->get_gameObject()->GetComponentInChildren<ConditionalMaterialSwitcher *>();
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        ad.materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+        for (auto *materialSwitcher : materialSwitchers) {
+            if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+            }
         }
-        ad.materialSwitcher = materialSwitcher;
         ad.dissolveEnabled = false;
     }
 
@@ -212,8 +213,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
     if (hasDissolveOffset && !ad.dissolveEnabled && noteDissolveConfig) {
-        ConditionalMaterialSwitcher *materialSwitcher = ad.materialSwitcher;
-        materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+        for (auto *materialSwitcher : materialSwitchers) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+        }
         ad.dissolveEnabled = true;
     }
 

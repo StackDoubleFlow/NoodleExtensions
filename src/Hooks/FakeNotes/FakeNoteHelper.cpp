@@ -5,6 +5,7 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "NELogger.h"
+#include "AssociatedData.h"
 
 using namespace GlobalNamespace;
 
@@ -13,8 +14,8 @@ bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
     if (!customNoteData->customData->value) {
         return false;
     }
-    rapidjson::Value &customData = *customNoteData->customData->value;
-    return customData.HasMember("_fake") && customData["_fake"].GetBool();
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    return ad.objectData.fake && *ad.objectData.fake;
 }
 
 bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
@@ -22,6 +23,6 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
     if (!customNoteData->customData->value) {
         return true;
     }
-    rapidjson::Value &customData = *customNoteData->customData->value;
-    return !customData.HasMember("_interactable") || customData["_interactable"].GetBool();
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    return !ad.objectData.interactable || *ad.objectData.interactable;
 }
