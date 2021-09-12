@@ -22,7 +22,7 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.13.0",
+      "versionRange": "^0.14.0",
       "additionalData": {}
     },
     {
@@ -32,12 +32,12 @@
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.13.0",
+      "versionRange": "^0.14.0",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "=0.11.0",
+      "versionRange": "^0.11.0",
       "additionalData": {}
     },
     {
@@ -47,12 +47,12 @@
     },
     {
       "id": "tracks",
-      "versionRange": "^0.2.0",
+      "versionRange": "^0.3.0",
       "additionalData": {}
     },
     {
       "id": "pinkcore",
-      "versionRange": "=1.6.0",
+      "versionRange": "^1.6.0",
       "additionalData": {}
     }
   ],

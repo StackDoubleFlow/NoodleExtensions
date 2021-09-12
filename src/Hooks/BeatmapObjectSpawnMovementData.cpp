@@ -87,13 +87,6 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
         moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration,
         self->noteLinesDistance);
-    // result = BeatmapObjectSpawnMovementData_ObstacleSpawnData(Vector3 {1, 2,
-    // 3}, Vector3 {4, 5, 6}, Vector3 {7, 8, 9}, obstacleHeight,
-    // result.moveDuration, jumpDuration, self->noteLinesDistance);
-
-    // ad->moveStartPos = moveStartPos;
-    // ad->moveEndPos = moveEndPos;
-    // ad->jumpEndPos = jumpEndPos;
 
     if (!finalNoteOffset.has_value()) {
         Vector3 noteOffset =

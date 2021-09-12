@@ -49,7 +49,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->inverseWorldRotation = NEVector::Quaternion::Euler(-rotation.get_eulerAngles());
 
     auto &scale = ad.objectData.scale;
-    
+
     float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
     NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = startPos + b;
@@ -237,14 +237,14 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
                 &ParametricBoxFakeGlowController::OnEnable, void,
                 ParametricBoxFakeGlowController *self) {}
 
-#include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
-MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
-    if (test && klass && klass->name && klass->namespaze) {
-        NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
-        PrintBacktrace(10);
-    }
-    return Object_New(klass);
-}
+// #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
+// MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
+//     if (test && klass && klass->name && klass->namespaze) {
+//         NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
+//         PrintBacktrace(10);
+//     }
+//     return Object_New(klass);
+// }
 
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);
