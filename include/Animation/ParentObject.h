@@ -28,8 +28,7 @@ public:
 
 class ParentController {
 public:
-    static inline std::unordered_set<TrackParenting::ParentObject*> parentObjects;
-    static inline std::vector<TrackParenting::ParentObject*> parentObjectsVec;
+    static inline std::vector<TrackParenting::ParentObject*> parentObjects;
 
     static TrackParenting::ParentObject *GetParentObjectTrack(Track *track);
     static void OnDestroy();

@@ -104,7 +104,7 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
         transform->set_localScale(instance->startScale);
     }
 
-    for (auto& parentObject : ParentController::parentObjectsVec) {
+    for (auto& parentObject : ParentController::parentObjects) {
         if (parentObject->childrenTracks.contains(parentTrack)) {
             parentObject->ParentToObject(transform);
         } else {
@@ -113,7 +113,7 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
     }
 
     for (auto& track : tracks) {
-        for (auto& parentObject : ParentController::parentObjectsVec) {
+        for (auto& parentObject : ParentController::parentObjects) {
             parentObject->childrenTracks.erase(track);
 
             if (parentObject->track == track) {
@@ -125,8 +125,7 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
     }
 
     // TODO: Make this more efficient, two lists are bad
-    ParentController::parentObjects.insert(instance);
-    ParentController::parentObjectsVec.emplace_back(instance);
+    ParentController::parentObjects.emplace_back(instance);
 }
 
 void ParentObject::ParentToObject(Transform *transform) {
@@ -148,5 +147,4 @@ ParentObject *ParentController::GetParentObjectTrack(Track *track) {
 void ParentController::OnDestroy() {
     NELogger::GetLogger().debug("Clearing parent objects");
     parentObjects.clear();
-    parentObjectsVec.clear();
 }
