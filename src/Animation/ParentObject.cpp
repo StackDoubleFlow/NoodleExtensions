@@ -71,7 +71,7 @@ void ParentObject::AssignTrack(std::vector<Track*> tracks, Track *parentTrack, s
     Transform *transform = instance->get_transform();
     if (startPos.has_value()) {
         instance->startPos = *startPos;
-        transform->set_localPosition(spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
+        transform->set_localPosition(*startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
     }
 
     if (startRot.has_value()) {
