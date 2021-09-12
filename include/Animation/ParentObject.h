@@ -5,7 +5,7 @@
 #include "custom-types/shared/macros.hpp"
 #include "NELogger.h"
 
-DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour, 
+DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_DEFAULT_CTOR();
     DECLARE_INSTANCE_METHOD(void, Update);
 
@@ -21,7 +21,7 @@ public:
 
     void ParentToObject(UnityEngine::Transform *transform);
     static void ResetTransformParent(UnityEngine::Transform *transform);
-    static void AssignTrack(std::vector<Track*> tracks, Track *parentTrack, std::optional<UnityEngine::Vector3> startPos, 
+    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<UnityEngine::Vector3> startPos,
         std::optional<UnityEngine::Quaternion> startRot, std::optional<UnityEngine::Quaternion> startLocalRot, std::optional<UnityEngine::Vector3> startScale);
 )
 

@@ -61,7 +61,7 @@ void ParentObject::ResetTransformParent(Transform *transform) {
     transform->SetParent(nullptr, false); 
 }
 
-void ParentObject::AssignTrack(std::vector<Track*> tracks, Track *parentTrack, std::optional<Vector3> startPos, 
+void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentTrack, std::optional<Vector3> startPos,
         std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot, std::optional<Vector3> startScale) {
     GameObject *parentGameObject = GameObject::New_ctor(il2cpp_utils::newcsstr("ParentObject"));
     ParentObject *instance = parentGameObject->AddComponent<ParentObject*>();
