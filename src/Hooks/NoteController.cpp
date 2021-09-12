@@ -87,12 +87,11 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             localRotation = Quaternion::Euler(*ad.objectData.localRotation);
         }
 
-        Quaternion worldRotationQuatnerion;
         if (ad.objectData.rotation) {
-            worldRotationQuatnerion = Quaternion::Euler(*ad.objectData.rotation);
+            Quaternion worldRotationQuatnerion = Quaternion::Euler(*ad.objectData.rotation);
 
             Quaternion inverseWorldRotation =
-                Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
+                    Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
             noteJump->worldRotation = worldRotationQuatnerion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuatnerion;
@@ -101,7 +100,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             worldRotationQuatnerion = worldRotationQuatnerion * localRotation;
             transform->set_localRotation(worldRotationQuatnerion);
         } else {
-            transform->set_localRotation(localRotation);
+            transform->set_localRotation(transform->get_localRotation() * localRotation);
         }
     }
 
