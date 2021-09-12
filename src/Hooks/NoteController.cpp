@@ -117,6 +117,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         ParentObject::ResetTransformParent(transform);
     }
 
+    ad.endRotation = endRotation;
     ad.moveStartPos = startPos;
     ad.moveEndPos = midPos;
     ad.jumpEndPos = endPos;
