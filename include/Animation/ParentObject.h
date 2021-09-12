@@ -23,7 +23,7 @@ public:
     void ParentToObject(UnityEngine::Transform *transform);
     static void ResetTransformParent(UnityEngine::Transform *transform);
     static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<UnityEngine::Vector3> startPos,
-        std::optional<UnityEngine::Quaternion> startRot, std::optional<UnityEngine::Quaternion> startLocalRot, std::optional<UnityEngine::Vector3> startScale, std::string const& trackName);
+        std::optional<UnityEngine::Quaternion> startRot, std::optional<UnityEngine::Quaternion> startLocalRot, std::optional<UnityEngine::Vector3> startScale);
 )
 
 class ParentController {

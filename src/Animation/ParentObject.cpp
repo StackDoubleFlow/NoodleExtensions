@@ -75,8 +75,8 @@ static void logTransform(Transform* transform, int hierarchy = 0) {
 }
 
 void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentTrack, std::optional<Vector3> startPos,
-        std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot, std::optional<Vector3> startScale, const std::string& trackName) {
-    GameObject *parentGameObject = GameObject::New_ctor(il2cpp_utils::newcsstr("ParentObject " + trackName));
+        std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot, std::optional<Vector3> startScale) {
+    GameObject *parentGameObject = GameObject::New_ctor(il2cpp_utils::newcsstr("ParentObject"));
     ParentObject *instance = parentGameObject->AddComponent<ParentObject*>();
     instance->origin = parentGameObject->get_transform();
     instance->track = parentTrack;
@@ -107,12 +107,8 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
     for (auto& parentObject : ParentController::parentObjectsVec) {
         if (parentObject->childrenTracks.contains(parentTrack)) {
             parentObject->ParentToObject(transform);
-            NELogger::GetLogger().debug("Parenting 1 %s", trackName.c_str());
-            logTransform(parentObject->get_transform());
         } else {
             ResetTransformParent(transform);
-            NELogger::GetLogger().debug("No parenting 2 %s", trackName.c_str());
-            logTransform(transform);
         }
     }
 
@@ -121,9 +117,7 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
             parentObject->childrenTracks.erase(track);
 
             if (parentObject->track == track) {
-                NELogger::GetLogger().debug("Parenting 3 %s", trackName.c_str());
                 instance->ParentToObject(parentObject->get_transform());
-                logTransform(instance->get_transform());
             }
         }
 
