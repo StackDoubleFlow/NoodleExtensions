@@ -82,7 +82,7 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
         }
 
         ParentObject::AssignTrack(childrenTracks, track, startPos, startRot, startLocalRot,
-                                  startScale);
+                                  startScale, eventData["_parentTrack"].GetString());
     } else if (customEventData->type == "AssignPlayerToTrack") {
         Track *track = &ad.tracks[eventData["_track"].GetString()];
         NELogger::GetLogger().debug("Assigning player to track %s at %p",
