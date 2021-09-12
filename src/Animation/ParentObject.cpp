@@ -71,7 +71,7 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
     Transform *transform = instance->get_transform();
     if (startPos.has_value()) {
         instance->startPos = *startPos;
-        transform->set_localPosition(*startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
+        transform->set_localPosition(instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
     }
 
     if (startRot.has_value()) {
@@ -82,8 +82,8 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
     }
 
     if (startLocalRot.has_value()) {
-        instance->startLocalRot = *startLocalRot;
-        transform->set_localRotation(instance->startRot * *startLocalRot);
+        instance->startLocalRot = instance->startRot * *startLocalRot;
+        transform->set_localRotation(transform->get_localRotation() * instance->startLocalRot);
     }
 
     if (startScale.has_value()) {

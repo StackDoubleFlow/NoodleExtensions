@@ -90,8 +90,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         if (ad.objectData.rotation) {
             Quaternion worldRotationQuatnerion = Quaternion::Euler(*ad.objectData.rotation);
 
-            Quaternion inverseWorldRotation =
-                    Quaternion::Euler(-worldRotationQuatnerion.get_eulerAngles());
+            Quaternion inverseWorldRotation = Quaternion::Inverse(worldRotationQuatnerion);
             noteJump->worldRotation = worldRotationQuatnerion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuatnerion;

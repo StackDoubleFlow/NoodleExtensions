@@ -29,7 +29,7 @@ MAKE_HOOK_MATCH(ProcessBeatmapEventData,
                 : std::nullopt;
 
         if (rotation.has_value()) {
-            self->rotation = *rotation;
+            self->rotation += *rotation;
             return true;
         }
     }
