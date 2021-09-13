@@ -27,6 +27,9 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
+// todo: clear some time
+std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *>*> cachedObstacleMaterialSwitchers;
+
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,
                 Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
@@ -96,9 +99,16 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
 
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
-        ad.materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
-        for (auto *materialSwitcher : materialSwitchers) {
+        Array<ConditionalMaterialSwitcher *>* materialSwitchers;
+        auto it = cachedObstacleMaterialSwitchers.find(self);
+        if (it == cachedObstacleMaterialSwitchers.end()) {
+            cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+        } else {
+            materialSwitchers = it->second;
+        }
+        ad.materialSwitchers = materialSwitchers;
+
+        for (auto *materialSwitcher : materialSwitchers->ref_to()) {
             if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
                 materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
             }
