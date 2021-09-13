@@ -31,7 +31,7 @@ struct AnimationObjectData {
     PointDefinition *cuttable;
     PointDefinition *definitePosition;
 
-    AnimationObjectData() {}
+    AnimationObjectData() = default;
     AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
 };
 
@@ -68,6 +68,8 @@ struct BeatmapObjectAssociatedData {
     NEVector::Vector3 moveEndPos;
     NEVector::Vector3 jumpEndPos;
     NEVector::Vector3 noteOffset;
+    float endRotation;
+
     float xOffset;
     // set to true is the dissolve material is currently in use
     bool dissolveEnabled;

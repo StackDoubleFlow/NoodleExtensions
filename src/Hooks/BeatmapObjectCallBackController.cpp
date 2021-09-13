@@ -30,6 +30,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    static auto callback_mptr = il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "HandleBeatmapObjectCallback", 1)->methodPointer;
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSource);
     auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());
@@ -42,7 +43,7 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
                 BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->get_Item(callbackData->nextObjectIndexInLine->values[j]);
 
                 float aheadTime = callbackData->aheadTime;
-                if (callbackData->callback->method_ptr.m_value == il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "HandleBeatmapObjectCallback", 1)->methodPointer) {
+                if (callbackData->callback->method_ptr.m_value == callback_mptr) {
                     if (beatmapObjectData->klass == customObstacleDataClass) {
                         auto obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
                         aheadTime = getAD(obstacleData->customData).aheadTime;

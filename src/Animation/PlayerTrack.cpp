@@ -76,12 +76,12 @@ void PlayerTrack::Update() {
             std::optional{ track->properties.position.value->vector3 } : std::nullopt;
 
         Quaternion worldRotationQuaternion = startRot;
-        Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
+        Vector3 positionVector = startPos;
         if (rotation.has_value() || position.has_value()) {
             Quaternion rotationOffset = rotation.value_or(Quaternion::get_identity());
             worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
             Vector3 positionOffset = position.value_or(Vector3::get_zero());
-            positionVector = worldRotationQuaternion * ((positionOffset + startPos) * noteLinesDistance);
+            positionVector = worldRotationQuaternion * ((positionOffset * noteLinesDistance) + startPos);
         }
 
         worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
@@ -91,12 +91,12 @@ void PlayerTrack::Update() {
             worldRotationQuaternion = worldRotationQuaternion * *localRotation;
         }
 
-        if (origin->get_localRotation() != worldRotationQuaternion) {
-            origin->set_localRotation(worldRotationQuaternion);
-        }
 
-        if (origin->get_localPosition() != positionVector) {
-            origin->set_localPosition(positionVector);
-        }
+        origin->set_localRotation(worldRotationQuaternion);
+
+
+
+        origin->set_localPosition(positionVector);
+
     }
 }
