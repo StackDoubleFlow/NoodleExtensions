@@ -46,8 +46,8 @@ MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate
 MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, UnityEngine::Vector3, NoteFloorMovement *self) {
     auto ret = NoteFloorMovement_SetToStart(self);
 
-    if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
-        self->get_transform()->set_localRotation(NEVector::Quaternion::Euler({0, 0, noteUpdateAD->endRotation}));
+    if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook.has_value() && noteUpdateAD->objectData.disableNoteLook.value()) {
+        self->rotatedObject->set_localRotation(NEVector::Quaternion::Euler({0, 0, noteUpdateAD->endRotation}));
     }
 
     return ret;
