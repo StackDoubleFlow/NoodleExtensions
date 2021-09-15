@@ -3,10 +3,10 @@
     "name": "NoodleExtensions",
     "id": "noodleextensions",
     "author": "StackDoubleFlow",
-    "version": "0.4.1",
+    "version": "1.0.0",
     "packageId": "com.beatgames.beatsaber",
-    "packageVersion": "1.16.4",
-    "description": "gaming",
+    "packageVersion": "1.17.1",
+    "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
     "modFiles": [
       "libnoodleextensions.so",
       "libcustom-json-data.so",

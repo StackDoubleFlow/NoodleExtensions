@@ -7,5 +7,4 @@ void InstallAndRegisterAll() {
     Hooks::InstallHooks(logger);
     NEEvents::AddEventCallbacks(logger);
     PinkCore::RequirementAPI::RegisterInstalled("Noodle Extensions");
-    PinkCore::RequirementAPI::RegisterInstalled("Chroma");
 }
