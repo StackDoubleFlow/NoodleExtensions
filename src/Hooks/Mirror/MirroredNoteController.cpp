@@ -17,6 +17,7 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "NECaches.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
@@ -51,13 +52,16 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
     //     }
     // }
 
+    auto& noteCache = NECaches::getNoteCache(self);
     if (ad.cutoutEffect) {
         // rekt
         self->set_hide(true);
 
         CutoutEffect *cutoutEffect = ad.mirroredCutoutEffect;
         if (!cutoutEffect) {
-            BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
+            BaseNoteVisuals *baseNoteVisuals = noteCache.baseNoteVisuals;
+            if (!baseNoteVisuals)
+                baseNoteVisuals = noteCache.baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
             CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
             Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
             for (int i = 0; i < cuttoutEffects->Length(); i++) {
@@ -74,9 +78,10 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
     }
 
     if (ad.disappearingArrowController) {
-        DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *disappearingArrowController = ad.mirroredDisappearingArrowController;
+        DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *disappearingArrowController = noteCache.mirroredDisappearingArrowController;
+
         if (!disappearingArrowController) {
-            disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *>();
+            disappearingArrowController = noteCache.mirroredDisappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *>();
             ad.mirroredDisappearingArrowController = disappearingArrowController;
         }
 

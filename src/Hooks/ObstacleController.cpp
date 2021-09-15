@@ -28,12 +28,6 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
-
-void NECaches::ClearObstacleCaches() {
-    cachedObstacleMaterialSwitchers.clear();
-}
-
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,
                 Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
@@ -102,13 +96,12 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         self->bounds.set_size(Vector3::get_zero());
     }
 
-    Array<ConditionalMaterialSwitcher *>* materialSwitchers;
-    auto it = cachedObstacleMaterialSwitchers.find(self);
-    if (it == cachedObstacleMaterialSwitchers.end()) {
-        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    } else {
-        materialSwitchers = it->second;
-    }
+    auto& obstacleCache = NECaches::getObstacleCache(self);
+
+    Array<ConditionalMaterialSwitcher *>* materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
+    if (!materialSwitchers)
+        obstacleCache.conditionalMaterialSwitchers = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+
     ad.materialSwitchers = materialSwitchers;
 
     for (auto *materialSwitcher : materialSwitchers->ref_to()) {
@@ -200,8 +193,11 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
         if (!cutoutAnimationEffect) {
-            ObstacleDissolve *obstacleDissolve =
-                self->get_gameObject()->GetComponent<ObstacleDissolve *>();
+            auto& obstacleCache = NECaches::getObstacleCache(self);
+
+            ObstacleDissolve *obstacleDissolve = obstacleCache.obstacleDissolve;
+            if (!obstacleDissolve)
+                obstacleDissolve = obstacleCache.obstacleDissolve = self->get_gameObject()->GetComponent<ObstacleDissolve *>();
             cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
