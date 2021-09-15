@@ -18,16 +18,13 @@
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
+#include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include <optional>
 
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
-
-// GameplayCoreInstaller.cpp
-extern int CachedNoteJumpMovementSpeed;
-extern int CachedNoteJumpStartBeatOffset;
 
 static Il2CppClass *customObstacleDataClass;
 static Il2CppClass *customNoteDataClass;
@@ -73,11 +70,11 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto obstacleData = (CustomJSONData::CustomObstacleData *)beatmapObjectData;
+                auto *obstacleData = (CustomJSONData::CustomObstacleData *)beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
                 bpm = obstacleData->bpm;
             } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
+                auto *noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
                 customDataWrapper = noteData->customData;
                 bpm = noteData->bpm;
             } else {
@@ -91,11 +88,11 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             float spawnOffset;
             if (customDataWrapper->value) {
                 rapidjson::Value &customData = *customDataWrapper->value;
-                njs = ad.objectData.noteJumpMovementSpeed.value_or(CachedNoteJumpMovementSpeed);
-                spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(CachedNoteJumpStartBeatOffset);
+                njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
+                spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
             } else {
-                njs = CachedNoteJumpMovementSpeed;
-                spawnOffset = CachedNoteJumpStartBeatOffset;
+                njs = NECaches::noteJumpMovementSpeed;
+                spawnOffset = NECaches::noteJumpStartBeatOffset;
             }
 
             float num = 60 / bpm;

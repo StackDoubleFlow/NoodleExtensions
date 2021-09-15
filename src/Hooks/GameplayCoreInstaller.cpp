@@ -9,12 +9,10 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
+#include "NECaches.h"
 #include "NEHooks.h"
 
 using namespace GlobalNamespace;
-
-int CachedNoteJumpMovementSpeed;
-int CachedNoteJumpStartBeatOffset;
 
 MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, GameplayCoreInstaller *self) {
     IDifficultyBeatmap *difficultyBeatmap = self->sceneSetupData->difficultyBeatmap;
@@ -27,9 +25,9 @@ MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, 
     if (gameplayModifiers->fastNotes) {
         njs = 20;
     }
-    CachedNoteJumpMovementSpeed = njs;
+    NECaches::noteJumpMovementSpeed = njs;
 
-    CachedNoteJumpStartBeatOffset = difficultyBeatmap->get_noteJumpStartBeatOffset() + self->sceneSetupData->playerSpecificSettings->noteJumpStartBeatOffset;
+    NECaches::noteJumpStartBeatOffset = difficultyBeatmap->get_noteJumpStartBeatOffset() + self->sceneSetupData->playerSpecificSettings->noteJumpStartBeatOffset;
 
     InstallBindings(self);
 }

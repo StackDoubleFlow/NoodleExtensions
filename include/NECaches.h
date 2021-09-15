@@ -1,7 +1,9 @@
 
-namespace NECaches {
+class NECaches {
+public:
+static float noteJumpMovementSpeed;
+static float noteJumpStartBeatOffset;
 
-void ClearObstacleCaches();
-void ClearNoteCaches();
-
-}
+static void ClearObstacleCaches();
+static void ClearNoteCaches();
+};
