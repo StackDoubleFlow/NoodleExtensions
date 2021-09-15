@@ -24,6 +24,7 @@
 #include "tracks/shared/TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
@@ -43,6 +44,12 @@ float noteTimeAdjust(float original, float jumpDuration) {
     }
 
     return original;
+}
+
+std::unordered_map<NoteController *, Array<ConditionalMaterialSwitcher *> *> cachedNoteMaterialSwitchers;
+
+void NECaches::ClearNoteCaches() {
+    cachedNoteMaterialSwitchers.clear();
 }
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
@@ -124,9 +131,15 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.localRotation = localRotation;
 
     if (getNEConfig().enableNoteDissolve.GetValue()) {
-        ad.materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
-        for (auto *materialSwitcher : materialSwitchers) {
+        Array<ConditionalMaterialSwitcher *>* materialSwitchers;
+        auto it = cachedNoteMaterialSwitchers.find(self);
+        if (it == cachedNoteMaterialSwitchers.end()) {
+            cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+        } else {
+            materialSwitchers = it->second;
+        }
+        ad.materialSwitchers = materialSwitchers;
+        for (auto *materialSwitcher : materialSwitchers->ref_to()) {
             if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
                 materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
             }
