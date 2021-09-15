@@ -44,17 +44,9 @@ void ParentObject::Update() {
         scaleVector = Vector3::Scale(startScale, *scale);
     }
 
-
     origin->set_localRotation(worldRotationQuaternion);
-
-
-
     origin->set_localPosition(positionVector);
-
-
-
     origin->set_localScale(scaleVector);
-
 }
 
 void ParentObject::ResetTransformParent(Transform *transform) {
