@@ -19,6 +19,7 @@
 #include "AssociatedData.h"
 #include "NEConfig.h"
 #include "NEHooks.h"
+#include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "tracks/shared/AssociatedData.h"
 #include "tracks/shared/TimeSourceHelper.h"
@@ -27,8 +28,11 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-// todo: clear some time
-std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *>*> cachedObstacleMaterialSwitchers;
+std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
+
+void NECaches::ClearObstacleCaches() {
+    cachedObstacleMaterialSwitchers.clear();
+}
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,

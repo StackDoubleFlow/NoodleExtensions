@@ -24,6 +24,7 @@
 #include "tracks/shared/TimeSourceHelper.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 using namespace GlobalNamespace;
@@ -44,8 +45,12 @@ float noteTimeAdjust(float original, float jumpDuration) {
 
     return original;
 }
-// todo: clear some time
-std::unordered_map<NoteController *, Array<ConditionalMaterialSwitcher *>*> cachedNoteMaterialSwitchers;
+
+std::unordered_map<NoteController *, Array<ConditionalMaterialSwitcher *> *> cachedNoteMaterialSwitchers;
+
+void NECaches::ClearNoteCaches() {
+    cachedNoteMaterialSwitchers.clear();
+}
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 NoteController *self, NoteData *noteData, float worldRotation,

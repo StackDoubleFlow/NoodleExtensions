@@ -16,6 +16,7 @@
 #include "tracks/shared/Animation/PointDefinition.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "NECaches.h"
 
 using namespace GlobalNamespace;
 using namespace TrackParenting;
@@ -56,6 +57,9 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
             }
         }
     }
+
+    NECaches::ClearNoteCaches();
+    NECaches::ClearObstacleCaches();
 }
 
 void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
