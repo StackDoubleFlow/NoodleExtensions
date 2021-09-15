@@ -68,7 +68,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     float defaultLength =
         (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
-    float length = (scale && scale->at(2) ? *scale->at(2) : defaultLength);
+    float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
                                                self->stretchableObstacle->obstacleFrame->color);

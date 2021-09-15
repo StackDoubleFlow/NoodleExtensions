@@ -1,7 +1,5 @@
 #pragma once
 #include "config-utils/shared/config-utils.hpp"
-// #include <unordered_map>
-// #include <string>
 
 DECLARE_CONFIG(NEConfig, 
     CONFIG_VALUE(enableNoteDissolve, bool, "Enable note dissolve", true);
