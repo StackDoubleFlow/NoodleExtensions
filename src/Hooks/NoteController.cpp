@@ -130,22 +130,20 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.worldRotation = self->get_worldRotation();
     ad.localRotation = localRotation;
 
-    if (getNEConfig().enableNoteDissolve.GetValue()) {
-        Array<ConditionalMaterialSwitcher *>* materialSwitchers;
-        auto it = cachedNoteMaterialSwitchers.find(self);
-        if (it == cachedNoteMaterialSwitchers.end()) {
-            cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-        } else {
-            materialSwitchers = it->second;
-        }
-        ad.materialSwitchers = materialSwitchers;
-        for (auto *materialSwitcher : materialSwitchers->ref_to()) {
-            if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-            }
-        }
-        ad.dissolveEnabled = false;
+    Array<ConditionalMaterialSwitcher *>* materialSwitchers;
+    auto it = cachedNoteMaterialSwitchers.find(self);
+    if (it == cachedNoteMaterialSwitchers.end()) {
+        cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    } else {
+        materialSwitchers = it->second;
     }
+    ad.materialSwitchers = materialSwitchers;
+    for (auto *materialSwitcher : materialSwitchers->ref_to()) {
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+    }
+    ad.dissolveEnabled = false;
 
     self->Update();
 }
@@ -232,7 +230,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         ad.dissolveEnabled = true;
     }
 
-    if (offset.dissolve.has_value() && noteDissolveConfig) {
+    if (offset.dissolve.has_value()) {
         CutoutEffect *cutoutEffect = ad.cutoutEffect;
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
@@ -248,17 +246,25 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
             ad.cutoutEffect = cutoutEffect;
         }
 
-        cutoutEffect->SetCutout(1 - *offset.dissolve);
+        if (noteDissolveConfig) {
+            cutoutEffect->SetCutout(1 - *offset.dissolve);
+        } else {
+            cutoutEffect->SetCutout(*offset.dissolve >= 0 ? 0 : 1);
+        }
     }
 
-    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None && noteDissolveConfig) {
+    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
         DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController = ad.disappearingArrowController;
         if (!disappearingArrowController) {
             disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
             ad.disappearingArrowController = disappearingArrowController;
         }
 
-        disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
+        if (noteDissolveConfig) {
+            disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
+        } else {
+            disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow >= 0 ? 1 : 0);
+        }
     }
 
     static auto *gameNoteControllerClass = classof(GameNoteController *);

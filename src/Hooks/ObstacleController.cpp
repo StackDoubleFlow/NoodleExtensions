@@ -102,23 +102,21 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         self->bounds.set_size(Vector3::get_zero());
     }
 
-    if (getNEConfig().enableObstacleDissolve.GetValue()) {
-        Array<ConditionalMaterialSwitcher *>* materialSwitchers;
-        auto it = cachedObstacleMaterialSwitchers.find(self);
-        if (it == cachedObstacleMaterialSwitchers.end()) {
-            cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-        } else {
-            materialSwitchers = it->second;
-        }
-        ad.materialSwitchers = materialSwitchers;
-
-        for (auto *materialSwitcher : materialSwitchers->ref_to()) {
-            if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-            }
-        }
-        ad.dissolveEnabled = false;
+    Array<ConditionalMaterialSwitcher *>* materialSwitchers;
+    auto it = cachedObstacleMaterialSwitchers.find(self);
+    if (it == cachedObstacleMaterialSwitchers.end()) {
+        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    } else {
+        materialSwitchers = it->second;
     }
+    ad.materialSwitchers = materialSwitchers;
+
+    for (auto *materialSwitcher : materialSwitchers->ref_to()) {
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+    }
+    ad.dissolveEnabled = false;
 
     self->Update();
 }
@@ -191,7 +189,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
-    if (offset.dissolve.has_value() && obstacleDissolveConfig) {
+    if (offset.dissolve.has_value()) {
         if (!ad.dissolveEnabled) {
             ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
             for (auto *materialSwitcher : materialSwitchers) {
@@ -208,7 +206,11 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
 
-        cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
+        if (obstacleDissolveConfig) {
+            cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
+        } else {
+            cutoutAnimationEffect->SetCutout(*offset.dissolve >= 0 ? 0 : 1);
+        }
     }
 
     ObstacleController_ManualUpdate(self);
