@@ -190,7 +190,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value()) {
-        if (!ad.dissolveEnabled) {
+        if (!ad.dissolveEnabled && obstacleDissolveConfig) {
             ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
             for (auto *materialSwitcher : materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
