@@ -15,7 +15,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
     auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
-    std::unordered_map<int, std::vector<CustomNoteData *>> notesInColumn;
+    std::unordered_map<float, std::vector<CustomNoteData *>> notesInColumn;
     for (int i = 0; i < customNotes->get_Count(); i++) {
         CustomNoteData *noteData = customNotes->items->values[i];
 
