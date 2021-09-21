@@ -59,7 +59,7 @@ struct ObjectCustomData {
 
 struct BeatmapObjectAssociatedData {
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
-    int startNoteLineLayer;
+    std::optional<int> startNoteLineLayer;
 
     float aheadTime;
     NEVector::Quaternion worldRotation;

@@ -122,7 +122,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
     std::optional<Vector2> &position = ad.objectData.position;
     std::optional<float> &njs = ad.objectData.noteJumpMovementSpeed;
     std::optional<float> &spawnOffset = ad.objectData.noteJumpStartBeatOffset;
-    std::optional<float> startLineLayer = static_cast<float>(ad.startNoteLineLayer);
+    std::optional<float> startLineLayer = ad.startNoteLineLayer;
     std::optional<float> flipLineIndex =
             ad.objectData.flip ? std::optional{ad.objectData.flip->x} : std::nullopt;
 
