@@ -110,8 +110,16 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         }
     }
 
-    Track *track = TracksAD::getAD(customNoteData->customData).track;
-    if (track) {
+    // TODO: Multi-track
+    std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    if (!tracks.empty()) {
+
+        if (tracks.size() > 1) {
+            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        }
+
+        auto track = tracks.front();
+
         ParentObject *parentObject =
             ParentController::GetParentObjectTrack(track);
         if (parentObject) {
@@ -166,7 +174,18 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     // }
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    Track *track = TracksAD::getAD(customNoteData->customData).track;
+    std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    // TODO: Multi track
+    Track* track = nullptr;
+
+    if (!tracks.empty()) {
+        track = tracks.front();
+
+        if (tracks.size() > 1) {
+            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        }
+    }
+
     noteUpdateAD = &ad;
     noteTrack = track;
 
@@ -178,6 +197,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
     elapsedTime = noteTimeAdjust(elapsedTime, noteJump->jumpDuration);
     float normalTime = elapsedTime / noteJump->jumpDuration;
+
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
         ad.animationData, track, normalTime);

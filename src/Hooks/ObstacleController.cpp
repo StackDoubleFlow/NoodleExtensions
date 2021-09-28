@@ -85,7 +85,18 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
-    Track *track = TracksAD::getAD(obstacleData->customData).track;
+    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    // TODO: Multi track
+    Track* track = nullptr;
+
+    if (!tracks.empty()) {
+        track = tracks.front();
+
+        if (tracks.size() > 1) {
+            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        }
+    }
+
     if (track) {
         ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
         if (parentObject) {
@@ -140,7 +151,17 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     // }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
-    Track *track = TracksAD::getAD(obstacleData->customData).track;
+    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    // TODO: Multi track
+    Track* track = nullptr;
+
+    if (!tracks.empty()) {
+        track = tracks.front();
+
+        if (tracks.size() > 1) {
+            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        }
+    }
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - self->startTimeOffset;
@@ -226,7 +247,18 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     }
     rapidjson::Value &customData = *obstacleData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
-    Track *track = TracksAD::getAD(obstacleData->customData).track;
+
+    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    // TODO: Multi track
+    Track* track = nullptr;
+
+    if (!tracks.empty()) {
+        track = tracks.front();
+
+        if (tracks.size() > 1) {
+            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        }
+    }
 
     float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
