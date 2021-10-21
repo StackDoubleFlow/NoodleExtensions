@@ -109,28 +109,13 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             transform->set_localRotation(transform->get_localRotation() * localRotation);
         }
     }
-
     // TODO: Multi-track
     std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
-
-        if (tracks.size() > 1) {
-            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        for (auto& track : tracks) {
+            track->AddGameObject(self->get_gameObject());
         }
-
-        auto track = tracks.front();
-
-        ParentObject *parentObject =
-            ParentController::GetParentObjectTrack(track);
-        if (parentObject) {
-            parentObject->ParentToObject(transform);
-        } else {
-            ParentObject::ResetTransformParent(transform);
-        }
-    } else {
-        ParentObject::ResetTransformParent(transform);
     }
-
     ad.endRotation = endRotation;
     ad.moveStartPos = startPos;
     ad.moveEndPos = midPos;

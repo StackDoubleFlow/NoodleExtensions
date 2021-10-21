@@ -17,9 +17,22 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "Animation/ParentObject.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
+
+static void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject)
+{
+    if (noteData->customData && noteData->customData->value) {
+        std::vector<Track *> const &tracks = TracksAD::getAD(noteData->customData).tracks;
+        if (!tracks.empty()) {
+            for (auto &track: tracks) {
+                track->AddGameObject(gameObject);
+            }
+        }
+    }
+}
 
 MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCubeNoteController", "Mirror", void, MirroredCubeNoteController *self, ICubeNoteMirrorable *noteController) {
     self->followedNote = noteController;
@@ -36,12 +49,16 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
 
     MirroredCubeNoteController_Mirror(self, noteController);
 
-    self->objectTransform->set_localScale(self->followedObjectTransform->get_localScale());
-    self->noteTransform->set_localScale(self->followedNoteTransform->get_localScale());
-
     auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
     auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+
+    AddToTrack(customNoteData, self->get_gameObject());
+
+    self->objectTransform->set_localScale(self->followedObjectTransform->get_localScale());
+    self->noteTransform->set_localScale(self->followedNoteTransform->get_localScale());
+
+
 
     // if (ad.cutoutEffect || ad.disappearingArrowController) {
     //     Renderer *renderer = ad.mirroredRenderer;

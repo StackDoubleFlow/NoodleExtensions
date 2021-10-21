@@ -23,7 +23,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := codegen
 LOCAL_EXPORT_C_INCLUDES := extern/codegen
 LOCAL_SRC_FILES := extern/libcodegen.so
-LOCAL_CPP_FEATURES += exceptions
+LOCAL_CPP_FEATURES += exceptions rtti
 include $(PREBUILT_SHARED_LIBRARY)
 # Creating prebuilt for dependency: custom-types - version: 0.12.7
 include $(CLEAR_VARS)
@@ -43,7 +43,7 @@ LOCAL_MODULE := modloader
 LOCAL_EXPORT_C_INCLUDES := extern/modloader
 LOCAL_SRC_FILES := extern/libmodloader.so
 include $(PREBUILT_SHARED_LIBRARY)
-# Creating prebuilt for dependency: beatsaber-hook - version: 2.3.0
+# Creating prebuilt for dependency: beatsaber-hook - version: 2.3.1
 include $(CLEAR_VARS)
 LOCAL_MODULE := beatsaber-hook_2_3_0
 LOCAL_EXPORT_C_INCLUDES := extern/beatsaber-hook
@@ -85,7 +85,7 @@ LOCAL_SHARED_LIBRARIES += questui
 LOCAL_SHARED_LIBRARIES += tracks
 LOCAL_SHARED_LIBRARIES += pinkcore
 LOCAL_LDLIBS += -llog
-LOCAL_CFLAGS += -isystem"./extern/libil2cpp/il2cpp/libil2cpp" -isystem"extern" -isystem"./extern/codegen/include" -DVERSION='"1.0.0"'
+LOCAL_CFLAGS += -isystem"./extern/libil2cpp/il2cpp/libil2cpp" -isystem"extern" -isystem"./extern/codegen/include" -DVERSION='"1.0.0"' -frtti
 LOCAL_CPPFLAGS += -std=c++2a
 LOCAL_C_INCLUDES += ./include ./src
 include $(BUILD_SHARED_LIBRARY)

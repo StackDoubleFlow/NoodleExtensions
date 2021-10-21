@@ -18,9 +18,14 @@ private:
     UnityEngine::Quaternion startLocalRot = UnityEngine::Quaternion::get_identity();
     UnityEngine::Vector3 startScale = UnityEngine::Vector3::get_one();
 public:
+    ~ParentObject();
+
     std::unordered_set<Track*> childrenTracks;
 
+
     void ParentToObject(UnityEngine::Transform *transform);
+    void HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed);
+
     static void ResetTransformParent(UnityEngine::Transform *transform);
     static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<UnityEngine::Vector3> startPos,
         std::optional<UnityEngine::Quaternion> startRot, std::optional<UnityEngine::Quaternion> startLocalRot, std::optional<UnityEngine::Vector3> startScale);

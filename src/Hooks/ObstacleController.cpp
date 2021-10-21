@@ -86,26 +86,10 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.worldRotation = rotation;
 
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
-    // TODO: Multi track
-    Track* track = nullptr;
-
     if (!tracks.empty()) {
-        track = tracks.front();
-
-        if (tracks.size() > 1) {
-            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
+        for (auto& track : tracks) {
+            track->AddGameObject(self->get_gameObject());
         }
-    }
-
-    if (track) {
-        ParentObject *parentObject = ParentController::GetParentObjectTrack(track);
-        if (parentObject) {
-            parentObject->ParentToObject(transform);
-        } else {
-            ParentObject::ResetTransformParent(transform);
-        }
-    } else {
-        ParentObject::ResetTransformParent(transform);
     }
 
     std::optional<bool> &cuttable = ad.objectData.interactable;

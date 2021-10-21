@@ -1,4 +1,6 @@
 #include "Animation/ParentObject.h"
+
+#include <utility>
 #include "UnityEngine/GameObject.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
@@ -50,7 +52,7 @@ void ParentObject::Update() {
 }
 
 void ParentObject::ResetTransformParent(Transform *transform) {
-    transform->SetParent(nullptr, false); 
+    transform->SetParent(nullptr, false);
 }
 
 static void logTransform(Transform* transform, int hierarchy = 0) {
@@ -66,17 +68,23 @@ static void logTransform(Transform* transform, int hierarchy = 0) {
     }
 }
 
-void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentTrack, std::optional<Vector3> startPos,
-        std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot, std::optional<Vector3> startScale) {
+void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack, std::optional<Vector3> startPos,
+                          std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot,
+                          std::optional<Vector3> startScale) {
+    if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
+        NELogger::GetLogger().error("How could a track contain itself?");
+        return;
+    }
     GameObject *parentGameObject = GameObject::New_ctor(il2cpp_utils::newcsstr("ParentObject"));
-    ParentObject *instance = parentGameObject->AddComponent<ParentObject*>();
+    ParentObject *instance = parentGameObject->AddComponent<ParentObject *>();
     instance->origin = parentGameObject->get_transform();
     instance->track = parentTrack;
 
     Transform *transform = instance->get_transform();
     if (startPos.has_value()) {
         instance->startPos = *startPos;
-        transform->set_localPosition(instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
+        transform->set_localPosition(
+                instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
     }
 
     if (startRot.has_value()) {
@@ -96,27 +104,22 @@ void ParentObject::AssignTrack(const std::vector<Track*>& tracks, Track *parentT
         transform->set_localScale(instance->startScale);
     }
 
-    for (auto& parentObject : ParentController::parentObjects) {
-        if (parentObject->childrenTracks.contains(parentTrack)) {
-            parentObject->ParentToObject(transform);
-        } else {
-            ResetTransformParent(transform);
-        }
-    }
+    parentTrack->AddGameObject(parentGameObject);
 
-    for (auto& track : tracks) {
-        for (auto& parentObject : ParentController::parentObjects) {
+    for (auto &track: tracks) {
+
+        for (auto &parentObject: ParentController::parentObjects) {
+            track->gameObjectModificationEvent -= {&ParentObject::HandleGameObject, parentObject};
             parentObject->childrenTracks.erase(track);
-
-            if (parentObject->track == track) {
-                instance->ParentToObject(parentObject->get_transform());
-            }
         }
 
+        for (auto &gameObject: track->gameObjects) {
+            instance->ParentToObject(gameObject->get_transform());
+        }
         instance->childrenTracks.insert(track);
+        track->gameObjectModificationEvent += {&ParentObject::HandleGameObject, instance};
     }
 
-    // TODO: Make this more efficient, two lists are bad
     ParentController::parentObjects.emplace_back(instance);
 }
 
@@ -134,6 +137,22 @@ ParentObject *ParentController::GetParentObjectTrack(Track *track) {
     } else {
         return nullptr;
     }
+}
+
+void ParentObject::HandleGameObject(Track *track, UnityEngine::GameObject *go, bool removed) {
+    if (removed) {
+        ResetTransformParent(go->get_transform());
+    } else {
+        ParentToObject(go->get_transform());
+    }
+}
+
+ParentObject::~ParentObject() {
+    for (auto& childTrack : childrenTracks) {
+        childTrack->gameObjectModificationEvent -= {&ParentObject::HandleGameObject, this};
+    }
+    // just in case
+    track->gameObjectModificationEvent -= {&ParentObject::HandleGameObject, this};
 }
 
 void ParentController::OnDestroy() {
