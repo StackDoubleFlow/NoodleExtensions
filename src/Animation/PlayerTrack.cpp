@@ -1,4 +1,5 @@
 #include "Animation/PlayerTrack.h"
+#include "Animation/AnimationHelper.h"
 #include "UnityEngine/GameObject.hpp"
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
@@ -70,10 +71,8 @@ void PlayerTrack::Update() {
     if (!paused) {
         float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-        std::optional<Quaternion> rotation = track->properties.rotation.value.has_value() ?
-            std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
-        std::optional<Vector3> position = track->properties.position.value.has_value() ?
-            std::optional{ track->properties.position.value->vector3 } : std::nullopt;
+        std::optional<Quaternion> rotation = getPropertyNullable<Quaternion>(track, track->properties.rotation);
+        std::optional<Vector3> position = getPropertyNullable<Vector3>(track, track->properties.position);
 
         Quaternion worldRotationQuaternion = startRot;
         Vector3 positionVector = startPos;
@@ -85,8 +84,7 @@ void PlayerTrack::Update() {
         }
 
         worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-        std::optional<Quaternion> localRotation = track->properties.localRotation.value.has_value() ?
-            std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
+        std::optional<Quaternion> localRotation = getPropertyNullable<Quaternion>(track, track->properties.localRotation);
         if (localRotation.has_value()) {
             worldRotationQuaternion = worldRotationQuaternion * *localRotation;
         }
