@@ -32,11 +32,17 @@ using namespace UnityEngine;
 using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
-Track *noteTrack;
 std::vector<Track*> noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
-    if (noteTrack) {
+
+
+    auto trackIt = std::find_if(noteTracks.begin(), noteTracks.end(), [](Track* track) {
+        return track->properties.time.value.has_value();
+    });
+
+    if (trackIt != noteTracks.end()) {
+        Track* noteTrack = *trackIt;
         Property &timeProperty = noteTrack->properties.time;
         if (timeProperty.value) {
             float time = timeProperty.value->linear;
@@ -173,7 +179,6 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     }
 
     noteUpdateAD = &ad;
-    noteTrack = track;
     noteTracks = tracks;
 
     NoteJump *noteJump = self->noteMovement->jump;

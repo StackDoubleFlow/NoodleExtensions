@@ -17,7 +17,6 @@ using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
 extern std::vector<Track*> noteTracks;
-extern Track* noteTrack;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
@@ -135,7 +134,6 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     // NoteController.ManualUpdate. To make sure it doesn't interfere with future notes, it's set
     // back to null
     noteUpdateAD = nullptr;
-    noteTrack = nullptr;
     noteTracks.clear();
 
     return result;
