@@ -4,11 +4,7 @@
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "custom-types/shared/macros.hpp"
 #include "NELogger.h"
-
-namespace NEVector {
-    struct Vector3;
-    struct Quaternion;
-}
+#include "tracks/shared/Vector.h"
 
 DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_DEFAULT_CTOR();
@@ -18,10 +14,10 @@ DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
 private:
     Track *track;
     UnityEngine::Transform *origin;
-    NEVector::Vector3 startPos = NEVector::Vector3::get_zero();
-    NEVector::Quaternion startRot = NEVector::Quaternion::get_identity();
-    NEVector::Quaternion startLocalRot = NEVector::Quaternion::get_identity();
-    NEVector::Vector3 startScale = NEVector::Vector3::get_one();
+    NEVector::Vector3 startPos = NEVector::Vector3::zero();
+    NEVector::Quaternion startRot = NEVector::Quaternion::identity();
+    NEVector::Quaternion startLocalRot = NEVector::Quaternion::identity();
+    NEVector::Vector3 startScale = NEVector::Vector3::one();
 public:
     ~ParentObject();
 

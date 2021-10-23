@@ -72,13 +72,13 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
 
         Transform *headTransform = self->playerTransforms->headTransform;
         NEVector::Quaternion inverse = NEVector::Quaternion::Inverse(worldRot);
-        NEVector::Vector3 upVector = inverse * NEVector::Vector3::get_up();
+        NEVector::Vector3 upVector = inverse * NEVector::Vector3::up();
 
 
         float baseUpMagnitude =
-            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(), NEVector::Vector3::get_up());
+            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(), NEVector::Vector3::up());
         float headUpMagnitude =
-            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::get_up());
+            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::up());
         float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;
         vector = vector + upVector * mult;
 

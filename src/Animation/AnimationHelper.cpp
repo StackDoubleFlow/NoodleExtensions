@@ -23,7 +23,7 @@ std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3
         return std::nullopt;
     }
 
-    Vector3 total = Vector3::get_zero();
+    Vector3 total = Vector3::zero();
     if (a) {
         total = total + *a;
     }

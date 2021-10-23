@@ -65,7 +65,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
     Transform *transform = self->get_transform();
     transform->set_localScale(
-        NEVector::Vector3::get_one()); // This is a fix for animation due to notes being
+        NEVector::Vector3::one()); // This is a fix for animation due to notes being
                              // recycled
 
     if (!customNoteData->customData->value) {

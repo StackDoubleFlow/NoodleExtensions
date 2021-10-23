@@ -24,7 +24,7 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
 
     for (int i = 0; i < vObstacleControllers.size(); i++) {
         auto *obstacleController = vObstacleControllers[i];
-        if (NEVector::Vector3(obstacleController->bounds.get_size()) == NEVector::Vector3::get_zero()) {
+        if (NEVector::Vector3(obstacleController->bounds.get_size()) == NEVector::Vector3::zero()) {
             (*vObstacleControllers)->RemoveAt(i);
             i--;
         }

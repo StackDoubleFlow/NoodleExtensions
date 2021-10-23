@@ -19,10 +19,10 @@ static Action *didPauseEventAction;
 DEFINE_TYPE(TrackParenting, PlayerTrack);
 
 void PlayerTrack::ctor() {
-    startPos = NEVector::Vector3::get_zero();
-    startRot = NEVector::Quaternion::get_identity();
-    startLocalRot = NEVector::Quaternion::get_identity();
-    startScale = NEVector::Vector3::get_one();
+    startPos = NEVector::Vector3::zero();
+    startRot = NEVector::Quaternion::identity();
+    startLocalRot = NEVector::Quaternion::identity();
+    startScale = NEVector::Vector3::one();
 }
 
 void PlayerTrack::AssignTrack(Track *track) {
@@ -77,9 +77,9 @@ void PlayerTrack::Update() {
         NEVector::Quaternion worldRotationQuaternion = startRot;
         NEVector::Vector3 positionVector = startPos;
         if (rotation.has_value() || position.has_value()) {
-            NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::get_identity());
+            NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::identity());
             worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
-            NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::get_zero());
+            NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::zero());
             positionVector = worldRotationQuaternion * ((positionOffset * noteLinesDistance) + startPos);
         }
 

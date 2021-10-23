@@ -25,9 +25,9 @@ void ParentObject::Update() {
     NEVector::Quaternion worldRotationQuaternion = startRot;
     NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
     if (rotation.has_value() || position.has_value()) {
-        NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::get_identity());
+        NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::identity());
         worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
-        NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::get_zero());
+        NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::zero());
         positionVector = worldRotationQuaternion * ((positionOffset + startPos) * noteLinesDistance);
     }
 
@@ -40,7 +40,7 @@ void ParentObject::Update() {
     Vector3 scaleVector = startScale;
     std::optional<NEVector::Vector3> scale = getPropertyNullable<Vector3>(track, track->properties.scale);
     if (scale.has_value()) {
-        scaleVector = NEVector::Vector3::Scale(startScale, *scale);
+        scaleVector = startScale * scale.value();
     }
 
     origin->set_localRotation(worldRotationQuaternion);

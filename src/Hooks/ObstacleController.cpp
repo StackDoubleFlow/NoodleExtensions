@@ -43,7 +43,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
 
     Transform *transform = self->get_transform();
-    transform->set_localScale(NEVector::Vector3::get_one());
+    transform->set_localScale(NEVector::Vector3::one());
 
     if (!obstacleData->customData->value) {
         return;
@@ -53,7 +53,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     NEVector::Quaternion rotation =
             NEVector::Quaternion::Euler(ad.objectData.rotation.value_or(NEVector::Vector3(0, worldRotation, 0)));
     self->worldRotation = rotation;
-    self->inverseWorldRotation = NEVector::Quaternion::Euler(-rotation.get_eulerAngles());
+    self->inverseWorldRotation = NEVector::Quaternion::Euler(-NEVector::Vector3(rotation.get_eulerAngles()));
 
     auto &scale = ad.objectData.scale;
 
@@ -67,7 +67,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.jumpEndPos = self->endPos;
 
     float defaultLength =
-            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).get_magnitude() / move2Duration * obstacleData->duration;
+            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).Magnitude() / move2Duration * obstacleData->duration;
     float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
@@ -76,7 +76,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     std::optional<NEVector::Vector3> &localrot = ad.objectData.localRotation;
 
-    NEVector::Quaternion localRotation = NEVector::Quaternion::get_identity();
+    NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
     if (localrot.has_value()) {
         localRotation = NEVector::Quaternion::Euler(localrot->x, localrot->y, localrot->z);
     }
@@ -94,7 +94,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     std::optional<bool> &cuttable = ad.objectData.interactable;
     if (cuttable && !*cuttable) {
-        self->bounds.set_size(NEVector::Vector3::get_zero());
+        self->bounds.set_size(NEVector::Vector3::zero());
     }
 
     Array<ConditionalMaterialSwitcher *>* materialSwitchers;
@@ -190,7 +190,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     if (offset.cuttable.has_value() && !*offset.cuttable) {
-        self->bounds.set_size(NEVector::Vector3::get_zero());
+        self->bounds.set_size(NEVector::Vector3::zero());
     }
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
