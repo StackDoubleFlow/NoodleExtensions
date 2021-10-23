@@ -16,7 +16,8 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern Track *noteTrack;
+extern std::vector<Track*> noteTracks;
+extern Track* noteTrack;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
@@ -122,7 +123,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
 
     if (noteUpdateAD) {
         std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(
-            noteUpdateAD->animationData, noteTrack, normalTime);
+            noteUpdateAD->animationData, noteTracks, normalTime);
         if (position.has_value()) {
             self->localPosition = *position + noteUpdateAD->noteOffset;
             result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
@@ -135,6 +136,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     // back to null
     noteUpdateAD = nullptr;
     noteTrack = nullptr;
+    noteTracks.clear();
 
     return result;
 }

@@ -33,6 +33,7 @@ using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
 Track *noteTrack;
+std::vector<Track*> noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
     if (noteTrack) {
@@ -173,6 +174,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     noteUpdateAD = &ad;
     noteTrack = track;
+    noteTracks = tracks;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -185,7 +187,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
-        ad.animationData, track, normalTime);
+        ad.animationData, tracks, normalTime);
 
     if (offset.positionOffset.has_value()) {
         floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;

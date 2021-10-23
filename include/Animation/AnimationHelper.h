@@ -65,6 +65,105 @@ static constexpr std::optional<T> getPathPropertyNullable(Track* track, std::opt
 
     return std::nullopt;
 }
+
+template<typename T>
+static std::optional<T> MultiTrackPathProps(std::vector<Track*> const& tracks, T const& defaultT, float time, std::function<std::optional<PointDefinitionInterpolation> (Track*)> const& vectorExpression) {
+    static_assert(std::is_same_v<T, float> ||
+                          std::is_same_v<T, NEVector::Vector3> ||
+                          std::is_same_v<T, NEVector::Vector4> ||
+                          std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    bool valid = false;
+    T total = defaultT;
+
+    for (auto& track : tracks) {
+        auto point = vectorExpression(track);
+        auto result = getPathPropertyNullable<T>(track, point, time);
+
+        if (result) {
+            total = result.value() * total;
+            valid = true;
+        }
+    }
+
+    return valid ? std::make_optional(total) : std::nullopt;
+}
+
+template<typename T>
+static std::optional<T> SumTrackPathProps(std::vector<Track*> const& tracks, T const& defaultT, float time, std::function<std::optional<PointDefinitionInterpolation> (Track*)> const& vectorExpression) {
+    static_assert(std::is_same_v<T, float> ||
+                  std::is_same_v<T, NEVector::Vector3> ||
+                  std::is_same_v<T, NEVector::Vector4> ||
+                  std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    bool valid = false;
+    T total = defaultT;
+
+    for (auto& track : tracks) {
+        auto point = vectorExpression(track);
+        auto result = getPathPropertyNullable<T>(track, point, time);
+
+        if (result) {
+            total = result.value() + total;
+            valid = true;
+        }
+    }
+
+    return valid ? std::make_optional(total) : std::nullopt;
+}
+
+template<typename T>
+static std::optional<T> MultiTrackProps(std::vector<Track*> const& tracks, T const& defaultT, std::function<std::optional<PropertyValue> (Track*)> const& vectorExpression) {
+    static_assert(std::is_same_v<T, float> ||
+                  std::is_same_v<T, NEVector::Vector3> ||
+                  std::is_same_v<T, NEVector::Vector4> ||
+                  std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    bool valid = false;
+    T total = defaultT;
+
+    for (auto& track : tracks) {
+        auto point = vectorExpression(track);
+        auto result = getPropertyNullable<T>(track, point);
+
+        if (result) {
+            total = result.value() * total;
+            valid = true;
+        }
+    }
+
+    return valid ? std::make_optional(total) : std::nullopt;
+}
+
+template<typename T>
+static std::optional<T> SumTrackProps(std::vector<Track*> const& tracks, T const& defaultT, std::function<std::optional<PropertyValue> (Track*)> const& vectorExpression) {
+    static_assert(std::is_same_v<T, float> ||
+                  std::is_same_v<T, NEVector::Vector3> ||
+                  std::is_same_v<T, NEVector::Vector4> ||
+                  std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    bool valid = false;
+    T total = defaultT;
+
+    for (auto& track : tracks) {
+        auto point = vectorExpression(track);
+        auto result = getPropertyNullable<T>(track, point);
+
+        if (result) {
+            total = result.value() + total;
+            valid = true;
+        }
+    }
+
+    return valid ? std::make_optional(total) : std::nullopt;
+}
+
+#define MSumTrackProps(tracks, defaultT, prop) SumTrackProps(tracks, defaultT, [](Track* track) { return track->properties.prop.value;})
+#define MMultTrackProps(tracks, defaultT, prop) MultiTrackProps(tracks, defaultT, [](Track* track) { return track->properties.prop.value; })
+
+#define MSumTrackPathProps(tracks, defaultT, time, prop) SumTrackPathProps(tracks, defaultT, time, [](Track* track) { return track->pathProperties.prop.value; })
+#define MMultTrackPathProps(tracks, defaultT, time, prop) MultiTrackPathProps(tracks, defaultT, time, [](Track* track) { return track->pathProperties.prop.value; })
+
 #pragma endregion
 
 namespace AnimationHelper {
@@ -78,7 +177,7 @@ struct ObjectOffset {
     std::optional<float> cuttable;
 };
 
-std::optional<NEVector::Vector3> GetDefinitePositionOffset(const AnimationObjectData& animationData, Track *track, float time);
-ObjectOffset GetObjectOffset(const AnimationObjectData& customData, Track *track, float time);
+std::optional<NEVector::Vector3> GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> tracks, float time);
+ObjectOffset GetObjectOffset(const AnimationObjectData& customData, std::vector<Track *> tracks, float time);
 
 } // end namespace AnimationHelper

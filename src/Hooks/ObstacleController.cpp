@@ -139,16 +139,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
-    // TODO: Multi track
-    Track* track = nullptr;
-
-    if (!tracks.empty()) {
-        track = tracks.front();
-
-        if (tracks.size() > 1) {
-            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
-        }
-    }
 
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - self->startTimeOffset;
@@ -156,7 +146,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
 
     AnimationHelper::ObjectOffset offset =
-        AnimationHelper::GetObjectOffset(ad.animationData, track, normalTime);
+        AnimationHelper::GetObjectOffset(ad.animationData, tracks, normalTime);
 
     if (offset.positionOffset.has_value()) {
         self->startPos = ad.moveStartPos + *offset.positionOffset;
@@ -243,21 +233,11 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
-    // TODO: Multi track
-    Track* track = nullptr;
-
-    if (!tracks.empty()) {
-        track = tracks.front();
-
-        if (tracks.size() > 1) {
-            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
-        }
-    }
 
     float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
     std::optional<NEVector::Vector3> position =
-        AnimationHelper::GetDefinitePositionOffset(ad.animationData, track, jumpTime);
+        AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
 
     if (position.has_value()) {
         NEVector::Vector3 noteOffset = ad.noteOffset;

@@ -15,14 +15,14 @@ using namespace UnityEngine;
 using namespace System;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern Track *noteTrack;
+extern std::vector<Track *> noteTracks;
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
     NEVector::Vector3 localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
     if (noteUpdateAD) {
-        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTrack, 0);
+        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, 0);
         if (position.has_value()) {
             NEVector::Vector3 noteOffset = noteUpdateAD->noteOffset;
             NEVector::Vector3 endPos = self->endPos;
