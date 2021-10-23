@@ -28,6 +28,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
+std::vector<ObstacleController*> activeObstacles;
 std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
 
 void NECaches::ClearObstacleCaches() {
@@ -95,6 +96,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     std::optional<bool> &cuttable = ad.objectData.interactable;
     if (cuttable && !*cuttable) {
         self->bounds.set_size(NEVector::Vector3::zero());
+    } else {
+        activeObstacles.emplace_back(self);
     }
 
     Array<ConditionalMaterialSwitcher *>* materialSwitchers;
