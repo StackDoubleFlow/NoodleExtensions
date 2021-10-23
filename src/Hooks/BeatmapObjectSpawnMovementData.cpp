@@ -162,8 +162,15 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
         float highestJump = startHeight.has_value()
                             ? (0.875f * lineYPos) + 0.639583f + self->jumpOffsetY
                             : self->HighestJumpPosYForLineLayer(noteData->noteLineLayer);
-        jumpGravity = 2.0f * (highestJump - (gravityOverride ? lineYPos : startLayerLineYPos)) /
-                      std::pow(localJumpDistance / localNoteJumpMovementSpeed * 0.5f, 2.0f);
+
+        std::function<float(float)> GetJumpGravity = [&startLayerLineYPos, &gravityOverride, &highestJump, &localJumpDistance, &localNoteJumpMovementSpeed](float lineYPos) {
+            return 2.0f * (highestJump - (gravityOverride ? lineYPos : startLayerLineYPos)) /
+                   std::pow(localJumpDistance / localNoteJumpMovementSpeed * 0.5f, 2.0f);
+        };
+
+        jumpGravity = GetJumpGravity(startLayerLineYPos);
+
+        float newJumpGravity = gravityOverride ? GetJumpGravity(lineYPos) : jumpGravity;
 
         jumpEndPos = localJumpEndPos + noteOffset;
 
@@ -178,11 +185,14 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
         moveEndPos = localMoveEndPos + noteOffset2;
 
         result = BeatmapObjectSpawnMovementData::NoteSpawnData(
-                moveStartPos, moveEndPos, jumpEndPos, jumpGravity, result.moveDuration, jumpDuration);
+                moveStartPos, moveEndPos, jumpEndPos, newJumpGravity, result.moveDuration, jumpDuration);
     }
 
-    float startVerticalVelocity = jumpGravity * jumpDuration * 0.5f;
+
+    // DEFINITE POSITION IS WEIRD, OK?
+    // fuck
     float num = jumpDuration * 0.5f;
+    float startVerticalVelocity = jumpGravity * num;
     float yOffset = (startVerticalVelocity * num) - (jumpGravity * num * num * 0.5f);
     getAD(noteData->customData).noteOffset = Vector3(self->centerPos) + noteOffset + Vector3(0, yOffset, 0);
 
