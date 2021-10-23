@@ -56,7 +56,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     if (pathDefinitePosition) {
         PointDefinition *position = animationData.position;
         std::optional<Vector3> pathPosition = position ? std::optional{ position->Interpolate(time) } : getPathPropertyNullable<Vector3>(track, track->pathProperties.position.value, time);
-        std::optional<Vector3> trackPosition = track && getPropertyNullable<Vector3>(track, track->properties.position.value);
+        std::optional<Vector3> trackPosition = getPropertyNullable<Vector3>(track, track->properties.position.value);
         std::optional<Vector3> positionOffset = pathPosition + trackPosition;
         std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
         if (definitePosition) definitePosition = *definitePosition * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
