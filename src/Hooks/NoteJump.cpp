@@ -76,7 +76,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
 
 
         float baseUpMagnitude =
-            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(), NEVector::Vector3::up());
+            NEVector::Vector3::Dot(worldRot * baseTransformPosition, NEVector::Vector3::up());
         float headUpMagnitude =
             NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::up());
         float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;

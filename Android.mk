@@ -85,7 +85,7 @@ LOCAL_SHARED_LIBRARIES += questui
 LOCAL_SHARED_LIBRARIES += tracks
 LOCAL_SHARED_LIBRARIES += pinkcore
 LOCAL_LDLIBS += -llog
-LOCAL_CFLAGS += -isystem"./extern/libil2cpp/il2cpp/libil2cpp" -isystem"extern" -isystem"./extern/codegen/include" -DVERSION='"1.0.0"' -frtti
+LOCAL_CFLAGS += -isystem"./extern/libil2cpp/il2cpp/libil2cpp" -isystem"extern" -isystem"./extern/codegen/include" -DVERSION='"1.0.0"' -frtti -O3
 LOCAL_CPPFLAGS += -std=c++2a
 LOCAL_C_INCLUDES += ./include ./src
 include $(BUILD_SHARED_LIBRARY)

@@ -2,9 +2,7 @@
 
 #include <optional>
 
-namespace NEVector {
-    struct Vector3;
-}
+#include "tracks/shared/Vector.h"
 
 namespace GlobalNamespace {
     class BeatmapObjectSpawnMovementData;
