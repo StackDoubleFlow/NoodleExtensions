@@ -20,19 +20,19 @@ extern Track *noteTrack;
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
-    Vector3 localPosition = Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
+    NEVector::Vector3 localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
     if (noteUpdateAD) {
-        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTrack, 0);
+        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTrack, 0);
         if (position.has_value()) {
-            Vector3 noteOffset = noteUpdateAD->noteOffset;
-            Vector3 endPos = self->endPos;
+            NEVector::Vector3 noteOffset = noteUpdateAD->noteOffset;
+            NEVector::Vector3 endPos = self->endPos;
             localPosition = localPosition + (*position + noteOffset - endPos);
         }
     }
     self->localPosition = localPosition;
-    
-    
-    Vector3 vector = self->worldRotation * self->localPosition;
+
+
+    NEVector::Vector3 vector = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
     self->get_transform()->set_localPosition(vector);
     if (num >= self->moveDuration) {
         Action *action = self->floorMovementDidFinishEvent;

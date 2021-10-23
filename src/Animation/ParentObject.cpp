@@ -1,6 +1,7 @@
 #include "Animation/ParentObject.h"
 
 #include <utility>
+#include "Animation/AnimationHelper.h"
 #include "UnityEngine/GameObject.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
@@ -18,32 +19,28 @@ DEFINE_TYPE(TrackParenting, ParentObject);
 void ParentObject::Update() {
     float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-    std::optional<Quaternion> rotation = track->properties.rotation.value.has_value() ?
-        std::optional{ track->properties.rotation.value->quaternion } : std::nullopt;
-    std::optional<Vector3> position = track->properties.position.value.has_value() ?
-        std::optional{ track->properties.position.value->vector3 } : std::nullopt;
+    std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
+    std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
 
-    Quaternion worldRotationQuaternion = startRot;
-    Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
+    NEVector::Quaternion worldRotationQuaternion = startRot;
+    NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
     if (rotation.has_value() || position.has_value()) {
-        Quaternion rotationOffset = rotation.value_or(Quaternion::get_identity());
+        NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::get_identity());
         worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
-        Vector3 positionOffset = position.value_or(Vector3::get_zero());
+        NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::get_zero());
         positionVector = worldRotationQuaternion * ((positionOffset + startPos) * noteLinesDistance);
     }
 
     worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-    std::optional<Quaternion> localRotation = track->properties.localRotation.value.has_value() ?
-        std::optional{ track->properties.localRotation.value->quaternion } : std::nullopt;
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
     if (localRotation.has_value()) {
         worldRotationQuaternion = worldRotationQuaternion * *localRotation;
     }
 
     Vector3 scaleVector = startScale;
-    std::optional<Vector3> scale = track->properties.scale.value.has_value() ?
-        std::optional{ track->properties.scale.value->vector3 } : std::nullopt;
+    std::optional<NEVector::Vector3> scale = getPropertyNullable<Vector3>(track, track->properties.scale);
     if (scale.has_value()) {
-        scaleVector = Vector3::Scale(startScale, *scale);
+        scaleVector = NEVector::Vector3::Scale(startScale, *scale);
     }
 
     origin->set_localRotation(worldRotationQuaternion);
@@ -68,9 +65,9 @@ static void logTransform(Transform* transform, int hierarchy = 0) {
     }
 }
 
-void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack, std::optional<Vector3> startPos,
-                          std::optional<Quaternion> startRot, std::optional<Quaternion> startLocalRot,
-                          std::optional<Vector3> startScale) {
+void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack, std::optional<NEVector::Vector3> startPos,
+                          std::optional<NEVector::Quaternion> startRot, std::optional<NEVector::Quaternion> startLocalRot,
+                          std::optional<NEVector::Vector3> startScale) {
     if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
         NELogger::GetLogger().error("How could a track contain itself?");
         return;
@@ -90,13 +87,13 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
     if (startRot.has_value()) {
         instance->startRot = *startRot;
         instance->startLocalRot = instance->startRot;
-        transform->set_localPosition(instance->startRot * transform->get_localPosition());
+        transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
         transform->set_localRotation(instance->startRot);
     }
 
     if (startLocalRot.has_value()) {
         instance->startLocalRot = instance->startRot * *startLocalRot;
-        transform->set_localRotation(transform->get_localRotation() * instance->startLocalRot);
+        transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
     }
 
     if (startScale.has_value()) {

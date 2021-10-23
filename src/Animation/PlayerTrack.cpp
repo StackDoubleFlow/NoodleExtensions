@@ -19,10 +19,10 @@ static Action *didPauseEventAction;
 DEFINE_TYPE(TrackParenting, PlayerTrack);
 
 void PlayerTrack::ctor() {
-    startPos = UnityEngine::Vector3::get_zero();
-    startRot = UnityEngine::Quaternion::get_identity();
-    startLocalRot = UnityEngine::Quaternion::get_identity();
-    startScale = UnityEngine::Vector3::get_one();
+    startPos = NEVector::Vector3::get_zero();
+    startRot = NEVector::Quaternion::get_identity();
+    startLocalRot = NEVector::Quaternion::get_identity();
+    startScale = NEVector::Vector3::get_one();
 }
 
 void PlayerTrack::AssignTrack(Track *track) {
@@ -71,20 +71,20 @@ void PlayerTrack::Update() {
     if (!paused) {
         float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
-        std::optional<Quaternion> rotation = getPropertyNullable<Quaternion>(track, track->properties.rotation);
-        std::optional<Vector3> position = getPropertyNullable<Vector3>(track, track->properties.position);
+        std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
+        std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
 
-        Quaternion worldRotationQuaternion = startRot;
-        Vector3 positionVector = startPos;
+        NEVector::Quaternion worldRotationQuaternion = startRot;
+        NEVector::Vector3 positionVector = startPos;
         if (rotation.has_value() || position.has_value()) {
-            Quaternion rotationOffset = rotation.value_or(Quaternion::get_identity());
+            NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::get_identity());
             worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
-            Vector3 positionOffset = position.value_or(Vector3::get_zero());
+            NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::get_zero());
             positionVector = worldRotationQuaternion * ((positionOffset * noteLinesDistance) + startPos);
         }
 
         worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-        std::optional<Quaternion> localRotation = getPropertyNullable<Quaternion>(track, track->properties.localRotation);
+        std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
         if (localRotation.has_value()) {
             worldRotationQuaternion = worldRotationQuaternion * *localRotation;
         }

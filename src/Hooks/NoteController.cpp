@@ -65,7 +65,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
     Transform *transform = self->get_transform();
     transform->set_localScale(
-        Vector3::get_one()); // This is a fix for animation due to notes being
+        NEVector::Vector3::get_one()); // This is a fix for animation due to notes being
                              // recycled
 
     if (!customNoteData->customData->value) {
@@ -78,26 +78,26 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
     std::optional<float> &curDir = ad.objectData.cutDirection;
     if (curDir.has_value()) {
-        Quaternion cutQuaternion = Quaternion::Euler(0, 0, curDir.value());
+        NEVector::Quaternion cutQuaternion = NEVector::Quaternion::Euler(0, 0, curDir.value());
         noteJump->endRotation = cutQuaternion;
-        Vector3 vector = cutQuaternion.get_eulerAngles();
+        NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
         vector =
             vector +
-            noteJump->randomRotations->values[noteJump->randomRotationIdx] * 20;
-        Quaternion midrotation = Quaternion::Euler(vector);
+                    NEVector::Vector3(noteJump->randomRotations->values[noteJump->randomRotationIdx]) * 20;
+        NEVector::Quaternion midrotation = NEVector::Quaternion::Euler(vector);
         noteJump->middleRotation = midrotation;
     }
 
-    Quaternion localRotation = Quaternion::get_identity();
+    NEVector::Quaternion localRotation = NEVector::Quaternion::get_identity();
     if (ad.objectData.rotation || ad.objectData.localRotation) {
         if (ad.objectData.localRotation) {
-            localRotation = Quaternion::Euler(*ad.objectData.localRotation);
+            localRotation = NEVector::Quaternion::Euler(*ad.objectData.localRotation);
         }
 
         if (ad.objectData.rotation) {
-            Quaternion worldRotationQuatnerion = Quaternion::Euler(*ad.objectData.rotation);
+            NEVector::Quaternion worldRotationQuatnerion = NEVector::Quaternion::Euler(*ad.objectData.rotation);
 
-            Quaternion inverseWorldRotation = Quaternion::Inverse(worldRotationQuatnerion);
+            NEVector::Quaternion inverseWorldRotation = NEVector::Quaternion::Inverse(worldRotationQuatnerion);
             noteJump->worldRotation = worldRotationQuatnerion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuatnerion;
@@ -106,7 +106,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             worldRotationQuatnerion = worldRotationQuatnerion * localRotation;
             transform->set_localRotation(worldRotationQuatnerion);
         } else {
-            transform->set_localRotation(transform->get_localRotation() * localRotation);
+            transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
         }
     }
     // TODO: Multi-track
@@ -200,15 +200,15 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     if (offset.rotationOffset.has_value() ||
         offset.localRotationOffset.has_value()) {
-        Quaternion worldRotation = ad.worldRotation;
-        Quaternion localRotation = ad.localRotation;
+        NEVector::Quaternion worldRotation = ad.worldRotation;
+        NEVector::Quaternion localRotation = ad.localRotation;
 
-        Quaternion worldRotationQuaternion = worldRotation;
+        NEVector::Quaternion worldRotationQuaternion = worldRotation;
         if (offset.rotationOffset.has_value()) {
             worldRotationQuaternion =
                 worldRotationQuaternion * *offset.rotationOffset;
-            Quaternion inverseWorldRotation =
-                Quaternion::Inverse(worldRotationQuaternion);
+            NEVector::Quaternion inverseWorldRotation =
+                    NEVector::Quaternion::Inverse(worldRotationQuaternion);
             noteJump->worldRotation = worldRotationQuaternion;
             noteJump->inverseWorldRotation = inverseWorldRotation;
             floorMovement->worldRotation = worldRotationQuaternion;

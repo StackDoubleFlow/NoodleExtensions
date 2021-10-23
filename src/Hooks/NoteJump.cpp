@@ -21,6 +21,7 @@ extern Track *noteTrack;
 float noteTimeAdjust(float original, float jumpDuration);
 
 MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump *self) {
+    auto selfTransform = self->get_transform();
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - (self->beatTime - self->jumpDuration * 0.5f);
     if (noteUpdateAD) {
@@ -45,43 +46,48 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         self->localPosition.y = self->localPosition.y + num3 * self->yAvoidance;
     }
     if (normalTime < 0.5) {
-        Transform *baseTransform = self->get_transform();
-        Quaternion a;
+        Transform *baseTransform = selfTransform; // lazy
+        NEVector::Vector3 baseTransformPosition(baseTransform->get_position());
+        NEVector::Quaternion baseTransformRotation(baseTransform->get_rotation());
+
+        NEVector::Quaternion a;
         if (normalTime < 0.125) {
-            a = Quaternion::Slerp(baseTransform->get_rotation() * self->startRotation,
-                                  baseTransform->get_rotation() * self->middleRotation,
+            a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation),
+                                  baseTransformRotation * NEVector::Quaternion(self->middleRotation),
                                   std::sin(normalTime * M_PI * 4));
         } else {
-            a = Quaternion::Slerp(baseTransform->get_rotation() * self->middleRotation,
-                                  baseTransform->get_rotation() * self->endRotation,
+            a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation),
+                                            baseTransformRotation * NEVector::Quaternion(self->endRotation),
                                   std::sin((normalTime - 0.125) * M_PI * 2));
         }
 
-        Vector3 vector = self->playerTransforms->headWorldPos;
+        NEVector::Vector3 vector = self->playerTransforms->headWorldPos;
 
         // Aero doesn't know what's happening anymore
-        Quaternion worldRot = self->inverseWorldRotation;
+        NEVector::Quaternion worldRot = self->inverseWorldRotation;
         if (baseTransform->get_parent()) {
             // Handle parenting
-            worldRot = worldRot * Quaternion::Inverse(baseTransform->get_parent()->get_rotation());
+            worldRot = worldRot * (NEVector::Quaternion) NEVector::Quaternion::Inverse(baseTransform->get_parent()->get_rotation());
         }
 
         Transform *headTransform = self->playerTransforms->headTransform;
-        Quaternion inverse = Quaternion::Inverse(worldRot);
-        Vector3 upVector = inverse * Vector3::get_up();
+        NEVector::Quaternion inverse = NEVector::Quaternion::Inverse(worldRot);
+        NEVector::Vector3 upVector = inverse * NEVector::Vector3::get_up();
+
+
         float baseUpMagnitude =
-            Vector3::Dot(worldRot * baseTransform->get_position(), Vector3::get_up());
+            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(), NEVector::Vector3::get_up());
         float headUpMagnitude =
-            Vector3::Dot(worldRot * headTransform->get_position(), Vector3::get_up());
+            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::get_up());
         float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;
         vector = vector + upVector * mult;
 
         // more wtf
-        Vector3 normalized = baseTransform->get_rotation() *
-                             (worldRot * (baseTransform->get_position() - vector).get_normalized());
+        NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
+                             (worldRot * NEVector::Vector3(baseTransformPosition - vector).get_normalized());
 
-        Quaternion b = Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
-        self->rotatedObject->set_rotation(Quaternion::Lerp(a, b, normalTime * 2));
+        NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
+        self->rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
     }
     if (normalTime >= 0.5 && !self->halfJumpMarkReported) {
         self->halfJumpMarkReported = true;
@@ -108,19 +114,19 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
             self->noteJumpDidFinishEvent->Invoke();
     }
 
-    Vector3 result = self->worldRotation * self->localPosition;
-    self->get_transform()->set_localPosition(self->worldRotation * self->localPosition);
+    NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
+    selfTransform->set_localPosition(NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition));
     if (self->noteJumpDidUpdateProgressEvent) {
         self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);
     }
 
     if (noteUpdateAD) {
-        std::optional<Vector3> position = AnimationHelper::GetDefinitePositionOffset(
+        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(
             noteUpdateAD->animationData, noteTrack, normalTime);
         if (position.has_value()) {
             self->localPosition = *position + noteUpdateAD->noteOffset;
-            result = self->worldRotation * self->localPosition;
-            self->get_transform()->set_localPosition(result);
+            result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
+            selfTransform->set_localPosition(result);
         }
     }
 

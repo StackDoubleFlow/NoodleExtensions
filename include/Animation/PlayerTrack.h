@@ -18,10 +18,10 @@ public:
 private:
     static inline PlayerTrack *instance;
     static inline Track *track;
-    static inline UnityEngine::Vector3 startPos;
-    static inline UnityEngine::Quaternion startRot;
-    static inline UnityEngine::Quaternion startLocalRot;
-    static inline UnityEngine::Vector3 startScale;
+    static inline NEVector::Vector3 startPos;
+    static inline NEVector::Quaternion startRot;
+    static inline NEVector::Quaternion startLocalRot;
+    static inline NEVector::Vector3 startScale;
     static inline UnityEngine::Transform *origin;
     static inline GlobalNamespace::PauseController *pauseController;
 

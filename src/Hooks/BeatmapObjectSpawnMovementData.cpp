@@ -97,7 +97,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
         finalNoteOffset = noteOffset;
     }
 
-    ad.noteOffset = self->centerPos + *finalNoteOffset;
+    ad.noteOffset = NEVector::Vector3(self->centerPos) + *finalNoteOffset;
     ad.xOffset =
         ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->noteLinesDistance;
 
@@ -184,7 +184,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
     float startVerticalVelocity = jumpGravity * jumpDuration * 0.5f;
     float num = jumpDuration * 0.5f;
     float yOffset = (startVerticalVelocity * num) - (jumpGravity * num * num * 0.5f);
-    getAD(noteData->customData).noteOffset = self->centerPos + noteOffset + Vector3(0, yOffset, 0);
+    getAD(noteData->customData).noteOffset = Vector3(self->centerPos) + noteOffset + Vector3(0, yOffset, 0);
 
 
     return result;

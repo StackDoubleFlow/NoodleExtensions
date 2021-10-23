@@ -5,6 +5,11 @@
 #include "custom-types/shared/macros.hpp"
 #include "NELogger.h"
 
+namespace NEVector {
+    struct Vector3;
+    struct Quaternion;
+}
+
 DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_DEFAULT_CTOR();
     DECLARE_SIMPLE_DTOR();
@@ -13,10 +18,10 @@ DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
 private:
     Track *track;
     UnityEngine::Transform *origin;
-    UnityEngine::Vector3 startPos = UnityEngine::Vector3::get_zero();
-    UnityEngine::Quaternion startRot = UnityEngine::Quaternion::get_identity();
-    UnityEngine::Quaternion startLocalRot = UnityEngine::Quaternion::get_identity();
-    UnityEngine::Vector3 startScale = UnityEngine::Vector3::get_one();
+    NEVector::Vector3 startPos = NEVector::Vector3::get_zero();
+    NEVector::Quaternion startRot = NEVector::Quaternion::get_identity();
+    NEVector::Quaternion startLocalRot = NEVector::Quaternion::get_identity();
+    NEVector::Vector3 startScale = NEVector::Vector3::get_one();
 public:
     ~ParentObject();
 
@@ -27,8 +32,8 @@ public:
     void HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed);
 
     static void ResetTransformParent(UnityEngine::Transform *transform);
-    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<UnityEngine::Vector3> startPos,
-        std::optional<UnityEngine::Quaternion> startRot, std::optional<UnityEngine::Quaternion> startLocalRot, std::optional<UnityEngine::Vector3> startScale);
+    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<NEVector::Vector3> startPos,
+        std::optional<NEVector::Quaternion> startRot, std::optional<NEVector::Quaternion> startLocalRot, std::optional<NEVector::Vector3> startScale);
 )
 
 class ParentController {

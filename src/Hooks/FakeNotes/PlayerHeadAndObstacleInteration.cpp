@@ -3,7 +3,7 @@
 
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/PlayerHeadAndObstacleInteraction.hpp"
-#include "UnityEngine/Vector3.hpp"
+#include "tracks/shared/Vector.h"
 
 #include "FakeNoteHelper.h"
 #include "NEHooks.h"
@@ -24,7 +24,7 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
 
     for (int i = 0; i < vObstacleControllers.size(); i++) {
         auto *obstacleController = vObstacleControllers[i];
-        if (obstacleController->bounds.get_size() == Vector3::get_zero()) {
+        if (NEVector::Vector3(obstacleController->bounds.get_size()) == NEVector::Vector3::get_zero()) {
             (*vObstacleControllers)->RemoveAt(i);
             i--;
         }

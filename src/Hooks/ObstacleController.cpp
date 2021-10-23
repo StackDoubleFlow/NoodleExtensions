@@ -50,8 +50,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    Quaternion rotation =
-        Quaternion::Euler(ad.objectData.rotation.value_or(Vector3(0, worldRotation, 0)));
+    NEVector::Quaternion rotation =
+            NEVector::Quaternion::Euler(ad.objectData.rotation.value_or(NEVector::Vector3(0, worldRotation, 0)));
     self->worldRotation = rotation;
     self->inverseWorldRotation = NEVector::Quaternion::Euler(-rotation.get_eulerAngles());
 
@@ -59,15 +59,15 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
     NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
-    self->startPos = startPos + b;
-    self->midPos = midPos + b;
-    self->endPos = endPos + b;
+    self->startPos = NEVector::Vector3(startPos) + b;
+    self->midPos = NEVector::Vector3(midPos) + b;
+    self->endPos = NEVector::Vector3(endPos) + b;
     ad.moveStartPos = self->startPos;
     ad.moveEndPos = self->midPos;
     ad.jumpEndPos = self->endPos;
 
     float defaultLength =
-        (self->endPos - self->midPos).get_magnitude() / move2Duration * obstacleData->duration;
+            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).get_magnitude() / move2Duration * obstacleData->duration;
     float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
@@ -76,12 +76,12 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     std::optional<NEVector::Vector3> &localrot = ad.objectData.localRotation;
 
-    Quaternion localRotation = NEVector::Quaternion::get_identity();
+    NEVector::Quaternion localRotation = NEVector::Quaternion::get_identity();
     if (localrot.has_value()) {
         localRotation = NEVector::Quaternion::Euler(localrot->x, localrot->y, localrot->z);
     }
     transform->set_localPosition(startPos);
-    transform->set_localRotation(self->worldRotation * localRotation);
+    transform->set_localRotation(NEVector::Quaternion(self->worldRotation) * localRotation);
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
@@ -94,7 +94,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     std::optional<bool> &cuttable = ad.objectData.interactable;
     if (cuttable && !*cuttable) {
-        self->bounds.set_size(Vector3::get_zero());
+        self->bounds.set_size(NEVector::Vector3::get_zero());
     }
 
     Array<ConditionalMaterialSwitcher *>* materialSwitchers;
@@ -190,7 +190,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     if (offset.cuttable.has_value() && !*offset.cuttable) {
-        self->bounds.set_size(Vector3::get_zero());
+        self->bounds.set_size(NEVector::Vector3::get_zero());
     }
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
