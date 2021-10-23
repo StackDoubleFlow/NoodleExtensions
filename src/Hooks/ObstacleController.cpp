@@ -195,12 +195,23 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value()) {
-        if (!ad.dissolveEnabled && obstacleDissolveConfig) {
+        float dissolve;
+
+        if (obstacleDissolveConfig) {
+            dissolve = 1 - *offset.dissolve;
+        } else {
+            dissolve = *offset.dissolve >= 0 ? 0 : 1;
+        }
+
+        bool wasEnabled = ad.dissolveEnabled;
+        ad.dissolveEnabled = obstacleDissolveConfig; // dissolve > 0.0f;
+
+        if (wasEnabled != ad.dissolveEnabled) {
             ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
-            for (auto *materialSwitcher : materialSwitchers) {
-                materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            for (auto *materialSwitcher: materialSwitchers) {
+                materialSwitcher->renderer->set_sharedMaterial(
+                        ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
             }
-            ad.dissolveEnabled = true;
         }
 
         CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
@@ -211,11 +222,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
 
-        if (obstacleDissolveConfig) {
-            cutoutAnimationEffect->SetCutout(1 - *offset.dissolve);
-        } else {
-            cutoutAnimationEffect->SetCutout(*offset.dissolve >= 0 ? 0 : 1);
-        }
+        cutoutAnimationEffect->SetCutout(dissolve);
     }
 
     ObstacleController_ManualUpdate(self);
