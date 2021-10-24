@@ -19,7 +19,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     for (int i = 0; i < customNotes->get_Count(); i++) {
         CustomNoteData *noteData = customNotes->items->values[i];
 
-        float lineIndex = noteData->lineIndex - 2;
+        float lineIndex = noteData->lineIndex - 2.0f;
         float lineLayer = noteData->noteLineLayer;
         if (noteData->customData->value) {
             rapidjson::Value &customData = *noteData->customData->value;

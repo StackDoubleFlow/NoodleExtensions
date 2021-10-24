@@ -30,6 +30,23 @@ std::optional<NEVector::Vector2> ReadOptionalVector2(const rapidjson::Value &obj
     return std::nullopt;
 }
 
+// Used for note flip
+std::optional<NEVector::Vector2> ReadOptionalVector2_emptyY(const rapidjson::Value &object,
+                                                         const char *key) {
+    auto itr = object.FindMember(key);
+
+    if (itr != object.MemberEnd() && itr->value.Size() >= 1) {
+        float x = itr->value[0].GetFloat();
+        float y = 0;
+
+        if (itr->value.Size() > 1) {
+            y = itr->value[1].GetFloat();
+        }
+        return NEVector::Vector2(x, y);
+    }
+    return std::nullopt;
+}
+
 std::optional<NEVector::Vector3> ReadOptionalRotation(const rapidjson::Value &object,
                                                       const char *key) {
     auto itr = object.FindMember(key);

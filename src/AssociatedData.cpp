@@ -41,7 +41,7 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
     fake = NEJSON::ReadOptionalBool(customData, "_fake");
     interactable = NEJSON::ReadOptionalBool(customData, "_interactable");
     cutDirection = NEJSON::ReadOptionalFloat(customData, "_cutDirection");
-    flip = NEJSON::ReadOptionalVector2(customData, "_flip");
+    flip = NEJSON::ReadOptionalVector2_emptyY(customData, "_flip");
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, "_disableNoteGravity");
     disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook");
     scale = NEJSON::ReadOptionalScale(customData, "_scale");
