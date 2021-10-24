@@ -37,8 +37,8 @@ struct AnimationObjectData {
 
 struct ObjectCustomData {
     std::optional<NEVector::Vector2> position;
-    std::optional<NEVector::Vector3> rotation;
-    std::optional<NEVector::Vector3> localRotation;
+    std::optional<NEVector::Quaternion> rotation;
+    std::optional<NEVector::Quaternion> localRotation;
     std::optional<float> noteJumpMovementSpeed;
     std::optional<float> noteJumpStartBeatOffset;
     std::optional<bool> fake;
@@ -85,6 +85,9 @@ struct BeatmapObjectAssociatedData {
     Array<GlobalNamespace::ConditionalMaterialSwitcher *> *materialSwitchers;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
+
+    // hide for obstacles
+    bool doUnhide;
 
     void ResetState();
 };

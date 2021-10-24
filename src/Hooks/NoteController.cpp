@@ -109,11 +109,11 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     NEVector::Quaternion localRotation = NEVector::Quaternion::get_identity();
     if (ad.objectData.rotation || ad.objectData.localRotation) {
         if (ad.objectData.localRotation) {
-            localRotation = NEVector::Quaternion::Euler(*ad.objectData.localRotation);
+            localRotation = *ad.objectData.localRotation;
         }
 
         if (ad.objectData.rotation) {
-            NEVector::Quaternion worldRotationQuatnerion = NEVector::Quaternion::Euler(*ad.objectData.rotation);
+            NEVector::Quaternion worldRotationQuatnerion = *ad.objectData.rotation;
 
             NEVector::Quaternion inverseWorldRotation = NEVector::Quaternion::Inverse(worldRotationQuatnerion);
             noteJump->worldRotation = worldRotationQuatnerion;

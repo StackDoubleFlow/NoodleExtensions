@@ -20,6 +20,54 @@ extern std::vector<Track*> noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
+void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTransform, float const normalTime) {
+    if (noteUpdateAD->objectData.disableNoteLook.value_or(false)) {
+        self->rotatedObject->set_localRotation(self->endRotation);
+    }
+    Transform *baseTransform = selfTransform; // lazy
+    NEVector::Vector3 baseTransformPosition(baseTransform->get_position());
+    NEVector::Quaternion baseTransformRotation(baseTransform->get_rotation());
+
+    NEVector::Quaternion a;
+    if (normalTime < 0.125) {
+        a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation),
+                                        baseTransformRotation * NEVector::Quaternion(self->middleRotation),
+                                        std::sin(normalTime * M_PI * 4));
+    } else {
+        a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation),
+                                        baseTransformRotation * NEVector::Quaternion(self->endRotation),
+                                        std::sin((normalTime - 0.125) * M_PI * 2));
+    }
+
+    NEVector::Vector3 vector = self->playerTransforms->headWorldPos;
+
+    // Aero doesn't know what's happening anymore
+    NEVector::Quaternion worldRot = self->inverseWorldRotation;
+    if (baseTransform->get_parent()) {
+        // Handle parenting
+        worldRot = worldRot * (NEVector::Quaternion) NEVector::Quaternion::Inverse(baseTransform->get_parent()->get_rotation());
+    }
+
+    Transform *headTransform = self->playerTransforms->headTransform;
+    NEVector::Quaternion inverse = NEVector::Quaternion::Inverse(worldRot);
+    NEVector::Vector3 upVector = inverse * NEVector::Vector3::up();
+
+
+    float baseUpMagnitude =
+            NEVector::Vector3::Dot(worldRot * baseTransformPosition, NEVector::Vector3::up());
+    float headUpMagnitude =
+            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::up());
+    float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;
+    vector = vector + upVector * mult;
+
+    // more wtf
+    NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
+                                   (worldRot * NEVector::Vector3(baseTransformPosition - vector).get_normalized());
+
+    NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
+    self->rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
+}
+
 MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump *self) {
     auto selfTransform = self->get_transform();
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
@@ -46,48 +94,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         self->localPosition.y = self->localPosition.y + num3 * self->yAvoidance;
     }
     if (normalTime < 0.5) {
-        Transform *baseTransform = selfTransform; // lazy
-        NEVector::Vector3 baseTransformPosition(baseTransform->get_position());
-        NEVector::Quaternion baseTransformRotation(baseTransform->get_rotation());
-
-        NEVector::Quaternion a;
-        if (normalTime < 0.125) {
-            a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation),
-                                  baseTransformRotation * NEVector::Quaternion(self->middleRotation),
-                                  std::sin(normalTime * M_PI * 4));
-        } else {
-            a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation),
-                                            baseTransformRotation * NEVector::Quaternion(self->endRotation),
-                                  std::sin((normalTime - 0.125) * M_PI * 2));
-        }
-
-        NEVector::Vector3 vector = self->playerTransforms->headWorldPos;
-
-        // Aero doesn't know what's happening anymore
-        NEVector::Quaternion worldRot = self->inverseWorldRotation;
-        if (baseTransform->get_parent()) {
-            // Handle parenting
-            worldRot = worldRot * (NEVector::Quaternion) NEVector::Quaternion::Inverse(baseTransform->get_parent()->get_rotation());
-        }
-
-        Transform *headTransform = self->playerTransforms->headTransform;
-        NEVector::Quaternion inverse = NEVector::Quaternion::Inverse(worldRot);
-        NEVector::Vector3 upVector = inverse * NEVector::Vector3::up();
-
-
-        float baseUpMagnitude =
-            NEVector::Vector3::Dot(worldRot * baseTransformPosition, NEVector::Vector3::up());
-        float headUpMagnitude =
-            NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::up());
-        float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;
-        vector = vector + upVector * mult;
-
-        // more wtf
-        NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
-                             (worldRot * NEVector::Vector3(baseTransformPosition - vector).get_normalized());
-
-        NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
-        self->rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
+        NoteJump_ManualUpdateNoteLookTranspile(self, selfTransform, normalTime);
     }
     if (normalTime >= 0.5 && !self->halfJumpMarkReported) {
         self->halfJumpMarkReported = true;

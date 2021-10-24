@@ -35,7 +35,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
     position = NEJSON::ReadOptionalVector2(customData, "_position");
     rotation = NEJSON::ReadOptionalRotation(customData, "_rotation");
-    localRotation = NEJSON::ReadOptionalVector3(customData, "_localRotation");
+    localRotation = NEJSON::ReadOptionalRotation(customData, "_localRotation");
     noteJumpMovementSpeed = NEJSON::ReadOptionalFloat(customData, "_noteJumpMovementSpeed");
     noteJumpStartBeatOffset = NEJSON::ReadOptionalFloat(customData, "_noteJumpStartBeatOffset");
     fake = NEJSON::ReadOptionalBool(customData, "_fake");
