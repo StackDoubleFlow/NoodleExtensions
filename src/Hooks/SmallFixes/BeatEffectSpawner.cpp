@@ -1,0 +1,79 @@
+#include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
+
+#include "GlobalNamespace/BeatmapObjectManager.hpp"
+#include "GlobalNamespace/BeatEffectSpawner.hpp"
+#include "GlobalNamespace/BeatEffectSpawner_InitData.hpp"
+#include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/NoteData.hpp"
+#include "GlobalNamespace/ColorType.hpp"
+#include "GlobalNamespace/ColorManager.hpp"
+#include "GlobalNamespace/AudioTimeSyncController.hpp"
+#include "GlobalNamespace/MemoryPoolContainer_1.hpp"
+#include "GlobalNamespace/LazyCopyHashSet_1.hpp"
+
+#include "System/Action_1.hpp"
+#include "UnityEngine/Vector3.hpp"
+#include "UnityEngine/Transform.hpp"
+
+#include "tracks/shared/Vector.h"
+#include "AssociatedData.h"
+#include "NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+
+
+using namespace GlobalNamespace;
+using namespace UnityEngine;
+
+constexpr static NEVector::Vector3 GetNoteControllerPosition(Transform* transform)
+{
+    return transform->get_position();
+}
+
+constexpr static NEVector::Quaternion GetNoteControllerRotation(Transform* transform)
+{
+    return transform->get_rotation();
+}
+
+MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
+                &BeatEffectSpawner::HandleNoteDidStartJump,
+                void,
+                BeatEffectSpawner *self,
+                NoteController* noteController) {
+    if (self->initData->hideNoteSpawnEffect)
+    {
+        return;
+    }
+    if (noteController->get_hide())
+    {
+        return;
+    }
+    if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->get_songTime())
+    {
+        return;
+    }
+    ColorType colorType = noteController->noteData->colorType;
+    Color color = (colorType != ColorType::None) ? self->colorManager->ColorForType(colorType) : self->bombColorEffect;
+    auto beatEffect = self->beatEffectPoolContainer->Spawn();
+    beatEffect->didFinishEvent->Add(reinterpret_cast<IBeatEffectDidFinishEvent *>(self));
+
+    // TRANSPILE HERE
+    auto transform = noteController->get_transform();
+    NEVector::Vector3 jumpStartPos(GetNoteControllerPosition(transform));
+    NEVector::Quaternion worldRotation(GetNoteControllerRotation(transform));
+
+    beatEffect->get_transform()->SetPositionAndRotation(
+            NEVector::Quaternion(noteController->get_worldRotation()) * jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
+            NEVector::Quaternion::identity());
+
+
+    beatEffect->Init(color, self->effectDuration, worldRotation);
+
+    //
+}
+
+void InstallBeatEffectSpawnerHooks(Logger &logger) {
+    INSTALL_HOOK_ORIG(logger, BeatEffectSpawner_HandleNoteDidStartJump);
+}
+
+NEInstallHooks(InstallBeatEffectSpawnerHooks);
