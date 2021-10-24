@@ -81,10 +81,15 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    NEVector::Quaternion rotation =
-            NEVector::Quaternion::Euler(ad.objectData.rotation.value_or(NEVector::Vector3(0, worldRotation, 0)));
+    NEVector::Quaternion rotation;
+
+    if (ad.objectData.rotation)
+        rotation = *ad.objectData.rotation;
+    else
+        rotation = NEVector::Quaternion::Euler(0, worldRotation, 0);
+
     self->worldRotation = rotation;
-    self->inverseWorldRotation = NEVector::Quaternion::Euler(-NEVector::Vector3(rotation.get_eulerAngles()));
+    self->inverseWorldRotation = NEVector::Quaternion::Inverse(rotation);
 
     auto &scale = ad.objectData.scale;
 
@@ -105,11 +110,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
-    std::optional<NEVector::Vector3> &localrot = ad.objectData.localRotation;
+    std::optional<NEVector::Quaternion> &localrot = ad.objectData.localRotation;
 
     NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
     if (localrot.has_value()) {
-        localRotation = NEVector::Quaternion::Euler(localrot->x, localrot->y, localrot->z);
+        localRotation = *localrot;
     }
     transform->set_localPosition(startPos);
     transform->set_localRotation(NEVector::Quaternion(self->worldRotation) * localRotation);
@@ -286,6 +291,10 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         cutoutAnimationEffect->SetCutout(dissolve);
+    }
+
+    if (ad.doUnhide) {
+        self->set_hide(false);
     }
 
     // do transpile only if needed
