@@ -1,6 +1,8 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
+#include "System/Action_1.hpp"
+#include "System/Action_2.hpp"
 #include "GlobalNamespace/ConditionalMaterialSwitcher.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
 #include "GlobalNamespace/ObstacleController.hpp"
@@ -33,6 +35,34 @@ std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *>
 
 void NECaches::ClearObstacleCaches() {
     cachedObstacleMaterialSwitchers.clear();
+}
+
+float obstacleTimeAdjust(float original, std::vector<Track*> const& tracks, float move1Duration, float finishMovementTime) {
+    if (original > move1Duration && !tracks.empty()) {
+        Track *obstacleTrack = nullptr;
+
+        if (tracks.size() > 1) {
+            auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track *track) {
+                return track->properties.time.value.has_value();
+            });
+
+            if (trackIt != tracks.end()) {
+                obstacleTrack = *trackIt;
+            }
+        } else {
+            obstacleTrack = tracks.front();
+        }
+
+        if (obstacleTrack) {
+            Property &timeProperty = obstacleTrack->properties.time;
+            if (timeProperty.value) {
+                float time = timeProperty.value->linear;
+                return (time * (finishMovementTime - move1Duration)) + move1Duration;
+            }
+        }
+    }
+
+    return original;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
@@ -119,6 +149,46 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->Update();
 }
 
+static void ObstacleController_ManualUpdateTranspile(ObstacleController *self, float const elapsedTime) {
+    // TRANSPILE HERE
+    float num = elapsedTime;
+    // TRANSPILE HERE
+    NEVector::Vector3 posForTime = self->GetPosForTime(num);
+    self->get_transform()->set_localPosition(NEVector::Quaternion (self->worldRotation) * posForTime);
+    auto action = self->didUpdateProgress;
+    if (action)
+    {
+        action->Invoke(self, num);
+    }
+    if (!self->passedThreeQuartersOfMove2Reported && num > self->move1Duration + self->move2Duration * 0.75f)
+    {
+        self->passedThreeQuartersOfMove2Reported = true;
+        auto action2 = self->passedThreeQuartersOfMove2Event;
+        if (action2)
+        {
+            action2->Invoke(self);
+        }
+    }
+    if (!self->passedAvoidedMarkReported && num > self->passedAvoidedMarkTime)
+    {
+        self->passedAvoidedMarkReported = true;
+        auto action3 = self->passedAvoidedMarkEvent;
+        if (action3)
+        {
+            action3->Invoke(self);
+        }
+    }
+    if (num > self->finishMovementTime)
+    {
+        auto action4 = self->finishedMovementEvent;
+        if (!action4)
+        {
+            return;
+        }
+        action4->Invoke(self);
+    }
+}
+
 bool test = false;
 MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
@@ -140,9 +210,9 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
-    float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
-    float elapsedTime = songTime - self->startTimeOffset;
-    float normalTime =
+    float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
+    float const elapsedTime = songTime - self->startTimeOffset;
+    float const normalTime =
         (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
 
     AnimationHelper::ObjectOffset offset =
@@ -216,6 +286,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         cutoutAnimationEffect->SetCutout(dissolve);
+    }
+
+    // do transpile only if needed
+    float const obstacleTime = obstacleTimeAdjust(elapsedTime, tracks, self->move1Duration, self->finishMovementTime);
+    if (obstacleTime != elapsedTime) {
+        ObstacleController_ManualUpdateTranspile(self, obstacleTime);
+        return;
     }
 
     ObstacleController_ManualUpdate(self);

@@ -35,14 +35,25 @@ BeatmapObjectAssociatedData *noteUpdateAD;
 std::vector<Track*> noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
+    if (noteTracks.empty())
+        return original;
+
+    Track* noteTrack = nullptr;
+
+    if (noteTracks.size() > 1) {
+        auto trackIt = std::find_if(noteTracks.begin(), noteTracks.end(), [](Track *track) {
+            return track->properties.time.value.has_value();
+        });
+
+        if (trackIt != noteTracks.end()) {
+            noteTrack = *trackIt;
+        }
+    } else {
+        noteTrack = noteTracks.front();
+    }
 
 
-    auto trackIt = std::find_if(noteTracks.begin(), noteTracks.end(), [](Track* track) {
-        return track->properties.time.value.has_value();
-    });
-
-    if (trackIt != noteTracks.end()) {
-        Track* noteTrack = *trackIt;
+    if (noteTrack) {
         Property &timeProperty = noteTrack->properties.time;
         if (timeProperty.value) {
             float time = timeProperty.value->linear;
