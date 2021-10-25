@@ -94,9 +94,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
-    std::optional<float> &curDir = ad.objectData.cutDirection;
+    auto const& curDir = ad.objectData.cutDirection;
     if (curDir.has_value()) {
-        NEVector::Quaternion cutQuaternion = NEVector::Quaternion::Euler(0, 0, curDir.value());
+        NEVector::Quaternion cutQuaternion = curDir.value();
         noteJump->endRotation = cutQuaternion;
         NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
         vector =

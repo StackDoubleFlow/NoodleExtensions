@@ -45,7 +45,7 @@ struct ObjectCustomData {
     std::optional<bool> interactable;
 
     // notes
-    std::optional<float> cutDirection;
+    std::optional<NEVector::Quaternion> cutDirection;
     std::optional<NEVector::Vector2> flip;
     std::optional<bool> disableNoteGravity;
     std::optional<bool> disableNoteLook;
@@ -59,7 +59,7 @@ struct ObjectCustomData {
 
 struct BeatmapObjectAssociatedData {
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
-    std::optional<int> startNoteLineLayer;
+    std::optional<float> startNoteLineLayer;
 
     float aheadTime;
     NEVector::Quaternion worldRotation;

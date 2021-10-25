@@ -40,7 +40,11 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
     noteJumpStartBeatOffset = NEJSON::ReadOptionalFloat(customData, "_noteJumpStartBeatOffset");
     fake = NEJSON::ReadOptionalBool(customData, "_fake");
     interactable = NEJSON::ReadOptionalBool(customData, "_interactable");
-    cutDirection = NEJSON::ReadOptionalFloat(customData, "_cutDirection");
+    auto cutDirOpt = NEJSON::ReadOptionalFloat(customData, "_cutDirection");
+
+    if (cutDirOpt)
+        cutDirection = NEVector::Quaternion::Euler(0, 0, cutDirOpt.value());
+
     flip = NEJSON::ReadOptionalVector2_emptyY(customData, "_flip");
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, "_disableNoteGravity");
     disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook");
