@@ -52,7 +52,7 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle,
 
     // POST FIX
     auto *customObstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleData);
-    if (customObstacleData->customData->value) {
+    if (customObstacleData->customData) {
         BeatmapObjectAssociatedData &ad = getAD(customObstacleData->customData);
         ad.doUnhide = true;
     }
@@ -64,5 +64,6 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle,
 void InstallBeatmapObjectManagerSmallFixHooks(Logger &logger) {
     INSTALL_HOOK_ORIG(logger, BeatmapObjectManager_SpawnObstacle);
 }
+
 
 NEInstallHooks(InstallBeatmapObjectManagerSmallFixHooks);

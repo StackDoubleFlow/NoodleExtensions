@@ -200,6 +200,11 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     test = true;
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
+    BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+
+    if (ad.doUnhide) {
+        self->set_hide(false);
+    }
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);
         return;
@@ -212,7 +217,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     //     return;
     // }
 
-    BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+
+
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
@@ -291,10 +297,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         cutoutAnimationEffect->SetCutout(dissolve);
-    }
-
-    if (ad.doUnhide) {
-        self->set_hide(false);
     }
 
     // do transpile only if needed
