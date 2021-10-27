@@ -177,7 +177,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
                                 : float(startLineLayer.value_or((float) noteData->beforeJumpNoteLineLayer));
 
         Vector3 const noteOffset2 =
-                SpawnDataHelper::GetNoteOffset(self, noteData, offsetStartRow, offsetStartHeight, noteData->time > 24.0f && noteData->time < 26.0f);
+                SpawnDataHelper::GetNoteOffset(self, noteData, offsetStartRow, offsetStartHeight);
         Vector3 const moveStartPos = localMoveStartPos + noteOffset2;
         Vector3 const moveEndPos = localMoveEndPos + noteOffset2;
 
