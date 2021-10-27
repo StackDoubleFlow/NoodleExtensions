@@ -12,7 +12,6 @@ using namespace CustomJSONData;
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
                 &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
                 BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
-    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
     auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
     std::unordered_map<float, std::vector<CustomNoteData *>> notesInColumn;
@@ -66,9 +65,11 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
         auto &list = pair.second;
         for (int m = 0; m < list.size(); m++) {
             BeatmapObjectAssociatedData &ad = getAD(list[m]->customData);
-            ad.startNoteLineLayer = m;
+            ad.startNoteLineLayer = (float) m;
         }
     }
+
+    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 }
 
 void InstallBeatmapObjectsInTimeRowProcessorHooks(Logger &logger) {

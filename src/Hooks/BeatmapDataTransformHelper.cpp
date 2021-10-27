@@ -56,9 +56,9 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
-    float startHalfJumpDurationInBeats = 4;
-    float maxHalfJumpDistance = 18;
-    float moveDuration = 0.5f;
+    float const startHalfJumpDurationInBeats = 4;
+    float const maxHalfJumpDistance = 18;
+    float const moveDuration = 0.5f;
 
     // loop through all objects in all lines of the beatmapData
     for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
@@ -86,8 +86,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             float njs;
             float spawnOffset;
-            if (customDataWrapper->value) {
-                rapidjson::Value &customData = *customDataWrapper->value;
+            if (customDataWrapper) {
                 njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
                 spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
             } else {
@@ -95,15 +94,15 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
                 spawnOffset = NECaches::noteJumpStartBeatOffset;
             }
 
-            float num = 60 / bpm;
+            float num = 60.0f / bpm;
             float num2 = startHalfJumpDurationInBeats;
             while (njs * num * num2 > maxHalfJumpDistance) {
-                num2 /= 2;
+                num2 /= 2.0f;
             }
 
             num2 += spawnOffset;
-            if (num2 < 1) {
-                num2 = 1;
+            if (num2 < 1.0f) {
+                num2 = 1.0f;
             }
 
             float jumpDuration = num * num2 * 2;
@@ -123,11 +122,14 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 bool leftHanded, EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
                 EnvironmentIntensityReductionOptions *environmentIntensityReductionOptions,
                 bool screenDisplacementEffectsEnabled) {
-    auto *transformedBeatmapData = ReorderLineData(beatmapData);
-    return BeatmapDataTransformHelper_CreateTransformedBeatmapData(
-        transformedBeatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
+    auto result = BeatmapDataTransformHelper_CreateTransformedBeatmapData(
+        beatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
         screenDisplacementEffectsEnabled);
+
+    auto *transformedBeatmapData = ReorderLineData(result);
+
+    return transformedBeatmapData;
 }
 
 // Skip obstacle merging, I have no clue how much this can fuck things
@@ -138,7 +140,7 @@ MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData,
 }
 
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
-    INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
+    INSTALL_HOOK_ORIG(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
     INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
 }
 
