@@ -71,13 +71,12 @@ void NECaches::ClearNoteCaches() {
 }
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
-                NoteController *self, NoteData *noteData, float worldRotation,
-                Vector3 startPos, Vector3 midPos, Vector3 endPos,
-                float move1Duration, float move2Duration, float jumpGravity,
+                NoteController *self, GlobalNamespace::NoteData* noteData,
+                float worldRotation, UnityEngine::Vector3 moveStartPos,
+                UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos,
+                float moveDuration, float jumpDuration, float jumpGravity,
                 float endRotation, float uniformScale) {
-    NoteController_Init(self, noteData, worldRotation, startPos, midPos, endPos,
-                        move1Duration, move2Duration, jumpGravity, endRotation,
-                        uniformScale);
+    NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration, jumpGravity, endRotation, uniformScale);
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
 
@@ -127,7 +126,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
         }
     }
-    // TODO: Multi-track
     std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
         for (auto& track : tracks) {
@@ -135,9 +133,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         }
     }
     ad.endRotation = endRotation;
-    ad.moveStartPos = startPos;
-    ad.moveEndPos = midPos;
-    ad.jumpEndPos = endPos;
+    ad.moveStartPos = moveStartPos;
+    ad.moveEndPos = moveEndPos;
+    ad.jumpEndPos = jumpEndPos;
     ad.worldRotation = self->get_worldRotation();
     ad.localRotation = localRotation;
 
@@ -168,7 +166,6 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         NoteController_ManualUpdate(self);
         return;
     }
-    rapidjson::Value &customData = *customNoteData->customData->value;
 
     // TODO: Cache deserialized animation data
     // if (!customData.HasMember("_animation")) {
@@ -178,16 +175,6 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
     std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
-    // TODO: Multi track
-    Track* track = nullptr;
-
-    if (!tracks.empty()) {
-        track = tracks.front();
-
-        if (tracks.size() > 1) {
-            NELogger::GetLogger().error("Multi tracks detected! Not supported yet, using first track");
-        }
-    }
 
     noteUpdateAD = &ad;
     noteTracks = tracks;
@@ -196,8 +183,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
     float songTime = TimeSourceHelper::getSongTime(noteJump->audioTimeSyncController);
-    float elapsedTime =
-        songTime - (noteJump->beatTime - (noteJump->jumpDuration * 0.5));
+    float elapsedTime = songTime - (customNoteData->time - (noteJump->jumpDuration * 0.5f));
     elapsedTime = noteTimeAdjust(elapsedTime, noteJump->jumpDuration);
     float normalTime = elapsedTime / noteJump->jumpDuration;
 

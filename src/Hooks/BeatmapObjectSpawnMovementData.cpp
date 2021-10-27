@@ -138,7 +138,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 //    Vector3 jumpEndPos = result.jumpEndPos;
     float jumpGravity = result.jumpGravity;
 
-    Vector3 noteOffset = SpawnDataHelper::GetNoteOffset(
+    Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(
             self, noteData, startRow, startLineLayer.value_or(noteData->beforeJumpNoteLineLayer));
 
     if (position.has_value() || flipLineIndex.has_value() || njs.has_value() ||
@@ -176,10 +176,10 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
                 gravityOverride ? startHeight
                                 : float(startLineLayer.value_or((float) noteData->beforeJumpNoteLineLayer));
 
-        Vector3 noteOffset2 =
-                SpawnDataHelper::GetNoteOffset(self, noteData, offsetStartRow, offsetStartHeight);
-        Vector3 moveStartPos = localMoveStartPos + noteOffset2;
-        Vector3 moveEndPos = localMoveEndPos + noteOffset2;
+        Vector3 const noteOffset2 =
+                SpawnDataHelper::GetNoteOffset(self, noteData, offsetStartRow, offsetStartHeight, noteData->time > 24.0f && noteData->time < 26.0f);
+        Vector3 const moveStartPos = localMoveStartPos + noteOffset2;
+        Vector3 const moveEndPos = localMoveEndPos + noteOffset2;
 
         result = BeatmapObjectSpawnMovementData::NoteSpawnData(
                 moveStartPos, moveEndPos, jumpEndPos, newJumpGravity, result.moveDuration, jumpDuration);

@@ -209,7 +209,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         ObstacleController_ManualUpdate(self);
         return;
     }
-    rapidjson::Value &customData = *obstacleData->customData->value;
 
     // TODO: Cache deserialized animation data
     // if (!customData.HasMember("_animation")) {
@@ -317,7 +316,6 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     if (!obstacleData->customData->value) {
         return ObstacleController_GetPosForTime(self, time);
     }
-    rapidjson::Value &customData = *obstacleData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;

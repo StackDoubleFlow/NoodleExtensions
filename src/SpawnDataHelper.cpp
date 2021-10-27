@@ -1,3 +1,4 @@
+#include "NELogger.h"
 #include "SpawnDataHelper.h"
 
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
@@ -18,8 +19,15 @@ NEVector::Vector3 SpawnDataHelper::GetNoteOffset(BeatmapObjectSpawnMovementData 
     return (NEVector::Vector3(spawnMovementData->rightVec) * distance) + NEVector::Vector3(0, LineYPosForLineLayer(spawnMovementData, beatmapObjectData, startHeight), 0);
 }
 
-void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNoteJumpMovementSpeed, std::optional<float> inputNoteJumpStartBeatOffset, float &localJumpDuration, 
-                       float &localJumpDistance, NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos, NEVector::Vector3 &localJumpEndPos) {
+void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData* spawnMovementData,
+                                        std::optional<float> const inputNoteJumpMovementSpeed,
+                                        std::optional<float> const inputNoteJumpStartBeatOffset,
+
+                                        float &localJumpDuration, float &localJumpDistance,
+                                        NEVector::Vector3 &localMoveStartPos,
+                                        NEVector::Vector3 &localMoveEndPos,
+                                        NEVector::Vector3 &localJumpEndPos
+                                        ) {
     float localNoteJumpMovementSpeed = inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed);
     float localNoteJumpStartBeatOffset = inputNoteJumpStartBeatOffset.value_or(spawnMovementData->noteJumpStartBeatOffset);
     float num = 60.0f / spawnMovementData->startBpm;
@@ -35,11 +43,11 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData *spawnMov
 
     localJumpDuration = num * num2 * 2.0f;
     localJumpDistance = localNoteJumpMovementSpeed * localJumpDuration;
-    NEVector::Vector3 spawnMovementDataForwardVec(spawnMovementData->forwardVec);
-    NEVector::Vector3 spawnMovementDataCenterPos(spawnMovementData->centerPos);
-    localMoveStartPos = spawnMovementDataCenterPos + NEVector::Vector3(spawnMovementDataForwardVec * (spawnMovementData->moveDistance + (localJumpDistance * 0.5f)));
-    localMoveEndPos =   spawnMovementDataCenterPos + NEVector::Vector3(spawnMovementDataForwardVec * localJumpDistance * 0.5f);
-    localJumpEndPos =   spawnMovementDataCenterPos - NEVector::Vector3(spawnMovementDataForwardVec * localJumpDistance * 0.5f);
+    NEVector::Vector3 const spawnMovementDataForwardVec(spawnMovementData->forwardVec);
+    NEVector::Vector3 const spawnMovementDataCenterPos(spawnMovementData->centerPos);
+    localMoveStartPos = spawnMovementDataCenterPos + (spawnMovementDataForwardVec * (spawnMovementData->moveDistance + (localJumpDistance * 0.5f)));
+    localMoveEndPos =   spawnMovementDataCenterPos + (spawnMovementDataForwardVec * localJumpDistance * 0.5f);
+    localJumpEndPos =   spawnMovementDataCenterPos - (spawnMovementDataForwardVec * localJumpDistance * 0.5f);
 }
 
 float SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> height) {

@@ -52,7 +52,6 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     PointDefinition *localDefinitePosition = animationData.definitePosition;
 
     std::optional<Vector3> pathDefinitePosition;
-    std::optional<Vector3> definitePosition;
     std::optional<Vector3> pathPosition;
     std::optional<Vector3> trackPosition;
 
@@ -92,7 +91,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     }
 
     std::optional<Vector3> positionOffset = pathPosition + trackPosition;
-    definitePosition = positionOffset + pathDefinitePosition;
+    std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
     if (definitePosition)
         definitePosition = *definitePosition *
                            spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;

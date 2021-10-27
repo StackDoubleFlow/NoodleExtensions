@@ -20,8 +20,18 @@ extern std::vector<Track*> noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
+constexpr static float InOutQuad(float t)
+{
+    if (t >= 0.5f)
+    {
+        return -1.0f + (4.0f - 2.0f * t) * t;
+    }
+    return 2.0f * t * t;
+}
+
+
 void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTransform, float const normalTime) {
-    if (noteUpdateAD->objectData.disableNoteLook.value_or(false)) {
+    if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook.value_or(false)) {
         self->rotatedObject->set_localRotation(self->endRotation);
     }
     Transform *baseTransform = selfTransform; // lazy
@@ -81,7 +91,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         self->localPosition.x = self->startPos.x;
     } else if (normalTime < 0.25) {
         self->localPosition.x = self->startPos.x + (self->endPos.x - self->startPos.x) *
-                                                       Easing::InOutQuad(normalTime * 4);
+                                                       InOutQuad(normalTime * 4);
     } else {
         self->localPosition.x = self->endPos.x;
     }
@@ -121,20 +131,18 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
             self->noteJumpDidFinishEvent->Invoke();
     }
 
-    NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
-    selfTransform->set_localPosition(NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition));
-    if (self->noteJumpDidUpdateProgressEvent) {
-        self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);
-    }
-
     if (noteUpdateAD) {
         std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(
             noteUpdateAD->animationData, noteTracks, normalTime);
         if (position.has_value()) {
             self->localPosition = *position + noteUpdateAD->noteOffset;
-            result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
-            selfTransform->set_localPosition(result);
         }
+    }
+
+    NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
+    selfTransform->set_localPosition(result);
+    if (self->noteJumpDidUpdateProgressEvent) {
+        self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);
     }
 
     // NoteJump.ManualUpdate will be the last place this is used after it was set in
