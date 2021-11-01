@@ -13,14 +13,14 @@
 #include "GlobalNamespace/BeatmapLineData.hpp"
 
 #include "Animation/ParentObject.h"
-#include "tracks/shared/Animation/PointDefinition.h"
-#include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NECaches.h"
+#include "SceneTransitionHelper.hpp"
 
 using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
+using namespace NoodleExtensions;
 
 MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO *self, Il2CppString *gameMode, IDifficultyBeatmap *difficultyBeatmap, IPreviewBeatmapLevel *previewBeatmapLevel, OverrideEnvironmentSettings *overrideEnvironmentSettings, ColorScheme *overrideColorScheme, GameplayModifiers *gameplayModifiers, PlayerSpecificSettings *playerSpecificSettings, PracticeSettings *practiceSettings, Il2CppString *backButtonText, bool useTestNoteCutSoundEffects) {
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects);
