@@ -15,6 +15,14 @@
 #include "NEHooks.h"
 #include "SceneTransitionHelper.hpp"
 
+// needed to compile, idk why
+#define ID "Noodle"
+#include "conditional-dependencies/shared/main.hpp"
+
+#include "qosmetics-api/shared/WallAPI.hpp"
+#include "qosmetics-api/shared/NoteAPI.hpp"
+#undef ID
+
 using namespace NoodleExtensions;
 using namespace GlobalNamespace;
 using namespace TrackParenting;
@@ -64,6 +72,15 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
     }
 
     Hooks::setNoodleHookEnabled(noodleRequirement);
+
+    auto const& modInfo = NELogger::modInfo;
+    if (noodleRequirement) {
+        Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
+        Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
+    } else {
+        Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
+        Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
+    }
 
     ParentController::OnDestroy();
 
