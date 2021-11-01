@@ -13,7 +13,7 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "=2.3.2",
+      "versionRange": "<3.0.0",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -57,6 +57,11 @@
     },
     {
       "id": "sombrero",
+      "versionRange": "*",
+      "additionalData": {}
+    },
+    {
+      "id": "qosmetics-api",
       "versionRange": "*",
       "additionalData": {}
     }
