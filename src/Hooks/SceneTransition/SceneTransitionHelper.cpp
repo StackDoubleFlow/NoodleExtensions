@@ -117,7 +117,7 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
         }
     }
 
-
+    clearEventADs();
     NECaches::ClearNoteCaches();
     NECaches::ClearObstacleCaches();
 }

@@ -115,6 +115,48 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
+void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
+    auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
+
+    if (!beatmapAD.valid) {
+        TracksAD::readBeatmapDataAD(beatmap);
+    }
+
+    // Parse events
+    for (auto const& customEventData : *beatmap->customEventsData) {
+        if (customEventData.type != "AssignTrackParent" && customEventData.type != "AssignPlayerToTrack") {
+            continue;
+        }
+
+        rapidjson::Value &eventData = *customEventData.data;
+        auto& eventAD = getEventAD(&customEventData);
+
+        if (customEventData.type == "AssignTrackParent") {
+            std::string parentTrackName(eventData["_parentTrack"].GetString());
+            Track* track = &beatmapAD.tracks[parentTrackName];
+
+            rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
+            std::vector<Track *> childrenTracks;
+            for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
+                 itr != rawChildrenTracks.End(); itr++) {
+                Track *child = &beatmapAD.tracks[itr->GetString()];
+                // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
+                childrenTracks.push_back(child);
+            }
+
+            // copy constructor deleted for some reason???
+            eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
+
+        } else if (customEventData.type == "AssignPlayerToTrack") {
+            std::string trackName(eventData["_track"].GetString());
+            Track *track = &beatmapAD.tracks[trackName];
+            NELogger::GetLogger().debug("Assigning player to track %s at %p",
+                                        trackName.c_str(), track);
+            eventAD.playerTrackEventData.emplace(track);
+        }
+    }
+}
+
 MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData, IReadonlyBeatmapData *,
                 IReadonlyBeatmapData *beatmapData, IPreviewBeatmapLevel *beatmapLevel,
@@ -128,6 +170,8 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
         screenDisplacementEffectsEnabled);
 
     auto *transformedBeatmapData = ReorderLineData(result);
+
+    LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
 
     return transformedBeatmapData;
 }

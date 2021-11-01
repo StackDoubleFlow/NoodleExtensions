@@ -1,6 +1,7 @@
 #pragma once
 
 #include "custom-json-data/shared/JSONWrapper.h"
+#include "custom-json-data/shared/CustomEventData.h"
 
 #include "tracks/shared/Vector.h"
 
@@ -91,5 +92,34 @@ struct BeatmapObjectAssociatedData {
 
     void ResetState();
 };
+
+struct PlayerTrackEventData {
+    PlayerTrackEventData() = default;
+    explicit PlayerTrackEventData(Track* track) : track(track) {}
+
+    Track* track;
+};
+
+struct ParentTrackEventData {
+    ParentTrackEventData() = default;
+    explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*> childrenTracks, std::string parentTrackName, Track* parentTrack);
+
+    const std::string parentTrackName;
+    Track* parentTrack;
+    std::optional<NEVector::Vector3> pos;
+    std::optional<NEVector::Quaternion> rot;
+    std::optional<NEVector::Quaternion> localRot;
+    std::optional<NEVector::Vector3> scale;
+    std::vector<Track *> childrenTracks;
+};
+
+struct BeatmapEventAssociatedData {
+    // union?
+    std::optional<PlayerTrackEventData> playerTrackEventData;
+    std::optional<ParentTrackEventData> parentTrackEventData;
+};
+
+BeatmapEventAssociatedData& getEventAD(CustomJSONData::CustomEventData const* customData);
+void clearEventADs();
 
 BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData);
