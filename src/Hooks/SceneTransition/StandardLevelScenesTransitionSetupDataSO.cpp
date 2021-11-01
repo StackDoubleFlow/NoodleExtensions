@@ -24,42 +24,9 @@ using namespace CustomJSONData;
 
 MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void, StandardLevelScenesTransitionSetupDataSO *self, Il2CppString *gameMode, IDifficultyBeatmap *difficultyBeatmap, IPreviewBeatmapLevel *previewBeatmapLevel, OverrideEnvironmentSettings *overrideEnvironmentSettings, ColorScheme *overrideColorScheme, GameplayModifiers *gameplayModifiers, PlayerSpecificSettings *playerSpecificSettings, PracticeSettings *practiceSettings, Il2CppString *backButtonText, bool useTestNoteCutSoundEffects) {
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects);
-    ParentController::OnDestroy();
 
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-
-    auto *beatmapData = reinterpret_cast<CustomBeatmapData*>(difficultyBeatmap->get_beatmapData());
-
-    for (int i = 0; i < beatmapData->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = beatmapData->beatmapLinesData->values[i];
-        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData =
-                beatmapLineData->beatmapObjectsData->items->values[j];
-            
-            CustomJSONData::JSONWrapper *customDataWrapper;
-            if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto obstacleData =
-                    (CustomJSONData::CustomObstacleData *)beatmapObjectData;
-                customDataWrapper = obstacleData->customData;
-            } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto noteData =
-                    (CustomJSONData::CustomNoteData *)beatmapObjectData;
-                customDataWrapper = noteData->customData;
-            } else {
-                continue;
-            }
-
-            if (customDataWrapper->value) {
-                rapidjson::Value &customData = *customDataWrapper->value;
-                BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-                ad.ResetState();
-            }
-        }
-    }
-
-    NECaches::ClearNoteCaches();
-    NECaches::ClearObstacleCaches();
+    SceneTransitionHelper::Patch(difficultyBeatmap,
+                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()));
 }
 
 void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
