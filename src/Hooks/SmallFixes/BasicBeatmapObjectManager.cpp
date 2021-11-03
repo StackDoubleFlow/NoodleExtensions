@@ -12,7 +12,7 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-extern std::vector<ObstacleController*> activeObstacles;
+SafePtr<List<ObstacleController*>>& getActiveObstacles();
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init,
                 &BasicBeatmapObjectManager::Init, void,
@@ -22,18 +22,16 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init,
                 GlobalNamespace::BombNoteController::Pool* bombNotePool,
                 GlobalNamespace::ObstacleController::Pool* obstaclePool) {
     BasicBeatmapObjectManager_Init(self, initData, gameNotePool, bombNotePool, obstaclePool);
-    activeObstacles.clear();
+    getActiveObstacles().emplace(List<ObstacleController*>::New_ctor());
 }
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_get_activeObstacleControllers,
                 &BasicBeatmapObjectManager::get_activeObstacleControllers,
                 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
                 BasicBeatmapObjectManager *self) {
-    // TODO: Maybe not allocate each time?
-    auto list = System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>::New_ctor(activeObstacles.size());
-    for (auto& oc : activeObstacles) list->Add(oc);
-    return list;
+    return (List<ObstacleController*>*) getActiveObstacles();
 }
+
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_DespawnInternal,
                 static_cast<void (GlobalNamespace::BasicBeatmapObjectManager::*)(GlobalNamespace::ObstacleController*)>(&GlobalNamespace::BasicBeatmapObjectManager::DespawnInternal),
@@ -41,11 +39,14 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_DespawnInternal,
                 BasicBeatmapObjectManager *self,
                 ObstacleController* obstacleController) {
     BasicBeatmapObjectManager_DespawnInternal(self, obstacleController);
-    std::erase(activeObstacles, obstacleController);
+    getActiveObstacles()->Remove(obstacleController);
 }
 
 void InstallBasicBeatmapObjectManagerHooks(Logger &logger) {
     INSTALL_HOOK(logger, BasicBeatmapObjectManager_Init);
+    INSTALL_HOOK(logger, BasicBeatmapObjectManager_get_activeObstacleControllers)
+    INSTALL_HOOK(logger, BasicBeatmapObjectManager_DespawnInternal)
+
 }
 
 NEInstallHooks(InstallBasicBeatmapObjectManagerHooks);

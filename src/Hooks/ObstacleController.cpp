@@ -30,7 +30,15 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-std::vector<ObstacleController*> activeObstacles;
+static SafePtr<List<ObstacleController*>> activeObstacles;
+SafePtr<List<ObstacleController*>>& getActiveObstacles() {
+    if (!activeObstacles)
+        activeObstacles.emplace(List<ObstacleController *>::New_ctor());
+
+    return activeObstacles;
+}
+
+
 std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
 
 void NECaches::ClearObstacleCaches() {
@@ -75,6 +83,36 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     Transform *transform = self->get_transform();
     transform->set_localScale(NEVector::Vector3::one());
+
+
+    if (!obstacleData->customData) {
+        return;
+    }
+
+    BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+
+    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    auto it = cachedObstacleMaterialSwitchers.find(self);
+    if (it == cachedObstacleMaterialSwitchers.end()) {
+        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    } else {
+        materialSwitchers = it->second;
+    }
+    ad.materialSwitchers = materialSwitchers;
+
+    for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+    }
+    ad.dissolveEnabled = false;
+
+    std::optional<bool> const& cuttable = ad.objectData.interactable;
+    if (cuttable && !*cuttable) {
+        self->bounds.set_size(NEVector::Vector3::zero());
+    } else {
+        getActiveObstacles()->Add(self);
+    }
 
     if (!obstacleData->customData->value) {
         return;
@@ -128,28 +166,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         }
     }
 
-    std::optional<bool> &cuttable = ad.objectData.interactable;
-    if (cuttable && !*cuttable) {
-        self->bounds.set_size(NEVector::Vector3::zero());
-    } else {
-        activeObstacles.emplace_back(self);
-    }
 
-    Array<ConditionalMaterialSwitcher *>* materialSwitchers;
-    auto it = cachedObstacleMaterialSwitchers.find(self);
-    if (it == cachedObstacleMaterialSwitchers.end()) {
-        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    } else {
-        materialSwitchers = it->second;
-    }
-    ad.materialSwitchers = materialSwitchers;
-
-    for (auto *materialSwitcher : materialSwitchers->ref_to()) {
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-        }
-    }
-    ad.dissolveEnabled = false;
 
     self->Update();
 }
