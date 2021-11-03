@@ -47,15 +47,14 @@ struct ObjectCustomData {
 
     // notes
     std::optional<NEVector::Quaternion> cutDirection;
-    std::optional<NEVector::Vector2> flip;
     std::optional<bool> disableNoteGravity;
     std::optional<bool> disableNoteLook;
 
     // obstacles
     std::optional<std::array<std::optional<float>, 3>> scale;
 
-    ObjectCustomData() {}
-    ObjectCustomData(const rapidjson::Value& customData);
+    ObjectCustomData() = default;
+    ObjectCustomData(const rapidjson::Value& customData, std::optional<NEVector::Vector2>& flip);
 };
 
 struct BeatmapObjectAssociatedData {
@@ -87,8 +86,13 @@ struct BeatmapObjectAssociatedData {
     AnimationObjectData animationData;
     ObjectCustomData objectData;
 
+    // flip for notes
+    std::optional<NEVector::Vector2> flip;
+
     // hide for obstacles
     bool doUnhide;
+
+    bool parsed = false;
 
     void ResetState();
 };

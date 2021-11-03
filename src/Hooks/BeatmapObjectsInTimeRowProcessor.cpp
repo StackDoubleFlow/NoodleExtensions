@@ -135,7 +135,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
                 flipVec.y = flipYSide;
 
                 auto &noteAD = getAD(noteData->customData);
-                noteAD.objectData.flip = flipVec;
+                noteAD.flip = flipVec;
             }
         }
     }

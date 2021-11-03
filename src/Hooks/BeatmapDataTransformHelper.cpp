@@ -115,6 +115,56 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 }
 
+void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
+    NELogger::GetLogger().info("BeatmapData klass name is %s",
+                               beatmap->klass->name);
+
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+
+    auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
+
+    if (!beatmapAD.valid) {
+        TracksAD::readBeatmapDataAD(beatmap);
+    }
+
+    for (int i = 0; i < beatmap->beatmapLinesData->Length(); i++) {
+        BeatmapLineData *beatmapLineData = beatmap->beatmapLinesData->values[i];
+        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
+            BeatmapObjectData *beatmapObjectData =
+                    beatmapLineData->beatmapObjectsData->items->values[j];
+
+            CustomJSONData::JSONWrapper *customDataWrapper;
+            if (beatmapObjectData->klass == customObstacleDataClass) {
+                auto obstacleData =
+                        (CustomJSONData::CustomObstacleData *)beatmapObjectData;
+                customDataWrapper = obstacleData->customData;
+            } else if (beatmapObjectData->klass == customNoteDataClass) {
+                auto noteData =
+                        (CustomJSONData::CustomNoteData *)beatmapObjectData;
+                customDataWrapper = noteData->customData;
+            } else {
+                continue;
+            }
+
+            if (customDataWrapper->value) {
+                rapidjson::Value &customData = *customDataWrapper->value;
+                BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+
+                if (ad.parsed)
+                    continue;
+
+                ad.objectData = ObjectCustomData(customData, ad.flip);
+
+                rapidjson::Value &animation = customData["_animation"];
+                ad.animationData = AnimationObjectData(beatmapAD, animation);
+
+                ad.parsed = true;
+            }
+        }
+    }
+}
+
 void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
     auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
 
@@ -172,6 +222,7 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     auto *transformedBeatmapData = ReorderLineData(result);
 
     LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
+    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
 
     return transformedBeatmapData;
 }

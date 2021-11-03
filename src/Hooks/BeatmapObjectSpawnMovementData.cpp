@@ -124,7 +124,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
     std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
     std::optional<float> startLineLayer = ad.startNoteLineLayer;
     std::optional<float> flipLineIndex =
-            ad.objectData.flip ? std::optional{ad.objectData.flip->x} : std::nullopt;
+            ad.flip ? std::optional{ad.flip->x} : std::nullopt;
 
     bool gravityOverride = ad.objectData.disableNoteGravity.value_or(false);
 

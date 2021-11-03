@@ -17,6 +17,9 @@
 
 using namespace GlobalNamespace;
 
+// Needed for obstacles, idk why too lazy to figure out
+void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap);
+
 MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
                 &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,
                 BeatmapData *, BeatmapDataLoader *self,
@@ -33,47 +36,8 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
             self, notesSaveData, waypointsSaveData, obstaclesSaveData,
             eventsSaveData, evironmentSpecialEventFilterData, startBpm, shuffle,
             shufflePeriod);
-    NELogger::GetLogger().info("BeatmapData klass name is %s",
-                               result->klass->name);
 
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-
-    auto &beatmapAD = TracksAD::getBeatmapAD(result->customData);
-
-    if (!beatmapAD.valid) {
-        TracksAD::readBeatmapDataAD(result);
-    }
-
-    for (int i = 0; i < result->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = result->beatmapLinesData->values[i];
-        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData =
-                beatmapLineData->beatmapObjectsData->items->values[j];
-
-            CustomJSONData::JSONWrapper *customDataWrapper;
-            if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto obstacleData =
-                    (CustomJSONData::CustomObstacleData *)beatmapObjectData;
-                customDataWrapper = obstacleData->customData;
-            } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto noteData =
-                    (CustomJSONData::CustomNoteData *)beatmapObjectData;
-                customDataWrapper = noteData->customData;
-            } else {
-                continue;
-            }
-
-            if (customDataWrapper->value) {
-                rapidjson::Value &customData = *customDataWrapper->value;
-                BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-                ad.objectData = ObjectCustomData(customData);
-
-                rapidjson::Value &animation = customData["_animation"];
-                ad.animationData = AnimationObjectData(beatmapAD, animation);
-            }
-        }
-    }
+    LoadNoodleObjects(result);
 
     return result;
 }

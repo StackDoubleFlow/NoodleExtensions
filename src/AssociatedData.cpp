@@ -35,7 +35,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
     definitePosition = TryGetPointData(beatmapAD, animation, "_definitePosition");
 }
 
-ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
+ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2>& flip) {
     position = NEJSON::ReadOptionalVector2(customData, "_position");
     rotation = NEJSON::ReadOptionalRotation(customData, "_rotation");
     localRotation = NEJSON::ReadOptionalRotation(customData, "_localRotation");
@@ -48,7 +48,10 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData) {
     if (cutDirOpt)
         cutDirection = NEVector::Quaternion::Euler(0, 0, cutDirOpt.value());
 
-    flip = NEJSON::ReadOptionalVector2_emptyY(customData, "_flip");
+    auto newFlip = NEJSON::ReadOptionalVector2_emptyY(customData, "_flip");
+    if (newFlip)
+        flip = newFlip;
+
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, "_disableNoteGravity");
     disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook");
     scale = NEJSON::ReadOptionalScale(customData, "_scale");
@@ -62,6 +65,7 @@ void ::BeatmapObjectAssociatedData::ResetState() {
     disappearingArrowController = nullptr;
     mirroredDisappearingArrowController = nullptr;
     materialSwitchers = nullptr;
+    parsed = false;
 }
 
 ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, std::vector<Track*> childrenTracks, std::string parentTrackName, Track* parentTrack) :
