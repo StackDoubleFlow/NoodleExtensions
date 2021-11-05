@@ -90,6 +90,9 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
     if (difficultyBeatmap) {
         auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
 
+        if (il2cpp_utils::AssignableFrom<CustomBeatmapData*>(beatmapData->klass) && beatmapData->customData)
+            getAD(beatmapData->customData).ResetState();
+
         for (int i = 0; i < beatmapData->beatmapLinesData->Length(); i++) {
             BeatmapLineData *beatmapLineData = beatmapData->beatmapLinesData->values[i];
             for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
