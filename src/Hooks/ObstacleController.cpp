@@ -117,7 +117,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     if (!obstacleData->customData->value) {
         return;
     }
-    BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     NEVector::Quaternion rotation;
 
@@ -129,7 +128,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->worldRotation = rotation;
     self->inverseWorldRotation = NEVector::Quaternion::Inverse(rotation);
 
-    auto &scale = ad.objectData.scale;
+    auto const& scale = ad.objectData.scale;
 
     float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
     NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
@@ -141,7 +140,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.jumpEndPos = self->endPos;
 
     float defaultLength =
-            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).Magnitude() / move2Duration * obstacleData->duration;
+            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).Magnitude() /
+            move2Duration * obstacleData->duration;
     float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
     self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
@@ -159,9 +159,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
-    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    std::vector<Track *> const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
     if (!tracks.empty()) {
-        for (auto& track : tracks) {
+        for (auto &track: tracks) {
             track->AddGameObject(self->get_gameObject());
         }
     }

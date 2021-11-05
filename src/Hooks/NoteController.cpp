@@ -76,31 +76,49 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos,
                 float moveDuration, float jumpDuration, float jumpGravity,
                 float endRotation, float uniformScale) {
-    NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration, jumpGravity, endRotation, uniformScale);
+    NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration,
+                        jumpGravity, endRotation, uniformScale);
     auto *customNoteData =
-        reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
+            reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
 
     Transform *transform = self->get_transform();
     transform->set_localScale(
-        NEVector::Vector3::one()); // This is a fix for animation due to notes being
-                             // recycled
+            NEVector::Vector3::one()); // This is a fix for animation due to notes being
+    // recycled
+
+    if (!customNoteData->customData)
+        return;
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    auto it = cachedNoteMaterialSwitchers.find(self);
+    if (it == cachedNoteMaterialSwitchers.end()) {
+        cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    } else {
+        materialSwitchers = it->second;
+    }
+    ad.materialSwitchers = materialSwitchers;
+    for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+        }
+    }
+    ad.dissolveEnabled = false;
 
     if (!customNoteData->customData->value) {
         return;
     }
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
-    auto const& curDir = ad.objectData.cutDirection;
+    auto const &curDir = ad.objectData.cutDirection;
     if (curDir.has_value()) {
         NEVector::Quaternion cutQuaternion = curDir.value();
         noteJump->endRotation = cutQuaternion;
         NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
         vector =
-            vector +
-                    NEVector::Vector3(noteJump->randomRotations->values[noteJump->randomRotationIdx]) * 20;
+                vector +
+                NEVector::Vector3(noteJump->randomRotations->values[noteJump->randomRotationIdx]) * 20;
         NEVector::Quaternion midrotation = NEVector::Quaternion::Euler(vector);
         noteJump->middleRotation = midrotation;
     }
@@ -126,9 +144,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
         }
     }
-    std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
-        for (auto& track : tracks) {
+        for (auto &track: tracks) {
             track->AddGameObject(self->get_gameObject());
         }
     }
@@ -139,20 +157,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.worldRotation = self->get_worldRotation();
     ad.localRotation = localRotation;
 
-    Array<ConditionalMaterialSwitcher *>* materialSwitchers;
-    auto it = cachedNoteMaterialSwitchers.find(self);
-    if (it == cachedNoteMaterialSwitchers.end()) {
-        cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    } else {
-        materialSwitchers = it->second;
-    }
-    ad.materialSwitchers = materialSwitchers;
-    for (auto *materialSwitcher : materialSwitchers->ref_to()) {
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-        }
-    }
-    ad.dissolveEnabled = false;
 
     self->Update();
 }

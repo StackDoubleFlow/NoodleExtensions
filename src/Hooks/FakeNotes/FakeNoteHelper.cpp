@@ -1,11 +1,16 @@
 #include "FakeNoteHelper.h"
 
 #include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/ObstacleController.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "NELogger.h"
 #include "AssociatedData.h"
+
+#include "System/Collections/Generic/List_1.hpp"
+#include "System/Collections/Generic/IList_1.hpp"
+#include "custom-json-data/shared/VList.h"
 
 using namespace GlobalNamespace;
 
@@ -25,4 +30,26 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
     }
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
     return !ad.objectData.interactable || *ad.objectData.interactable;
+}
+
+List<ObstacleController *>*
+FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles) {
+    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
+
+    for (auto const& obstacle : intersectingObstacles) {
+        auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
+
+        bool add = !customData || !customData->value;
+
+        if (!add) {
+            auto const &ad = getAD(customData);
+            add = !ad.objectData.fake.value_or(false);
+        }
+
+        if (add) {
+            filteredInner->Add(obstacle);
+        }
+    }
+
+    return filteredInner;
 }

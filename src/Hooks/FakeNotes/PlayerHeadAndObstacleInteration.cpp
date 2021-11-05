@@ -1,6 +1,10 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
+
+#include "UnityEngine/Bounds.hpp"
+#include "UnityEngine/Transform.hpp"
+
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/PlayerHeadAndObstacleInteraction.hpp"
 #include "tracks/shared/Vector.h"
@@ -20,6 +24,7 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
     PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint(
         self, worldPos, obstacleControllers);
 
+    // Replaced in transpile
     VList<ObstacleController *> vObstacleControllers = obstacleControllers;
 
     for (int i = 0; i < vObstacleControllers.size(); i++) {
@@ -31,9 +36,19 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
     }
 }
 
+MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_get_intersectingObstacles,
+                &PlayerHeadAndObstacleInteraction::get_intersectingObstacles,
+                System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
+                        PlayerHeadAndObstacleInteraction *self) {
+    auto obstaclesResult = PlayerHeadAndObstacleInteraction_get_intersectingObstacles(self);
+    auto obstacles = FakeNoteHelper::ObstacleFakeCheck(obstaclesResult);
+
+    return obstacles;
+}
+
 void InstallPlayerHeadAndObstacleInterationHooks(Logger &logger) {
-    INSTALL_HOOK(
-        logger, PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint);
+    INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint);
+    INSTALL_HOOK(logger, PlayerHeadAndObstacleInteraction_get_intersectingObstacles);
 }
 
 NEInstallHooks(InstallPlayerHeadAndObstacleInterationHooks);

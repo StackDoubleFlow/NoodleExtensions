@@ -1,0 +1,23 @@
+#include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
+
+#include "GlobalNamespace/GameNoteController.hpp"
+#include "GlobalNamespace/BadNoteCutEffectSpawner.hpp"
+
+#include "FakeNoteHelper.h"
+#include "NEHooks.h"
+#include "custom-json-data/shared/CustomBeatmapData.h"
+
+using namespace GlobalNamespace;
+
+MAKE_HOOK_MATCH(BadNoteCutEffectSpawner_HandleNoteWasCut, &BadNoteCutEffectSpawner::HandleNoteWasCut, void,
+                BadNoteCutEffectSpawner *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
+    if (FakeNoteHelper::GetCuttable(noteController->noteData)) {
+        BadNoteCutEffectSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
+    }
+}
+
+void InstallBadNoteCutEffectSpawnerHooks(Logger &logger) {
+    INSTALL_HOOK(logger, BadNoteCutEffectSpawner_HandleNoteWasCut);
+}
+NEInstallHooks(InstallBadNoteCutEffectSpawnerHooks);

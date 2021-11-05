@@ -42,8 +42,8 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     std::optional<float> startX = position ? std::optional{position->x} : std::nullopt;
     std::optional<float> startY = position ? std::optional{position->y} : std::nullopt;
 
-    std::optional<float> &njs = ad.objectData.noteJumpMovementSpeed;
-    std::optional<float> &spawnOffset = ad.objectData.noteJumpStartBeatOffset;
+    std::optional<float> const& njs = ad.objectData.noteJumpMovementSpeed;
+    std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
 
     auto &scale = ad.objectData.scale;
     std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
