@@ -299,7 +299,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         bool wasEnabled = ad.dissolveEnabled;
-        ad.dissolveEnabled = obstacleDissolveConfig; // dissolve > 0.0f;
+        ad.dissolveEnabled = obstacleDissolveConfig && dissolve > 0.0f;
 
         if (wasEnabled != ad.dissolveEnabled) {
             ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
