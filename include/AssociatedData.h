@@ -68,6 +68,7 @@ struct BeatmapObjectAssociatedData {
     NEVector::Vector3 moveEndPos;
     NEVector::Vector3 jumpEndPos;
     NEVector::Vector3 noteOffset;
+    NEVector::Vector3 boundsSize; // obstacles
     float endRotation;
 
     float xOffset;

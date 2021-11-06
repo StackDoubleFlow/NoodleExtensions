@@ -100,19 +100,13 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
     ad.materialSwitchers = materialSwitchers;
 
-    for (auto *materialSwitcher: materialSwitchers->ref_to()) {
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
+    // Reset only if NE dissolve is enabled
+    if (getNEConfig().enableObstacleDissolve.GetValue()) {
+        for (auto *materialSwitcher: materialSwitchers->ref_to()) {
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
         }
     }
     ad.dissolveEnabled = false;
-
-    std::optional<bool> const& cuttable = ad.objectData.interactable;
-    if (cuttable && !*cuttable) {
-        self->bounds.set_size(NEVector::Vector3::zero());
-    } else {
-        getActiveObstacles()->Add(self);
-    }
 
     if (!obstacleData->customData->value) {
         return;
@@ -148,7 +142,16 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
-    std::optional<NEVector::Quaternion> &localrot = ad.objectData.localRotation;
+    auto const& cuttable = ad.objectData.interactable;
+    if (cuttable && *cuttable) {
+        self->bounds.set_size(NEVector::Vector3::zero());
+    } else {
+        getActiveObstacles()->Add(self);
+    }
+
+    ad.boundsSize = self->bounds.get_size();
+
+    std::optional<NEVector::Quaternion> const& localrot = ad.objectData.localRotation;
 
     NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
     if (localrot.has_value()) {
@@ -279,8 +282,10 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         transform->set_localRotation(worldRotationQuaternion);
     }
 
-    if (offset.cuttable.has_value() && !*offset.cuttable) {
+    if (offset.cuttable.has_value() && *offset.cuttable >= 1.0f) {
         self->bounds.set_size(NEVector::Vector3::zero());
+    } else {
+        self->bounds.set_size(ad.boundsSize);
     }
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
