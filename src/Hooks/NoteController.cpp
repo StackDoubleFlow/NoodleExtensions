@@ -98,9 +98,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     }
     ad.materialSwitchers = materialSwitchers;
     for (auto *materialSwitcher: materialSwitchers->ref_to()) {
-        if (materialSwitcher->renderer->get_sharedMaterial() != materialSwitcher->material0) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-        }
+        materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
     ad.dissolveEnabled = false;
 
@@ -123,7 +121,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         noteJump->middleRotation = midrotation;
     }
 
-    NEVector::Quaternion localRotation = NEVector::Quaternion::get_identity();
+    NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
     if (ad.objectData.rotation || ad.objectData.localRotation) {
         if (ad.objectData.localRotation) {
             localRotation = *ad.objectData.localRotation;
