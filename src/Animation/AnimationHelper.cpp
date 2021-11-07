@@ -78,7 +78,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
         }
     } else {
         pathDefinitePosition = localDefinitePosition ? std::optional{
-                localDefinitePosition->Interpolate(time)} : MSumTrackPathProps(tracks, 1.0f, time, definitePosition);
+                localDefinitePosition->Interpolate(time)} : MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
 
         if (pathDefinitePosition) {
             PointDefinition *position = animationData.position;
