@@ -165,6 +165,41 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     }
 }
 
+void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
+    rapidjson::Value &eventData = *customEventData->data;
+    auto& eventAD = getEventAD(customEventData);
+
+    if (eventAD.parsed)
+        return;
+
+    if (customEventData->type == "AssignTrackParent") {
+        std::string parentTrackName(eventData["_parentTrack"].GetString());
+        Track* track = &beatmapAD.tracks[parentTrackName];
+
+        rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
+        std::vector<Track *> childrenTracks;
+        childrenTracks.reserve(rawChildrenTracks.Size());
+        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
+             itr != rawChildrenTracks.End(); itr++) {
+            Track *child = &beatmapAD.tracks[itr->GetString()];
+            // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
+            childrenTracks.push_back(child);
+        }
+
+        // copy constructor deleted for some reason???
+        eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
+
+    } else if (customEventData->type == "AssignPlayerToTrack") {
+        std::string trackName(eventData["_track"].GetString());
+        Track *track = &beatmapAD.tracks[trackName];
+        NELogger::GetLogger().debug("Assigning player to track %s at %p",
+                                    trackName.c_str(), track);
+        eventAD.playerTrackEventData.emplace(track);
+    }
+
+    eventAD.parsed = true;
+}
+
 void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
     auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
 
@@ -178,32 +213,8 @@ void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
             continue;
         }
 
-        rapidjson::Value &eventData = *customEventData.data;
-        auto& eventAD = getEventAD(&customEventData);
 
-        if (customEventData.type == "AssignTrackParent") {
-            std::string parentTrackName(eventData["_parentTrack"].GetString());
-            Track* track = &beatmapAD.tracks[parentTrackName];
-
-            rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
-            std::vector<Track *> childrenTracks;
-            for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
-                 itr != rawChildrenTracks.End(); itr++) {
-                Track *child = &beatmapAD.tracks[itr->GetString()];
-                // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
-                childrenTracks.push_back(child);
-            }
-
-            // copy constructor deleted for some reason???
-            eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
-
-        } else if (customEventData.type == "AssignPlayerToTrack") {
-            std::string trackName(eventData["_track"].GetString());
-            Track *track = &beatmapAD.tracks[trackName];
-            NELogger::GetLogger().debug("Assigning player to track %s at %p",
-                                        trackName.c_str(), track);
-            eventAD.playerTrackEventData.emplace(track);
-        }
+        LoadNoodleEvent(beatmapAD, &customEventData);
     }
 }
 

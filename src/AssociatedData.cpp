@@ -68,8 +68,8 @@ void ::BeatmapObjectAssociatedData::ResetState() {
     parsed = false;
 }
 
-ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, std::vector<Track*> childrenTracks, std::string parentTrackName, Track* parentTrack) :
-    parentTrackName(std::move(parentTrackName)),
+ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack) :
+    parentTrackName(parentTrackName),
     parentTrack(parentTrack),
     childrenTracks(std::move(childrenTracks))
     {
@@ -82,7 +82,7 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, st
     }
 
     auto rotIt = eventData.FindMember("_rotation");
-    if (posIt != eventData.MemberEnd()) {
+    if (rotIt != eventData.MemberEnd()) {
         float x = rotIt->value[0].GetFloat();
         float y = rotIt->value[1].GetFloat();
         float z = rotIt->value[2].GetFloat();
@@ -90,7 +90,7 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, st
     }
 
     auto localRotIt = eventData.FindMember("_localRotation");
-    if (posIt != eventData.MemberEnd()) {
+    if (localRotIt != eventData.MemberEnd()) {
         float x = localRotIt->value[0].GetFloat();
         float y = localRotIt->value[1].GetFloat();
         float z = localRotIt->value[2].GetFloat();
@@ -98,7 +98,7 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, st
     }
 
     auto scaleIt = eventData.FindMember("_scale");
-    if (posIt != eventData.MemberEnd()) {
+    if (scaleIt != eventData.MemberEnd()) {
         float x = scaleIt->value[0].GetFloat();
         float y = scaleIt->value[1].GetFloat();
         float z = scaleIt->value[2].GetFloat();

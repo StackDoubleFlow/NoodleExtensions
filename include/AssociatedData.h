@@ -107,7 +107,7 @@ struct PlayerTrackEventData {
 
 struct ParentTrackEventData {
     ParentTrackEventData() = default;
-    explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*> childrenTracks, std::string parentTrackName, Track* parentTrack);
+    explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack);
 
     const std::string parentTrackName;
     Track* parentTrack;
@@ -122,6 +122,8 @@ struct BeatmapEventAssociatedData {
     // union?
     std::optional<PlayerTrackEventData> playerTrackEventData;
     std::optional<ParentTrackEventData> parentTrackEventData;
+
+    bool parsed = false;
 };
 
 BeatmapEventAssociatedData& getEventAD(CustomJSONData::CustomEventData const* customData);

@@ -30,6 +30,8 @@ MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnControlle
     BeatmapObjectSpawnController_Start(self);
 }
 
+void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData);
+
 void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
     if (customEventData->type != "AssignTrackParent" && customEventData->type != "AssignPlayerToTrack") {
@@ -37,6 +39,14 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
     }
 
     auto const &ad = getEventAD(customEventData);
+
+    // fail safe, idek why this needs to be done smh
+    // CJD you bugger
+    if (!ad.parsed) {
+        auto *customBeatmapData = (CustomJSONData::CustomBeatmapData *)callbackController->beatmapData;
+        TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(customBeatmapData->customData);
+        LoadNoodleEvent(beatmapAD, customEventData);
+    }
 
     if (ad.parentTrackEventData) {
         auto const& parentTrackData = *ad.parentTrackEventData;
