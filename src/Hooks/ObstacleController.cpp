@@ -143,7 +143,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->bounds = self->stretchableObstacle->bounds;
 
     auto const& cuttable = ad.objectData.interactable;
-    if (cuttable && *cuttable) {
+    if (cuttable && !*cuttable) {
         self->bounds.set_size(NEVector::Vector3::zero());
     } else {
         getActiveObstacles()->Add(self);
