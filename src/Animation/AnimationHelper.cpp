@@ -18,7 +18,7 @@ extern BeatmapObjectCallbackController *callbackController;
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
 
-std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3> b) {
+constexpr std::optional<Vector3> operator+(std::optional<Vector3> const& a, std::optional<Vector3> const& b) {
     if (!a && !b) {
         return std::nullopt;
     }
@@ -36,7 +36,7 @@ std::optional<Vector3> operator+(std::optional<Vector3> a, std::optional<Vector3
 }
 
 template<typename T>
-std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
+constexpr std::optional<T> operator*(std::optional<T> const& a, std::optional<T> const& b) {
     if (a && b) {
         return *a * *b;
     } else if (a) {
@@ -48,46 +48,52 @@ std::optional<T> operator*(std::optional<T> a, std::optional<T> b) {
     }
 }
 
-std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> tracks, float time) {
+std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time) {
     PointDefinition *localDefinitePosition = animationData.definitePosition;
 
-    std::optional<Vector3> pathDefinitePosition;
+    std::optional<Vector3> pathDefinitePosition = localDefinitePosition ? std::optional{localDefinitePosition->Interpolate(time)} : std::nullopt;
     std::optional<Vector3> pathPosition;
     std::optional<Vector3> trackPosition;
 
-    if (tracks.size() == 1) {
-        Track *track = tracks.front();
+    if (!tracks.empty()) {
+        if (tracks.size() == 1) {
+            Track *track = tracks.front();
 
-        pathDefinitePosition = localDefinitePosition ? std::optional{
-                localDefinitePosition->Interpolate(time)} : getPathPropertyNullable<Vector3>(track,
-                                                                                             track->pathProperties.definitePosition.value,
-                                                                                             time);
+            if (!pathDefinitePosition)
+                pathDefinitePosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value, time);
 
-        if (pathDefinitePosition) {
+            if (!pathDefinitePosition) {
+                return std::nullopt;
+            }
+
             PointDefinition *position = animationData.position;
             pathPosition = position ? std::optional{position->Interpolate(time)}
-                                    : getPathPropertyNullable<Vector3>(track,
-                                                                       track->pathProperties.position.value,
-                                                                       time);
-            trackPosition = getPropertyNullable<Vector3>(track,
-                                                         track->properties.position.value);
+                                    : getPathPropertyNullable<Vector3>(track, track->pathProperties.position.value, time);
 
+            trackPosition = getPropertyNullable<Vector3>(track, track->properties.position.value);
 
         } else {
-            return std::nullopt;
-        }
-    } else {
-        pathDefinitePosition = localDefinitePosition ? std::optional{
-                localDefinitePosition->Interpolate(time)} : MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
+            if (!pathDefinitePosition)
+                pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
 
-        if (pathDefinitePosition) {
+            if (!pathDefinitePosition) {
+                return std::nullopt;
+            }
+
             PointDefinition *position = animationData.position;
             pathPosition = position ? std::optional{position->Interpolate(time)}
                                     : MSumTrackPathProps(tracks, Vector3::zero(), time, position);
-            trackPosition = MSumTrackPathProps(tracks, Vector3::zero(), time, position);
-        } else {
-            return std::nullopt;
+
+            trackPosition = MSumTrackProps(tracks, Vector3::zero(), position);
         }
+        // else isn't really needed here, but let's do it anyways
+    } else if (!pathDefinitePosition) return std::nullopt;
+
+
+    if (!pathPosition) {
+        PointDefinition *position = animationData.position;
+        pathPosition = position ? std::optional{position->Interpolate(time)}
+                                : std::nullopt;
     }
 
     std::optional<Vector3> positionOffset = pathPosition + trackPosition;
@@ -111,7 +117,7 @@ namespace {
     }
 }
 
-ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, std::vector<Track *> tracks, float time) {
+ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time) {
     ObjectOffset offset;
 
     PointDefinition *position = animationData.position;
@@ -196,7 +202,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
 
 
         offset.rotationOffset = pathRotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);
-        offset.scaleOffset = pathScale * MSumTrackProps(tracks, Vector3::zero(), scale);
+        offset.scaleOffset = pathScale * MMultTrackProps(tracks, Vector3::zero(), scale);
         offset.localRotationOffset = pathLocalRotation * MMultTrackProps(tracks, Quaternion::identity(), localRotation);
         offset.dissolve = pathDissolve * MMultTrackProps(tracks, 1.0f, dissolve);
         offset.dissolveArrow = pathDissolveArrow * MMultTrackProps(tracks, 1.0f, dissolveArrow);

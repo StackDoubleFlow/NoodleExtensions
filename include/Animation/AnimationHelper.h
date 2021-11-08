@@ -73,6 +73,9 @@ static std::optional<T> MultiTrackPathProps(std::vector<Track*> const& tracks, T
                           std::is_same_v<T, NEVector::Vector4> ||
                           std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
 
+    if (tracks.empty())
+        return std::nullopt;
+
     bool valid = false;
     T total = defaultT;
 
@@ -95,6 +98,9 @@ static std::optional<T> SumTrackPathProps(std::vector<Track*> const& tracks, T c
                   std::is_same_v<T, NEVector::Vector3> ||
                   std::is_same_v<T, NEVector::Vector4> ||
                   std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    if (tracks.empty())
+        return std::nullopt;
 
     bool valid = false;
     T total = defaultT;
@@ -119,6 +125,9 @@ static std::optional<T> MultiTrackProps(std::vector<Track*> const& tracks, T con
                   std::is_same_v<T, NEVector::Vector4> ||
                   std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
 
+    if (tracks.empty())
+        return std::nullopt;
+
     bool valid = false;
     T total = defaultT;
 
@@ -141,6 +150,9 @@ static std::optional<T> SumTrackProps(std::vector<Track*> const& tracks, T const
                   std::is_same_v<T, NEVector::Vector3> ||
                   std::is_same_v<T, NEVector::Vector4> ||
                   std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
+    if (tracks.empty())
+        return std::nullopt;
 
     bool valid = false;
     T total = defaultT;
@@ -177,7 +189,7 @@ struct ObjectOffset {
     std::optional<float> cuttable;
 };
 
-std::optional<NEVector::Vector3> GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> tracks, float time);
-ObjectOffset GetObjectOffset(const AnimationObjectData& customData, std::vector<Track *> tracks, float time);
+std::optional<NEVector::Vector3> GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time);
+ObjectOffset GetObjectOffset(const AnimationObjectData& customData, std::vector<Track *> const& tracks, float time);
 
 } // end namespace AnimationHelper

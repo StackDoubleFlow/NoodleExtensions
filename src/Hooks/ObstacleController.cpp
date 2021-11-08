@@ -354,7 +354,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
         if (time < self->move1Duration) {
             NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
                 self->startPos, self->midPos, time / self->move1Duration);
-            return result + definitePosition - static_cast<NEVector::Vector3>(self->midPos);
+            return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
         } else {
             return definitePosition;
         }
