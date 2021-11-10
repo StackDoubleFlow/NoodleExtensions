@@ -102,10 +102,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     }
     ad.dissolveEnabled = false;
 
-    if (!customNoteData->customData->value) {
-        return;
-    }
-
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
@@ -200,8 +196,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         noteJump->endPos = ad.jumpEndPos + *offset.positionOffset;
     }
 
+    auto transform = self->get_transform();
+
     if (offset.scaleOffset.has_value()) {
-        self->get_transform()->set_localScale(*offset.scaleOffset);
+        transform->set_localScale(*offset.scaleOffset);
     }
 
     if (offset.rotationOffset.has_value() ||
@@ -228,7 +226,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
                 worldRotationQuaternion * *offset.localRotationOffset;
         }
 
-        self->get_transform()->set_localRotation(worldRotationQuaternion);
+        transform->set_localRotation(worldRotationQuaternion);
     }
 
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();

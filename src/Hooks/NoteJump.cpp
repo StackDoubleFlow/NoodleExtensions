@@ -53,9 +53,10 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTrans
 
     // Aero doesn't know what's happening anymore
     NEVector::Quaternion worldRot = self->inverseWorldRotation;
-    if (baseTransform->get_parent()) {
+    auto baseTransformParent = baseTransform->get_parent();
+    if (baseTransformParent) {
         // Handle parenting
-        worldRot = worldRot * (NEVector::Quaternion) NEVector::Quaternion::Inverse(baseTransform->get_parent()->get_rotation());
+        worldRot = worldRot * (NEVector::Quaternion) NEVector::Quaternion::Inverse(baseTransformParent->get_rotation());
     }
 
     Transform *headTransform = self->playerTransforms->headTransform;
@@ -103,6 +104,20 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         float num3 = 0.5 - std::cos(normalTime * 8 * M_PI) * 0.5;
         self->localPosition.y = self->localPosition.y + num3 * self->yAvoidance;
     }
+
+    // transpile here
+    // https://github.com/Aeroluna/NoodleExtensions/blob/2147129bfd480a718d99d8c2ca8c45df0502c5d1/NoodleExtensions/HarmonyPatches/NoteJump.cs#L115-L126
+    bool definitePosition = false;
+
+    if (noteUpdateAD) {
+        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, normalTime);
+        if (position.has_value()) {
+            self->localPosition = *position + noteUpdateAD->noteOffset;
+            definitePosition = true;
+        }
+    }
+    //
+
     if (normalTime < 0.5) {
         NoteJump_ManualUpdateNoteLookTranspile(self, selfTransform, normalTime);
     }
@@ -121,7 +136,8 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         if (self->noteJumpDidPassMissedMarkerEvent)
             self->noteJumpDidPassMissedMarkerEvent->Invoke();
     }
-    if (self->threeQuartersMarkReported) {
+
+    if (self->threeQuartersMarkReported && !definitePosition) {
         float num4 = (normalTime - 0.75f) / 0.25f;
         num4 = num4 * num4 * num4;
         self->localPosition.z = self->localPosition.z - std::lerp(0, self->endDistanceOffset, num4);
@@ -129,14 +145,6 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     if (normalTime >= 1) {
         if (self->noteJumpDidFinishEvent)
             self->noteJumpDidFinishEvent->Invoke();
-    }
-
-    if (noteUpdateAD) {
-        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(
-            noteUpdateAD->animationData, noteTracks, normalTime);
-        if (position.has_value()) {
-            self->localPosition = *position + noteUpdateAD->noteOffset;
-        }
     }
 
     NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
