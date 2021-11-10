@@ -38,7 +38,7 @@ void ParentObject::Update() {
     }
 
     Vector3 scaleVector = startScale;
-    std::optional<NEVector::Vector3> scale = getPropertyNullable<Vector3>(track, track->properties.scale);
+    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
     if (scale.has_value()) {
         scaleVector = startScale * scale.value();
     }
@@ -113,7 +113,7 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
         for (auto &gameObject: track->gameObjects) {
             instance->ParentToObject(gameObject->get_transform());
         }
-        instance->childrenTracks.insert(track);
+        instance->childrenTracks.emplace(track);
         track->gameObjectModificationEvent += {&ParentObject::HandleGameObject, instance};
     }
 

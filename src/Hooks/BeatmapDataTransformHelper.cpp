@@ -86,13 +86,9 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 
             float njs;
             float spawnOffset;
-            if (customDataWrapper) {
-                njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
-                spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
-            } else {
-                njs = NECaches::noteJumpMovementSpeed;
-                spawnOffset = NECaches::noteJumpStartBeatOffset;
-            }
+
+            njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
+            spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
 
             float num = 60.0f / bpm;
             float num2 = startHalfJumpDurationInBeats;

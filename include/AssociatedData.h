@@ -99,14 +99,12 @@ struct BeatmapObjectAssociatedData {
 };
 
 struct PlayerTrackEventData {
-    PlayerTrackEventData() = default;
     explicit PlayerTrackEventData(Track* track) : track(track) {}
 
     Track* track;
 };
 
 struct ParentTrackEventData {
-    ParentTrackEventData() = default;
     explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack);
 
     const std::string parentTrackName;

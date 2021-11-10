@@ -12,6 +12,11 @@
 // my most educated guess is compiler inlining method magic
 template<typename T>
 static constexpr std::optional<T> getPropertyNullable(Track* track, const std::optional<PropertyValue>& prop) {
+    static_assert(std::is_same_v<T, float> ||
+                  std::is_same_v<T, NEVector::Vector3> ||
+                  std::is_same_v<T, NEVector::Vector4> ||
+                  std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
     if (!track) return std::nullopt;
     if (!prop) return std::nullopt;
 
@@ -43,6 +48,11 @@ static constexpr std::optional<T> getPropertyNullable(Track* track, const Proper
 
 template<typename T>
 static constexpr std::optional<T> getPathPropertyNullable(Track* track, std::optional<PointDefinitionInterpolation>& prop, float time) {
+    static_assert(std::is_same_v<T, float> ||
+                  std::is_same_v<T, NEVector::Vector3> ||
+                  std::is_same_v<T, NEVector::Vector4> ||
+                  std::is_same_v<T, NEVector::Quaternion>, "Not valid type");
+
     if (!track) return std::nullopt;
     if (!prop) return std::nullopt;
 

@@ -52,9 +52,7 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
         auto const& parentTrackData = *ad.parentTrackEventData;
         ParentObject::AssignTrack(parentTrackData.childrenTracks, parentTrackData.parentTrack, parentTrackData.pos, parentTrackData.rot, parentTrackData.localRot,
                                   parentTrackData.scale);
-    }
-
-    if (ad.playerTrackEventData) {
+    } else if (ad.playerTrackEventData) {
         PlayerTrack::AssignTrack(ad.playerTrackEventData->track);
     }
 }

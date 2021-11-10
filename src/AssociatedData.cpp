@@ -11,7 +11,7 @@ using namespace NEVector;
 namespace {
 
 PointDefinition *TryGetPointData(BeatmapAssociatedData &beatmapAD,
-                                 const rapidjson::Value &animation, const char *name) {
+                                 const rapidjson::Value &animation, std::string_view name) {
     PointDefinition *anonPointDef;
     PointDefinition *pointDef =
         Animation::TryGetPointData(beatmapAD, anonPointDef, animation, name);
