@@ -60,6 +60,7 @@ void PlayerTrack::OnDestroy() {
         // pauseController->remove_didPauseEvent(didPauseEventAction);
     }
     instance = nullptr;
+    track = nullptr;
 }
 
 void PlayerTrack::Update() {
