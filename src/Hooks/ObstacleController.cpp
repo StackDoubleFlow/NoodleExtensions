@@ -108,7 +108,20 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
     ad.dissolveEnabled = false;
 
+    std::function<void()> const setBounds = [&ad, &self](){
+        auto const& cuttable = ad.objectData.interactable;
+        if (cuttable && !*cuttable) {
+            self->bounds.set_size(NEVector::Vector3::zero());
+        } else {
+            getActiveObstacles()->Add(self);
+        }
+
+        ad.boundsSize = self->bounds.get_size();
+    };
+
+
     if (!obstacleData->customData->value) {
+        setBounds();
         return;
     }
 
@@ -142,14 +155,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
-    auto const& cuttable = ad.objectData.interactable;
-    if (cuttable && !*cuttable) {
-        self->bounds.set_size(NEVector::Vector3::zero());
-    } else {
-        getActiveObstacles()->Add(self);
-    }
-
-    ad.boundsSize = self->bounds.get_size();
+    setBounds();
 
     std::optional<NEVector::Quaternion> const& localrot = ad.objectData.localRotation;
 
@@ -282,10 +288,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         transform->set_localRotation(worldRotationQuaternion);
     }
 
-    if (offset.cuttable.has_value() && *offset.cuttable >= 1.0f) {
-        self->bounds.set_size(NEVector::Vector3::zero());
-    } else {
-        self->bounds.set_size(ad.boundsSize);
+    if (offset.cuttable.has_value()) {
+        if (*offset.cuttable >= 1.0f) {
+            self->bounds.set_size(NEVector::Vector3::zero());
+        }
+        else {
+            self->bounds.set_size(ad.boundsSize);
+        }
     }
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
