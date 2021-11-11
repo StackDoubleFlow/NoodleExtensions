@@ -73,37 +73,10 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, st
     parentTrack(parentTrack),
     childrenTracks(std::move(childrenTracks))
     {
-    auto posIt = eventData.FindMember("_position");
-    if (posIt != eventData.MemberEnd()) {
-        float x = posIt->value[0].GetFloat();
-        float y = posIt->value[1].GetFloat();
-        float z = posIt->value[2].GetFloat();
-        pos = Vector3(x, y, z);
-    }
-
-    auto rotIt = eventData.FindMember("_rotation");
-    if (rotIt != eventData.MemberEnd()) {
-        float x = rotIt->value[0].GetFloat();
-        float y = rotIt->value[1].GetFloat();
-        float z = rotIt->value[2].GetFloat();
-        rot = Quaternion::Euler(x, y, z);
-    }
-
-    auto localRotIt = eventData.FindMember("_localRotation");
-    if (localRotIt != eventData.MemberEnd()) {
-        float x = localRotIt->value[0].GetFloat();
-        float y = localRotIt->value[1].GetFloat();
-        float z = localRotIt->value[2].GetFloat();
-        localRot = Quaternion::Euler(x, y, z);
-    }
-
-    auto scaleIt = eventData.FindMember("_scale");
-    if (scaleIt != eventData.MemberEnd()) {
-        float x = scaleIt->value[0].GetFloat();
-        float y = scaleIt->value[1].GetFloat();
-        float z = scaleIt->value[2].GetFloat();
-        scale = Vector3(x, y, z);
-    }
+    pos = NEJSON::ReadOptionalVector3(eventData, "_position");
+    rot = NEJSON::ReadOptionalRotation(eventData, "_rotation");
+    localRot = NEJSON::ReadOptionalRotation(eventData, "_localRotation");
+    scale = NEJSON::ReadOptionalVector3(eventData, "_scale");
 }
 
 ::BeatmapObjectAssociatedData &getAD(CustomJSONData::JSONWrapper *customData) {
