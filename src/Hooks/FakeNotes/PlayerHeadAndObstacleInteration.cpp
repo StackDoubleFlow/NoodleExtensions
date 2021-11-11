@@ -27,11 +27,16 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
     // Replaced in transpile
     VList<ObstacleController *> vObstacleControllers = obstacleControllers;
 
-    for (int i = 0; i < vObstacleControllers.size(); i++) {
+    int size = vObstacleControllers.size();
+
+    for (int i = 0; i < size; i++) {
+        if (i >= size) break;
+
         auto *obstacleController = vObstacleControllers[i];
         if (NEVector::Vector3(obstacleController->bounds.get_size()) == NEVector::Vector3::zero()) {
             (*vObstacleControllers)->RemoveAt(i);
             i--;
+            size--;
         }
     }
 }
