@@ -24,7 +24,7 @@ MAKE_HOOK_MATCH(HandleNoteControllerNoteWasMissed,
 MAKE_HOOK_MATCH(BeatmapObjectManager_HandleNoteControllerNoteWasCut,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasCut, void,
                 BeatmapObjectManager *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
-    if (!FakeNoteHelper::GetFakeNote(noteController) && noteCutCoreEffectsSpawner) {
+    if (FakeNoteHelper::GetFakeNote(noteController) && noteCutCoreEffectsSpawner) {
         CRASH_UNLESS(*noteCutCoreEffectsSpawner);
         noteCutCoreEffectsSpawner.value()->HandleNoteWasCut(noteController, noteCutInfo);
         self->Despawn(noteController);
