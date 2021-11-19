@@ -144,6 +144,12 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             track->AddGameObject(self->get_gameObject());
         }
     }
+    // how fucking long has _zOffset existed???!??
+    float zOffset = self->noteMovement->zOffset;
+    moveStartPos.z += zOffset;
+    moveEndPos.z += zOffset;
+    jumpEndPos.z += zOffset;
+
     ad.endRotation = endRotation;
     ad.moveStartPos = moveStartPos;
     ad.moveEndPos = moveEndPos;
