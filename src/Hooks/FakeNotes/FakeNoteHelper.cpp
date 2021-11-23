@@ -34,7 +34,7 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
 
 List<ObstacleController *>*
 FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles) {
-    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
+//    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
 
     for (auto const& obstacle : intersectingObstacles) {
         auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
@@ -46,10 +46,10 @@ FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> in
             add = !ad.objectData.fake.value_or(false);
         }
 
-        if (add) {
-            filteredInner->Add(obstacle);
+        if (!add) {
+            (*intersectingObstacles)->Remove(obstacle);
         }
     }
 
-    return filteredInner;
+    return intersectingObstacles;
 }
