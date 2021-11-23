@@ -47,6 +47,22 @@ std::optional<NEVector::Vector2> ReadOptionalVector2_emptyY(const rapidjson::Val
     return std::nullopt;
 }
 
+std::pair<std::optional<float>, std::optional<float>> ReadOptionalPair(const rapidjson::Value &object,const char *key) {
+    auto itr = object.FindMember(key);
+
+    if (itr != object.MemberEnd() && itr->value.Size() >= 1) {
+        float x = itr->value[0].GetFloat();
+        float y = 0;
+
+        if (itr->value.Size() > 1) {
+            y = itr->value[1].GetFloat();
+            return {x, y};
+        }
+        return {x, std::nullopt};
+    }
+    return {std::nullopt, std::nullopt};
+}
+
 std::optional<NEVector::Quaternion> ReadOptionalRotation(const rapidjson::Value &object,
                                                       const char *key) {
     auto itr = object.FindMember(key);

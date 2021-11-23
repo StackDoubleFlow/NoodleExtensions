@@ -37,7 +37,9 @@ struct AnimationObjectData {
 };
 
 struct ObjectCustomData {
-    std::optional<NEVector::Vector2> position;
+    std::optional<float> startX;
+    std::optional<float> startY;
+
     std::optional<NEVector::Quaternion> rotation;
     std::optional<NEVector::Quaternion> localRotation;
     std::optional<float> noteJumpMovementSpeed;
@@ -48,7 +50,7 @@ struct ObjectCustomData {
     // notes
     std::optional<NEVector::Quaternion> cutDirection;
     std::optional<bool> disableNoteGravity;
-    std::optional<bool> disableNoteLook;
+    bool disableNoteLook;
 
     // obstacles
     std::optional<std::array<std::optional<float>, 3>> scale;

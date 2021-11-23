@@ -36,7 +36,10 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
 }
 
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2>& flip) {
-    position = NEJSON::ReadOptionalVector2(customData, "_position");
+    auto position = NEJSON::ReadOptionalPair(customData, "_position");
+    startX = position.first;
+    startY = position.second;
+
     rotation = NEJSON::ReadOptionalRotation(customData, "_rotation");
     localRotation = NEJSON::ReadOptionalRotation(customData, "_localRotation");
     noteJumpMovementSpeed = NEJSON::ReadOptionalFloat(customData, "_noteJumpMovementSpeed");
@@ -53,7 +56,7 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
         flip = newFlip;
 
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, "_disableNoteGravity");
-    disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook");
+    disableNoteLook = NEJSON::ReadOptionalBool(customData, "_disableNoteLook").value_or(false);
     scale = NEJSON::ReadOptionalScale(customData, "_scale");
 }
 

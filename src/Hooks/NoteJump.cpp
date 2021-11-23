@@ -31,7 +31,7 @@ constexpr static float InOutQuad(float t)
 
 
 void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTransform, float const normalTime) {
-    if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook.value_or(false)) {
+    if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
         self->rotatedObject->set_localRotation(self->endRotation);
     }
     Transform *baseTransform = selfTransform; // lazy

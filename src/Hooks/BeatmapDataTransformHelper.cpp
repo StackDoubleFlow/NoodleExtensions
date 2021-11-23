@@ -82,13 +82,8 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             }
 
             BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-            float &aheadTime = ad.aheadTime;
-
-            float njs;
-            float spawnOffset;
-
-            njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
-            spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
+            float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
+            float spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
 
             float num = 60.0f / bpm;
             float num2 = startHalfJumpDurationInBeats;
@@ -102,7 +97,7 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
             }
 
             float jumpDuration = num * num2 * 2;
-            aheadTime = moveDuration + (jumpDuration * 0.5f);
+            ad.aheadTime = moveDuration + (jumpDuration * 0.5f);
         }
 
         OrderObjects(beatmapLineData->beatmapObjectsData);
@@ -162,6 +157,9 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
 }
 
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
+    if (customEventData->type != "AssignTrackParent" && customEventData->type != "AssignPlayerToTrack") {
+        return;
+    }
     rapidjson::Value &eventData = *customEventData->data;
     auto& eventAD = getEventAD(customEventData);
 
@@ -205,11 +203,6 @@ void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
 
     // Parse events
     for (auto const& customEventData : *beatmap->customEventsData) {
-        if (customEventData.type != "AssignTrackParent" && customEventData.type != "AssignPlayerToTrack") {
-            continue;
-        }
-
-
         LoadNoodleEvent(beatmapAD, &customEventData);
     }
 }

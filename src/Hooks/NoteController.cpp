@@ -140,8 +140,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     }
     std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
+        auto go = self->get_gameObject();
         for (auto &track: tracks) {
-            track->AddGameObject(self->get_gameObject());
+            track->AddGameObject(go);
         }
     }
     // how fucking long has _zOffset existed???!??
@@ -166,7 +167,9 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
-    if (!customNoteData->customData->value) {
+    if (!customNoteData->customData) {
+        noteUpdateAD = nullptr;
+        noteTracks.clear();
         NoteController_ManualUpdate(self);
         return;
     }

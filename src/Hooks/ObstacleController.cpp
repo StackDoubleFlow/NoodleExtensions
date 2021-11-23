@@ -170,8 +170,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     std::vector<Track *> const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
     if (!tracks.empty()) {
+        auto go = self->get_gameObject();
         for (auto &track: tracks) {
-            track->AddGameObject(self->get_gameObject());
+            track->AddGameObject(go);
         }
     }
 
