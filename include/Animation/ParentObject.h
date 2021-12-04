@@ -18,6 +18,7 @@ private:
     NEVector::Quaternion startRot = NEVector::Quaternion::identity();
     NEVector::Quaternion startLocalRot = NEVector::Quaternion::identity();
     NEVector::Vector3 startScale = NEVector::Vector3::one();
+    bool worldPositionStays;
 public:
     ~ParentObject();
 
@@ -28,8 +29,8 @@ public:
     void HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed);
 
     static void ResetTransformParent(UnityEngine::Transform *transform);
-    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<NEVector::Vector3> startPos,
-        std::optional<NEVector::Quaternion> startRot, std::optional<NEVector::Quaternion> startLocalRot, std::optional<NEVector::Vector3> startScale);
+    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<NEVector::Vector3> const& startPos,
+        std::optional<NEVector::Quaternion> const& startRot, std::optional<NEVector::Quaternion> const&  startLocalRot, std::optional<NEVector::Vector3> const& startScale, bool worldPositionStays);
 )
 
 class ParentController {

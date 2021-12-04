@@ -80,6 +80,8 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, st
     rot = NEJSON::ReadOptionalRotation(eventData, "_rotation");
     localRot = NEJSON::ReadOptionalRotation(eventData, "_localRotation");
     scale = NEJSON::ReadOptionalVector3(eventData, "_scale");
+
+    worldPositionStays = NEJSON::ReadOptionalBool(eventData, "_worldPositionStays").value_or(false);
 }
 
 ::BeatmapObjectAssociatedData &getAD(CustomJSONData::JSONWrapper *customData) {

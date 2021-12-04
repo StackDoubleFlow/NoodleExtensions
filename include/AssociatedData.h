@@ -115,6 +115,7 @@ struct ParentTrackEventData {
     std::optional<NEVector::Quaternion> rot;
     std::optional<NEVector::Quaternion> localRot;
     std::optional<NEVector::Vector3> scale;
+    bool worldPositionStays;
     std::vector<Track *> childrenTracks;
 };
 

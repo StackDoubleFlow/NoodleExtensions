@@ -65,9 +65,11 @@ static void logTransform(Transform* transform, int hierarchy = 0) {
     }
 }
 
-void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack, std::optional<NEVector::Vector3> startPos,
-                          std::optional<NEVector::Quaternion> startRot, std::optional<NEVector::Quaternion> startLocalRot,
-                          std::optional<NEVector::Vector3> startScale) {
+void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack,
+                               std::optional<NEVector::Vector3> const&  startPos,
+                               std::optional<NEVector::Quaternion> const& startRot,
+                               std::optional<NEVector::Quaternion> const& startLocalRot,
+                               std::optional<NEVector::Vector3> const& startScale, bool worldPositionStays) {
     if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
         NELogger::GetLogger().error("How could a track contain itself?");
         return;
@@ -76,6 +78,7 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
     ParentObject *instance = parentGameObject->AddComponent<ParentObject *>();
     instance->origin = parentGameObject->get_transform();
     instance->track = parentTrack;
+    instance->worldPositionStays = worldPositionStays;
 
     Transform *transform = instance->get_transform();
     if (startPos.has_value()) {
@@ -121,7 +124,7 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
 }
 
 void ParentObject::ParentToObject(Transform *transform) {
-    transform->SetParent(origin->get_transform(), false);
+    transform->SetParent(origin->get_transform(), worldPositionStays);
 }
 
 ParentObject *ParentController::GetParentObjectTrack(Track *track) {
