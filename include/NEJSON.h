@@ -73,7 +73,7 @@ std::optional<NEVector::Quaternion> ReadOptionalRotation(const rapidjson::Value 
             float y = itr->value[1].GetFloat();
             float z = itr->value[2].GetFloat();
             rot = NEVector::Vector3(x, y, z);
-        } else if (itr->value.IsFloat()) {
+        } else if (itr->value.IsNumber()) {
             rot = NEVector::Vector3(0, itr->value.GetFloat(), 0);
         }
 
