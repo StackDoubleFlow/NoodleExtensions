@@ -26,6 +26,9 @@
 #include "tracks/shared/AssociatedData.h"
 #include "tracks/shared/TimeSourceHelper.h"
 
+#define ID "Noodle"
+#include "chroma/shared/ObstacleAPI.hpp"
+
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
@@ -309,7 +312,14 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         bool wasEnabled = ad.dissolveEnabled;
-        ad.dissolveEnabled = obstacleDissolveConfig && dissolve > 0.0f;
+        ad.dissolveEnabled = obstacleDissolveConfig;
+
+        if (ad.dissolveEnabled) {
+            auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+
+            if (!color || color.value().a > 0.0f)
+                ad.dissolveEnabled = dissolve > 0.0f;
+        }
 
         if (wasEnabled != ad.dissolveEnabled) {
             ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
