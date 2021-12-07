@@ -57,20 +57,23 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     std::optional<Vector3> trackPosition;
 
     if (!pathDefinitePosition) {
-        if (!tracks.empty()) {
-            if (tracks.size() == 1) {
-                Track *track = tracks.front();
-
-                pathDefinitePosition = getPathPropertyNullable<Vector3>(track,track->pathProperties.definitePosition.value, time);
-            } else {
-                pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
-            }
-        } else
+        if (tracks.empty()) {
             return std::nullopt;
+        }
 
-        if (!pathDefinitePosition)
-            return std::nullopt;
+
+        if (tracks.size() == 1) {
+            Track *track = tracks.front();
+
+            pathDefinitePosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value,
+                                                                    time);
+        } else {
+            pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
+        }
     }
+
+    if (!pathDefinitePosition)
+        return std::nullopt;
 
 
     pathPosition = position ? std::optional{position->Interpolate(time)} : std::nullopt;
