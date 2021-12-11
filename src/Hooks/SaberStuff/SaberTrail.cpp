@@ -18,6 +18,9 @@ MAKE_HOOK_MATCH(SaberTrail_Init,
                 &SaberTrail::Init,
                 void,
                 SaberTrail* self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return SaberTrail_Init(self);
+
     SaberTrail_Init(self);
     // parent to VRGameCore
 

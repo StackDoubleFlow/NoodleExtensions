@@ -23,6 +23,9 @@ MAKE_HOOK_MATCH(Saber_ManualUpdate,
                 &Saber::ManualUpdate,
                 void,
                 Saber* self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return Saber_ManualUpdate(self);
+
     movementData = self->movementData;
     saber = self;
 
@@ -37,6 +40,9 @@ MAKE_HOOK_MATCH(SaberMovementData_AddNewData,
                 void,
                 SaberMovementData* self,
                 UnityEngine::Vector3 topPos, UnityEngine::Vector3 bottomPos, float time) {
+    if (!Hooks::isNoodleHookEnabled())
+        return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
+
     if (self != movementData || !movementData || !saber)
         return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
 
@@ -51,6 +57,7 @@ MAKE_HOOK_MATCH(SaberMovementData_AddNewData,
 
 void InstallSaberHooks(Logger &logger) {
     INSTALL_HOOK(logger, Saber_ManualUpdate);
+    INSTALL_HOOK(logger, SaberMovementData_AddNewData);
 }
 
 NEInstallHooks(InstallSaberHooks);

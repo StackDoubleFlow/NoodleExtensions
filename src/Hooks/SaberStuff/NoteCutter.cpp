@@ -37,6 +37,9 @@ MAKE_HOOK_MATCH(Saber_get_saberBladeTopPos,
                 &Saber::get_saberBladeTopPos,
                 UnityEngine::Vector3,
                 Saber* self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return Saber_get_saberBladeTopPos(self);
+
     if (!playerTransform || !firstCall[0])
         return Saber_get_saberBladeTopPos(self);
 
@@ -51,6 +54,9 @@ MAKE_HOOK_MATCH(Saber_get_saberBladeBottomPos,
                 &Saber::get_saberBladeBottomPos,
                 UnityEngine::Vector3,
                 Saber* self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return Saber_get_saberBladeBottomPos(self);
+
     if (!playerTransform || !firstCall[1])
         return Saber_get_saberBladeBottomPos(self);
 
@@ -66,87 +72,18 @@ MAKE_HOOK_MATCH(NoteCutter_Cut,
                 void,
                 NoteCutter* self,
                 Saber* saber) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteCutter_Cut(self, saber);
+
     firstCall[0] = true;
     firstCall[1] = true;
 
     playerTransform = saber->get_transform()->get_parent()->get_parent();
 
     NoteCutter_Cut(self, saber);
+    firstCall[0] = false;
+    firstCall[1] = false;
     playerTransform = nullptr;
-
-//    auto prevTopPos = saber->saberBladeTopPos;
-//    auto prevBottomPos = saber->saberBladeBottomPos;
-//
-//    playerTransform = saber->get_transform()->get_parent()->get_parent();
-//
-//    saber->saberBladeTopPos = playerTransform->TransformPoint(prevTopPos);
-//    saber->saberBladeBottomPos = playerTransform->TransformPoint(prevBottomPos);
-//
-//    NoteCutter_Cut(self, saber);
-//
-//    saber->saberBladeTopPos = prevTopPos;
-//    saber->saberBladeBottomPos = prevBottomPos;
-
-
-
-
-//    Vector3 saberBladeTopPos = saber->saberBladeTopPos;
-//    Vector3 saberBladeBottomPos = saber->saberBladeBottomPos;
-//
-//    auto playerTransform = saber->get_transform()->get_parent()->get_parent();
-//
-//    saberBladeTopPos = playerTransform->TransformPoint(saberBladeTopPos);
-//    saberBladeBottomPos = playerTransform->TransformPoint(saberBladeBottomPos);
-//
-//    BladeMovementDataElement prevAddedData = saber->movementData->get_prevAddedData();
-//    NEVector::Vector3 topPos = prevAddedData.topPos;
-//    NEVector::Vector3 bottomPos = prevAddedData.bottomPos;
-//    Vector3 vector;
-//    Vector3 halfExtents;
-//    Quaternion orientation;
-//    if (GeometryTools::ThreePointsToBox(saberBladeTopPos, saberBladeBottomPos, (bottomPos + topPos) * 0.5f, vector, halfExtents, orientation))
-//    {
-//        int num = Physics::OverlapBoxNonAlloc(vector, halfExtents, self->colliders, orientation, LayerMasks::_get_noteLayerMask());
-//        if (num == 0)
-//        {
-//            return;
-//        }
-//        if (num == 1)
-//        {
-//            self->colliders->get(0)->get_gameObject()->GetComponent<CuttableBySaber*>()->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//            return;
-//        }
-//        for (int i = 0; i < num; i++)
-//        {
-//            CuttableBySaber* component = self->colliders->get(i)->get_gameObject()->GetComponent<CuttableBySaber*>();
-//            Vector3 position = component->get_transform()->get_position();
-//            NoteCutter::CuttableBySaberSortParams* cuttableBySaberSortParams = self->cuttableBySaberSortParams->get(i);
-//            cuttableBySaberSortParams->cuttableBySaber = component;
-//            cuttableBySaberSortParams->distance = (topPos - position).sqrMagnitude() - component->get_radius() * component->get_radius();
-//            cuttableBySaberSortParams->pos = position;
-//        }
-//        if (num == 2)
-//        {
-//            if (self->comparer->Compare(self->cuttableBySaberSortParams->get(0), self->cuttableBySaberSortParams->get(1)) > 0)
-//            {
-//                self->cuttableBySaberSortParams->get(0)->cuttableBySaber->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//                self->cuttableBySaberSortParams->get(1)->cuttableBySaber->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//                return;
-//            }
-//            self->cuttableBySaberSortParams->get(1)->cuttableBySaber->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//            self->cuttableBySaberSortParams->get(0)->cuttableBySaber->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//            return;
-//        }
-//        else
-//        {
-//            System::Array::Sort(self->cuttableBySaberSortParams, 0, num,
-//                                reinterpret_cast<System::Collections::IComparer *>(self->comparer));
-//            for (int j = 0; j < num; j++)
-//            {
-//                self->cuttableBySaberSortParams->get(j)->cuttableBySaber->Cut(saber, vector, orientation, saberBladeTopPos - topPos);
-//            }
-//        }
-//    }
 }
 
 void InstallNoteCutterHooks(Logger &logger) {
