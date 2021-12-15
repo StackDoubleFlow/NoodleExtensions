@@ -24,8 +24,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
     if (customNoteData->customData && customNoteData->customData->value) {
         std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
         if (!tracks.empty()) {
+            auto go = noteController->get_gameObject();
             for (auto &track: tracks) {
-                track->RemoveGameObject(noteController->get_gameObject());
+                track->RemoveGameObject(go);
             }
         }
     }
@@ -41,8 +42,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Obstacle_Despawn,
     if (customObstacleData->customData && customObstacleData->customData->value) {
         std::vector<Track *> const &tracks = TracksAD::getAD(customObstacleData->customData).tracks;
         if (!tracks.empty()) {
+            auto go = obstacleController->get_gameObject();
             for (auto &track: tracks) {
-                track->RemoveGameObject(obstacleController->get_gameObject());
+                track->RemoveGameObject(go);
             }
         }
     }
