@@ -1,9 +1,9 @@
 name: NDK build
 
 env:
-  module_id: noodle
+  module_id: noodleextensions
   qmodName: noodle_extensions
-  cache-name: tracks_cache
+  cache-name: noodleextensions_cache
 
 on:
   push:
