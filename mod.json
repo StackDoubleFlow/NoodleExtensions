@@ -1,15 +1,30 @@
 {
-    "_QPVersion": "0.1.1",
-    "name": "NoodleExtensions",
-    "id": "noodleextensions",
-    "author": "StackDoubleFlow",
-    "version": "1.0.0",
-    "packageId": "com.beatgames.beatsaber",
-    "packageVersion": "1.17.1",
-    "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
-    "modFiles": [
-      "libnoodleextensions.so",
-      "libcustom-json-data.so",
-      "libtracks.so"
-    ]
-  }
+  "_QPVersion": "0.1.2",
+  "name": "Tracks",
+  "id": "NoodleExtensions",
+  "author": "StackDoubleFlow",
+  "version": "1.0.0-beta1",
+  "packageId": "com.beatgames.beatsaber",
+  "packageVersion": "1.17.1",
+  "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
+  "dependencies": [
+    {
+      "versionRange": "^0.4.3",
+      "id": "tracks",
+      "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.4.3/tracks.qmod"
+    },
+    {
+      "versionRange": "^0.14.1",
+      "id": "custom-json-data",
+      "modLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.14.1/custom-json-data.qmod"
+    }
+  ],
+  "modFiles": [
+    "libnoodleextensions.so"
+  ],
+  "libraryFiles": [
+    "libbeatsaber-hook_2_3_2.so"
+  ],
+  "fileCopies": [],
+  "copyExtensions": []
+}
