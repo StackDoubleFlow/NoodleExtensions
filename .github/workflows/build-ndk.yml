@@ -1,5 +1,10 @@
 name: NDK build
 
+env:
+  module_id: noodleextensions
+  qmodName: noodle_extensions
+  cache-name: noodleextensions_cache
+
 on:
   push:
     branches: [ master ]
@@ -17,47 +22,98 @@ jobs:
         submodules: true
         lfs: true
 
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+
+    - name: Create ndkpath.txt
+      run: |
+        echo "$ANDROID_NDK_LATEST_HOME" > ${GITHUB_WORKSPACE}/ndkpath.txt
+        cat ${GITHUB_WORKSPACE}/ndkpath.txt
+
     - name: Get QPM
+      if: steps.cache-qpm.outputs.cache-hit != 'true'
       uses: dawidd6/action-download-artifact@v2
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
-        workflow: main.yml
-        name: QPM-ubuntu-x64
+        workflow: cargo-build.yml
+        name: linux-qpm-rust
         path: QPM
-        repo: sc2ad/QuestPackageManager
+        repo: RedBrumbler/QuestPackageManager-Rust
         
-    - name: QPM Collect
+    - name: QPM Collapse
       run: |
-        chmod +x ./QPM/QPM
-        ./QPM/QPM collect
-      
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust collapse
+
+    - name: QPM Dependencies Cache
+      id: cache-qpm-deps
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-qpm-deps
+      with:
+        path: /home/runner/.local/share/QPM-Rust/cache
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('qpm.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
     - name: QPM Restore
-      run: ./QPM/QPM restore
+      run: |
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust restore
+
+    - name: QPM Legacy fix
+      run: |
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust cache legacy-fix
+
     - name: List Post Restore
       run: |
-        ls -la ${GITHUB_WORKSPACE}/extern/
-        ls -la QPM_Temp
+        echo includes:
+        ls -la ${GITHUB_WORKSPACE}/extern/includes
+        echo libs:
+        ls -la ${GITHUB_WORKSPACE}/extern/libs
+        echo cache:
+        ls -la $HOME/.local/share/QPM-Rust/cache
+
     - name: Build
       run: |
         cd ${GITHUB_WORKSPACE}
-        pwsh -Command ./scripts/build.ps1
+        pwsh -Command ./build.ps1
+# TODO: Generate QMOD
+#        ./QPM/qpm-rust qmod build
+
+
+    - name: Create Qmod
+      run: |
+        pwsh -Command ./createqmod.ps1 ${{env.qmodName}}
+
     - name: Get Library Name
       id: libname
       run: |
-        cd ./libs/arm64-v8a/
-        pattern="libnoodleextensions.so"
+        cd ./build/
+        pattern="lib${module_id}*.so"
         files=( $pattern )
         echo ::set-output name=NAME::"${files[0]}"
     - name: Upload non-debug artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.libname.outputs.NAME }}
-        path: ./libs/arm64-v8a/${{ steps.libname.outputs.NAME }}
+        path: ./build/${{ steps.libname.outputs.NAME }}
         if-no-files-found: error
-    - name: Upload debug artifact
+
+    - name: Upload qmod artifact
       uses: actions/upload-artifact@v2
       with:
-        name: debug_${{ steps.libname.outputs.NAME }}
-        path: ./obj/local/arm64-v8a/${{ steps.libname.outputs.NAME }}
+        name: ${{env.qmodName}}.qmod
+        path: ./${{ env.qmodName }}.qmod
         if-no-files-found: error
+
+        # TODO: NEEDED?
+#    - name: Upload debug artifact
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: debug_${{ steps.libname.outputs.NAME }}
+#        path: ./obj/local/arm64-v8a/${{ steps.libname.outputs.NAME }}
+#        if-no-files-found: error
     # TODO: Add auto-populating releases, auto update versions, auto publish package on release

@@ -27,7 +27,7 @@
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.12.7",
+      "versionRange": "*",
       "additionalData": {}
     },
     {
@@ -47,7 +47,7 @@
     },
     {
       "id": "tracks",
-      "versionRange": "^0.3.0",
+      "versionRange": "^0.4.0",
       "additionalData": {}
     },
     {
@@ -62,6 +62,11 @@
     },
     {
       "id": "qosmetics-api",
+      "versionRange": "*",
+      "additionalData": {}
+    },
+    {
+      "id": "modloader",
       "versionRange": "*",
       "additionalData": {}
     }

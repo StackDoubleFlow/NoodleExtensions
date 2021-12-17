@@ -33,6 +33,7 @@ constexpr static float InOutQuad(float t)
 void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTransform, float const normalTime) {
     if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
         self->rotatedObject->set_localRotation(self->endRotation);
+        return;
     }
     Transform *baseTransform = selfTransform; // lazy
     NEVector::Vector3 baseTransformPosition(baseTransform->get_position());
@@ -69,7 +70,7 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTrans
     float headUpMagnitude =
             NEVector::Vector3::Dot(worldRot * NEVector::Vector3(headTransform->get_position()), NEVector::Vector3::up());
     float mult = std::lerp(headUpMagnitude, baseUpMagnitude, 0.8f) - headUpMagnitude;
-    vector = vector + upVector * mult;
+    vector = vector + (upVector * mult);
 
     // more wtf
     NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
