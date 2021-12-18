@@ -228,16 +228,8 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     return transformedBeatmapData;
 }
 
-// Skip obstacle merging, I have no clue how much this can fuck things
-MAKE_HOOK_MATCH(BeatmapDataObstaclesMergingTransform_CreateTransformedData,
-                &BeatmapDataObstaclesMergingTransform::CreateTransformedData,
-                IReadonlyBeatmapData *, IReadonlyBeatmapData *beatmapData) {
-    return beatmapData;
-}
-
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
     INSTALL_HOOK_ORIG(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
-    INSTALL_HOOK(logger, BeatmapDataObstaclesMergingTransform_CreateTransformedData);
 }
 
 NEInstallHooks(InstallBeatmapDataTransformHelperHooks);

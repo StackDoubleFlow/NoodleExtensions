@@ -128,6 +128,31 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
 
     if (tracks.size() == 1) {
         auto track = tracks.front();
+
+//#define singlePathProp(type, name, interpolate) \
+//std::optional<type> path##name = (name) ? (name)->interpolate(time) : \
+//getPathPropertyNullable<type>(track, track->pathProperties.name.value, time);
+//
+//#define offsetProp(type, name, offsetName, op) \
+//offset.offsetName = path##name op (track ? std::optional{track->properties.name.value->type} : std::nullopt);
+//
+//
+//        singlePathProp(Vector3, position, Interpolate)
+//        singlePathProp(Quaternion, rotation, InterpolateQuaternion)
+//        singlePathProp(Vector3, scale, Interpolate)
+//        singlePathProp(Quaternion, localRotation, InterpolateQuaternion)
+//        singlePathProp(float, dissolve, InterpolateLinear)
+//        singlePathProp(float, dissolveArrow, InterpolateLinear)
+//        singlePathProp(float, cuttable, InterpolateLinear)
+//
+//        offsetProp(vector3, position, positionOffset, +)
+//        offsetProp(quaternion, rotation, rotationOffset, *)
+//        offsetProp(vector3, scale, scaleOffset, *)
+//        offsetProp(quaternion, localRotation, localRotationOffset, *)
+//        offsetProp(linear, dissolve, dissolve, *)
+//        offsetProp(linear, dissolveArrow, dissolveArrow, *)
+//        offsetProp(linear, cuttable, cuttable, *)
+
         std::optional<Vector3> pathPosition = position ? std::optional{position->Interpolate(time)}
                                                        : getPathPropertyNullable<Vector3>(track,
                                                                                           track->pathProperties.position.value,
@@ -197,8 +222,6 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
                                                      : MMultTrackPathProps(tracks, 1.0f, time, cuttable);
 
         offset.positionOffset = pathPosition + MSumTrackProps(tracks, Vector3::zero(), position);
-
-
         offset.rotationOffset = pathRotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);
         offset.scaleOffset = pathScale * MMultTrackProps(tracks, Vector3::zero(), scale);
         offset.localRotationOffset = pathLocalRotation * MMultTrackProps(tracks, Quaternion::identity(), localRotation);
