@@ -3,7 +3,7 @@
 
 namespace NEJSON {
 
-std::optional<bool> ReadOptionalBool(const rapidjson::Value &object, const char *key) {
+static std::optional<bool> ReadOptionalBool(const rapidjson::Value &object, const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd()) {
         return itr->value.GetBool();
@@ -11,7 +11,7 @@ std::optional<bool> ReadOptionalBool(const rapidjson::Value &object, const char 
     return std::nullopt;
 }
 
-std::optional<float> ReadOptionalFloat(const rapidjson::Value &object, const char *key) {
+static std::optional<float> ReadOptionalFloat(const rapidjson::Value &object, const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd()) {
         return itr->value.GetFloat();
@@ -19,7 +19,7 @@ std::optional<float> ReadOptionalFloat(const rapidjson::Value &object, const cha
     return std::nullopt;
 }
 
-std::optional<NEVector::Vector2> ReadOptionalVector2(const rapidjson::Value &object,
+static std::optional<NEVector::Vector2> ReadOptionalVector2(const rapidjson::Value &object,
                                                      const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd() && itr->value.Size() >= 2) {
@@ -31,7 +31,7 @@ std::optional<NEVector::Vector2> ReadOptionalVector2(const rapidjson::Value &obj
 }
 
 // Used for note flip
-std::optional<NEVector::Vector2> ReadOptionalVector2_emptyY(const rapidjson::Value &object,
+static std::optional<NEVector::Vector2> ReadOptionalVector2_emptyY(const rapidjson::Value &object,
                                                          const char *key) {
     auto itr = object.FindMember(key);
 
@@ -47,7 +47,7 @@ std::optional<NEVector::Vector2> ReadOptionalVector2_emptyY(const rapidjson::Val
     return std::nullopt;
 }
 
-std::pair<std::optional<float>, std::optional<float>> ReadOptionalPair(const rapidjson::Value &object,const char *key) {
+static std::pair<std::optional<float>, std::optional<float>> ReadOptionalPair(const rapidjson::Value &object,const char *key) {
     auto itr = object.FindMember(key);
 
     if (itr != object.MemberEnd() && itr->value.Size() >= 1) {
@@ -63,7 +63,7 @@ std::pair<std::optional<float>, std::optional<float>> ReadOptionalPair(const rap
     return {std::nullopt, std::nullopt};
 }
 
-std::optional<NEVector::Quaternion> ReadOptionalRotation(const rapidjson::Value &object,
+static std::optional<NEVector::Quaternion> ReadOptionalRotation(const rapidjson::Value &object,
                                                       const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd()) {
@@ -82,7 +82,7 @@ std::optional<NEVector::Quaternion> ReadOptionalRotation(const rapidjson::Value 
     return std::nullopt;
 }
 
-std::optional<NEVector::Vector3> ReadOptionalVector3(const rapidjson::Value &object,
+static std::optional<NEVector::Vector3> ReadOptionalVector3(const rapidjson::Value &object,
                                                      const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd() && itr->value.Size() >= 3) {
@@ -94,7 +94,7 @@ std::optional<NEVector::Vector3> ReadOptionalVector3(const rapidjson::Value &obj
     return std::nullopt;
 }
 
-std::optional<std::array<std::optional<float>, 3>> ReadOptionalScale(const rapidjson::Value &object,
+static std::optional<std::array<std::optional<float>, 3>> ReadOptionalScale(const rapidjson::Value &object,
                                                                      const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd() && itr->value.IsArray()) {
