@@ -43,7 +43,7 @@ MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
 }
 
 void InstallBeatmapDataLoaderHooks(Logger &logger) {
-    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
+//    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
 }
 
 NEInstallHooks(InstallBeatmapDataLoaderHooks);

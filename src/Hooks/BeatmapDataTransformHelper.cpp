@@ -219,11 +219,10 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
         screenDisplacementEffectsEnabled);
 
+    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
     auto *transformedBeatmapData = ReorderLineData(result);
 
     LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
-    // TODO: Figure out why this breaks god of time
-//    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
 
     return transformedBeatmapData;
 }
