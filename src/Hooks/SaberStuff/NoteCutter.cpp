@@ -92,4 +92,4 @@ void InstallNoteCutterHooks(Logger &logger) {
     INSTALL_HOOK(logger, Saber_get_saberBladeTopPos);
 }
 
-NEInstallHooks(InstallNoteCutterHooks);
+//NEInstallHooks(InstallNoteCutterHooks);

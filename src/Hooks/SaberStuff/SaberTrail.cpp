@@ -33,4 +33,4 @@ void InstallSaber_TrailHooks(Logger &logger) {
     INSTALL_HOOK(logger, SaberTrail_Init);
 }
 
-NEInstallHooks(InstallSaber_TrailHooks);
+//NEInstallHooks(InstallSaber_TrailHooks);

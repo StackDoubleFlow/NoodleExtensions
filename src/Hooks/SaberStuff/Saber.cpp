@@ -60,4 +60,4 @@ void InstallSaberHooks(Logger &logger) {
     INSTALL_HOOK(logger, SaberMovementData_AddNewData);
 }
 
-NEInstallHooks(InstallSaberHooks);
+//NEInstallHooks(InstallSaberHooks);
