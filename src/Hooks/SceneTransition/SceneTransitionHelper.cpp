@@ -28,24 +28,6 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-bool SceneTransitionHelper::CheckIfInArray(ValueUTF16 const&val, const std::u16string_view stringToCheck) {
-    if (val.IsArray()) {
-        for (auto const& element : val.GetArray()) {
-            if (element.IsString() && element.GetString() == stringToCheck)
-                return true;
-        }
-    }
-
-    if (val.IsObject()) {
-        for (auto const& element : val.GetObject()) {
-            if (element.value.IsString() && element.value.GetString() == stringToCheck)
-                return true;
-        }
-    }
-
-    return false;
-}
-
 void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom) {
     bool noodleRequirement = false;
 
@@ -56,18 +38,7 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
         if (dynData) {
             ValueUTF16 const& rapidjsonData = *dynData;
 
-            auto requirements = rapidjsonData.FindMember(u"_requirements");
-
-            if (requirements != rapidjsonData.MemberEnd()) {
-                noodleRequirement |= CheckIfInArray(requirements->value, REQUIREMENTNAME);
-            }
-
-            auto suggestions = rapidjsonData.FindMember(u"_suggestions");
-
-            if (suggestions != rapidjsonData.MemberEnd()) {
-                noodleRequirement |= CheckIfInArray(suggestions->value, REQUIREMENTNAME);
-            }
-
+            noodleRequirement = CheckIfNoodle(rapidjsonData);
         }
     }
 
