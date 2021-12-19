@@ -17,20 +17,27 @@ using namespace System;
 extern BeatmapObjectAssociatedData *noteUpdateAD;
 extern std::vector<Track *> noteTracks;
 
+static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, NoteFloorMovement* noteFloorMovement) {
+    if (!noteUpdateAD) {
+        return original;
+    }
+
+    std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData,
+                                                                                           noteTracks, 0);
+    if (!position.has_value()) {
+        return original;
+    }
+
+    NEVector::Vector3 noteOffset = noteUpdateAD->noteOffset;
+    NEVector::Vector3 endPos = noteFloorMovement->endPos;
+    return original + (position.value() + noteOffset - endPos);
+}
+
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
-    NEVector::Vector3 localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
-    if (noteUpdateAD) {
-        std::optional<NEVector::Vector3> position = AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, 0);
-        if (position.has_value()) {
-            NEVector::Vector3 noteOffset = noteUpdateAD->noteOffset;
-            NEVector::Vector3 endPos = self->endPos;
-            localPosition = localPosition + (*position + noteOffset - endPos);
-        }
-    }
-    self->localPosition = localPosition;
-
+    self->localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
+    self->localPosition = DefinitePositionTranspile(self->localPosition, self);
 
     NEVector::Vector3 vector = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
     self->get_transform()->set_localPosition(vector);
