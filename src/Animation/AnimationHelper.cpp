@@ -207,7 +207,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
                                                           : MMultTrackPathProps(tracks, Quaternion::identity(), time,
                                                                                 rotation);
         std::optional<Vector3> pathScale = scale ? std::optional{scale->Interpolate(time)}
-                                                 : MMultTrackPathProps(tracks, Vector3::zero(), time, scale);
+                                                 : MMultTrackPathProps(tracks, Vector3::one(), time, scale);
         std::optional<Quaternion> pathLocalRotation = localRotation ? std::optional{
                 localRotation->InterpolateQuaternion(time)} : MMultTrackPathProps(tracks, Quaternion::identity(), time,
                                                                                   localRotation);
@@ -223,7 +223,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
 
         offset.positionOffset = pathPosition + MSumTrackProps(tracks, Vector3::zero(), position);
         offset.rotationOffset = pathRotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);
-        offset.scaleOffset = pathScale * MMultTrackProps(tracks, Vector3::zero(), scale);
+        offset.scaleOffset = pathScale * MMultTrackProps(tracks, Vector3::one(), scale);
         offset.localRotationOffset = pathLocalRotation * MMultTrackProps(tracks, Quaternion::identity(), localRotation);
         offset.dissolve = pathDissolve * MMultTrackProps(tracks, 1.0f, dissolve);
         offset.dissolveArrow = pathDissolveArrow * MMultTrackProps(tracks, 1.0f, dissolveArrow);
