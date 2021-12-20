@@ -9,9 +9,9 @@
   "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
   "dependencies": [
     {
-      "versionRange": "^0.4.3",
+      "versionRange": "^0.4.4",
       "id": "tracks",
-      "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.4.3/tracks.qmod"
+      "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.4.4/tracks.qmod"
     },
     {
       "versionRange": "^0.14.1",
