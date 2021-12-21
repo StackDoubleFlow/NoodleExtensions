@@ -74,6 +74,11 @@
       "id": "songloader",
       "versionRange": "^0.7.0",
       "additionalData": {}
+    },
+    {
+      "id": "cpp-semver",
+      "versionRange": "^0.1.1",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
