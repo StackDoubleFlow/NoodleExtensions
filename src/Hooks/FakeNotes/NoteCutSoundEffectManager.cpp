@@ -8,6 +8,7 @@
 #include "NEHooks.h"
 #include "SharedUpdate.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-types/shared/coroutine.hpp"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
@@ -15,6 +16,7 @@ using namespace UnityEngine;
 static NoteCutSoundEffectManager *currentSoundEffectManager;
 static int lastFrame = -1;
 static int cutCount = -1;
+static const int maxNotesPerFrame = 30;
 static std::vector<NoteController *> hitsoundQueue;
 
 static bool ProcessHitSound(NoteController *noteController) {
@@ -26,20 +28,51 @@ static bool ProcessHitSound(NoteController *noteController) {
         cutCount = 0;
     }
 
-    return cutCount < 30;
+    return cutCount < maxNotesPerFrame;
+}
+
+custom_types::Helpers::Coroutine AddNotesLater() {
+    while(currentSoundEffectManager) {
+        if (hitsoundQueue.empty())
+            co_yield nullptr;
+
+        int notesRemaining = maxNotesPerFrame - cutCount;
+
+        notesRemaining = std::clamp(notesRemaining, 0, (int) hitsoundQueue.size());
+
+        for (int i = 0; i < notesRemaining; i++) {
+            auto noteController = hitsoundQueue.back();
+            hitsoundQueue.pop_back();
+
+            currentSoundEffectManager->HandleNoteWasSpawned(noteController);
+        }
+
+        cutCount += notesRemaining;
+
+
+        co_yield nullptr;
+    }
+    co_return;
 }
 
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_Start, &NoteCutSoundEffectManager::Start, void,
                 NoteCutSoundEffectManager *self) {
     currentSoundEffectManager = self;
+    cutCount = 0;
+    hitsoundQueue.clear();
+    self->StartCoroutine(reinterpret_cast<System::Collections::IEnumerator*>(custom_types::Helpers::CoroutineHelper::New(AddNotesLater())));
     NoteCutSoundEffectManager_Start(self);
 }
 
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned,
                 &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
                 NoteCutSoundEffectManager *self, NoteController *noteController) {
-    if (!FakeNoteHelper::GetFakeNote(noteController) && ProcessHitSound(noteController)) {
-        NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
+    if (!FakeNoteHelper::GetFakeNote(noteController)) {
+        if (ProcessHitSound(noteController)) {
+            NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
+        } else {
+            hitsoundQueue.emplace_back(noteController);
+        }
     }
 }
 
