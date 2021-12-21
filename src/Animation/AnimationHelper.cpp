@@ -51,22 +51,13 @@ constexpr std::optional<T> operator*(std::optional<T> const& a, std::optional<T>
 std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time) {
     PointDefinition *localDefinitePosition = animationData.definitePosition;
 
-    std::optional<Vector3> pathDefinitePosition;
+    std::optional<Vector3> pathDefinitePosition =
+            localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time)) : std::nullopt;
 
-    if (localDefinitePosition)
-        pathDefinitePosition = localDefinitePosition->Interpolate(time);
-
-    if (!pathDefinitePosition) {
-        if (tracks.empty()) {
-            return std::nullopt;
-        }
-
-
+    if (!pathDefinitePosition && !tracks.empty()) {
         if (tracks.size() == 1) {
             Track *track = tracks.front();
-
-            pathDefinitePosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value,
-                                                                    time);
+            pathDefinitePosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value, time);
         } else {
             pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
         }
@@ -76,12 +67,10 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
         return std::nullopt;
 
     PointDefinition *position = animationData.position;
-    std::optional<Vector3> pathPosition;
-
-    if (position)
-        pathPosition = position->Interpolate(time);
-
+    std::optional<Vector3> pathPosition = position ? std::optional(position->Interpolate(time)) : std::nullopt;
     std::optional<Vector3> trackPosition;
+
+    std::optional<Vector3> positionOffset;
 
     if (!tracks.empty()) {
         if (tracks.size() == 1) {
@@ -97,12 +86,11 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
             if (!pathPosition)
                 pathPosition = MSumTrackPathProps(tracks, Vector3::zero(), time, position);
         }
+
+        positionOffset = pathPosition + trackPosition;
+    } else {
+        positionOffset = pathPosition;
     }
-
-    std::optional<Vector3> positionOffset = pathPosition;
-
-    if (trackPosition)
-        positionOffset = pathPosition + trackPosition.value();
 
     std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
     if (definitePosition)
@@ -137,13 +125,6 @@ std::optional<type> path##name = (name) ? std::optional<type>((name)->interpolat
     if (!tracks.empty()) {
         if (tracks.size() == 1) {
             auto track = tracks.front();
-
-//#define singlePathProp(type, name, interpolate) \
-//std::optional<type> path##name = (name) ? (name)->interpolate(time) : \
-//getPathPropertyNullable<type>(track, track->pathProperties.name.value, time);
-//
-//#define offsetProp(type, name, offsetName, op) \
-//offset.offsetName = path##name op getPropertyNullable<type>(track, track->properties.name);
 
 #define singlePathProp(type, name, interpolate) \
 if (!path##name)                                \
@@ -191,10 +172,18 @@ if (!path##name)                                \
             offset.dissolveArrow = pathdissolveArrow * MMultTrackProps(tracks, 1.0f, dissolveArrow);
             offset.cuttable = pathcuttable * MMultTrackProps(tracks, 1.0f, cuttable);
         }
+    } else {
+        offset.positionOffset = pathposition;
+        offset.rotationOffset = pathrotation;
+        offset.scaleOffset = pathscale;
+        offset.localRotationOffset = pathlocalRotation;
+        offset.dissolve = pathdissolve;
+        offset.dissolveArrow = pathdissolveArrow;
+        offset.cuttable = pathcuttable;
     }
 
     if (offset.positionOffset)
-        offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
+        offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
     return offset;
 }
