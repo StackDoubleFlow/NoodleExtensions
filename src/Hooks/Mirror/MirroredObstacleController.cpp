@@ -15,13 +15,28 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
+MAKE_HOOK_MATCH(MirroredObstacleController_Mirror,
+                &MirroredObstacleController::Mirror, void,
+                MirroredObstacleController *self,
+                ObstacleController* obstacleController) {
+    if (Hooks::isNoodleHookEnabled()) {
+        self->set_hide(true);
+        return;
+    }
+
+    MirroredObstacleController_Mirror(self, obstacleController);
+}
+
 MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
                 &MirroredObstacleController::UpdatePositionAndRotation, void,
                 MirroredObstacleController *self) {
     // static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     // if (self->followedObstacle && self->followedObstacle->obstacleData->klass == customObstacleDataClass) {
     // TODO: Check if NE is enabled on this map
-    self->set_hide(true);
+    if (Hooks::isNoodleHookEnabled()) {
+        self->set_hide(true);
+        return;
+    }
     // }
 
     // if (self->followedTransform->get_position().y < 0) {
@@ -48,6 +63,7 @@ MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
 }
 
 void InstallMirroredObstacleControllerHooks(Logger &logger) {
+    INSTALL_HOOK(logger, MirroredObstacleController_Mirror);
     INSTALL_HOOK(logger, MirroredObstacleController_UpdatePositionAndRotation);
 }
 
