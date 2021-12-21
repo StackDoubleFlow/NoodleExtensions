@@ -151,7 +151,7 @@ void InstallOutdatedModsHooks(Logger &logger) {
     AddToDependencyIfOutdated(SongLoaderID, SongLoaderVersionRange, modList, outdatedMods);
     AddToDependencyIfOutdated(PinkCoreID, PinkCoreVersionRange, modList, outdatedMods);
 
-    if (modList.empty())
+    if (outdatedMods.empty())
         return;
 
     QuestUI::Init();
