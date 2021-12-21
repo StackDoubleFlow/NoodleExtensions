@@ -36,9 +36,9 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
 }
 
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2>& flip) {
-    auto position = NEJSON::ReadOptionalPair(customData, "_position");
-    startX = position.first;
-    startY = position.second;
+    auto [x, y] = NEJSON::ReadOptionalPair(customData, "_position");
+    startX = x;
+    startY = y;
 
     rotation = NEJSON::ReadOptionalRotation(customData, "_rotation");
     localRotation = NEJSON::ReadOptionalRotation(customData, "_localRotation");

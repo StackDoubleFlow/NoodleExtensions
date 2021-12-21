@@ -74,7 +74,7 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTrans
 
     // more wtf
     NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
-                                   (worldRot * NEVector::Vector3(baseTransformPosition - vector).get_normalized());
+                                   (worldRot * Sombrero::vector3subtract(baseTransformPosition, vector).get_normalized());
 
     NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
     self->rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
@@ -84,9 +84,11 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     auto selfTransform = self->get_transform();
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - (self->beatTime - self->jumpDuration * 0.5f);
+    // transpile here
     if (noteUpdateAD) {
         elapsedTime = noteTimeAdjust(elapsedTime, self->jumpDuration);
     }
+    //
     float normalTime = elapsedTime / self->jumpDuration;
 
     if (self->startPos.x == self->endPos.x) {
@@ -138,7 +140,9 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
             self->noteJumpDidPassMissedMarkerEvent->Invoke();
     }
 
+    // transpile here
     if (self->threeQuartersMarkReported && !definitePosition) {
+    //
         float num4 = (normalTime - 0.75f) / 0.25f;
         num4 = num4 * num4 * num4;
         self->localPosition.z = self->localPosition.z - std::lerp(0, self->endDistanceOffset, num4);

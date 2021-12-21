@@ -159,7 +159,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.localRotation = localRotation;
 
 
-    self->Update();
+//    self->Update();
 }
 
 MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void,
@@ -170,8 +170,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     if (!customNoteData->customData) {
         noteUpdateAD = nullptr;
         noteTracks.clear();
-        NoteController_ManualUpdate(self);
-        return;
+        return NoteController_ManualUpdate(self);
     }
 
     // TODO: Cache deserialized animation data
@@ -199,10 +198,11 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         ad.animationData, tracks, normalTime);
 
     if (offset.positionOffset.has_value()) {
-        floorMovement->startPos = ad.moveStartPos + *offset.positionOffset;
-        floorMovement->endPos = ad.moveEndPos + *offset.positionOffset;
-        noteJump->startPos = ad.moveEndPos + *offset.positionOffset;
-        noteJump->endPos = ad.jumpEndPos + *offset.positionOffset;
+        auto const& offsetPos = *offset.positionOffset;
+        floorMovement->startPos = ad.moveStartPos + offsetPos;
+        floorMovement->endPos = ad.moveEndPos + offsetPos;
+        noteJump->startPos = ad.moveEndPos + offsetPos;
+        noteJump->endPos = ad.jumpEndPos + offsetPos;
     }
 
     auto transform = self->get_transform();

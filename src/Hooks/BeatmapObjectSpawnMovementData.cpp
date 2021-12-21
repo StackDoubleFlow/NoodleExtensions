@@ -154,6 +154,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
                 self, noteData, startLineLayer.value_or(noteData->beforeJumpNoteLineLayer));
         float const lineYPos = SpawnDataHelper::LineYPosForLineLayer(self, noteData, startHeight);
 
+        // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
         float const highestJump = startHeight.has_value()
                             ? (0.875f * lineYPos) + 0.639583f + self->jumpOffsetY
                             : self->HighestJumpPosYForLineLayer(noteData->noteLineLayer);

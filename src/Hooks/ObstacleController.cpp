@@ -26,7 +26,6 @@
 #include "tracks/shared/AssociatedData.h"
 #include "tracks/shared/TimeSourceHelper.h"
 
-#define ID "Noodle"
 #include "chroma/shared/ObstacleAPI.hpp"
 
 using namespace GlobalNamespace;
