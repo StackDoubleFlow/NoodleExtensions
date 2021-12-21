@@ -147,9 +147,12 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
 
                 ad.objectData = ObjectCustomData(customData, ad.flip);
 
-                rapidjson::Value &animation = customData["_animation"];
-                ad.animationData = AnimationObjectData(beatmapAD, animation);
-
+                if (customData.HasMember("_animation")) {
+                    rapidjson::Value &animation = customData["_animation"];
+                    ad.animationData = AnimationObjectData(beatmapAD, animation);
+                } else {
+                    ad.animationData = AnimationObjectData();
+                }
                 ad.parsed = true;
             }
         }
