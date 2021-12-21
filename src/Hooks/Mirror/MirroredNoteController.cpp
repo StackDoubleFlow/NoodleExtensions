@@ -136,7 +136,7 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_UpdatePositionAndRotati
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
     UpdateMirror(ad, self->objectTransform, self->noteTransform,
-                 self->followedNoteTransform, self,
+                 self->followedObjectTransform, self,
                  [self](bool hide) {
                      self->set_hide(hide);
                  });
