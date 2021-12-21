@@ -160,7 +160,20 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
 }
 
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
-    if (customEventData->type != "AssignTrackParent" && customEventData->type != "AssignPlayerToTrack") {
+    bool isType = false;
+
+    static std::hash<std::string_view> stringViewHash;
+    auto typeHash = stringViewHash(customEventData->type);
+
+#define TYPE_GET(jsonName, varName)                                \
+    static auto jsonNameHash_##varName = stringViewHash(jsonName); \
+    if (!isType && typeHash == (jsonNameHash_##varName))                      \
+        isType = true;
+
+    TYPE_GET("AssignTrackParent", AssignTrackParent)
+    TYPE_GET("AssignPlayerToTrack", AssignPlayerToTrack)
+
+    if (!isType) {
         return;
     }
     rapidjson::Value &eventData = *customEventData->data;
@@ -169,7 +182,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
     if (eventAD.parsed)
         return;
 
-    if (customEventData->type == "AssignTrackParent") {
+    if (typeHash == jsonNameHash_AssignTrackParent) {
         std::string parentTrackName(eventData["_parentTrack"].GetString());
         Track* track = &beatmapAD.tracks[parentTrackName];
 
@@ -186,7 +199,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
         // copy constructor deleted for some reason???
         eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
 
-    } else if (customEventData->type == "AssignPlayerToTrack") {
+    } else if (typeHash == jsonNameHash_AssignPlayerToTrack) {
         std::string trackName(eventData["_track"].GetString());
         Track *track = &beatmapAD.tracks[trackName];
         NELogger::GetLogger().debug("Assigning player to track %s at %p",

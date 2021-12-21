@@ -34,7 +34,20 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
 
 void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
-    if (customEventData->type != "AssignTrackParent" && customEventData->type != "AssignPlayerToTrack") {
+    bool isType = false;
+
+    static std::hash<std::string_view> stringViewHash;
+    auto typeHash = stringViewHash(customEventData->type);
+
+#define TYPE_GET(jsonName, varName)                                \
+    static auto jsonNameHash_##varName = stringViewHash(jsonName); \
+    if (!isType && typeHash == (jsonNameHash_##varName))                      \
+        isType = true;
+
+    TYPE_GET("AssignTrackParent", AssignTrackParent)
+    TYPE_GET("AssignPlayerToTrack", AssignPlayerToTrack)
+
+    if (!isType) {
         return;
     }
 
