@@ -39,7 +39,7 @@ static const std::string SongLoaderID = "SongLoader";
 static const std::string SongLoaderVersionRange = ">=0.7.2";
 
 static const std::string PinkCoreID = "pinkcore";
-static const std::string PinkCoreVersionRange = ">=1.6.2";
+static const std::string PinkCoreVersionRange = ">1.6.2";
 
 static std::vector<const ModInfo> outdatedMods;
 
