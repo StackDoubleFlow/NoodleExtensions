@@ -9,14 +9,14 @@
   "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
   "dependencies": [
     {
-      "versionRange": "^0.4.4",
+      "version": ">=0.4.6",
       "id": "tracks",
-      "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.4.4/tracks.qmod"
+      "downloadIfMissing": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.4.6/tracks.qmod"
     },
     {
-      "versionRange": "^0.14.1",
+      "version": ">=0.14.2",
       "id": "custom-json-data",
-      "modLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.14.1/custom-json-data.qmod"
+      "downloadIfMissing": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.14.2/custom-json-data.qmod"
     }
   ],
   "modFiles": [
