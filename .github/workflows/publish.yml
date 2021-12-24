@@ -109,7 +109,7 @@ jobs:
       - name: Commit Edit Version
         run: |
           git add qpm.json
-          git commit -m "Update Version and post restore"
+          git commit --allow-empty -m "Update Version and post restore"
 
       # Then, we want to use the commit we have just made, and force push our tag to that commit
       - name: Get Commit ID
