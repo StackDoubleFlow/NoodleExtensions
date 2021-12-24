@@ -21,7 +21,7 @@ MAKE_HOOK_MATCH(CutoutEffect_SetCutout,
                 CutoutEffect *self,
                 float cutout, UnityEngine::Vector3 cutoutOffset) {
     // Do not run SetCutout if the new value is the same as old.
-    if (cutout != self->cutout) {
+    if (std::abs(cutout - self->cutout) > 0.005) {
         CutoutEffect_SetCutout(self, cutout, cutoutOffset);
     }
 }
