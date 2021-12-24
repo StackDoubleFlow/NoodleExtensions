@@ -384,7 +384,12 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
 
 MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
                 &ParametricBoxFakeGlowController::OnEnable, void,
-                ParametricBoxFakeGlowController *self) {}
+                ParametricBoxFakeGlowController *self) {
+    if (Hooks::isNoodleHookEnabled())
+        return;
+
+    ParametricBoxFakeGlowController_OnEnable(self);
+}
 
 // #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
 // MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
