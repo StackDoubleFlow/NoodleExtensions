@@ -53,7 +53,9 @@
     {
       "id": "pinkcore",
       "versionRange": "^1.6.0",
-      "additionalData": {}
+      "additionalData": {
+        "includeQmod": false
+      }
     },
     {
       "id": "sombrero",
