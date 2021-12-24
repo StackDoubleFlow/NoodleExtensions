@@ -4,7 +4,7 @@ A port of the Noodle Extensions mod made originally for the PC version of Beat S
 
 ## Building from Source
 
-You'll need [qpm_rust](https://github.com/RedBrumbler/QuestPackageManager-Rust), powershell, and cmake.
+You'll need [qpm_rust](https://github.com/RedBrumbler/QuestPackageManager-Rust), Powershell, Ninja, and CMake in `PATH`.
 
 You'll also need the latest Android NDK. Create a file called `ndkpath.txt` containing the path to the directly where you extracted the ndk to.
 
