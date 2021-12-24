@@ -41,6 +41,9 @@ static const std::string SongLoaderVersionRange = ">=0.7.2";
 static const std::string PinkCoreID = "pinkcore";
 static const std::string PinkCoreVersionRange = ">1.6.2";
 
+static const std::string ChromaID = "chroma";
+static const std::string ChromaVersionRange = ">=2.5.7";
+
 static std::vector<const ModInfo> outdatedMods;
 
 
@@ -150,6 +153,7 @@ void InstallOutdatedModsHooks(Logger &logger) {
     AddToDependencyIfOutdated(QosID, QosVersionRange, modList, outdatedMods);
     AddToDependencyIfOutdated(SongLoaderID, SongLoaderVersionRange, modList, outdatedMods);
     AddToDependencyIfOutdated(PinkCoreID, PinkCoreVersionRange, modList, outdatedMods);
+    AddToDependencyIfOutdated(ChromaID, ChromaVersionRange, modList, outdatedMods);
 
     if (outdatedMods.empty())
         return;
