@@ -14,3 +14,9 @@ qpm-rust cache legacy-fix
 pwsh ./build.ps1
 pwsh ./createqmod.ps1 noodle_extensions
 ```
+
+## What still needs to be done?
+- Left handed mode
+- Beatmap note/obstacle/bomb count (includes fakes)
+- Some maps such as Centipede by totally balloon have fake notes registered as real notes
+- Make Noodle only run on Noodle maps
