@@ -44,7 +44,10 @@ static const std::string PinkCoreVersionRange = ">1.6.2";
 static const std::string ChromaID = "chroma";
 static const std::string ChromaVersionRange = ">=2.5.7";
 
+static const std::string MappingExtensionsID = "MappingExtensions";
+
 static std::vector<const ModInfo> outdatedMods;
+static bool MEInstalled = false;
 
 
 static void AddToDependencyIfOutdated(std::string const& modName,
@@ -112,21 +115,30 @@ custom_types::Helpers::Coroutine openDialogLater() {
     layout->set_childForceExpandWidth(true);
 
     // Texts
+    if (MEInstalled) {
+        auto warningMEText = BeatSaberUI::CreateText(layout->get_transform(),
+                                                     "Mapping extensions is installed. REMOVE IT");
+        warningMEText->set_enableWordWrapping(true);
+        warningMEText->set_alignment(TMPro::TextAlignmentOptions::Center);
+        warningMEText->set_fontSize(warningMEText->get_fontSize() * 1.125f);
+    }
 
-    auto warningText = BeatSaberUI::CreateText(layout->get_transform(),
-                                               "There seems to be some incompatible mods with Noodle that have updates. Please update the following mods:");
-    warningText->set_enableWordWrapping(true);
-    warningText->set_alignment(TMPro::TextAlignmentOptions::Center);
-    warningText->set_fontSize(warningText->get_fontSize() * 0.85f);
+    if (!outdatedMods.empty()) {
+        auto warningText = BeatSaberUI::CreateText(layout->get_transform(),
+                                                   "There seems to be some incompatible mods with Noodle that have updates. Please update the following mods:");
+        warningText->set_enableWordWrapping(true);
+        warningText->set_alignment(TMPro::TextAlignmentOptions::Center);
+        warningText->set_fontSize(warningText->get_fontSize() * 0.85f);
 
-    auto smallLayout = layout; // BeatSaberUI::CreateVerticalLayoutGroup(layout->get_transform());
+        auto smallLayout = layout; // BeatSaberUI::CreateVerticalLayoutGroup(layout->get_transform());
 
-    for (auto const &mod: outdatedMods) {
-        std::string modInfo(mod.id + ":" + mod.version);
-        auto modText = BeatSaberUI::CreateText(smallLayout->get_transform(), modInfo);
-        modText->set_enableWordWrapping(true);
-        modText->set_alignment(TMPro::TextAlignmentOptions::Center);
-        modText->set_fontSize(modText->get_fontSize() * 0.7f);
+        for (auto const &mod: outdatedMods) {
+            std::string modInfo(mod.id + ":" + mod.version);
+            auto modText = BeatSaberUI::CreateText(smallLayout->get_transform(), modInfo);
+            modText->set_enableWordWrapping(true);
+            modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+            modText->set_fontSize(modText->get_fontSize() * 0.7f);
+        }
     }
 
     modalTransform->Show(true, true, nullptr);
@@ -155,7 +167,11 @@ void InstallOutdatedModsHooks(Logger &logger) {
     AddToDependencyIfOutdated(PinkCoreID, PinkCoreVersionRange, modList, outdatedMods);
     AddToDependencyIfOutdated(ChromaID, ChromaVersionRange, modList, outdatedMods);
 
-    if (outdatedMods.empty())
+    if (modList.contains(MappingExtensionsID)) {
+        MEInstalled = true;
+    }
+
+    if (outdatedMods.empty() && !MEInstalled)
         return;
 
     QuestUI::Init();
