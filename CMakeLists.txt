@@ -46,12 +46,17 @@ target_link_libraries(${COMPILE_ID} PRIVATE -llog)
 include(extern.cmake)
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_STRIP} -g -S -d --strip-all
+        COMMAND ${CMAKE_STRIP} -d --strip-debug
         "lib${COMPILE_ID}.so" -o "stripped_lib${COMPILE_ID}.so"
         COMMENT "Strip debug symbols done on final binary.")
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E rename lib${COMPILE_ID}.so debug_lib${COMPILE_ID}.so
+        COMMAND ${CMAKE_COMMAND} -E make_directory debug
+        COMMENT "Rename the lib to debug_ since it has debug symbols"
+        )
+
+add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rename lib${COMPILE_ID}.so debug/lib${COMPILE_ID}.so
         COMMENT "Rename the lib to debug_ since it has debug symbols"
         )
 
