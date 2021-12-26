@@ -24,7 +24,10 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
                 BaseNoteVisuals *self) {
     BaseNoteVisuals_Awake(self);
 
-    if (il2cpp_utils::AssignableFrom<ICubeNoteTypeProvider*>(self->noteController->klass)) {
+    static auto ICubeNoteTypeProviderKlass = classof(ICubeNoteTypeProvider*);
+    static auto CustomNoteDataKlass = classof(CustomJSONData::CustomNoteData*);
+
+    if (il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->noteController->klass)) {
         NoteController* noteController = static_cast<NoteController *>(self->noteController);
 
         if (!noteController->noteData)
@@ -32,7 +35,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 
         DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController;
 
-        if (il2cpp_utils::AssignableFrom<CustomJSONData::CustomNoteData*>(noteController->noteData->klass)) {
+        if (il2cpp_functions::class_is_assignable_from(CustomNoteDataKlass, noteController->noteData->klass)) {
 //        if (noteData->customData) {
             CustomJSONData::CustomNoteData* noteData = static_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
             auto &ad = getAD(noteData->customData);

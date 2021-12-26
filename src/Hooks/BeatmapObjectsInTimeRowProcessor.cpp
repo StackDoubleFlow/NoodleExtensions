@@ -16,12 +16,14 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     if (notes->get_Count() < 0)
         return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
+    static auto CustomNoteDataKlass = classof(CustomNoteData*);
+
     auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
     std::unordered_map<float, std::vector<CustomNoteData *>> notesInColumn;
     for (int i = 0; i < customNotes->get_Count(); i++) {
         CustomNoteData *noteData = customNotes->items->values[i];
 
-        if (!il2cpp_utils::AssignableFrom<CustomNoteData*>(noteData->klass))
+        if (!il2cpp_functions::class_is_assignable_from(CustomNoteDataKlass, noteData->klass))
             continue;
 
         float lineIndex = noteData->lineIndex - 2.0f;

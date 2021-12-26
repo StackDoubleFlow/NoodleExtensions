@@ -19,7 +19,9 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 static bool GetHiddenForType(BeatmapObjectManager* beatmapObjectManager) {
-    if (il2cpp_utils::AssignableFrom<BasicBeatmapObjectManager*>(beatmapObjectManager->klass))
+    static auto BasicBeatmapObjectManagerKlass = classof(BasicBeatmapObjectManager*);
+
+    if (il2cpp_functions::class_is_assignable_from(BasicBeatmapObjectManagerKlass, beatmapObjectManager->klass))
     {
         return true;
     }
