@@ -18,7 +18,7 @@ extern std::optional<NoteCutCoreEffectsSpawner*> noteCutCoreEffectsSpawner;
 MAKE_HOOK_MATCH(HandleNoteControllerNoteWasMissed,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasMissed, void,
                 BeatmapObjectManager *self, NoteController *noteController) {
-    if (!FakeNoteHelper::GetFakeNote(noteController)) {
+    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         HandleNoteControllerNoteWasMissed(self, noteController);
     }
 }
@@ -50,16 +50,24 @@ void HandleNoteWasCut(NoteCutCoreEffectsSpawner* self, GlobalNamespace::NoteCont
 MAKE_HOOK_MATCH(BeatmapObjectManager_HandleNoteControllerNoteWasCut,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasCut, void,
                 BeatmapObjectManager *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
-    if (FakeNoteHelper::GetFakeNote(noteController) && noteCutCoreEffectsSpawner) {
-        CRASH_UNLESS(*noteCutCoreEffectsSpawner);
-//        NELogger::GetLogger().debug("note %p %p extract type %p", &noteCutInfo.heldRef, &classof(GlobalNamespace::NoteCutInfo)->this_arg, NoteCutInfoT(noteCutInfo));
-//        NELogger::GetLogger().debug("no arg %p arg %p", il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_type<ByRef<NoteCutInfo>>::get(), il2cpp_utils::il2cpp_type_check::il2cpp_arg_type<ByRef<NoteCutInfo>>::get(noteCutInfo));
-        HandleNoteWasCut(*noteCutCoreEffectsSpawner, noteController, noteCutInfo);
-        self->Despawn(noteController);
+    // If not fake note or noteCutCoreEffectsSpawner is null
+    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
+        BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);
         return;
     }
-    BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);
+
+    if (!noteCutCoreEffectsSpawner) {
+        NELogger::GetLogger().error("noteCutCoreEffectsSpawner is null");
+        return;
+    }
+
+    CRASH_UNLESS(*noteCutCoreEffectsSpawner);
+//        NELogger::GetLogger().debug("note %p %p extract type %p", &noteCutInfo.heldRef, &classof(GlobalNamespace::NoteCutInfo)->this_arg, NoteCutInfoT(noteCutInfo));
+//        NELogger::GetLogger().debug("no arg %p arg %p", il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_type<ByRef<NoteCutInfo>>::get(), il2cpp_utils::il2cpp_type_check::il2cpp_arg_type<ByRef<NoteCutInfo>>::get(noteCutInfo));
+    HandleNoteWasCut(*noteCutCoreEffectsSpawner, noteController, noteCutInfo);
+    self->Despawn(noteController);
 }
+
 
 void InstallBeatmapObjectManagerHooks(Logger &logger) {
     INSTALL_HOOK(logger, HandleNoteControllerNoteWasMissed);

@@ -14,8 +14,8 @@
 
 using namespace GlobalNamespace;
 
-bool FakeNoteHelper::GetFakeNote(NoteController *noteController) {
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->get_noteData());
+bool FakeNoteHelper::GetFakeNote(NoteData *noteData) {
+    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
     if (!customNoteData->customData->value) {
         return false;
     }

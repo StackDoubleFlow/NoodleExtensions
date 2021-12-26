@@ -2,6 +2,8 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
 #include "GlobalNamespace/NoteCutSoundEffectManager.hpp"
+#include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/NoteData.hpp"
 #include "UnityEngine/Time.hpp"
 
 #include "FakeNoteHelper.h"
@@ -67,7 +69,7 @@ MAKE_HOOK_MATCH(NoteCutSoundEffectManager_Start, &NoteCutSoundEffectManager::Sta
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned,
                 &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
                 NoteCutSoundEffectManager *self, NoteController *noteController) {
-    if (!FakeNoteHelper::GetFakeNote(noteController)) {
+    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         if (ProcessHitSound(noteController)) {
             NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
         } else {

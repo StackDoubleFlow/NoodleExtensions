@@ -1,11 +1,23 @@
 #include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
 #include "tracks/shared/Vector.h"
+#include "NELogger.h"
 
 namespace NEJSON {
 
 static std::optional<bool> ReadOptionalBool(const rapidjson::Value &object, const char *key) {
     auto itr = object.FindMember(key);
     if (itr != object.MemberEnd()) {
+        if (itr->value.IsString()) {
+            std::string boolS = itr->value.GetString();
+
+            if (boolS == "true") {
+                return true;
+            }
+
+            NELogger::GetLogger().error("ReadOptionalBool: THE VALUE IS A STRING WHY! value: \"%s\"", boolS.c_str());
+            return false;
+        }
+
         return itr->value.GetBool();
     }
     return std::nullopt;

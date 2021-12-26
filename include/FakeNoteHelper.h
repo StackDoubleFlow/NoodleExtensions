@@ -18,7 +18,7 @@ namespace System::Collections::Generic {
 
 namespace FakeNoteHelper {
 
-bool GetFakeNote(GlobalNamespace::NoteController *noteController);
+bool GetFakeNote(GlobalNamespace::NoteData *noteData);
 bool GetCuttable(GlobalNamespace::NoteData *noteData);
 
 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController *>* ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles);

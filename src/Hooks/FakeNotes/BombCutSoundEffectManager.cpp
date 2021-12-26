@@ -13,7 +13,7 @@ using namespace GlobalNamespace;
 
 MAKE_HOOK_MATCH(BombCutSoundEffectManager_HandleNoteWasCut, &BombCutSoundEffectManager::HandleNoteWasCut, void,
                 BombCutSoundEffectManager *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
-    if (FakeNoteHelper::GetCuttable(noteController->noteData)) {
+    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         BombCutSoundEffectManager_HandleNoteWasCut(self, noteController, noteCutInfo);
     }
 }
