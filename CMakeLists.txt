@@ -8,6 +8,8 @@ project(${COMPILE_ID})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 
+#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 # define that stores the actual source directory
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -46,7 +48,7 @@ target_link_libraries(${COMPILE_ID} PRIVATE -llog)
 include(extern.cmake)
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_STRIP} -d --strip-debug
+        COMMAND ${CMAKE_STRIP} -d --strip-all
         "lib${COMPILE_ID}.so" -o "stripped_lib${COMPILE_ID}.so"
         COMMENT "Strip debug symbols done on final binary.")
 
