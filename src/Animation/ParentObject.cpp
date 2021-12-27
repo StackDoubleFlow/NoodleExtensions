@@ -1,5 +1,7 @@
 #include "Animation/ParentObject.h"
 
+#include "beatsaber-hook/shared/utils/il2cpp-type-check.hpp"
+
 #include <utility>
 #include "Animation/AnimationHelper.h"
 #include "UnityEngine/GameObject.hpp"
@@ -48,9 +50,7 @@ void ParentObject::Update() {
     origin->set_localScale(scaleVector);
 }
 
-void ParentObject::ResetTransformParent(Transform *transform) {
-    transform->SetParent(nullptr, false);
-}
+
 
 static void logTransform(Transform* transform, int hierarchy = 0) {
     if (hierarchy != 0) {
@@ -70,17 +70,23 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
                                std::optional<NEVector::Quaternion> const& startRot,
                                std::optional<NEVector::Quaternion> const& startLocalRot,
                                std::optional<NEVector::Vector3> const& startScale, bool worldPositionStays) {
-    if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
-        NELogger::GetLogger().error("How could a track contain itself?");
-        return;
-    }
-    GameObject *parentGameObject = GameObject::New_ctor(il2cpp_utils::newcsstr("ParentObject"));
+//    if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
+//        NELogger::GetLogger().error("How could a track contain itself?");
+//        return;
+//    }
+    static auto* ParentName = il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("ParentObject");
+
+    GameObject *parentGameObject = GameObject::New_ctor(ParentName);
     ParentObject *instance = parentGameObject->AddComponent<ParentObject *>();
-    instance->origin = parentGameObject->get_transform();
+
+    static auto get_transform = il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::GameObject::get_transform>::get();
+    static auto get_transformMB = il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::MonoBehaviour::get_transform>::get();
+
+    instance->origin = get_transform(parentGameObject);
     instance->track = parentTrack;
     instance->worldPositionStays = worldPositionStays;
 
-    Transform *transform = instance->get_transform();
+    Transform *transform = get_transformMB(instance);
     if (startPos.has_value()) {
         instance->startPos = *startPos;
         transform->set_localPosition(
@@ -104,9 +110,13 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
         transform->set_localScale(instance->startScale);
     }
 
+    auto startTime = std::chrono::high_resolution_clock::now();
     parentTrack->AddGameObject(parentGameObject);
 
     for (auto &track: tracks) {
+        if (track == parentTrack) {
+            NELogger::GetLogger().error("How could a track contain itself?");
+        }
 
         for (auto &parentObject: ParentController::parentObjects) {
             track->gameObjectModificationEvent -= {&ParentObject::HandleGameObject, parentObject};
@@ -114,7 +124,7 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
         }
 
         for (auto &gameObject: track->gameObjects) {
-            instance->ParentToObject(gameObject->get_transform());
+            instance->ParentToObject(get_transform(gameObject));
         }
         instance->childrenTracks.emplace(track);
         track->gameObjectModificationEvent += {&ParentObject::HandleGameObject, instance};
@@ -124,26 +134,25 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
 }
 
 void ParentObject::ParentToObject(Transform *transform) {
-    transform->SetParent(origin->get_transform(), worldPositionStays);
+    static auto SetParent = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<void (Transform::*)(UnityEngine::Transform *, bool)>(&UnityEngine::Transform::SetParent)>::get();
+
+    SetParent(transform, origin, worldPositionStays);
 }
 
-ParentObject *ParentController::GetParentObjectTrack(Track *track) {
-    auto itr = std::find_if(parentObjects.begin(), parentObjects.end(), [=](auto *n) {
-        return n->childrenTracks.contains(track); 
-    });
+void ParentObject::ResetTransformParent(Transform *transform) {
+    static auto SetParent = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<void (Transform::*)(UnityEngine::Transform *, bool)>(&UnityEngine::Transform::SetParent)>::get();
 
-    if (itr != parentObjects.end()) {
-        return *itr;
-    } else {
-        return nullptr;
-    }
+    SetParent(transform, nullptr, false);
 }
 
 void ParentObject::HandleGameObject(Track *track, UnityEngine::GameObject *go, bool removed) {
+    static auto get_transform = il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::GameObject::get_transform>::get();
+
+
     if (removed) {
-        ResetTransformParent(go->get_transform());
+        ResetTransformParent(get_transform(go));
     } else {
-        ParentToObject(go->get_transform());
+        ParentToObject(get_transform(go));
     }
 }
 
