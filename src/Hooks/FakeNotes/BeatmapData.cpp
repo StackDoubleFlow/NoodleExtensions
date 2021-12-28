@@ -39,7 +39,7 @@ static std::unordered_map<BeatmapData*, BeatmapRemoveData> beatmapRemoveDatas;
 
 // return true if fake
 // subtracts from object count if fake
-static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObjectData, BeatmapRemoveData& beatmapRemoveData)
+static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObjectData)
 {
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
@@ -51,7 +51,7 @@ static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObject
         auto obstacleData =
                 (CustomJSONData::CustomObstacleData *)beatmapObjectData;
         customDataWrapper = obstacleData->customData;
-        countField = &beatmapRemoveData.toRemoveObstacle;
+        countField = &self->obstaclesCount;
     } else if (beatmapObjectData->klass == customNoteDataClass) {
         auto noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
         customDataWrapper = noteData->customData;
@@ -59,9 +59,9 @@ static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObject
         if (noteData->cutDirection == NoteCutDirection::None)
         {
             // bomb
-            countField = &beatmapRemoveData.toRemoveBomb;
+            countField = &self->bombsCount;
         } else {
-            countField = &beatmapRemoveData.toRemoveNote;
+            countField = &self->cuttableNotesCount;
         }
     }
 
@@ -72,7 +72,7 @@ static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObject
 
         if (fake.value_or(false)) {
             int& countRef = *countField;
-            countRef++;
+            countRef--;
 
             return true;
         }
@@ -114,7 +114,7 @@ MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObje
                BeatmapData *self, BeatmapObjectData* beatmapObjectData) {
     BeatmapData_AddBeatmapObjectData_t(self, beatmapObjectData);
 
-    FakeObjectRemove(self, beatmapObjectData, beatmapRemoveDatas[self]);
+    FakeObjectRemove(self, beatmapObjectData);
 }
 
 void InstallBeatmapDataHooks(Logger &logger) {
@@ -122,7 +122,7 @@ void InstallBeatmapDataHooks(Logger &logger) {
 
     // force CJD to be first
     Modloader::requireMod("CustomJSONData");
-    RuntimeSongLoader::API::AddBeatmapDataLoadedEvent(&OnBeatmapLoad);
+//    RuntimeSongLoader::API::AddBeatmapDataLoadedEvent(&OnBeatmapLoad);
 
 }
 NEInstallHooks(InstallBeatmapDataHooks);
