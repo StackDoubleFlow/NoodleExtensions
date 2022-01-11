@@ -64,7 +64,7 @@ float noteTimeAdjust(float original, float jumpDuration) {
     return original;
 }
 
-std::unordered_map<NoteController *, Array<ConditionalMaterialSwitcher *> *> cachedNoteMaterialSwitchers;
+std::unordered_map<NoteController *, ArrayW<ConditionalMaterialSwitcher *>> cachedNoteMaterialSwitchers;
 
 void NECaches::ClearNoteCaches() {
     cachedNoteMaterialSwitchers.clear();
@@ -89,7 +89,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!customNoteData->customData)
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
     auto it = cachedNoteMaterialSwitchers.find(self);
     if (it == cachedNoteMaterialSwitchers.end()) {
         cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
@@ -97,7 +97,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         materialSwitchers = it->second;
     }
     ad.materialSwitchers = materialSwitchers;
-    for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+    for (auto *materialSwitcher: materialSwitchers) {
         materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
     ad.dissolveEnabled = false;
@@ -112,7 +112,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
         vector =
                 vector +
-                NEVector::Vector3(noteJump->randomRotations->values[noteJump->randomRotationIdx]) * 20;
+                NEVector::Vector3(noteJump->randomRotations.get(noteJump->randomRotationIdx)) * 20;
         NEVector::Quaternion midrotation = NEVector::Quaternion::Euler(vector);
         noteJump->middleRotation = midrotation;
     }
@@ -241,7 +241,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
     if (hasDissolveOffset && !ad.dissolveEnabled && noteDissolveConfig) {
-        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+        ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
         for (auto *materialSwitcher : materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
         }
@@ -253,9 +253,8 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
             CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
-            Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
-            for (int i = 0; i < cuttoutEffects->Length(); i++) {
-                CutoutEffect *effect = cuttoutEffects->get(i);
+            ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
+            for (CutoutEffect *effect : cuttoutEffects) {
                 if (csstrtostr(effect->get_name()) != u"NoteArrow") {
                     cutoutEffect = effect;
                     break;
@@ -292,16 +291,16 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
         if (self->klass == gameNoteControllerClass) {
             auto *gameNoteController = reinterpret_cast<GameNoteController *>(self);
-            Array<BoxCuttableBySaber *> *bigCuttable = gameNoteController->bigCuttableBySaberList;
-            for (int i = 0; i < bigCuttable->Length(); i++) {
-                if (bigCuttable->values[i]->canBeCut != enabled) {
-                    bigCuttable->values[i]->set_canBeCut(enabled);
+            ArrayW<BoxCuttableBySaber *> bigCuttables = gameNoteController->bigCuttableBySaberList;
+            for (auto bigCuttable : bigCuttables) {
+                if (bigCuttable->canBeCut != enabled) {
+                    bigCuttable->set_canBeCut(enabled);
                 }
             }
-            Array<BoxCuttableBySaber *> *smallCuttable = gameNoteController->smallCuttableBySaberList;
-            for (int i = 0; i < smallCuttable->Length(); i++) {
-                if (smallCuttable->values[i]->canBeCut != enabled) {
-                    smallCuttable->values[i]->set_canBeCut(enabled);
+            ArrayW<BoxCuttableBySaber *> smallCuttables = gameNoteController->smallCuttableBySaberList;
+            for (auto smallCuttable : smallCuttables) {
+                if (smallCuttable->canBeCut != enabled) {
+                    smallCuttable->set_canBeCut(enabled);
                 }
             }
         } else if(self->klass == bombNoteControllerClass) {

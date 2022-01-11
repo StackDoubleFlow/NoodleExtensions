@@ -46,7 +46,7 @@ bool ObjectTimeCompare(BeatmapObjectData *a, BeatmapObjectData *b) {
 }
 
 void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
-    BeatmapObjectData **begin = beatmapObjectsData->items->values;
+    BeatmapObjectData **begin = beatmapObjectsData->items.begin();
     BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
     std::sort(begin, end, ObjectTimeCompare);
 }
@@ -61,11 +61,12 @@ IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     float const moveDuration = 0.5f;
 
     // loop through all objects in all lines of the beatmapData
-    for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = customBeatmapData->beatmapLinesData->values[i];
+    for (BeatmapLineData *beatmapLineData : customBeatmapData->beatmapLinesData) {
+        if (!beatmapLineData)
+            continue;
+
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData =
-                beatmapLineData->beatmapObjectsData->items->values[j];
+            BeatmapObjectData *beatmapObjectData = beatmapLineData->beatmapObjectsData->items.get(j);
             float bpm;
 
             CustomJSONData::JSONWrapper *customDataWrapper;
@@ -119,11 +120,13 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
         TracksAD::readBeatmapDataAD(beatmap);
     }
 
-    for (int i = 0; i < beatmap->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = beatmap->beatmapLinesData->values[i];
+    for (BeatmapLineData *beatmapLineData : beatmap->beatmapLinesData) {
+        if (!beatmapLineData)
+            continue;
+
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
             BeatmapObjectData *beatmapObjectData =
-                    beatmapLineData->beatmapObjectsData->items->values[j];
+                    beatmapLineData->beatmapObjectsData->items.get(j);
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {

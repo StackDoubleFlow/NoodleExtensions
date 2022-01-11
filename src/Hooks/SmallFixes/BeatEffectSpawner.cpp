@@ -16,6 +16,8 @@
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Transform.hpp"
 
+#include "tracks/shared/TimeSourceHelper.h"
+
 #include "tracks/shared/Vector.h"
 #include "AssociatedData.h"
 #include "NEHooks.h"
@@ -48,7 +50,7 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
     {
         return;
     }
-    if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->get_songTime())
+    if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->songTime)
     {
         return;
     }

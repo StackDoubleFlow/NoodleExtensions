@@ -41,7 +41,7 @@ SafePtr<List<ObstacleController*>>& getActiveObstacles() {
 }
 
 
-std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
+std::unordered_map<ObstacleController *, ArrayW<ConditionalMaterialSwitcher *>> cachedObstacleMaterialSwitchers;
 
 void NECaches::ClearObstacleCaches() {
     cachedObstacleMaterialSwitchers.clear();
@@ -93,7 +93,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
     auto it = cachedObstacleMaterialSwitchers.find(self);
     if (it == cachedObstacleMaterialSwitchers.end()) {
         cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
@@ -104,7 +104,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     // Reset only if NE dissolve is enabled
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
-        for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+        for (auto *materialSwitcher: materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
         }
     }
@@ -321,7 +321,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         if (wasEnabled != ad.dissolveEnabled) {
-            ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
             for (auto *materialSwitcher: materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(
                         ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);

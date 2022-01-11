@@ -37,10 +37,10 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
 
     for (int i = 0; i < self->beatmapObjectCallbackData->size; i++) {
         self->beatmapObjectDataCallbackCacheList->Clear();
-        BeatmapObjectCallbackData *callbackData = self->beatmapObjectCallbackData->items->values[i];
+        BeatmapObjectCallbackData *callbackData = self->beatmapObjectCallbackData->items.get(i);
         for (int j = 0; j < beatmapLinesData->Length(); j++) {
-            while (callbackData->nextObjectIndexInLine->values[j] < ((List<GlobalNamespace::BeatmapObjectData*>*) beatmapLinesData->values[j]->get_beatmapObjectsData())->get_Count()) {
-                BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->get_Item(callbackData->nextObjectIndexInLine->values[j]);
+            while (callbackData->nextObjectIndexInLine.get(j) < ((List<GlobalNamespace::BeatmapObjectData*>*) beatmapLinesData->values[j]->get_beatmapObjectsData())->get_Count()) {
+                BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->get_Item(callbackData->nextObjectIndexInLine.get(j));
 
                 float aheadTime = callbackData->aheadTime;
                 if (callbackData->callback->method_ptr.m_value == callback_mptr) {
@@ -59,22 +59,22 @@ MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallba
                 }
                 if (beatmapObjectData->time >= self->spawningStartTime) {
                     for (int k = self->beatmapObjectDataCallbackCacheList->get_Count(); k >= 0; k--) {
-                        if (k == 0 || self->beatmapObjectDataCallbackCacheList->items->values[k - 1]->time <= beatmapObjectData->time) {
+                        if (k == 0 || self->beatmapObjectDataCallbackCacheList->items.get(k - 1)->time <= beatmapObjectData->time) {
                             self->beatmapObjectDataCallbackCacheList->Insert(k, beatmapObjectData);
                             break;
                         }
                     }
                 }
-                callbackData->nextObjectIndexInLine->values[j]++;
+                callbackData->nextObjectIndexInLine.get(j)++;
             }
         }
         for (int j = 0; j < self->beatmapObjectDataCallbackCacheList->size; j++) {
-            callbackData->callback->Invoke(self->beatmapObjectDataCallbackCacheList->items->values[j]);
+            callbackData->callback->Invoke(self->beatmapObjectDataCallbackCacheList->items.get(j));
         }
     }
 
     for (int l = 0; l < self->beatmapEventCallbackData->get_Count(); l++) {
-        BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items->values[l];
+        BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items.get(l);
         while (callbackData->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
             BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(callbackData->nextEventIndex);
             if (beatmapEventData->time - callbackData->aheadTime >= songTime) {

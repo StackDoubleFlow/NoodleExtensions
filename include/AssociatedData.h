@@ -85,7 +85,7 @@ struct BeatmapObjectAssociatedData {
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
     // conditional material switch for dissolve
-    Array<GlobalNamespace::ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
 
