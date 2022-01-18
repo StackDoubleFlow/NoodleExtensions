@@ -11,6 +11,7 @@ using namespace AnimationHelper;
 using namespace GlobalNamespace;
 using namespace NEVector;
 using namespace CustomJSONData;
+using namespace Animation;
 
 // BeatmapObjectCallbackController.cpp
 extern BeatmapObjectCallbackController *callbackController;
@@ -48,7 +49,7 @@ constexpr std::optional<T> operator*(std::optional<T> const& a, std::optional<T>
     }
 }
 
-std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time) {
+std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::span<Track *> tracks, float time) {
     PointDefinition *localDefinitePosition = animationData.definitePosition;
 
     std::optional<Vector3> pathDefinitePosition =
@@ -59,7 +60,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
             Track *track = tracks.front();
             pathDefinitePosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value, time);
         } else {
-            pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), time, definitePosition);
+            pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), definitePosition, time);
         }
     }
 
@@ -84,7 +85,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
             trackPosition = MSumTrackProps(tracks, Vector3::zero(), position);
 
             if (!pathPosition)
-                pathPosition = MSumTrackPathProps(tracks, Vector3::zero(), time, position);
+                pathPosition = MSumTrackPathProps(tracks, Vector3::zero(), position, time);
         }
 
         positionOffset = pathPosition + trackPosition;
@@ -100,7 +101,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     return definitePosition;
 }
 
-ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, std::vector<Track *> const& tracks, float time) {
+ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, std::span<Track *> tracks, float time) {
     ObjectOffset offset;
 
     PointDefinition *position = animationData.position;
@@ -156,13 +157,13 @@ offset.offsetName = path##name op getPropertyNullable<type>(track, track->proper
 if (!path##name)                                \
     path##name = func;
 
-            multiPathProp(position, MSumTrackPathProps(tracks, Vector3::zero(), time, position))
-            multiPathProp(rotation, MMultTrackPathProps(tracks, Quaternion::identity(), time, rotation))
-            multiPathProp(scale, MMultTrackPathProps(tracks, Vector3::one(), time, scale))
-            multiPathProp(localRotation, MMultTrackPathProps(tracks, Quaternion::identity(), time, localRotation))
-            multiPathProp(dissolve, MMultTrackPathProps(tracks, 1.0f, time, dissolve))
-            multiPathProp(dissolveArrow, MMultTrackPathProps(tracks, 1.0f, time, dissolveArrow))
-            multiPathProp(cuttable, MMultTrackPathProps(tracks, 1.0f, time, cuttable))
+            multiPathProp(position, MSumTrackPathProps(tracks, Vector3::zero(), position, time))
+            multiPathProp(rotation, MMultTrackPathProps(tracks, Quaternion::identity(), rotation, time))
+            multiPathProp(scale, MMultTrackPathProps(tracks, Vector3::one(), scale, time))
+            multiPathProp(localRotation, MMultTrackPathProps(tracks, Quaternion::identity(), localRotation, time))
+            multiPathProp(dissolve, MMultTrackPathProps(tracks, 1.0f, dissolve, time))
+            multiPathProp(dissolveArrow, MMultTrackPathProps(tracks, 1.0f, dissolveArrow, time))
+            multiPathProp(cuttable, MMultTrackPathProps(tracks, 1.0f, cuttable, time))
 
             offset.positionOffset = pathposition + MSumTrackProps(tracks, Vector3::zero(), position);
             offset.rotationOffset = pathrotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);

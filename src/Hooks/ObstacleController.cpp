@@ -47,7 +47,7 @@ void NECaches::ClearObstacleCaches() {
     cachedObstacleMaterialSwitchers.clear();
 }
 
-float obstacleTimeAdjust(float original, std::vector<Track*> const& tracks, float move1Duration, float finishMovementTime) {
+float obstacleTimeAdjust(float original, std::span<Track*> tracks, float move1Duration, float finishMovementTime) {
     if (original > move1Duration && !tracks.empty()) {
         Track *obstacleTrack = nullptr;
 
@@ -170,7 +170,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
-    std::vector<Track *> const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
     if (!tracks.empty()) {
         auto go = self->get_gameObject();
         for (auto &track: tracks) {
@@ -247,7 +247,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
 
 
-    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float const elapsedTime = songTime - self->startTimeOffset;
@@ -352,19 +352,29 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosForTime, Vector3,
                 ObstacleController *self, float time) {
-    auto *obstacleData = (CustomJSONData::CustomObstacleData *)self->obstacleData;
+//    static auto CustomObstacleDataKlass = classof(CustomJSONData::CustomObstacleData *);
+//    CRASH_UNLESS(self);
+//    CRASH_UNLESS(self->obstacleData);
+//    NELogger::GetLogger().debug("ObstacleController::GetPosForTime %p", self->obstacleData);
+//    CRASH_UNLESS(self->obstacleData->klass);
+//    CRASH_UNLESS(CustomObstacleDataKlass);
+//
+//    if (!self || !self->obstacleData || self->obstacleData->klass != CustomObstacleDataKlass) {
+//        return ObstacleController_GetPosForTime(self, time);
+//    }
+    auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     if (!obstacleData->customData->value) {
         return ObstacleController_GetPosForTime(self, time);
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
     float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
     std::optional<NEVector::Vector3> position =
-        AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
+            AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
 
     if (position.has_value()) {
         NEVector::Vector3 noteOffset = ad.noteOffset;
@@ -372,7 +382,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
         definitePosition.x += ad.xOffset;
         if (time < self->move1Duration) {
             NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
-                self->startPos, self->midPos, time / self->move1Duration);
+                    self->startPos, self->midPos, time / self->move1Duration);
             return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
         } else {
             return definitePosition;

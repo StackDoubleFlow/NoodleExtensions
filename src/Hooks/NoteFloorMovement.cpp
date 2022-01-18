@@ -15,7 +15,7 @@ using namespace UnityEngine;
 using namespace System;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern std::vector<Track *> noteTracks;
+extern TracksAD::TracksVector noteTracks;
 
 static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, NoteFloorMovement* noteFloorMovement) {
     if (!noteUpdateAD) {

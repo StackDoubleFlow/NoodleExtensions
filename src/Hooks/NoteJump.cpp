@@ -16,7 +16,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern std::vector<Track*> noteTracks;
+extern TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration);
 

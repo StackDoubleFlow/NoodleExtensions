@@ -32,7 +32,7 @@ using namespace UnityEngine;
 using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
-std::vector<Track*> noteTracks;
+TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
     if (noteTracks.empty())
@@ -138,7 +138,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
         }
     }
-    std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    auto const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
         auto go = self->get_gameObject();
         for (auto &track: tracks) {
@@ -180,7 +180,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     // }
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
 
     noteUpdateAD = &ad;
     noteTracks = tracks;

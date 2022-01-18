@@ -10,6 +10,7 @@ using namespace TrackParenting;
 using namespace UnityEngine;
 using namespace GlobalNamespace;
 using namespace System;
+using namespace Animation;
 
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;

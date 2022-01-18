@@ -25,7 +25,7 @@ using namespace UnityEngine;
 static constexpr void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject)
 {
     if (noteData->customData && noteData->customData->value) {
-        std::vector<Track *> const &tracks = TracksAD::getAD(noteData->customData).tracks;
+        auto const &tracks = TracksAD::getAD(noteData->customData).tracks;
         if (!tracks.empty()) {
             for (auto &track: tracks) {
                 track->AddGameObject(gameObject);
