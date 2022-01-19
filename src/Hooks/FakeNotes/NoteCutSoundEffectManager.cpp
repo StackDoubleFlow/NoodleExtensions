@@ -62,7 +62,7 @@ MAKE_HOOK_MATCH(NoteCutSoundEffectManager_Start, &NoteCutSoundEffectManager::Sta
     currentSoundEffectManager = self;
     cutCount = 0;
     hitsoundQueue.clear();
-    self->StartCoroutine(reinterpret_cast<System::Collections::IEnumerator*>(custom_types::Helpers::CoroutineHelper::New(AddNotesLater())));
+    self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(AddNotesLater()));
     NoteCutSoundEffectManager_Start(self);
 }
 

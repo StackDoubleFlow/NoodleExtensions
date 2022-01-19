@@ -152,9 +152,7 @@ MAKE_HOOK_MATCH(MainFlowCoordinator_DidActivate, &GlobalNamespace::MainFlowCoord
     static bool dialogOpened = false;
     if (!dialogOpened) {
         dialogOpened = true;
-        self->StartCoroutine(
-                reinterpret_cast<System::Collections::IEnumerator *>(custom_types::Helpers::CoroutineHelper::New(
-                        openDialogLater())));
+        self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(openDialogLater()));
     }
 }
 

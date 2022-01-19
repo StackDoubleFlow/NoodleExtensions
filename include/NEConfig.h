@@ -9,5 +9,6 @@ DECLARE_CONFIG(NEConfig,
     CONFIG_INIT_FUNCTION(
         CONFIG_INIT_VALUE(enableNoteDissolve);
         CONFIG_INIT_VALUE(enableObstacleDissolve);
+        CONFIG_INIT_VALUE(qosmeticsModelDisable);
     )
 )
