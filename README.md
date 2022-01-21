@@ -7,6 +7,8 @@ A port of the Noodle Extensions mod made originally for the PC version of Beat S
   - Due to the Quest not having distortion on walls, Noodle Extensions will attempt to change the walls materials to solid if these conditions are met:
     - Wall color alpha (controlled by Chroma) is greater than or equal to 1
     - Dissolve animation is being applied
+- Bombs are not coloring/are always black
+  - A bug specific to Quest causes bombs to lose their color/default to black when dissolve animation is being applied. It is not certain if this bug will be fixed or worked around.
 - Why does Noodle Extensions disable my Qosmetics notes/walls?
   - Qosmetics notes/walls drastically reduce performance especially in Noodle maps and also ruin the artistic experience. 
 - Why do you suggest disabling Mapping Extensions? It works fine for me
