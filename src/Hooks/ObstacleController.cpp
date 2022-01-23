@@ -249,6 +249,12 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
+    if (tracks.empty() && !ad.parsed)
+    {
+        ObstacleController_ManualUpdate(self);
+        return;
+    }
+
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float const elapsedTime = songTime - self->startTimeOffset;
     float const normalTime =
@@ -376,18 +382,20 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     std::optional<NEVector::Vector3> position =
             AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
 
-    if (position.has_value()) {
-        NEVector::Vector3 noteOffset = ad.noteOffset;
-        NEVector::Vector3 definitePosition = *position + noteOffset;
-        definitePosition.x += ad.xOffset;
-        if (time < self->move1Duration) {
-            NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
-                    self->startPos, self->midPos, time / self->move1Duration);
-            return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
-        } else {
-            return definitePosition;
-        }
+    if (!position.has_value())
+        return ObstacleController_GetPosForTime(self, time);
+
+    NEVector::Vector3 noteOffset = ad.noteOffset;
+    NEVector::Vector3 definitePosition = *position + noteOffset;
+    definitePosition.x += ad.xOffset;
+    if (time < self->move1Duration) {
+        NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
+                self->startPos, self->midPos, time / self->move1Duration);
+        return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
+    } else {
+        return definitePosition;
     }
+}
 
     return ObstacleController_GetPosForTime(self, time);
 }

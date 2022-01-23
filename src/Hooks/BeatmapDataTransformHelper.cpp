@@ -165,11 +165,10 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
     bool isType = false;
 
-    static std::hash<std::string_view> stringViewHash;
-    auto typeHash = stringViewHash(customEventData->type);
+    auto typeHash = customEventData->typeHash;
 
 #define TYPE_GET(jsonName, varName)                                \
-    static auto jsonNameHash_##varName = stringViewHash(jsonName); \
+    static auto jsonNameHash_##varName = std::hash<std::string_view>()(jsonName); \
     if (!isType && typeHash == (jsonNameHash_##varName))                      \
         isType = true;
 

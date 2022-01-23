@@ -24,7 +24,7 @@ PointDefinition *TryGetPointData(BeatmapAssociatedData &beatmapAD,
 } // namespace
 
 AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
-                                         const rapidjson::Value &animation) {
+                                         const rapidjson::Value &animation) : parsed(true) {
     position = TryGetPointData(beatmapAD, animation, "_position");
     rotation = TryGetPointData(beatmapAD, animation, "_rotation");
     scale = TryGetPointData(beatmapAD, animation, "_scale");

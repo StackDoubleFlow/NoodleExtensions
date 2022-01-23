@@ -159,7 +159,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.localRotation = localRotation;
 
 
-//    self->Update();
+    self->Update();
 }
 
 MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void,
@@ -184,6 +184,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     noteUpdateAD = &ad;
     noteTracks = tracks;
+
+    if (noteTracks.empty() && !ad.animationData.parsed) {
+        return NoteController_ManualUpdate(self);
+    }
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;

@@ -31,6 +31,7 @@ struct AnimationObjectData {
     PointDefinition *dissolveArrow;
     PointDefinition *cuttable;
     PointDefinition *definitePosition;
+    bool parsed = false;
 
     AnimationObjectData() = default;
     AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
