@@ -22,6 +22,9 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init,
                 GlobalNamespace::BombNoteController::Pool* bombNotePool,
                 GlobalNamespace::ObstacleController::Pool* obstaclePool) {
     BasicBeatmapObjectManager_Init(self, initData, gameNotePool, bombNotePool, obstaclePool);
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     getActiveObstacles().emplace(List<ObstacleController*>::New_ctor());
 }
 
@@ -29,6 +32,9 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_get_activeObstacleControllers,
                 &BasicBeatmapObjectManager::get_activeObstacleControllers,
                 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
                 BasicBeatmapObjectManager *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BasicBeatmapObjectManager_get_activeObstacleControllers(self);
+
     return (List<ObstacleController*>*) getActiveObstacles();
 }
 
@@ -39,6 +45,9 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_DespawnInternal,
                 BasicBeatmapObjectManager *self,
                 ObstacleController* obstacleController) {
     BasicBeatmapObjectManager_DespawnInternal(self, obstacleController);
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     getActiveObstacles()->Remove(obstacleController);
 }
 

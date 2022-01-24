@@ -14,6 +14,9 @@ using namespace UnityEngine;
 MAKE_HOOK_MATCH(PlayerTransforms_Update,
                 &PlayerTransforms::Update, void,
                 PlayerTransforms *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return PlayerTransforms_Update(self);
+
     PlayerTransforms_Update(self);
     self->headPseudoLocalPos = self->headTransform->get_localPosition();
 }

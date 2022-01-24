@@ -18,6 +18,9 @@ using namespace GlobalNamespace;
 MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
                 static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(GlobalNamespace::NoteController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
                 BeatmapObjectManager *self, NoteController *noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_Note_Despawn(self, noteController);
+
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
 
@@ -36,6 +39,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
 MAKE_HOOK_MATCH(BeatmapObjectManager_Obstacle_Despawn,
                 static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(GlobalNamespace::ObstacleController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
                 BeatmapObjectManager *self, ObstacleController *obstacleController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_Obstacle_Despawn(self, obstacleController);
+
     auto *customObstacleData =
             reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleController->obstacleData);
 

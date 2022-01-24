@@ -76,6 +76,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos,
                 float moveDuration, float jumpDuration, float jumpGravity,
                 float endRotation, float uniformScale) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteController_Init(self);
+
     NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration,
                         jumpGravity, endRotation, uniformScale);
     auto *customNoteData =
@@ -164,6 +167,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
 MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void,
                 NoteController *self) {
+
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteController_ManualUpdate(self);
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);

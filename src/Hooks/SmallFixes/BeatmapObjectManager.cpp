@@ -36,6 +36,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle,
                 GlobalNamespace::ObstacleData* obstacleData,
                 GlobalNamespace::BeatmapObjectSpawnMovementData::ObstacleSpawnData obstacleSpawnData,
                 float rotation) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_SpawnObstacle(self);
+
     auto obstacleController = self->SpawnObstacleInternal(obstacleData, obstacleSpawnData, rotation);
     if (obstacleController)
     {

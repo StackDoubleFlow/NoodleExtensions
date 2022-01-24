@@ -12,6 +12,8 @@ using namespace CustomJSONData;
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
                 &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
                 BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
     if (notes->get_Count() < 0)
         return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
@@ -84,6 +86,9 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
                 &BeatmapObjectsInTimeRowProcessor::ProcessColorNotesInTimeRow, void,
                 System::Collections::Generic::IList_1<NoteData *> *colorNotesDataOld,
                 float nextBasicNoteTimeRowTime) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(colorNotesDataOld, nextBasicNoteTimeRowTime);
+
     List<CustomNoteData *> *colorNotesData = reinterpret_cast<List<CustomNoteData *> *>(colorNotesDataOld);
 
     int const customNoteCount = colorNotesData->get_Count();

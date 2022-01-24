@@ -24,6 +24,8 @@ MAKE_HOOK_MATCH(DisappearingArrowControllerBase_SetArrowTransparency,
                 DisappearingArrowControllerBase_1<GameNoteController*> *self,
                 float arrowTransparency) {
     DisappearingArrowControllerBase_SetArrowTransparency(self, arrowTransparency);
+    if (!Hooks::isNoodleHookEnabled())
+        return;
     self->arrowCutoutEffect->SetCutout(1.0f - arrowTransparency);
 }
 

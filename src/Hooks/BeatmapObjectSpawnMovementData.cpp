@@ -27,6 +27,9 @@ using namespace NEVector;
 MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstacleSpawnData,
                 BeatmapObjectSpawnMovementData::ObstacleSpawnData,
                 BeatmapObjectSpawnMovementData *self, ObstacleData *normalObstacleData) {
+    if (!Hooks::isNoodleHookEnabled())
+        return GetObstacleSpawnData(self, normalObstacleData);
+
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result =
         GetObstacleSpawnData(self, obstacleData);
@@ -35,7 +38,6 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     if (!obstacleData->customData->value) {
         return result;
     }
-    rapidjson::Value &customData = *obstacleData->customData->value;
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     std::optional<float> startX = ad.objectData.startX;
@@ -106,6 +108,9 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJumpingNoteSpawnData,
                 BeatmapObjectSpawnMovementData::NoteSpawnData, BeatmapObjectSpawnMovementData *self,
                 NoteData *normalNoteData) {
+    if (!Hooks::isNoodleHookEnabled())
+        return GetJumpingNoteSpawnData(self, normalNoteData);
+
     BeatmapObjectSpawnMovementData::NoteSpawnData result = GetJumpingNoteSpawnData(self, normalNoteData);
     auto noteDataCast = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(normalNoteData);
     if (!noteDataCast)

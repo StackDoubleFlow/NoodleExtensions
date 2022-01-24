@@ -34,6 +34,8 @@ static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, N
 }
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteFloorMovement_ManualUpdate(self);
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
     self->localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
@@ -51,6 +53,9 @@ MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate
 }
 
 MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, UnityEngine::Vector3, NoteFloorMovement *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteFloorMovement_SetToStart(self);
+
     auto ret = NoteFloorMovement_SetToStart(self);
 
     if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {

@@ -79,6 +79,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,
                 Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
                 float singleLineWidth, float height) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
+                                       move1Duration, move2Duration, singleLineWidth, height);
     ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
                             move1Duration, move2Duration, singleLineWidth, height);
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
@@ -223,10 +226,10 @@ static void ObstacleController_ManualUpdateTranspile(ObstacleController *self, f
     }
 }
 
-bool test = false;
 MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
-    test = true;
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_ManualUpdate(self);
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -358,6 +361,9 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosForTime, Vector3,
                 ObstacleController *self, float time) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_GetPosForTime(self, time);
+
 //    static auto CustomObstacleDataKlass = classof(CustomJSONData::CustomObstacleData *);
 //    CRASH_UNLESS(self);
 //    CRASH_UNLESS(self->obstacleData);

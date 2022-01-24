@@ -237,6 +237,9 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
         screenDisplacementEffectsEnabled);
 
+    if (!Hooks::isNoodleHookEnabled())
+        return result;
+
     LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
     auto *transformedBeatmapData = ReorderLineData(result);
 

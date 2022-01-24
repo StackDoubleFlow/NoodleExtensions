@@ -18,6 +18,9 @@ extern std::optional<NoteCutCoreEffectsSpawner*> noteCutCoreEffectsSpawner;
 MAKE_HOOK_MATCH(HandleNoteControllerNoteWasMissed,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasMissed, void,
                 BeatmapObjectManager *self, NoteController *noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return HandleNoteControllerNoteWasMissed(self, noteController);
+
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         HandleNoteControllerNoteWasMissed(self, noteController);
     }
@@ -39,6 +42,9 @@ void HandleNoteWasCut(NoteCutCoreEffectsSpawner* self, GlobalNamespace::NoteCont
 MAKE_HOOK_MATCH(BeatmapObjectManager_HandleNoteControllerNoteWasCut,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasCut, void,
                 BeatmapObjectManager *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);
+
     // If not fake note or noteCutCoreEffectsSpawner is null
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);

@@ -14,6 +14,9 @@ using namespace GlobalNamespace;
 
 MAKE_HOOK_MATCH(NoteCutScoreSpawner_HandleNoteWasCut, &NoteCutScoreSpawner::HandleNoteWasCut, void,
                 NoteCutScoreSpawner *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteCutScoreSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
+
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         NoteCutScoreSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
     }

@@ -16,6 +16,7 @@
 #include "NELogger.h"
 #include "tracks/shared/TimeSourceHelper.h"
 #include "tracks/shared/Vector.h"
+#include "NEHooks.h"
 
 using namespace Events;
 using namespace GlobalNamespace;
@@ -34,6 +35,9 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
 
 void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     bool isType = false;
 
     auto typeHash = customEventData->typeHash;

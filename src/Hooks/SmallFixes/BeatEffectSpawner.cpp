@@ -42,6 +42,9 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
                 void,
                 BeatEffectSpawner *self,
                 NoteController* noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatEffectSpawner_HandleNoteDidStartJump(self, noteController);
+
     if (self->initData->hideNoteSpawnEffect)
     {
         return;

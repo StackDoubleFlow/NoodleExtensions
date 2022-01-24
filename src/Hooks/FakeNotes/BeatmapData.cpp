@@ -114,6 +114,9 @@ MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObje
                BeatmapData *self, BeatmapObjectData* beatmapObjectData) {
     BeatmapData_AddBeatmapObjectData_t(self, beatmapObjectData);
 
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     FakeObjectRemove(self, beatmapObjectData);
 }
 

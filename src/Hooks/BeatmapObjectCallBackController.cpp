@@ -22,6 +22,9 @@
 using namespace GlobalNamespace;
 
 MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallbackController::LateUpdate, void, BeatmapObjectCallbackController *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectCallbackController_LateUpdate(self);
+
     if (!self->beatmapData) {
         return;
     }
