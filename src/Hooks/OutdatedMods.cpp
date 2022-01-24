@@ -176,4 +176,4 @@ void InstallOutdatedModsHooks(Logger &logger) {
     INSTALL_HOOK(logger, MainFlowCoordinator_DidActivate);
 }
 
-NEInstallHooks(InstallOutdatedModsHooks);
+//NEInstallHooks(InstallOutdatedModsHooks);
