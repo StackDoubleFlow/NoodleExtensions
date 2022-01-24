@@ -33,7 +33,7 @@ namespace NoodleExtensions {
             return false;
         }
 
-        static void Patch(GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData * customBeatmapDataCustom, PlayerSpecificSettings* playerSpecificSettings);
+        static void Patch(GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData * customBeatmapDataCustom, GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings);
 
         static bool CheckIfNoodle(ValueUTF16 const& rapidjsonData) {
             auto requirements = rapidjsonData.FindMember(u"_requirements");

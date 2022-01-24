@@ -76,14 +76,14 @@ struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::MemoryPoolBas
 
 // I love generics and il2cpp
 MAKE_HOOK(MemoryPoolBase_Despawn, nullptr, void, MemoryPoolBase_1<Il2CppObject*> *self, Il2CppObject* item, MethodInfo* methodInfo) {
-    static auto* ObstacleControllerKlass = classof(ObstacleController*);
+    static auto *ObstacleControllerKlass = classof(ObstacleController*);
 
-//    if (!item || (item->klass != ObstacleControllerKlass
+    if (!item || (item->klass != ObstacleControllerKlass
 //    /* && !il2cpp_functions::class_is_assignable_from(ObstacleControllerKlass, item->klass) */ // TODO: Is this future proofing even needed?
-//    )) {
-//        MemoryPoolBase_Despawn(self, item, methodInfo);
-//        return;
-//    }
+    )) {
+        MemoryPoolBase_Despawn(self, item, methodInfo);
+        return;
+    }
 
     if (self) {
         self->activeCount--;
