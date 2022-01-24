@@ -5,6 +5,7 @@
 
 float NECaches::noteJumpMovementSpeed;
 float NECaches::noteJumpStartBeatOffset;
+bool NECaches::LeftHandedMode;
 
 void InstallAndRegisterAll() {
     Logger& logger = NELogger::GetLogger();

@@ -73,7 +73,7 @@ MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned,
                 &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
                 NoteCutSoundEffectManager *self, NoteController *noteController) {
     if (!Hooks::isNoodleHookEnabled())
-        return NoteCutSoundEffectManager_HandleNoteWasSpawned(self);
+        return NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
 
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         if (ProcessHitSound(noteController)) {
