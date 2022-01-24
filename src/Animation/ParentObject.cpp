@@ -9,6 +9,8 @@
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
+#include "NECaches.h"
+
 using namespace TrackParenting;
 using namespace UnityEngine;
 using namespace GlobalNamespace;
@@ -24,6 +26,14 @@ void ParentObject::Update() {
 
     std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
     std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
+    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
+
+    if (NECaches::LeftHandedMode) {
+        rotation = Animation::MirrorQuaternionNullable(rotation);
+        localRotation = Animation::MirrorQuaternionNullable(localRotation);
+        position = Animation::MirrorVectorNullable(position);
+    }
 
     NEVector::Quaternion worldRotationQuaternion = startRot;
     NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
@@ -35,13 +45,12 @@ void ParentObject::Update() {
     }
 
     worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
+
     if (localRotation.has_value()) {
         worldRotationQuaternion = worldRotationQuaternion * *localRotation;
     }
 
     Vector3 scaleVector = startScale;
-    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
     if (scale.has_value()) {
         scaleVector = startScale * scale.value();
     }

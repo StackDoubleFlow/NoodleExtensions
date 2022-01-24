@@ -397,9 +397,6 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     }
 }
 
-    return ObstacleController_GetPosForTime(self, time);
-}
-
 MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
                 &ParametricBoxFakeGlowController::OnEnable, void,
                 ParametricBoxFakeGlowController *self) {

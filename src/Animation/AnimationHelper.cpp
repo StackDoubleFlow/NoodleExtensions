@@ -6,6 +6,7 @@
 #include "Animation/AnimationHelper.h"
 #include "AssociatedData.h"
 #include "NELogger.h"
+#include "NECaches.h"
 
 using namespace AnimationHelper;
 using namespace GlobalNamespace;
@@ -98,6 +99,10 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
         definitePosition = definitePosition.value() *
                            spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
 
+    if (NECaches::LeftHandedMode) {
+        definitePosition = Animation::MirrorVectorNullable(definitePosition);
+    }
+
     return definitePosition;
 }
 
@@ -185,6 +190,12 @@ if (!path##name)                                \
 
     if (offset.positionOffset)
         offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+
+    if (NECaches::LeftHandedMode) {
+        offset.rotationOffset = Animation::MirrorQuaternionNullable(offset.rotationOffset);
+        offset.localRotationOffset = Animation::MirrorQuaternionNullable(offset.localRotationOffset);
+        offset.positionOffset = Animation::MirrorVectorNullable(offset.positionOffset);
+    }
 
     return offset;
 }

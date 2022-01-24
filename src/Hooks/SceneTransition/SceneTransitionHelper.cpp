@@ -5,6 +5,7 @@
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/IDifficultyBeatmap.hpp"
+#include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
 #include "Animation/ParentObject.h"
 #include "tracks/shared/Animation/PointDefinition.h"
@@ -26,7 +27,8 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom) {
+void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom, PlayerSpecificSettings* playerSpecificSettings) {
+    NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
     bool noodleRequirement = false;
 
     CRASH_UNLESS(customBeatmapDataCustom);

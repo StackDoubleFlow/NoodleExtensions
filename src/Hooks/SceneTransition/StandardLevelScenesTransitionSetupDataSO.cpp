@@ -26,7 +26,7 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects);
 
     SceneTransitionHelper::Patch(difficultyBeatmap,
-                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()));
+                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()), playerSpecificSettings);
 }
 
 void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
