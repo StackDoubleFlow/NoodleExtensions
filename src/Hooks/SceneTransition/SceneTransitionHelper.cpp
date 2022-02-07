@@ -16,6 +16,8 @@
 #include "NEHooks.h"
 #include "SceneTransitionHelper.hpp"
 
+#include "pinkcore/shared/RequirementAPI.hpp"
+
 // needed to compile, idk why
 #include "conditional-dependencies/shared/main.hpp"
 
@@ -30,6 +32,7 @@ using namespace CustomJSONData;
 void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom, PlayerSpecificSettings* playerSpecificSettings) {
     NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
     bool noodleRequirement = false;
+    bool meRequirement = false;
 
     CRASH_UNLESS(customBeatmapDataCustom);
     if (customBeatmapDataCustom->levelCustomData) {
@@ -38,9 +41,12 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
         if (dynData) {
             ValueUTF16 const& rapidjsonData = *dynData;
 
+            meRequirement = CheckIfME(rapidjsonData);
             noodleRequirement = CheckIfNoodle(rapidjsonData);
         }
     }
+
+    noodleRequirement = !meRequirement && noodleRequirement;
 
     Hooks::setNoodleHookEnabled(noodleRequirement);
 

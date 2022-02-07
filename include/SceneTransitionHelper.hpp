@@ -44,5 +44,15 @@ namespace NoodleExtensions {
 
             return false;
         }
+
+        static bool CheckIfME(ValueUTF16 const& rapidjsonData) {
+            auto requirements = rapidjsonData.FindMember(u"_requirements");
+
+            if (requirements != rapidjsonData.MemberEnd()) {
+                return CheckIfInArray(requirements->value, ME_REQUIREMENTNAME);
+            }
+
+            return false;
+        }
     };
 }

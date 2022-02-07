@@ -1,5 +1,6 @@
 #include "Animation/Events.h"
 #include "pinkcore/shared/RequirementAPI.hpp"
+#include "pinkcore/shared/API.hpp"
 #include "NEHooks.h"
 #include "NECaches.h"
 
@@ -11,5 +12,16 @@ void InstallAndRegisterAll() {
     Logger& logger = NELogger::GetLogger();
     Hooks::InstallHooks(logger);
     NEEvents::AddEventCallbacks(logger);
-    PinkCore::RequirementAPI::RegisterInstalled("Noodle Extensions");
+    PinkCore::RequirementAPI::RegisterInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
+
+    PinkCore::API::GetFoundRequirementCallbackSafe() += [](const std::vector<std::string>& requirements){
+        bool meRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
+        bool neRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
+
+        if (meRequirement && neRequirement) {
+            PinkCore::RequirementAPI::RemoveInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
+        } else {
+            PinkCore::RequirementAPI::RegisterInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
+        }
+    };
 }
