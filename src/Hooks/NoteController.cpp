@@ -117,7 +117,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         vector =
                 vector +
                 NEVector::Vector3(noteJump->randomRotations.get(noteJump->randomRotationIdx)) * 20;
-        NEVector::Quaternion midrotation = NEVector::Quaternion::Euler(vector);
+        static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
+
+        NEVector::Quaternion midrotation = Quaternion_Euler(vector);
         noteJump->middleRotation = midrotation;
     }
 

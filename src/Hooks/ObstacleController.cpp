@@ -132,13 +132,16 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     NEVector::Quaternion rotation;
 
+    static auto Quaternion_Inverse = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Quaternion)>(&UnityEngine::Quaternion::Inverse)>::get();
+    static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(float, float, float)>(&UnityEngine::Quaternion::Euler)>::get();
+
     if (ad.objectData.rotation)
         rotation = *ad.objectData.rotation;
     else
-        rotation = NEVector::Quaternion::Euler(0, worldRotation, 0);
+        rotation = Quaternion_Euler(0, worldRotation, 0);
 
     self->worldRotation = rotation;
-    self->inverseWorldRotation = NEVector::Quaternion::Inverse(rotation);
+    self->inverseWorldRotation = Quaternion_Inverse(rotation);
 
     auto const& scale = ad.objectData.scale;
 

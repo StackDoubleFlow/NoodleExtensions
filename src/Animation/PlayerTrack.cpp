@@ -29,8 +29,8 @@ void PlayerTrack::ctor() {
 
 void PlayerTrack::AssignTrack(Track *track) {
     if (!instance) {
-        GameObject *gameObject = GameObject::Find(il2cpp_utils::newcsstr("LocalPlayerGameCore"));
-        GameObject *noodleObject = GameObject::New_ctor(il2cpp_utils::newcsstr("NoodlePlayerTrack"));
+        GameObject *gameObject = GameObject::Find("LocalPlayerGameCore");
+        GameObject *noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
         origin = noodleObject->get_transform();
         origin->SetParent(gameObject->get_transform()->get_parent(), true);
         gameObject->get_transform()->SetParent(origin, true);

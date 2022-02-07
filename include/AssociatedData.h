@@ -108,9 +108,8 @@ struct PlayerTrackEventData {
 };
 
 struct ParentTrackEventData {
-    explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack);
+    explicit ParentTrackEventData(const rapidjson::Value& customData, TracksAD::BeatmapAssociatedData &beatmapAD);
 
-    const std::string parentTrackName;
     Track* parentTrack;
     std::optional<NEVector::Vector3> pos;
     std::optional<NEVector::Quaternion> rot;

@@ -185,22 +185,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
         return;
 
     if (typeHash == jsonNameHash_AssignTrackParent) {
-        std::string parentTrackName(eventData["_parentTrack"].GetString());
-        Track* track = &beatmapAD.tracks[parentTrackName];
-
-        rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
-        std::vector<Track *> childrenTracks;
-        childrenTracks.reserve(rawChildrenTracks.Size());
-        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
-             itr != rawChildrenTracks.End(); itr++) {
-            Track *child = &beatmapAD.tracks[itr->GetString()];
-            // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
-            childrenTracks.push_back(child);
-        }
-
-        // copy constructor deleted for some reason???
-        eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
-
+        eventAD.parentTrackEventData.emplace(eventData, beatmapAD);
     } else if (typeHash == jsonNameHash_AssignPlayerToTrack) {
         std::string trackName(eventData["_track"].GetString());
         Track *track = &beatmapAD.tracks[trackName];

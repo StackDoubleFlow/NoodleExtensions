@@ -58,8 +58,10 @@ MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, Un
 
     auto ret = NoteFloorMovement_SetToStart(self);
 
+    static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
+
     if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
-        self->rotatedObject->set_localRotation(NEVector::Quaternion::Euler({0, 0, noteUpdateAD->endRotation}));
+        self->rotatedObject->set_localRotation(Quaternion_Euler({0, 0, noteUpdateAD->endRotation}));
     }
 
     return ret;

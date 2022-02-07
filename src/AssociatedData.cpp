@@ -71,11 +71,19 @@ void ::BeatmapObjectAssociatedData::ResetState() {
     parsed = false;
 }
 
-ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack) :
-    parentTrackName(parentTrackName),
-    parentTrack(parentTrack),
-    childrenTracks(std::move(childrenTracks))
-    {
+ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, BeatmapAssociatedData &beatmapAD) {
+    parentTrack = &beatmapAD.tracks[eventData["_parentTrack"].GetString()];
+
+    rapidjson::Value const &rawChildrenTracks = eventData["_childrenTracks"];
+
+    childrenTracks.reserve(rawChildrenTracks.Size());
+    for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
+         itr != rawChildrenTracks.End(); itr++) {
+        Track *child = &beatmapAD.tracks[itr->GetString()];
+        // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
+        childrenTracks.emplace_back(child);
+    }
+
     pos = NEJSON::ReadOptionalVector3(eventData, "_position");
     rot = NEJSON::ReadOptionalRotation(eventData, "_rotation");
     localRot = NEJSON::ReadOptionalRotation(eventData, "_localRotation");
