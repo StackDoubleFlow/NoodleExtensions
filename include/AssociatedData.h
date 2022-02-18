@@ -130,4 +130,9 @@ struct BeatmapEventAssociatedData {
 BeatmapEventAssociatedData& getEventAD(CustomJSONData::CustomEventData const* customData);
 void clearEventADs();
 
-BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData);
+constexpr BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData) {
+    std::any &ad = customData->associatedData['N'];
+    if (!ad.has_value())
+        ad = std::make_any<::BeatmapObjectAssociatedData>();
+    return std::any_cast<::BeatmapObjectAssociatedData &>(ad);
+}

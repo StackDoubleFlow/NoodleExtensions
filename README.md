@@ -5,7 +5,7 @@ A port of the Noodle Extensions mod made originally for the PC version of Beat S
 ## FAQ (Frequently Asked Questions)
 - Why are the wall colors not the same as PC (desaturated, transparent etc.)?
   - Due to the Quest not having distortion on walls, Noodle Extensions will attempt to change the walls materials to solid if these conditions are met:
-    - Wall color alpha (controlled by Chroma) is greater than or equal to 1
+    - Wall color alpha (controlled by Chroma) is greater than or equal 0
     - Dissolve animation is being applied
 - Bombs are not coloring/are always black
   - A bug specific to Quest causes bombs to lose their color/default to black when dissolve animation is being applied. It is not certain if this bug will be fixed or worked around.

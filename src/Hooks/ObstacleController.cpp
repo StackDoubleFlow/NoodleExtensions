@@ -42,9 +42,18 @@ SafePtr<List<ObstacleController*>>& getActiveObstacles() {
 
 
 std::unordered_map<ObstacleController *, ArrayW<ConditionalMaterialSwitcher *>> cachedObstacleMaterialSwitchers;
+std::unordered_map<GlobalNamespace::ObstacleControllerBase *, Sombrero::FastColor> cachedObstacleColors;
+
+bool mapLoaded = false;
+
+void OnObstacleChangeColor(GlobalNamespace::ObstacleControllerBase * oc, Sombrero::FastColor const& color) {
+    cachedObstacleColors[oc] = color;
+}
 
 void NECaches::ClearObstacleCaches() {
     cachedObstacleMaterialSwitchers.clear();
+    cachedObstacleColors.clear();
+    mapLoaded = false;
 }
 
 float obstacleTimeAdjust(float original, std::span<Track*> tracks, float move1Duration, float finishMovementTime) {
@@ -92,6 +101,18 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     if (!obstacleData->customData) {
         return;
+    }
+
+    // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
+    if (!mapLoaded) {
+        static auto callbackOpt = Chroma::ObstacleAPI::getObstacleChangedColorCallbackSafe();
+        mapLoaded = true;
+        if (callbackOpt) {
+            Chroma::ObstacleAPI::ObstacleCallback& callback = *callbackOpt;
+            // remove if it already exists
+            callback -= &OnObstacleChangeColor;
+            callback += &OnObstacleChangeColor;
+        }
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -326,9 +347,20 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         ad.dissolveEnabled = obstacleDissolveConfig;
 
         if (ad.dissolveEnabled) {
-            auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
 
-            if (!color || color.value().a > 0.0f)
+            auto colorIt = cachedObstacleColors.find(self);
+
+            bool transparent = true;
+
+            if (colorIt != cachedObstacleColors.end()) {
+                auto const &color = colorIt->second;
+
+                if (color.a < 0.0f) {
+                    transparent = false;
+                }
+            }
+
+            if (transparent)
                 ad.dissolveEnabled = dissolve > 0.0f;
         }
 

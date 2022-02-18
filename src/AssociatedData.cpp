@@ -92,13 +92,6 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, Be
     worldPositionStays = NEJSON::ReadOptionalBool(eventData, "_worldPositionStays").value_or(false);
 }
 
-::BeatmapObjectAssociatedData &getAD(CustomJSONData::JSONWrapper *customData) {
-    std::any &ad = customData->associatedData['N'];
-    if (!ad.has_value())
-        ad = std::make_any<::BeatmapObjectAssociatedData>();
-    return std::any_cast<::BeatmapObjectAssociatedData &>(ad);
-}
-
 static std::unordered_map<CustomJSONData::CustomEventData const*, BeatmapEventAssociatedData> eventDataMap;
 
 ::BeatmapEventAssociatedData &getEventAD(CustomJSONData::CustomEventData const* customData) {

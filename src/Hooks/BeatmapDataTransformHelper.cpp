@@ -29,32 +29,34 @@ using namespace System::Collections::Generic;
 static Il2CppClass *customObstacleDataClass;
 static Il2CppClass *customNoteDataClass;
 
-float ObjectSortGetTime(BeatmapObjectData *n) {
+float ObjectSortGetTime(BeatmapObjectData const* n) {
     if (n->klass == customObstacleDataClass) {
-        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData *>(n);
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
         return n->time - getAD(obstacle->customData).aheadTime;
     } else if (n->klass == customNoteDataClass) {
-        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData *>(n);
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
         return n->time - getAD(note->customData).aheadTime;
     } else {
         return n->time;
     }
 }
 
-bool ObjectTimeCompare(BeatmapObjectData *a, BeatmapObjectData *b) {
+constexpr bool ObjectTimeCompare(BeatmapObjectData const * a, BeatmapObjectData const* b) {
     return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
 void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
     BeatmapObjectData **begin = beatmapObjectsData->items.begin();
     BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
-    std::sort(begin, end, ObjectTimeCompare);
+    std::stable_sort(begin, end, ObjectTimeCompare);
 }
 
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     BeatmapData *customBeatmapData = beatmapData->GetCopy();
-    customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    if (!customObstacleDataClass) {
+        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    }
 
     float const startHalfJumpDurationInBeats = 4;
     float const maxHalfJumpDistance = 18;
