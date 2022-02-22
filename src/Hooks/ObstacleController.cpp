@@ -115,6 +115,14 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         }
     }
 
+    // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
+    auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+    if (color) {
+        cachedObstacleColors[self] = *color;
+    } else {
+        cachedObstacleColors.erase(self);
+    }
+
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
@@ -355,7 +363,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             if (colorIt != cachedObstacleColors.end()) {
                 auto const &color = colorIt->second;
 
-                if (color.a < 0.0f) {
+                if (color.a <= 0.0f) {
                     transparent = false;
                 }
             }
