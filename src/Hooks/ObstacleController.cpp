@@ -103,24 +103,26 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         return;
     }
 
-    // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
-    if (!mapLoaded) {
-        static auto callbackOpt = Chroma::ObstacleAPI::getObstacleChangedColorCallbackSafe();
-        mapLoaded = true;
-        if (callbackOpt) {
-            Chroma::ObstacleAPI::ObstacleCallback& callback = *callbackOpt;
-            // remove if it already exists
-            callback -= &OnObstacleChangeColor;
-            callback += &OnObstacleChangeColor;
+    if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
+        // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
+        if (!mapLoaded) {
+            static auto callbackOpt = Chroma::ObstacleAPI::getObstacleChangedColorCallbackSafe();
+            mapLoaded = true;
+            if (callbackOpt) {
+                Chroma::ObstacleAPI::ObstacleCallback &callback = *callbackOpt;
+                // remove if it already exists
+                callback -= &OnObstacleChangeColor;
+                callback += &OnObstacleChangeColor;
+            }
         }
-    }
 
-    // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
-    auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
-    if (color) {
-        cachedObstacleColors[self] = *color;
-    } else {
-        cachedObstacleColors.erase(self);
+        // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
+        auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+        if (color) {
+            cachedObstacleColors[self] = *color;
+        } else {
+            cachedObstacleColors.erase(self);
+        }
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -355,21 +357,26 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         ad.dissolveEnabled = obstacleDissolveConfig;
 
         if (ad.dissolveEnabled) {
+            if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::BASIC) {
+                ad.dissolveEnabled |= dissolve > 0.0f;
+            } else {
+                bool transparent = true;
 
-            auto colorIt = cachedObstacleColors.find(self);
+                if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
+                    auto colorIt = cachedObstacleColors.find(self);
 
-            bool transparent = true;
+                    if (colorIt != cachedObstacleColors.end()) {
+                        auto const &color = colorIt->second;
 
-            if (colorIt != cachedObstacleColors.end()) {
-                auto const &color = colorIt->second;
-
-                if (color.a <= 0.0f) {
-                    transparent = false;
+                        if (color.a <= 0.0f) {
+                            transparent = false;
+                        }
+                    }
                 }
-            }
 
-            if (transparent)
-                ad.dissolveEnabled = dissolve > 0.0f;
+                if (transparent)
+                    ad.dissolveEnabled = dissolve > 0.0f;
+            }
         }
 
         if (wasEnabled != ad.dissolveEnabled) {

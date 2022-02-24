@@ -5,6 +5,8 @@
 
 #include "UnityEngine/UI/LayoutElement.hpp"
 
+#include <algorithm>
+
 using namespace UnityEngine;
 using namespace QuestUI;
 
@@ -35,6 +37,22 @@ void UIDidActivate(HMUI::ViewController* self, bool firstActivation, bool addedT
 
         AddConfigValueToggle(container->get_transform(), getNEConfig().enableNoteDissolve);
         AddConfigValueToggle(container->get_transform(), getNEConfig().enableObstacleDissolve);
+
+
+
+        auto values = getMaterialBehaviourValues();
+        auto defaultVal = std::clamp<int>(getNEConfig().materialBehaviour.GetValue(), 0, values.size() - 1);
+
+        auto dropdown = QuestUI::BeatSaberUI::CreateDropdown(container->get_transform(), getNEConfig().materialBehaviour.GetName(), values[defaultVal], values, [values](StringW val){
+            auto index = values.begin() - std::find(values.begin(), values.end(), val);
+
+            getNEConfig().materialBehaviour.SetValue(std::abs(index));
+        });
+
+        BeatSaberUI::AddHoverHint(dropdown->get_transform(), "Smart: Changes obstacle material based on Chroma coloring to simulate distortion opacity."
+                                                             "\nSemiBasic: switches material opaque/transparent if dissolve is applied."
+                                                             "\nBasic: retains opaque material color once dissolve is applied");
+
 
         auto text = BeatSaberUI::CreateText(container->get_transform(), "Qosmetics models cause an outstanding amount of lag in the current state. Disable this setting if you do not care and will happily jam to UwU notes and rainbow walls");
 
