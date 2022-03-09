@@ -32,7 +32,6 @@ MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
                 MirroredObstacleController *self) {
     // static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     // if (self->followedObstacle && self->followedObstacle->obstacleData->klass == customObstacleDataClass) {
-    // TODO: Check if NE is enabled on this map
     if (Hooks::isNoodleHookEnabled()) {
         self->set_hide(true);
         return;

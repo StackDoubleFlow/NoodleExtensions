@@ -15,7 +15,7 @@ using namespace UnityEngine;
 using namespace System;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern std::vector<Track *> noteTracks;
+extern TracksAD::TracksVector noteTracks;
 
 static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, NoteFloorMovement* noteFloorMovement) {
     if (!noteUpdateAD) {
@@ -34,6 +34,8 @@ static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, N
 }
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteFloorMovement_ManualUpdate(self);
     float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
 
     self->localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
@@ -51,10 +53,15 @@ MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate
 }
 
 MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, UnityEngine::Vector3, NoteFloorMovement *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteFloorMovement_SetToStart(self);
+
     auto ret = NoteFloorMovement_SetToStart(self);
 
+    static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
+
     if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
-        self->rotatedObject->set_localRotation(NEVector::Quaternion::Euler({0, 0, noteUpdateAD->endRotation}));
+        self->rotatedObject->set_localRotation(Quaternion_Euler({0, 0, noteUpdateAD->endRotation}));
     }
 
     return ret;

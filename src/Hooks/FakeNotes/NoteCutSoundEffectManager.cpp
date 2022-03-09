@@ -59,16 +59,22 @@ custom_types::Helpers::Coroutine AddNotesLater() {
 
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_Start, &NoteCutSoundEffectManager::Start, void,
                 NoteCutSoundEffectManager *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteCutSoundEffectManager_Start(self);
+
     currentSoundEffectManager = self;
     cutCount = 0;
     hitsoundQueue.clear();
-    self->StartCoroutine(reinterpret_cast<System::Collections::IEnumerator*>(custom_types::Helpers::CoroutineHelper::New(AddNotesLater())));
+    self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(AddNotesLater()));
     NoteCutSoundEffectManager_Start(self);
 }
 
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned,
                 &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
                 NoteCutSoundEffectManager *self, NoteController *noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
+
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         if (ProcessHitSound(noteController)) {
             NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);

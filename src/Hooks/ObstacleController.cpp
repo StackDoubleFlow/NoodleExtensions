@@ -41,13 +41,22 @@ SafePtr<List<ObstacleController*>>& getActiveObstacles() {
 }
 
 
-std::unordered_map<ObstacleController *, Array<ConditionalMaterialSwitcher *> *> cachedObstacleMaterialSwitchers;
+std::unordered_map<ObstacleController *, ArrayW<ConditionalMaterialSwitcher *>> cachedObstacleMaterialSwitchers;
+std::unordered_map<GlobalNamespace::ObstacleControllerBase *, Sombrero::FastColor> cachedObstacleColors;
+
+bool mapLoaded = false;
+
+void OnObstacleChangeColor(GlobalNamespace::ObstacleControllerBase * oc, Sombrero::FastColor const& color) {
+    cachedObstacleColors[oc] = color;
+}
 
 void NECaches::ClearObstacleCaches() {
     cachedObstacleMaterialSwitchers.clear();
+    cachedObstacleColors.clear();
+    mapLoaded = false;
 }
 
-float obstacleTimeAdjust(float original, std::vector<Track*> const& tracks, float move1Duration, float finishMovementTime) {
+float obstacleTimeAdjust(float original, std::span<Track*> tracks, float move1Duration, float finishMovementTime) {
     if (original > move1Duration && !tracks.empty()) {
         Track *obstacleTrack = nullptr;
 
@@ -79,6 +88,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                 ObstacleData *normalObstacleData, float worldRotation, Vector3 startPos,
                 Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
                 float singleLineWidth, float height) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
+                                       move1Duration, move2Duration, singleLineWidth, height);
     ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
                             move1Duration, move2Duration, singleLineWidth, height);
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
@@ -91,9 +103,31 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         return;
     }
 
+    if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
+        // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
+        if (!mapLoaded) {
+            static auto callbackOpt = Chroma::ObstacleAPI::getObstacleChangedColorCallbackSafe();
+            mapLoaded = true;
+            if (callbackOpt) {
+                Chroma::ObstacleAPI::ObstacleCallback &callback = *callbackOpt;
+                // remove if it already exists
+                callback -= &OnObstacleChangeColor;
+                callback += &OnObstacleChangeColor;
+            }
+        }
+
+        // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
+        auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+        if (color) {
+            cachedObstacleColors[self] = *color;
+        } else {
+            cachedObstacleColors.erase(self);
+        }
+    }
+
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
     auto it = cachedObstacleMaterialSwitchers.find(self);
     if (it == cachedObstacleMaterialSwitchers.end()) {
         cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
@@ -104,7 +138,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     // Reset only if NE dissolve is enabled
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
-        for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+        for (auto *materialSwitcher: materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
         }
     }
@@ -129,13 +163,16 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     NEVector::Quaternion rotation;
 
+    static auto Quaternion_Inverse = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Quaternion)>(&UnityEngine::Quaternion::Inverse)>::get();
+    static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(float, float, float)>(&UnityEngine::Quaternion::Euler)>::get();
+
     if (ad.objectData.rotation)
         rotation = *ad.objectData.rotation;
     else
-        rotation = NEVector::Quaternion::Euler(0, worldRotation, 0);
+        rotation = Quaternion_Euler(0, worldRotation, 0);
 
     self->worldRotation = rotation;
-    self->inverseWorldRotation = NEVector::Quaternion::Inverse(rotation);
+    self->inverseWorldRotation = Quaternion_Inverse(rotation);
 
     auto const& scale = ad.objectData.scale;
 
@@ -170,7 +207,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.localRotation = localRotation;
     ad.worldRotation = rotation;
 
-    std::vector<Track *> const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const &tracks = TracksAD::getAD(obstacleData->customData).tracks;
     if (!tracks.empty()) {
         auto go = self->get_gameObject();
         for (auto &track: tracks) {
@@ -223,10 +260,10 @@ static void ObstacleController_ManualUpdateTranspile(ObstacleController *self, f
     }
 }
 
-bool test = false;
 MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpdate, void,
                 ObstacleController *self) {
-    test = true;
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_ManualUpdate(self);
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -247,7 +284,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
 
 
-    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+
+    if (tracks.empty() && !ad.parsed)
+    {
+        ObstacleController_ManualUpdate(self);
+        return;
+    }
 
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float const elapsedTime = songTime - self->startTimeOffset;
@@ -314,14 +357,30 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         ad.dissolveEnabled = obstacleDissolveConfig;
 
         if (ad.dissolveEnabled) {
-            auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+            if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::BASIC) {
+                ad.dissolveEnabled |= dissolve > 0.0f;
+            } else {
+                bool transparent = true;
 
-            if (!color || color.value().a > 0.0f)
-                ad.dissolveEnabled = dissolve > 0.0f;
+                if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
+                    auto colorIt = cachedObstacleColors.find(self);
+
+                    if (colorIt != cachedObstacleColors.end()) {
+                        auto const &color = colorIt->second;
+
+                        if (color.a <= 0.0f) {
+                            transparent = false;
+                        }
+                    }
+                }
+
+                if (transparent)
+                    ad.dissolveEnabled = dissolve > 0.0f;
+            }
         }
 
         if (wasEnabled != ad.dissolveEnabled) {
-            ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
             for (auto *materialSwitcher: materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(
                         ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
@@ -347,39 +406,50 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     ObstacleController_ManualUpdate(self);
-    test = false;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosForTime, Vector3,
                 ObstacleController *self, float time) {
-    auto *obstacleData = (CustomJSONData::CustomObstacleData *)self->obstacleData;
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleController_GetPosForTime(self, time);
+
+//    static auto CustomObstacleDataKlass = classof(CustomJSONData::CustomObstacleData *);
+//    CRASH_UNLESS(self);
+//    CRASH_UNLESS(self->obstacleData);
+//    NELogger::GetLogger().debug("ObstacleController::GetPosForTime %p", self->obstacleData);
+//    CRASH_UNLESS(self->obstacleData->klass);
+//    CRASH_UNLESS(CustomObstacleDataKlass);
+//
+//    if (!self || !self->obstacleData || self->obstacleData->klass != CustomObstacleDataKlass) {
+//        return ObstacleController_GetPosForTime(self, time);
+//    }
+    auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     if (!obstacleData->customData->value) {
         return ObstacleController_GetPosForTime(self, time);
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    std::vector<Track *> const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
     float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
     std::optional<NEVector::Vector3> position =
-        AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
+            AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
 
-    if (position.has_value()) {
-        NEVector::Vector3 noteOffset = ad.noteOffset;
-        NEVector::Vector3 definitePosition = *position + noteOffset;
-        definitePosition.x += ad.xOffset;
-        if (time < self->move1Duration) {
-            NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
+    if (!position.has_value())
+        return ObstacleController_GetPosForTime(self, time);
+
+    NEVector::Vector3 noteOffset = ad.noteOffset;
+    NEVector::Vector3 definitePosition = *position + noteOffset;
+    definitePosition.x += ad.xOffset;
+    if (time < self->move1Duration) {
+        NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
                 self->startPos, self->midPos, time / self->move1Duration);
-            return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
-        } else {
-            return definitePosition;
-        }
+        return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
+    } else {
+        return definitePosition;
     }
-
-    return ObstacleController_GetPosForTime(self, time);
 }
 
 MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,

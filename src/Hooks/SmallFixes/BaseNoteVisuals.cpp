@@ -22,6 +22,9 @@ using namespace UnityEngine;
 MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
                 &BaseNoteVisuals::Awake, void,
                 BaseNoteVisuals *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BaseNoteVisuals_Awake(self);
+
     BaseNoteVisuals_Awake(self);
 
     static auto ICubeNoteTypeProviderKlass = classof(ICubeNoteTypeProvider*);

@@ -25,7 +25,7 @@ using namespace UnityEngine;
 static constexpr void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject)
 {
     if (noteData->customData && noteData->customData->value) {
-        std::vector<Track *> const &tracks = TracksAD::getAD(noteData->customData).tracks;
+        auto const &tracks = TracksAD::getAD(noteData->customData).tracks;
         if (!tracks.empty()) {
             for (auto &track: tracks) {
                 track->AddGameObject(gameObject);
@@ -117,6 +117,9 @@ static void UpdateMirror(BeatmapObjectAssociatedData& ad,Transform* objectTransf
 MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCubeNoteController", "Mirror", void, MirroredCubeNoteController *self, ICubeNoteMirrorable *noteController) {
     MirroredCubeNoteController_Mirror(self, noteController);
 
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
     auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
@@ -125,6 +128,9 @@ MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCu
 }
 
 MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_UpdatePositionAndRotation, "", "MirroredCubeNoteController", "UpdatePositionAndRotation", void, MirroredCubeNoteController *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return MirroredCubeNoteController_UpdatePositionAndRotation(self);
+
     if (!CheckSkip(self->noteTransform, self->followedNoteTransform)) {
         return;
     }

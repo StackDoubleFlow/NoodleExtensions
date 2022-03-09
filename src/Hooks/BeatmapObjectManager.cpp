@@ -18,11 +18,14 @@ using namespace GlobalNamespace;
 MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
                 static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(GlobalNamespace::NoteController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
                 BeatmapObjectManager *self, NoteController *noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_Note_Despawn(self, noteController);
+
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
 
     if (customNoteData->customData && customNoteData->customData->value) {
-        std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
+        auto const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
         if (!tracks.empty()) {
             auto go = noteController->get_gameObject();
             for (auto &track: tracks) {
@@ -36,11 +39,14 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
 MAKE_HOOK_MATCH(BeatmapObjectManager_Obstacle_Despawn,
                 static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(GlobalNamespace::ObstacleController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
                 BeatmapObjectManager *self, ObstacleController *obstacleController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_Obstacle_Despawn(self, obstacleController);
+
     auto *customObstacleData =
             reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleController->obstacleData);
 
     if (customObstacleData->customData && customObstacleData->customData->value) {
-        std::vector<Track *> const &tracks = TracksAD::getAD(customObstacleData->customData).tracks;
+        auto const &tracks = TracksAD::getAD(customObstacleData->customData).tracks;
         if (!tracks.empty()) {
             auto go = obstacleController->get_gameObject();
             for (auto &track: tracks) {

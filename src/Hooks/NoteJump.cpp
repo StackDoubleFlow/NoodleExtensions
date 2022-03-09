@@ -16,7 +16,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData *noteUpdateAD;
-extern std::vector<Track*> noteTracks;
+extern TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
@@ -81,6 +81,8 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTrans
 }
 
 MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteJump_ManualUpdate(self);
     auto selfTransform = self->get_transform();
     float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float elapsedTime = songTime - (self->beatTime - self->jumpDuration * 0.5f);

@@ -5,11 +5,13 @@
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "System/Action.hpp"
+#include "NECaches.h"
 
 using namespace TrackParenting;
 using namespace UnityEngine;
 using namespace GlobalNamespace;
 using namespace System;
+using namespace Animation;
 
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
@@ -27,8 +29,8 @@ void PlayerTrack::ctor() {
 
 void PlayerTrack::AssignTrack(Track *track) {
     if (!instance) {
-        GameObject *gameObject = GameObject::Find(il2cpp_utils::newcsstr("LocalPlayerGameCore"));
-        GameObject *noodleObject = GameObject::New_ctor(il2cpp_utils::newcsstr("NoodlePlayerTrack"));
+        GameObject *gameObject = GameObject::Find("LocalPlayerGameCore");
+        GameObject *noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
         origin = noodleObject->get_transform();
         origin->SetParent(gameObject->get_transform()->get_parent(), true);
         gameObject->get_transform()->SetParent(origin, true);
@@ -74,6 +76,13 @@ void PlayerTrack::Update() {
 
         std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
         std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
+        std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
+
+        if (NECaches::LeftHandedMode) {
+            rotation = Animation::MirrorQuaternionNullable(rotation);
+            localRotation = Animation::MirrorQuaternionNullable(localRotation);
+            position = Animation::MirrorVectorNullable(position);
+        }
 
         NEVector::Quaternion worldRotationQuaternion = startRot;
         NEVector::Vector3 positionVector = startPos;
@@ -85,16 +94,12 @@ void PlayerTrack::Update() {
         }
 
         worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-        std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
         if (localRotation.has_value()) {
             worldRotationQuaternion = worldRotationQuaternion * *localRotation;
         }
 
 
         origin->set_localRotation(worldRotationQuaternion);
-
-
-
         origin->set_localPosition(positionVector);
 
     }

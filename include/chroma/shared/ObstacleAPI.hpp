@@ -72,5 +72,21 @@ namespace Chroma {
 
             return std::nullopt;
         }
+
+        /// This retrieves the callback used for Saber Color changed.
+        ///
+        /// \return
+        using ObstacleCallback = UnorderedEventCallback<GlobalNamespace::ObstacleControllerBase*, Sombrero::FastColor const&>;
+        static std::optional<std::reference_wrapper<ObstacleCallback>> getObstacleChangedColorCallbackSafe() {
+            static auto function = CondDeps::Find<ObstacleCallback*>(CHROMA_ID, "getObstacleChangedColorCallbackSafe");
+
+            /// Oh boi what have I done
+            if (function) {
+                ObstacleCallback& callback = *function.value()();
+                return std::make_optional(std::ref(callback));
+            }
+
+            return std::nullopt;
+        }
     };
 }

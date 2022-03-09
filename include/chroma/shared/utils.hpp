@@ -5,6 +5,9 @@
 
 #define CHROMA_ID "chroma"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+
 namespace Chroma {
 
     inline static int floorToInt(float f) {
@@ -55,33 +58,29 @@ namespace Chroma {
         float a;
         bool isSet;
 
-        [[nodiscard]] Sombrero::FastColor getColor() const {
-            return Sombrero::FastColor(r, g, b, a);
+        constexpr OptColor() = default;
+        constexpr OptColor(float r, float g, float b, float a) : r(r), g(g), b(b), a(a), isSet(true) {}
+
+        [[nodiscard]] constexpr Sombrero::FastColor getColor() const {
+            return {r, g, b, a};
         }
     };
     }
 
-    inline OptColor OptColorFromColor(Sombrero::FastColor const &color) {
+    constexpr static OptColor OptColorFromColor(Sombrero::FastColor const &color) {
         return {
                 color.r,
                 color.g,
                 color.b,
                 color.a,
-                true
         };
     }
 
     // This is probably not needed but it is verbose
-    inline const OptColor OptColorNull = {
-            0,
-            0,
-            0,
-            0,
-            false,
-    };
+    inline static constexpr const OptColor OptColorNull{};
 
 
-    inline OptColor OptColorFromColor(std::optional<Sombrero::FastColor> const &color) {
+    static constexpr OptColor OptColorFromColor(std::optional<Sombrero::FastColor> const &color) {
         return color ? OptColorFromColor(*color) : OptColorNull;
     }
 }

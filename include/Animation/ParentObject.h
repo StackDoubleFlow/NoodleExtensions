@@ -6,6 +6,8 @@
 #include "NELogger.h"
 #include "tracks/shared/Vector.h"
 
+#include "AssociatedData.h"
+
 DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_DEFAULT_CTOR();
     DECLARE_SIMPLE_DTOR();
@@ -29,8 +31,7 @@ public:
     void HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed);
 
     static void ResetTransformParent(UnityEngine::Transform *transform);
-    static void AssignTrack(std::vector<Track*> const& tracks, Track *parentTrack, std::optional<NEVector::Vector3> const& startPos,
-        std::optional<NEVector::Quaternion> const& startRot, std::optional<NEVector::Quaternion> const&  startLocalRot, std::optional<NEVector::Vector3> const& startScale, bool worldPositionStays);
+    static void AssignTrack(ParentTrackEventData const& parentTrackEventData);
 )
 
 class ParentController {

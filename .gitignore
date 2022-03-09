@@ -4,8 +4,10 @@ obj/
 libs/
 ndkpath.txt
 *.qmod
-
+QPM/
+ninja-build/
 build/
+*.cmake
 
 # QPM
 qpm.shared.json

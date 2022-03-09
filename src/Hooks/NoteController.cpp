@@ -32,7 +32,7 @@ using namespace UnityEngine;
 using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD;
-std::vector<Track*> noteTracks;
+TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
     if (noteTracks.empty())
@@ -64,7 +64,7 @@ float noteTimeAdjust(float original, float jumpDuration) {
     return original;
 }
 
-std::unordered_map<NoteController *, Array<ConditionalMaterialSwitcher *> *> cachedNoteMaterialSwitchers;
+std::unordered_map<NoteController *, ArrayW<ConditionalMaterialSwitcher *>> cachedNoteMaterialSwitchers;
 
 void NECaches::ClearNoteCaches() {
     cachedNoteMaterialSwitchers.clear();
@@ -78,6 +78,10 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 float endRotation, float uniformScale) {
     NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration,
                         jumpGravity, endRotation, uniformScale);
+
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
 
@@ -89,7 +93,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!customNoteData->customData)
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    Array<ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
     auto it = cachedNoteMaterialSwitchers.find(self);
     if (it == cachedNoteMaterialSwitchers.end()) {
         cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
@@ -97,7 +101,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         materialSwitchers = it->second;
     }
     ad.materialSwitchers = materialSwitchers;
-    for (auto *materialSwitcher: materialSwitchers->ref_to()) {
+    for (auto *materialSwitcher: materialSwitchers) {
         materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
     ad.dissolveEnabled = false;
@@ -112,8 +116,10 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
         vector =
                 vector +
-                NEVector::Vector3(noteJump->randomRotations->values[noteJump->randomRotationIdx]) * 20;
-        NEVector::Quaternion midrotation = NEVector::Quaternion::Euler(vector);
+                NEVector::Vector3(noteJump->randomRotations.get(noteJump->randomRotationIdx)) * 20;
+        static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
+
+        NEVector::Quaternion midrotation = Quaternion_Euler(vector);
         noteJump->middleRotation = midrotation;
     }
 
@@ -138,7 +144,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
         }
     }
-    std::vector<Track *> const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    auto const &tracks = TracksAD::getAD(customNoteData->customData).tracks;
     if (!tracks.empty()) {
         auto go = self->get_gameObject();
         for (auto &track: tracks) {
@@ -159,11 +165,14 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.localRotation = localRotation;
 
 
-//    self->Update();
+    self->Update();
 }
 
 MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void,
                 NoteController *self) {
+
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteController_ManualUpdate(self);
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
@@ -180,10 +189,14 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     // }
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    std::vector<Track *> const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
+    auto const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
 
     noteUpdateAD = &ad;
     noteTracks = tracks;
+
+    if (noteTracks.empty() && !ad.animationData.parsed) {
+        return NoteController_ManualUpdate(self);
+    }
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -240,12 +253,13 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
-    if (hasDissolveOffset && !ad.dissolveEnabled && noteDissolveConfig) {
-        ArrayWrapper<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+    bool isDissolving = offset.dissolve.value_or(0) > 0 || offset.dissolveArrow.value_or(0) > 0;
+    if (hasDissolveOffset && ad.dissolveEnabled != isDissolving && noteDissolveConfig) {
+        ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
         for (auto *materialSwitcher : materialSwitchers) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1 : materialSwitcher->material0);
         }
-        ad.dissolveEnabled = true;
+        ad.dissolveEnabled = isDissolving;
     }
 
     if (offset.dissolve.has_value()) {
@@ -253,10 +267,9 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         if (!cutoutEffect) {
             BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
             CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
-            Array<CutoutEffect*>* cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
-            for (int i = 0; i < cuttoutEffects->Length(); i++) {
-                CutoutEffect *effect = cuttoutEffects->get(i);
-                if (csstrtostr(effect->get_name()) != u"NoteArrow") {
+            ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
+            for (CutoutEffect *effect : cuttoutEffects) {
+                if (effect->get_name() != u"NoteArrow") {
                     cutoutEffect = effect;
                     break;
                 }
@@ -292,16 +305,16 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
         if (self->klass == gameNoteControllerClass) {
             auto *gameNoteController = reinterpret_cast<GameNoteController *>(self);
-            Array<BoxCuttableBySaber *> *bigCuttable = gameNoteController->bigCuttableBySaberList;
-            for (int i = 0; i < bigCuttable->Length(); i++) {
-                if (bigCuttable->values[i]->canBeCut != enabled) {
-                    bigCuttable->values[i]->set_canBeCut(enabled);
+            ArrayW<BoxCuttableBySaber *> bigCuttables = gameNoteController->bigCuttableBySaberList;
+            for (auto bigCuttable : bigCuttables) {
+                if (bigCuttable->canBeCut != enabled) {
+                    bigCuttable->set_canBeCut(enabled);
                 }
             }
-            Array<BoxCuttableBySaber *> *smallCuttable = gameNoteController->smallCuttableBySaberList;
-            for (int i = 0; i < smallCuttable->Length(); i++) {
-                if (smallCuttable->values[i]->canBeCut != enabled) {
-                    smallCuttable->values[i]->set_canBeCut(enabled);
+            ArrayW<BoxCuttableBySaber *> smallCuttables = gameNoteController->smallCuttableBySaberList;
+            for (auto smallCuttable : smallCuttables) {
+                if (smallCuttable->canBeCut != enabled) {
+                    smallCuttable->set_canBeCut(enabled);
                 }
             }
         } else if(self->klass == bombNoteControllerClass) {

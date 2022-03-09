@@ -29,43 +29,46 @@ using namespace System::Collections::Generic;
 static Il2CppClass *customObstacleDataClass;
 static Il2CppClass *customNoteDataClass;
 
-float ObjectSortGetTime(BeatmapObjectData *n) {
+float ObjectSortGetTime(BeatmapObjectData const* n) {
     if (n->klass == customObstacleDataClass) {
-        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData *>(n);
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
         return n->time - getAD(obstacle->customData).aheadTime;
     } else if (n->klass == customNoteDataClass) {
-        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData *>(n);
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
         return n->time - getAD(note->customData).aheadTime;
     } else {
         return n->time;
     }
 }
 
-bool ObjectTimeCompare(BeatmapObjectData *a, BeatmapObjectData *b) {
+constexpr bool ObjectTimeCompare(BeatmapObjectData const * a, BeatmapObjectData const* b) {
     return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
 void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
-    BeatmapObjectData **begin = beatmapObjectsData->items->values;
+    BeatmapObjectData **begin = beatmapObjectsData->items.begin();
     BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
-    std::sort(begin, end, ObjectTimeCompare);
+    std::stable_sort(begin, end, ObjectTimeCompare);
 }
 
 IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
     BeatmapData *customBeatmapData = beatmapData->GetCopy();
-    customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    if (!customObstacleDataClass) {
+        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    }
 
     float const startHalfJumpDurationInBeats = 4;
     float const maxHalfJumpDistance = 18;
     float const moveDuration = 0.5f;
 
     // loop through all objects in all lines of the beatmapData
-    for (int i = 0; i < customBeatmapData->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = customBeatmapData->beatmapLinesData->values[i];
+    for (BeatmapLineData *beatmapLineData : customBeatmapData->beatmapLinesData) {
+        if (!beatmapLineData)
+            continue;
+
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData =
-                beatmapLineData->beatmapObjectsData->items->values[j];
+            BeatmapObjectData *beatmapObjectData = beatmapLineData->beatmapObjectsData->items.get(j);
             float bpm;
 
             CustomJSONData::JSONWrapper *customDataWrapper;
@@ -119,11 +122,13 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
         TracksAD::readBeatmapDataAD(beatmap);
     }
 
-    for (int i = 0; i < beatmap->beatmapLinesData->Length(); i++) {
-        BeatmapLineData *beatmapLineData = beatmap->beatmapLinesData->values[i];
+    for (BeatmapLineData *beatmapLineData : beatmap->beatmapLinesData) {
+        if (!beatmapLineData)
+            continue;
+
         for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
             BeatmapObjectData *beatmapObjectData =
-                    beatmapLineData->beatmapObjectsData->items->values[j];
+                    beatmapLineData->beatmapObjectsData->items.get(j);
 
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
@@ -162,11 +167,10 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
     bool isType = false;
 
-    static std::hash<std::string_view> stringViewHash;
-    auto typeHash = stringViewHash(customEventData->type);
+    auto typeHash = customEventData->typeHash;
 
 #define TYPE_GET(jsonName, varName)                                \
-    static auto jsonNameHash_##varName = stringViewHash(jsonName); \
+    static auto jsonNameHash_##varName = std::hash<std::string_view>()(jsonName); \
     if (!isType && typeHash == (jsonNameHash_##varName))                      \
         isType = true;
 
@@ -183,22 +187,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
         return;
 
     if (typeHash == jsonNameHash_AssignTrackParent) {
-        std::string parentTrackName(eventData["_parentTrack"].GetString());
-        Track* track = &beatmapAD.tracks[parentTrackName];
-
-        rapidjson::Value &rawChildrenTracks = eventData["_childrenTracks"];
-        std::vector<Track *> childrenTracks;
-        childrenTracks.reserve(rawChildrenTracks.Size());
-        for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
-             itr != rawChildrenTracks.End(); itr++) {
-            Track *child = &beatmapAD.tracks[itr->GetString()];
-            // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
-            childrenTracks.push_back(child);
-        }
-
-        // copy constructor deleted for some reason???
-        eventAD.parentTrackEventData.emplace(eventData, childrenTracks, parentTrackName, track);
-
+        eventAD.parentTrackEventData.emplace(eventData, beatmapAD);
     } else if (typeHash == jsonNameHash_AssignPlayerToTrack) {
         std::string trackName(eventData["_track"].GetString());
         Track *track = &beatmapAD.tracks[trackName];
@@ -234,6 +223,9 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
         beatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
         screenDisplacementEffectsEnabled);
+
+    if (!Hooks::isNoodleHookEnabled())
+        return result;
 
     LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
     auto *transformedBeatmapData = ReorderLineData(result);

@@ -16,6 +16,7 @@
 #include "NELogger.h"
 #include "tracks/shared/TimeSourceHelper.h"
 #include "tracks/shared/Vector.h"
+#include "NEHooks.h"
 
 using namespace Events;
 using namespace GlobalNamespace;
@@ -34,13 +35,15 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
 
 void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     bool isType = false;
 
-    static std::hash<std::string_view> stringViewHash;
-    auto typeHash = stringViewHash(customEventData->type);
+    auto typeHash = customEventData->typeHash;
 
 #define TYPE_GET(jsonName, varName)                                \
-    static auto jsonNameHash_##varName = stringViewHash(jsonName); \
+    static auto jsonNameHash_##varName = std::hash<std::string_view>()(jsonName); \
     if (!isType && typeHash == (jsonNameHash_##varName))                      \
         isType = true;
 
@@ -62,10 +65,7 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
     }
 
     if (ad.parentTrackEventData) {
-        auto const& parentTrackData = *ad.parentTrackEventData;
-        ParentObject::AssignTrack(parentTrackData.childrenTracks, parentTrackData.parentTrack, parentTrackData.pos,
-                                  parentTrackData.rot, parentTrackData.localRot,
-                                  parentTrackData.scale, parentTrackData.worldPositionStays);
+        ParentObject::AssignTrack(*ad.parentTrackEventData);
     } else if (ad.playerTrackEventData) {
         PlayerTrack::AssignTrack(ad.playerTrackEventData->track);
     }

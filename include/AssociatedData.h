@@ -31,6 +31,7 @@ struct AnimationObjectData {
     PointDefinition *dissolveArrow;
     PointDefinition *cuttable;
     PointDefinition *definitePosition;
+    bool parsed = false;
 
     AnimationObjectData() = default;
     AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
@@ -85,7 +86,7 @@ struct BeatmapObjectAssociatedData {
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
     // conditional material switch for dissolve
-    Array<GlobalNamespace::ConditionalMaterialSwitcher *> *materialSwitchers;
+    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
 
@@ -107,9 +108,8 @@ struct PlayerTrackEventData {
 };
 
 struct ParentTrackEventData {
-    explicit ParentTrackEventData(const rapidjson::Value& customData, std::vector<Track*>  childrenTracks, std::string_view parentTrackName, Track* parentTrack);
+    explicit ParentTrackEventData(const rapidjson::Value& customData, TracksAD::BeatmapAssociatedData &beatmapAD);
 
-    const std::string parentTrackName;
     Track* parentTrack;
     std::optional<NEVector::Vector3> pos;
     std::optional<NEVector::Quaternion> rot;
@@ -130,4 +130,9 @@ struct BeatmapEventAssociatedData {
 BeatmapEventAssociatedData& getEventAD(CustomJSONData::CustomEventData const* customData);
 void clearEventADs();
 
-BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData);
+constexpr BeatmapObjectAssociatedData& getAD(CustomJSONData::JSONWrapper *customData) {
+    std::any &ad = customData->associatedData['N'];
+    if (!ad.has_value())
+        ad = std::make_any<::BeatmapObjectAssociatedData>();
+    return std::any_cast<::BeatmapObjectAssociatedData &>(ad);
+}

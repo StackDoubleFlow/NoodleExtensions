@@ -24,6 +24,9 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
     PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint(
         self, worldPos, obstacleControllers);
 
+    if (!Hooks::isNoodleHookEnabled())
+        return;
+
     // Replaced in transpile
     VList<ObstacleController *> vObstacleControllers = obstacleControllers;
 
@@ -45,6 +48,9 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_get_intersectingObstacles,
                 &PlayerHeadAndObstacleInteraction::get_intersectingObstacles,
                 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
                         PlayerHeadAndObstacleInteraction *self) {
+    if (!Hooks::isNoodleHookEnabled())
+        return PlayerHeadAndObstacleInteraction_get_intersectingObstacles(self);
+
     auto obstaclesResult = PlayerHeadAndObstacleInteraction_get_intersectingObstacles(self);
     auto obstacles = FakeNoteHelper::ObstacleFakeCheck(obstaclesResult);
 

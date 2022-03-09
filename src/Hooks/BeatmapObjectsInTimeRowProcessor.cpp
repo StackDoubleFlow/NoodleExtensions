@@ -12,6 +12,8 @@ using namespace CustomJSONData;
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
                 &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
                 BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
 
     if (notes->get_Count() < 0)
         return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
@@ -21,7 +23,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
     std::unordered_map<float, std::vector<CustomNoteData *>> notesInColumn;
     for (int i = 0; i < customNotes->get_Count(); i++) {
-        CustomNoteData *noteData = customNotes->items->values[i];
+        CustomNoteData *noteData = customNotes->items.get(i);
 
         if (!il2cpp_functions::class_is_assignable_from(CustomNoteDataKlass, noteData->klass))
             continue;
@@ -84,6 +86,9 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
                 &BeatmapObjectsInTimeRowProcessor::ProcessColorNotesInTimeRow, void,
                 System::Collections::Generic::IList_1<NoteData *> *colorNotesDataOld,
                 float nextBasicNoteTimeRowTime) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(colorNotesDataOld, nextBasicNoteTimeRowTime);
+
     List<CustomNoteData *> *colorNotesData = reinterpret_cast<List<CustomNoteData *> *>(colorNotesDataOld);
 
     int const customNoteCount = colorNotesData->get_Count();

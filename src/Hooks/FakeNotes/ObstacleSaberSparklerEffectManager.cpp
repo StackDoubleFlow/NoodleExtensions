@@ -31,6 +31,9 @@ MAKE_HOOK_MATCH(ObstacleSaberSparkleEffectManager_GetBurnMarkPos,
                 UnityEngine::Bounds bounds, UnityEngine::Transform* transform,
                 UnityEngine::Vector3 bladeBottomPos,
                 UnityEngine::Vector3 bladeTopPos, ByRef<UnityEngine::Vector3> burnMarkPos) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ObstacleSaberSparkleEffectManager_GetBurnMarkPos(self, bounds, transform, bladeBottomPos, bladeTopPos, burnMarkPos);
+
     if (bounds.get_size() == NEVector::Vector3::zero()) {
         // burnMarkPos is out ref, must assign
         burnMarkPos.heldRef = NEVector::Vector3::zero();

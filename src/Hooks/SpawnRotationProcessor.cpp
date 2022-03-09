@@ -16,6 +16,9 @@ MAKE_HOOK_MATCH(ProcessBeatmapEventData,
                 &SpawnRotationProcessor::ProcessBeatmapEventData, bool,
                 SpawnRotationProcessor *self,
                 BeatmapEventData *normalEventData) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ProcessBeatmapEventData(self, normalEventData);
+
     auto *beatmapEventData = reinterpret_cast<CustomJSONData::CustomBeatmapEventData *>(normalEventData);
     if (BeatmapEventTypeExtensions::IsRotationEvent(beatmapEventData->type)) {
         if (!beatmapEventData->customData->value) {

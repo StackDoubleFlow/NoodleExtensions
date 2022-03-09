@@ -9,9 +9,12 @@
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
+#include "NECaches.h"
+
 using namespace TrackParenting;
 using namespace UnityEngine;
 using namespace GlobalNamespace;
+using namespace Animation;
 
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
@@ -23,6 +26,14 @@ void ParentObject::Update() {
 
     std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
     std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
+    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
+
+    if (NECaches::LeftHandedMode) {
+        rotation = Animation::MirrorQuaternionNullable(rotation);
+        localRotation = Animation::MirrorQuaternionNullable(localRotation);
+        position = Animation::MirrorVectorNullable(position);
+    }
 
     NEVector::Quaternion worldRotationQuaternion = startRot;
     NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
@@ -34,13 +45,12 @@ void ParentObject::Update() {
     }
 
     worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
+
     if (localRotation.has_value()) {
         worldRotationQuaternion = worldRotationQuaternion * *localRotation;
     }
 
     Vector3 scaleVector = startScale;
-    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
     if (scale.has_value()) {
         scaleVector = startScale * scale.value();
     }
@@ -65,16 +75,8 @@ static void logTransform(Transform* transform, int hierarchy = 0) {
     }
 }
 
-void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parentTrack,
-                               std::optional<NEVector::Vector3> const&  startPos,
-                               std::optional<NEVector::Quaternion> const& startRot,
-                               std::optional<NEVector::Quaternion> const& startLocalRot,
-                               std::optional<NEVector::Vector3> const& startScale, bool worldPositionStays) {
-//    if (std::find(tracks.begin(), tracks.end(), parentTrack) != tracks.end()) {
-//        NELogger::GetLogger().error("How could a track contain itself?");
-//        return;
-//    }
-    static auto* ParentName = il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("ParentObject");
+void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData) {
+    static ConstString ParentName("ParentObject");
 
     GameObject *parentGameObject = GameObject::New_ctor(ParentName);
     ParentObject *instance = parentGameObject->AddComponent<ParentObject *>();
@@ -83,38 +85,38 @@ void ParentObject::AssignTrack(const std::vector<Track *> &tracks, Track *parent
     static auto get_transformMB = il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::MonoBehaviour::get_transform>::get();
 
     instance->origin = get_transform(parentGameObject);
-    instance->track = parentTrack;
-    instance->worldPositionStays = worldPositionStays;
+    instance->track = parentTrackEventData.parentTrack;
+    instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
     Transform *transform = get_transformMB(instance);
-    if (startPos.has_value()) {
-        instance->startPos = *startPos;
+    if (parentTrackEventData.pos.has_value()) {
+        instance->startPos = *parentTrackEventData.pos;
         transform->set_localPosition(
                 instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
     }
 
-    if (startRot.has_value()) {
-        instance->startRot = *startRot;
+    if (parentTrackEventData.rot.has_value()) {
+        instance->startRot = *parentTrackEventData.rot;
         instance->startLocalRot = instance->startRot;
         transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
         transform->set_localRotation(instance->startRot);
     }
 
-    if (startLocalRot.has_value()) {
-        instance->startLocalRot = instance->startRot * *startLocalRot;
+    if (parentTrackEventData.localRot.has_value()) {
+        instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
         transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
     }
 
-    if (startScale.has_value()) {
-        instance->startScale = *startScale;
+    if (parentTrackEventData.scale.has_value()) {
+        instance->startScale = *parentTrackEventData.scale;
         transform->set_localScale(instance->startScale);
     }
 
     auto startTime = std::chrono::high_resolution_clock::now();
-    parentTrack->AddGameObject(parentGameObject);
+    parentTrackEventData.parentTrack->AddGameObject(parentGameObject);
 
-    for (auto &track: tracks) {
-        if (track == parentTrack) {
+    for (auto &track : parentTrackEventData.childrenTracks) {
+        if (track == parentTrackEventData.parentTrack) {
             NELogger::GetLogger().error("How could a track contain itself?");
         }
 

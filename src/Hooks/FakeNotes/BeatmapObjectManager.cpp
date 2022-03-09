@@ -18,21 +18,13 @@ extern std::optional<NoteCutCoreEffectsSpawner*> noteCutCoreEffectsSpawner;
 MAKE_HOOK_MATCH(HandleNoteControllerNoteWasMissed,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasMissed, void,
                 BeatmapObjectManager *self, NoteController *noteController) {
+    if (!Hooks::isNoodleHookEnabled())
+        return HandleNoteControllerNoteWasMissed(self, noteController);
+
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         HandleNoteControllerNoteWasMissed(self, noteController);
     }
 }
-
-// temp
-template<typename T>
-struct ::il2cpp_utils::il2cpp_type_check::il2cpp_arg_type<ByRef<T>> {
-    static inline const Il2CppType* get(ByRef<T> arg) {
-        // ByRef types should NOT perform argument based lookups, since they could be holding a null reference.
-        // ex: out
-        // Instead, we should deduce the type from our held type alone.
-        return ::il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_type<ByRef<T>>::get();
-    }
-};
 
 // lazy
 static const Il2CppType * NoteCutInfoT(ByRef<NoteCutInfo> info) {
@@ -50,6 +42,9 @@ void HandleNoteWasCut(NoteCutCoreEffectsSpawner* self, GlobalNamespace::NoteCont
 MAKE_HOOK_MATCH(BeatmapObjectManager_HandleNoteControllerNoteWasCut,
                 &BeatmapObjectManager::HandleNoteControllerNoteWasCut, void,
                 BeatmapObjectManager *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);
+
     // If not fake note or noteCutCoreEffectsSpawner is null
     if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
         BeatmapObjectManager_HandleNoteControllerNoteWasCut(self, noteController, noteCutInfo);

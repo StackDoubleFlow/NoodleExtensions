@@ -5,31 +5,34 @@
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/IDifficultyBeatmap.hpp"
+#include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
 #include "Animation/ParentObject.h"
 #include "tracks/shared/Animation/PointDefinition.h"
 #include "AssociatedData.h"
 #include "NECaches.h"
-
+#include "NEConfig.h"
 #include "NELogger.h"
 #include "NEHooks.h"
 #include "SceneTransitionHelper.hpp"
 
+#include "pinkcore/shared/RequirementAPI.hpp"
+
 // needed to compile, idk why
-#define ID "Noodle"
 #include "conditional-dependencies/shared/main.hpp"
 
 #include "qosmetics-api/shared/WallAPI.hpp"
 #include "qosmetics-api/shared/NoteAPI.hpp"
-#undef ID
 
 using namespace NoodleExtensions;
 using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom) {
+void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom, PlayerSpecificSettings* playerSpecificSettings) {
+    NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
     bool noodleRequirement = false;
+    bool meRequirement = false;
 
     CRASH_UNLESS(customBeatmapDataCustom);
     if (customBeatmapDataCustom->levelCustomData) {
@@ -38,14 +41,17 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
         if (dynData) {
             ValueUTF16 const& rapidjsonData = *dynData;
 
+            meRequirement = CheckIfME(rapidjsonData);
             noodleRequirement = CheckIfNoodle(rapidjsonData);
         }
     }
 
+    noodleRequirement = !meRequirement && noodleRequirement;
+
     Hooks::setNoodleHookEnabled(noodleRequirement);
 
     auto const& modInfo = NELogger::modInfo;
-    if (noodleRequirement) {
+    if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
         Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
         Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
     } else {
@@ -61,11 +67,13 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
     if (difficultyBeatmap) {
         auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
 
-        for (int i = 0; i < beatmapData->beatmapLinesData->Length(); i++) {
-            BeatmapLineData *beatmapLineData = beatmapData->beatmapLinesData->values[i];
+        for (BeatmapLineData *beatmapLineData : beatmapData->beatmapLinesData) {
+            if (!beatmapLineData)
+                continue;
+
             for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
                 BeatmapObjectData *beatmapObjectData =
-                        beatmapLineData->beatmapObjectsData->items->values[j];
+                        beatmapLineData->beatmapObjectsData->items.get(j);
 
                 CustomJSONData::JSONWrapper *customDataWrapper;
                 if (beatmapObjectData->klass == customObstacleDataClass) {

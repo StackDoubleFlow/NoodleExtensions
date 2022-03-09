@@ -37,6 +37,9 @@ FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> in
 //    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
 
     for (auto const& obstacle : intersectingObstacles) {
+        if (!obstacle || !obstacle->obstacleData)
+            continue;
+
         auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
 
         bool add = !customData || !customData->value;
