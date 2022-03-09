@@ -14,6 +14,9 @@ void InstallAndRegisterAll() {
     NEEvents::AddEventCallbacks(logger);
     PinkCore::RequirementAPI::RegisterInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
 
+    Modloader::requireMod("MappingExtensions");
+    if (!Modloader::getMods().contains("MappingExtensions")) return;
+
     PinkCore::API::GetFoundRequirementCallbackSafe() += [](const std::vector<std::string>& requirements){
         bool meRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
         bool neRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
