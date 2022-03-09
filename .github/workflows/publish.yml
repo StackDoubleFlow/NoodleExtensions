@@ -168,17 +168,6 @@ jobs:
           asset_name: ${{ steps.libname.outputs.NAME }}
           asset_content_type: application/octet-stream
 
-      - name: Upload Debug Asset
-        id: upload_debug_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
-          asset_path: ./build/debug/${{ steps.libname.outputs.NAME }}
-          asset_name: ${{ steps.libname.outputs.NAME }}
-          asset_content_type: application/octet-stream
-
       - name: Upload Qmod Asset
         id: upload_qmod_asset
         uses: actions/upload-release-asset@v1
