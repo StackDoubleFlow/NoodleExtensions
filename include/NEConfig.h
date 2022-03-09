@@ -4,9 +4,9 @@
 #include "beatsaber-hook/shared/utils/typedefs-string.hpp"
 
 enum struct MaterialBehaviour {
-    SMART_COLOR,
-    SEMI_BASIC,
-    BASIC
+    SMART_COLOR = 0,
+    SEMI_BASIC = 1,
+    BASIC = 2
 };
 
 inline std::vector<StringW> getMaterialBehaviourValues() {

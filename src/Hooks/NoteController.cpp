@@ -253,12 +253,13 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
-    if (hasDissolveOffset && !ad.dissolveEnabled && noteDissolveConfig) {
+    bool isDissolving = offset.dissolve.value_or(0) > 0 || offset.dissolveArrow.value_or(0) > 0;
+    if (hasDissolveOffset && ad.dissolveEnabled != isDissolving && noteDissolveConfig) {
         ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
         for (auto *materialSwitcher : materialSwitchers) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material1);
+            materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1 : materialSwitcher->material0);
         }
-        ad.dissolveEnabled = true;
+        ad.dissolveEnabled = isDissolving;
     }
 
     if (offset.dissolve.has_value()) {
@@ -268,7 +269,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
             CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
             ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
             for (CutoutEffect *effect : cuttoutEffects) {
-                if (csstrtostr(effect->get_name()) != u"NoteArrow") {
+                if (effect->get_name() != u"NoteArrow") {
                     cutoutEffect = effect;
                     break;
                 }
