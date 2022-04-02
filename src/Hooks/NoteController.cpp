@@ -72,12 +72,12 @@ void NECaches::ClearNoteCaches() {
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
                 NoteController *self, GlobalNamespace::NoteData* noteData,
-                float worldRotation, UnityEngine::Vector3 moveStartPos,
-                UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos,
+                float worldRotation, ::UnityEngine::Vector3 moveStartPos,
+                ::UnityEngine::Vector3 moveEndPos, ::UnityEngine::Vector3 jumpEndPos,
                 float moveDuration, float jumpDuration, float jumpGravity,
-                float endRotation, float uniformScale) {
+                float endRotation, float uniformScale, bool rotateTowardsPlayer, bool useRandomRotation) {
     NoteController_Init(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration,
-                        jumpGravity, endRotation, uniformScale);
+                        jumpGravity, endRotation, uniformScale, rotateTowardsPlayer, useRandomRotation);
 
     if (!Hooks::isNoodleHookEnabled())
         return;
@@ -109,14 +109,23 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
+    float zOffset = self->noteMovement->zOffset;
+    moveStartPos.z += zOffset;
+    moveEndPos.z += zOffset;
+    jumpEndPos.z += zOffset;
+
     auto const &curDir = ad.objectData.cutDirection;
     if (curDir.has_value()) {
         NEVector::Quaternion cutQuaternion = curDir.value();
         noteJump->endRotation = cutQuaternion;
         NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
-        vector =
-                vector +
-                NEVector::Vector3(noteJump->randomRotations.get(noteJump->randomRotationIdx)) * 20;
+        if (useRandomRotation) {
+            auto randomRotations = noteJump->randomRotations;
+            auto num = (int) std::round((noteData->time * 10.0f) + (moveEndPos.x * 2.0f) + (moveEndPos.y * 2.0f)) % randomRotations.size();
+            vector = vector +
+                            (noteJump->randomRotations[num] * 20.0f);
+        }
+
         static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
 
         NEVector::Quaternion midrotation = Quaternion_Euler(vector);
@@ -151,11 +160,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
             track->AddGameObject(go);
         }
     }
-    // how fucking long has _zOffset existed???!??
-    float zOffset = self->noteMovement->zOffset;
-    moveStartPos.z += zOffset;
-    moveEndPos.z += zOffset;
-    jumpEndPos.z += zOffset;
 
     ad.endRotation = endRotation;
     ad.moveStartPos = moveStartPos;

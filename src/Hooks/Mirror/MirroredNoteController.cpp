@@ -1,7 +1,8 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
-#include "GlobalNamespace/MirroredCubeNoteController.hpp"
+
+#include "GlobalNamespace/IGameNoteMirrorable.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
 #include "GlobalNamespace/BaseNoteVisuals.hpp"
@@ -113,44 +114,44 @@ static void UpdateMirror(BeatmapObjectAssociatedData& ad,Transform* objectTransf
     objectTransform->set_localScale(followedObjectTransformLocalScale);
     noteTransform->set_localScale(followedObjectTransformLocalScale);
 }
-
-MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCubeNoteController", "Mirror", void, MirroredCubeNoteController *self, ICubeNoteMirrorable *noteController) {
-    MirroredCubeNoteController_Mirror(self, noteController);
-
-    if (!Hooks::isNoodleHookEnabled())
-        return;
-
-    auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-
-    AddToTrack(customNoteData, self->get_gameObject());
-}
-
-MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_UpdatePositionAndRotation, "", "MirroredCubeNoteController", "UpdatePositionAndRotation", void, MirroredCubeNoteController *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return MirroredCubeNoteController_UpdatePositionAndRotation(self);
-
-    if (!CheckSkip(self->noteTransform, self->followedNoteTransform)) {
-        return;
-    }
-
-    MirroredCubeNoteController_UpdatePositionAndRotation(self);
-
-    auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-
-    UpdateMirror(ad, self->objectTransform, self->noteTransform,
-                 self->followedObjectTransform, self,
-                 [self](bool hide) {
-                     self->set_hide(hide);
-                 });
-}
+//
+//MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_Mirror, "", "MirroredCubeNoteController", "Mirror", void, MirroredCubeNoteController *self, IGameNoteMirrorable *noteController) {
+//    MirroredCubeNoteController_Mirror(self, noteController);
+//
+//    if (!Hooks::isNoodleHookEnabled())
+//        return;
+//
+//    auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
+//    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
+//    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+//
+//    AddToTrack(customNoteData, self->get_gameObject());
+//}
+//
+//MAKE_HOOK_FIND_CLASS_INSTANCE(MirroredCubeNoteController_UpdatePositionAndRotation, "", "MirroredCubeNoteController", "UpdatePositionAndRotation", void, MirroredCubeNoteController *self) {
+//    if (!Hooks::isNoodleHookEnabled())
+//        return MirroredCubeNoteController_UpdatePositionAndRotation(self);
+//
+//    if (!CheckSkip(self->noteTransform, self->followedNoteTransform)) {
+//        return;
+//    }
+//
+//    MirroredCubeNoteController_UpdatePositionAndRotation(self);
+//
+//    auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote);
+//    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);
+//    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+//
+//    UpdateMirror(ad, self->objectTransform, self->noteTransform,
+//                 self->followedObjectTransform, self,
+//                 [self](bool hide) {
+//                     self->set_hide(hide);
+//                 });
+//}
 
 void InstallMirroredNoteControllerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, MirroredCubeNoteController_Mirror);
-    INSTALL_HOOK(logger, MirroredCubeNoteController_UpdatePositionAndRotation);
+//    INSTALL_HOOK(logger, MirroredCubeNoteController_Mirror);
+//    INSTALL_HOOK(logger, MirroredCubeNoteController_UpdatePositionAndRotation);
 }
 
 NEInstallHooks(InstallMirroredNoteControllerHooks);

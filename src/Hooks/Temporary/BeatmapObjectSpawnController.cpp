@@ -3,7 +3,6 @@
 #include "beatsaber-hook/shared/utils/typedefs-array.hpp"
 
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
 #include "GlobalNamespace/IAudioTimeSource.hpp"
 #include "UnityEngine/GameObject.hpp"

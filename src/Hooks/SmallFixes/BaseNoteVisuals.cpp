@@ -2,7 +2,6 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/BaseNoteVisuals.hpp"
-#include "GlobalNamespace/ICubeNoteTypeProvider.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
 #include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
@@ -27,7 +26,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 
     BaseNoteVisuals_Awake(self);
 
-    static auto ICubeNoteTypeProviderKlass = classof(ICubeNoteTypeProvider*);
+    static auto ICubeNoteTypeProviderKlass = nullptr;
     static auto CustomNoteDataKlass = classof(CustomJSONData::CustomNoteData*);
 
     if (il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->noteController->klass)) {
@@ -58,7 +57,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 }
 
 void InstallBaseNoteVisualsHooks(Logger &logger) {
-    INSTALL_HOOK(logger, BaseNoteVisuals_Awake);
+//    INSTALL_HOOK(logger, BaseNoteVisuals_Awake);
 }
 
 NEInstallHooks(InstallBaseNoteVisualsHooks);

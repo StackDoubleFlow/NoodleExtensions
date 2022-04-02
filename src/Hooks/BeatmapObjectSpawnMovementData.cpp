@@ -5,7 +5,6 @@
 #include "GlobalNamespace/BeatmapEventData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
-#include "GlobalNamespace/BeatmapObjectType.hpp"
 #include "GlobalNamespace/NoteCutDirection.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/NoteLineLayer.hpp"
@@ -17,7 +16,6 @@
 #include "NELogger.h"
 #include "SpawnDataHelper.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
-#include "custom-json-data/shared/CustomBeatmapSaveData.h"
 
 #include <cmath>
 
@@ -65,14 +63,13 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 
     std::optional<Vector3> finalNoteOffset = std::nullopt;
 
+    Vector3 noteOffset;
+
     if (startX.has_value() || startY.has_value() || njs.has_value() || spawnOffset.has_value()) {
-        Vector3 noteOffset =
-            SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
-        noteOffset.y = startY.has_value()
-                           ? self->verticalObstaclePosY + (startY.value() * self->noteLinesDistance)
-                           : ((obstacleData->obstacleType == ObstacleType::Top)
-                                  ? (self->topObstaclePosY + self->jumpOffsetY)
-                                  : self->verticalObstaclePosY);
+        noteOffset =
+            SpawnDataHelper::GetObstacleOffset(self, obstacleData, startX, startY);
+
+        noteOffset.y += self->get_jumpOffsetY();
 
         finalNoteOffset = noteOffset;
 
@@ -82,25 +79,22 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     }
 
     if (height.has_value()) {
-        obstacleHeight = height.value() * self->noteLinesDistance;
+        obstacleHeight = std::min(height.value() * obstacleData->height * 0.6f, self->obstacleTopPosY - noteOffset.y);
     }
 
     result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
         moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration,
-        self->noteLinesDistance);
+        self->get_noteLinesDistance());
 
     if (!finalNoteOffset.has_value()) {
-        Vector3 noteOffset =
-            SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
-        noteOffset.y = (obstacleData->get_obstacleType() == ObstacleType::Top)
-                           ? (self->topObstaclePosY + self->jumpOffsetY)
-                           : self->verticalObstaclePosY;
+//        Vector3 noteOffset =
+//            SpawnDataHelper::GetNoteOffset(self, obstacleData, startX, std::nullopt);
         finalNoteOffset = noteOffset;
     }
 
     ad.noteOffset = NEVector::Vector3(self->centerPos) + *finalNoteOffset;
     ad.xOffset =
-        ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->noteLinesDistance;
+        ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->get_noteLinesDistance();
 
     return result;
 }
@@ -161,7 +155,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 
         // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
         float const highestJump = startHeight.has_value()
-                            ? (0.875f * lineYPos) + 0.639583f + self->jumpOffsetY
+                            ? (0.875f * lineYPos) + 0.639583f + self->get_jumpOffsetY()
                             : self->HighestJumpPosYForLineLayer(noteData->noteLineLayer);
 
         std::function<float(float)> const GetJumpGravity = [&startLayerLineYPos, &gravityOverride, &highestJump, &localJumpDistance, &localNoteJumpMovementSpeed](float lineYPos) {

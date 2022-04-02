@@ -269,7 +269,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     if (ad.doUnhide) {
-        self->set_hide(false);
+        self->Hide(false);
     }
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);

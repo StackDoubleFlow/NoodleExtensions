@@ -2,36 +2,43 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor.hpp"
+#include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor_TimeSliceContainer_1.hpp"
 
 #include "AssociatedData.h"
 #include "NEHooks.h"
+#include "custom-json-data/shared/VList.h"
 
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
 
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
-                &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
-                BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
+                &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice, void,
+                BeatmapObjectsInTimeRowProcessor *self,
+                GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>* allObjectsTimeSlice,
+                float nextTimeSliceTime) {
     if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
+        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
 
-    if (notes->get_Count() < 0)
-        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
+    auto items = allObjectsTimeSlice->items;
 
-    static auto CustomNoteDataKlass = classof(CustomNoteData*);
+    std::vector<CustomNoteData*> customNotes;
 
-    auto *customNotes = reinterpret_cast<List<CustomNoteData *> *>(notes);
+    for (auto o : VList(items)) {
+        if (o && il2cpp_utils::AssignableFrom<CustomNoteData>(o->klass)) customNotes.emplace_back((CustomNoteData*) o);
+    }
+
+    if (customNotes.empty())
+        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
+
+
+
+
     std::unordered_map<float, std::vector<CustomNoteData *>> notesInColumn;
-    for (int i = 0; i < customNotes->get_Count(); i++) {
-        CustomNoteData *noteData = customNotes->items.get(i);
-
-        if (!il2cpp_functions::class_is_assignable_from(CustomNoteDataKlass, noteData->klass))
-            continue;
-
+    for (auto noteData : customNotes) {
         float lineIndex = noteData->lineIndex - 2.0f;
         float lineLayer = noteData->noteLineLayer;
         if (noteData->customData->value) {
-            rapidjson::Value &customData = *noteData->customData->value;
+            rapidjson::Value const& customData = *noteData->customData->value;
             auto pos = customData.FindMember("_position");
             if (pos != customData.MemberEnd()) {
                 int size = pos->value.Size();
@@ -50,7 +57,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
         for (int k = 0; k < list.size(); k++) {
             float listLineLayer = list[k]->noteLineLayer;
             if (noteData->customData->value) {
-                rapidjson::Value &customData = *noteData->customData->value;
+                rapidjson::Value const& customData = *noteData->customData->value;
                 auto listPos = customData.FindMember("_position");
                 if (listPos != customData.MemberEnd()) {
                     if (listPos->value.Size() >= 2) {
@@ -79,17 +86,18 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
         }
     }
 
-    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, notes);
+    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
-                &BeatmapObjectsInTimeRowProcessor::ProcessColorNotesInTimeRow, void,
-                System::Collections::Generic::IList_1<NoteData *> *colorNotesDataOld,
-                float nextBasicNoteTimeRowTime) {
+                &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceColorNotesDidFinishTimeSlice, void,
+                BeatmapObjectsInTimeRowProcessor* self,
+                GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::NoteData*>* currentTimeSlice,
+                float nextTimeSliceTime) {
     if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(colorNotesDataOld, nextBasicNoteTimeRowTime);
+        return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
 
-    List<CustomNoteData *> *colorNotesData = reinterpret_cast<List<CustomNoteData *> *>(colorNotesDataOld);
+    auto *colorNotesData = reinterpret_cast<List<CustomNoteData *> *>(currentTimeSlice->items);
 
     int const customNoteCount = colorNotesData->get_Count();
 
@@ -102,7 +110,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
             float lineIndex = noteData->lineIndex - 2.0f;
             float lineLayer = noteData->noteLineLayer;
             if (noteData->customData->value) {
-                rapidjson::Value &customData = *noteData->customData->value;
+                rapidjson::Value const& customData = *noteData->customData->value;
                 auto pos = customData.FindMember("_position");
                 if (pos != customData.MemberEnd()) {
                     int size = pos->value.Size();
@@ -151,7 +159,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
     }
 
 
-    BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(colorNotesDataOld, nextBasicNoteTimeRowTime);
+    BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
 }
 
 

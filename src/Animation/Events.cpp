@@ -1,6 +1,6 @@
 #include "Animation/Events.h"
 #include "GlobalNamespace/BeatmapData.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
+#include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Vector3.hpp"
@@ -23,17 +23,17 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace NEVector;
 
-BeatmapObjectSpawnController *spawnController;
+BeatmapCallbacksController *spawnController;
 
-MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void,
-                BeatmapObjectSpawnController *self) {
+MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapCallbacksController::Start, void,
+                BeatmapCallbacksController *self) {
     spawnController = self;
     BeatmapObjectSpawnController_Start(self);
 }
 
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData);
 
-void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
+void CustomEventCallback(BeatmapCallbacksController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
     if (!Hooks::isNoodleHookEnabled())
         return;

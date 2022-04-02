@@ -19,28 +19,28 @@ using namespace GlobalNamespace;
 
 // Needed for obstacles, idk why too lazy to figure out
 void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap);
-
-MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
-                &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,
-                BeatmapData *, BeatmapDataLoader *self,
-                List<BeatmapSaveData::NoteData *> *notesSaveData,
-                List<BeatmapSaveData::WaypointData *> *waypointsSaveData,
-                List<BeatmapSaveData::ObstacleData *> *obstaclesSaveData,
-                List<BeatmapSaveData::EventData *> *eventsSaveData,
-                BeatmapSaveData::SpecialEventKeywordFiltersData
-                    *evironmentSpecialEventFilterData,
-                float startBpm, float shuffle, float shufflePeriod) {
-    // This should call CJD's hook
-    auto *result =
-        (CustomJSONData::CustomBeatmapData *)GetBeatmapDataFromBeatmapSaveData(
-            self, notesSaveData, waypointsSaveData, obstaclesSaveData,
-            eventsSaveData, evironmentSpecialEventFilterData, startBpm, shuffle,
-            shufflePeriod);
-
-    LoadNoodleObjects(result);
-
-    return result;
-}
+//
+//MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
+//                &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,
+//                BeatmapData *, BeatmapDataLoader *self,
+//                List<BeatmapSaveData::NoteData *> *notesSaveData,
+//                List<BeatmapSaveData::WaypointData *> *waypointsSaveData,
+//                List<BeatmapSaveData::ObstacleData *> *obstaclesSaveData,
+//                List<BeatmapSaveData::EventData *> *eventsSaveData,
+//                BeatmapSaveData::SpecialEventKeywordFiltersData
+//                    *evironmentSpecialEventFilterData,
+//                float startBpm, float shuffle, float shufflePeriod) {
+//    // This should call CJD's hook
+//    auto *result =
+//        (CustomJSONData::CustomBeatmapData *)GetBeatmapDataFromBeatmapSaveData(
+//            self, notesSaveData, waypointsSaveData, obstaclesSaveData,
+//            eventsSaveData, evironmentSpecialEventFilterData, startBpm, shuffle,
+//            shufflePeriod);
+//
+//    LoadNoodleObjects(result);
+//
+//    return result;
+//}
 
 void InstallBeatmapDataLoaderHooks(Logger &logger) {
 //    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);

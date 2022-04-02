@@ -3,13 +3,6 @@
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapDataLoader.hpp"
-#include "GlobalNamespace/BeatmapSaveData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_WaypointData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_SpecialEventKeywordFiltersData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_SpecialEventsForKeyword.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "pinkcore/shared/API.hpp"
@@ -121,6 +114,7 @@ MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObje
 }
 
 void InstallBeatmapDataHooks(Logger &logger) {
+    // TODO: Replace basic beatmap info
     INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
 
     // force CJD to be first

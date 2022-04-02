@@ -35,7 +35,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD,
     definitePosition = TryGetPointData(beatmapAD, animation, "_definitePosition");
 }
 
-ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2>& flip) {
+ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2>& flip, CustomJSONData::CustomNoteData* noteData) {
     auto [x, y] = NEJSON::ReadOptionalPair(customData, "_position");
     startX = x;
     startY = y;
@@ -48,8 +48,13 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
     interactable = NEJSON::ReadOptionalBool(customData, "_interactable");
     auto cutDirOpt = NEJSON::ReadOptionalFloat(customData, "_cutDirection");
 
-    if (cutDirOpt)
-        cutDirection = NEVector::Quaternion::Euler(0, 0, cutDirOpt.value());
+    if (cutDirOpt) {
+        if (noteData) {
+            cutDirection = NEVector::Quaternion::Euler(0, 0, cutDirOpt.value() + noteData->cutDirectionAngleOffset);
+        } else {
+            cutDirection = NEVector::Quaternion::Euler(0, 0, cutDirOpt.value());
+        }
+    }
 
     auto newFlip = NEJSON::ReadOptionalVector2_emptyY(customData, "_flip");
     if (newFlip)

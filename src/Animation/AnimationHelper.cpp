@@ -1,4 +1,4 @@
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
+#include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -15,7 +15,7 @@ using namespace CustomJSONData;
 using namespace Animation;
 
 // BeatmapObjectCallbackController.cpp
-extern BeatmapObjectCallbackController *callbackController;
+extern BeatmapCallbacksController *callbackController;
 
 // Events.cpp
 extern BeatmapObjectSpawnController *spawnController;
@@ -97,7 +97,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
     if (definitePosition)
         definitePosition = definitePosition.value() *
-                           spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+                           spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
 
     if (NECaches::LeftHandedMode) {
         definitePosition = Animation::MirrorVectorNullable(definitePosition);
@@ -189,7 +189,7 @@ if (!path##name)                                \
     }
 
     if (offset.positionOffset)
-        offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+        offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
 
     if (NECaches::LeftHandedMode) {
         offset.rotationOffset = Animation::MirrorQuaternionNullable(offset.rotationOffset);

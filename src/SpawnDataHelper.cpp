@@ -4,20 +4,36 @@
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "tracks/shared/Vector.h"
 
 using namespace GlobalNamespace;
+//
+//float SpawnDataHelperF::GetJumpDuration(BeatmapObjectSpawnController::InitData* initData, BeatmapObjectSpawnMovementData *movementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
+//
+//    /*if (_initData.noteJumpValueType != BeatmapObjectSpawnMovementData.NoteJumpValueType.BeatOffset)
+//    {
+//        return _movementData.jumpDuration;
+//    }*/
+//
+//    float oneBeatDuration = OneBeatDuration(initData->beatsPerMinute);
+//    float halfJumpDurationInBeats = CalculateHalfJumpDurationInBeats(movementData->startHalfJumpDurationInBeats,
+//                                                                     movementData->maxHalfJumpDistance,
+//                                                                     inputNjs.value_or(movementData->noteJumpMovementSpeed),
+//    oneBeatDuration,
+//    inputOffset.value_or(movementData->noteJumpStartBeatOffset));
+//
+//    return oneBeatDuration * halfJumpDurationInBeats * 2.0f;
+//
+//}
+//
+//float SpawnDataHelperF::GetSpawnAheadTime(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
+//    return spawnMovementData->moveDuration + (GetJumpDuration(inputNjs, inputOffset) * 0.5f);
+//}
 
-NEVector::Vector3 SpawnDataHelper::GetNoteOffset(BeatmapObjectSpawnMovementData *spawnMovementData, BeatmapObjectData *beatmapObjectData, std::optional<float> startRow, std::optional<float> startHeight) {
-    float distance = (-(spawnMovementData->noteLinesCount - 1.0f) * 0.5f) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2.0f : 0.0f);
-    float lineIndex = startRow.value_or(beatmapObjectData->lineIndex);
-    distance = (distance + lineIndex) * spawnMovementData->noteLinesDistance;
-
-    return (NEVector::Vector3(spawnMovementData->rightVec) * distance) + NEVector::Vector3(0, LineYPosForLineLayer(spawnMovementData, beatmapObjectData, startHeight), 0);
-}
 
 void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnMovementData* spawnMovementData,
                                         std::optional<float> const inputNoteJumpMovementSpeed,

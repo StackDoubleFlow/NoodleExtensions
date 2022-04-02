@@ -130,13 +130,14 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
             BeatmapObjectData *beatmapObjectData =
                     beatmapLineData->beatmapObjectsData->items.get(j);
 
+            CustomJSONData::CustomNoteData* noteData;
             CustomJSONData::JSONWrapper *customDataWrapper;
             if (beatmapObjectData->klass == customObstacleDataClass) {
                 auto obstacleData =
                         (CustomJSONData::CustomObstacleData *)beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
             } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto noteData =
+                noteData =
                         (CustomJSONData::CustomNoteData *)beatmapObjectData;
                 customDataWrapper = noteData->customData;
             } else {
@@ -144,16 +145,16 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
             }
 
             if (customDataWrapper->value) {
-                rapidjson::Value &customData = *customDataWrapper->value;
+                rapidjson::Value const& customData = *customDataWrapper->value;
                 BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
 
                 if (ad.parsed)
                     continue;
 
-                ad.objectData = ObjectCustomData(customData, ad.flip);
+                ad.objectData = ObjectCustomData(customData, ad.flip, noteData);
 
                 if (customData.HasMember("_animation")) {
-                    rapidjson::Value &animation = customData["_animation"];
+                    rapidjson::Value const& animation = customData["_animation"];
                     ad.animationData = AnimationObjectData(beatmapAD, animation);
                 } else {
                     ad.animationData = AnimationObjectData();
