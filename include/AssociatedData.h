@@ -14,7 +14,6 @@ namespace GlobalNamespace {
     template<typename T>
     class DisappearingArrowControllerBase_1;
     class GameNoteController;
-    class MirroredCubeNoteController;
     class ConditionalMaterialSwitcher;
 }
 
@@ -84,7 +83,7 @@ struct BeatmapObjectAssociatedData {
     GlobalNamespace::CutoutEffect *cutoutEffect;
     GlobalNamespace::CutoutEffect *mirroredCutoutEffect;
     GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
+//    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::Mirror *> *mirroredDisappearingArrowController;
     // conditional material switch for dissolve
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;
     AnimationObjectData animationData;

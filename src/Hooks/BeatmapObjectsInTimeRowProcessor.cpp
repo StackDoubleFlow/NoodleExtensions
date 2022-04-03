@@ -24,7 +24,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     std::vector<CustomNoteData*> customNotes;
 
     for (auto o : VList(items)) {
-        if (o && il2cpp_utils::AssignableFrom<CustomNoteData>(o->klass)) customNotes.emplace_back((CustomNoteData*) o);
+        if (o && il2cpp_utils::AssignableFrom<CustomNoteData*>(o->klass)) customNotes.emplace_back((CustomNoteData*) o);
     }
 
     if (customNotes.empty())

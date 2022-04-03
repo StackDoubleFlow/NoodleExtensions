@@ -1,7 +1,6 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
-
 #include "GlobalNamespace/IGameNoteMirrorable.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
@@ -95,17 +94,17 @@ static void UpdateMirror(BeatmapObjectAssociatedData& ad,Transform* objectTransf
     }
 
     if (ad.disappearingArrowController) {
-        DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *disappearingArrowController = ad.mirroredDisappearingArrowController;
-        if (!disappearingArrowController) {
-            if (!go)
-                go = mirroredNoteController->get_gameObject();
+//        DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *disappearingArrowController = ad.mirroredDisappearingArrowController;
+//        if (!disappearingArrowController) {
+//            if (!go)
+//                go = mirroredNoteController->get_gameObject();
 
-            disappearingArrowController = go->GetComponent<DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *>();
-            ad.mirroredDisappearingArrowController = disappearingArrowController;
-        }
+//            TODO: disappearingArrowController = go->GetComponent<DisappearingArrowControllerBase_1<MirroredCubeNoteController *> *>();
+//            ad.mirroredDisappearingArrowController = disappearingArrowController;
+//        }
 
-        if (disappearingArrowController)
-            disappearingArrowController->SetArrowTransparency(1 - ad.disappearingArrowController->arrowCutoutEffect->cutout);
+//        if (disappearingArrowController)
+//            disappearingArrowController->SetArrowTransparency(1 - ad.disappearingArrowController->arrowCutoutEffect->cutout);
     }
 
     auto const followedObjectTransformLocalScale = followedObjectTransform->get_localScale();

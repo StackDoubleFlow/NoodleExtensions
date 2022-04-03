@@ -50,64 +50,32 @@ void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
     BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
     std::stable_sort(begin, end, ObjectTimeCompare);
 }
-
-IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
-    BeatmapData *customBeatmapData = beatmapData->GetCopy();
-    if (!customObstacleDataClass) {
-        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-    }
-
-    float const startHalfJumpDurationInBeats = 4;
-    float const maxHalfJumpDistance = 18;
-    float const moveDuration = 0.5f;
-
-    // loop through all objects in all lines of the beatmapData
-    for (BeatmapLineData *beatmapLineData : customBeatmapData->beatmapLinesData) {
-        if (!beatmapLineData)
-            continue;
-
-        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData = beatmapLineData->beatmapObjectsData->items.get(j);
-            float bpm;
-
-            CustomJSONData::JSONWrapper *customDataWrapper;
-            if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto *obstacleData = (CustomJSONData::CustomObstacleData *)beatmapObjectData;
-                customDataWrapper = obstacleData->customData;
-                bpm = obstacleData->bpm;
-            } else if (beatmapObjectData->klass == customNoteDataClass) {
-                auto *noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
-                customDataWrapper = noteData->customData;
-                bpm = noteData->bpm;
-            } else {
-                continue;
-            }
-
-            BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-            float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
-            float spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
-
-            float num = 60.0f / bpm;
-            float num2 = startHalfJumpDurationInBeats;
-            while (njs * num * num2 > maxHalfJumpDistance) {
-                num2 /= 2.0f;
-            }
-
-            num2 += spawnOffset;
-            if (num2 < 1.0f) {
-                num2 = 1.0f;
-            }
-
-            float jumpDuration = num * num2 * 2;
-            ad.aheadTime = moveDuration + (jumpDuration * 0.5f);
-        }
-
-        OrderObjects(beatmapLineData->beatmapObjectsData);
-    }
-
-    return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
-}
+//
+//IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
+//    auto *customBeatmapData = static_cast<CustomJSONData::CustomBeatmapData *>(beatmapData->GetCopy());
+//    if (!customObstacleDataClass) {
+//        customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+//        customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+//    }
+//
+//
+//
+//    auto notes = customBeatmapData->GetBeatmapItemsCpp<NoteData*>();
+//    auto obstacles = customBeatmapData->GetBeatmapItemsCpp<ObstacleData*>();
+//
+//    std::vector<BeatmapObjectData*> objects;
+//    objects.reserve(notes.size() + obstacles.size());
+//
+//    std::copy(notes.begin(), notes.end(), std::back_inserter(objects));
+//    std::copy(obstacles.begin(), obstacles.end(), std::back_inserter(objects));
+//
+//    // loop through all objects in all lines of the beatmapData
+//    for (BeatmapObjectData *beatmapObjectData : objects) {
+//
+//    }
+//
+//    return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
+//}
 
 void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     NELogger::GetLogger().info("BeatmapData klass name is %s",
@@ -122,45 +90,70 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
         TracksAD::readBeatmapDataAD(beatmap);
     }
 
-    for (BeatmapLineData *beatmapLineData : beatmap->beatmapLinesData) {
-        if (!beatmapLineData)
+
+    auto notes = beatmap->GetBeatmapItemsCpp<NoteData*>();
+    auto obstacles = beatmap->GetBeatmapItemsCpp<ObstacleData*>();
+
+    std::vector<BeatmapObjectData*> objects;
+    objects.reserve(notes.size() + obstacles.size());
+
+    std::copy(notes.begin(), notes.end(), std::back_inserter(objects));
+    std::copy(obstacles.begin(), obstacles.end(), std::back_inserter(objects));
+
+    for (BeatmapObjectData *beatmapObjectData : objects) {
+        CustomJSONData::CustomNoteData *noteData;
+        CustomJSONData::JSONWrapper *customDataWrapper;
+        float bpm;
+        if (beatmapObjectData->klass == customObstacleDataClass) {
+            auto *obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
+            customDataWrapper = obstacleData->customData;
+            bpm = obstacleData->bpm;
+        } else if (beatmapObjectData->klass == customNoteDataClass) {
+            auto *noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
+            customDataWrapper = noteData->customData;
+            bpm = noteData->bpm;
+        } else {
             continue;
+        }
 
-        for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-            BeatmapObjectData *beatmapObjectData =
-                    beatmapLineData->beatmapObjectsData->items.get(j);
+        float const startHalfJumpDurationInBeats = 4;
+        float const maxHalfJumpDistance = 18;
+        float const moveDuration = 0.5f;
 
-            CustomJSONData::CustomNoteData* noteData;
-            CustomJSONData::JSONWrapper *customDataWrapper;
-            if (beatmapObjectData->klass == customObstacleDataClass) {
-                auto obstacleData =
-                        (CustomJSONData::CustomObstacleData *)beatmapObjectData;
-                customDataWrapper = obstacleData->customData;
-            } else if (beatmapObjectData->klass == customNoteDataClass) {
-                noteData =
-                        (CustomJSONData::CustomNoteData *)beatmapObjectData;
-                customDataWrapper = noteData->customData;
-            } else {
+        BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+        float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
+        float spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
+
+        float num = 60.0f / bpm;
+        float num2 = startHalfJumpDurationInBeats;
+        while (njs * num * num2 > maxHalfJumpDistance) {
+            num2 /= 2.0f;
+        }
+
+        num2 += spawnOffset;
+        if (num2 < 1.0f) {
+            num2 = 1.0f;
+        }
+
+        float jumpDuration = num * num2 * 2;
+        ad.aheadTime = moveDuration + (jumpDuration * 0.5f);
+
+        if (customDataWrapper->value) {
+            rapidjson::Value const &customData = *customDataWrapper->value;
+            BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+
+            if (ad.parsed)
                 continue;
+
+            ad.objectData = ObjectCustomData(customData, ad.flip, noteData);
+
+            if (customData.HasMember("_animation")) {
+                rapidjson::Value const &animation = customData["_animation"];
+                ad.animationData = AnimationObjectData(beatmapAD, animation);
+            } else {
+                ad.animationData = AnimationObjectData();
             }
-
-            if (customDataWrapper->value) {
-                rapidjson::Value const& customData = *customDataWrapper->value;
-                BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-
-                if (ad.parsed)
-                    continue;
-
-                ad.objectData = ObjectCustomData(customData, ad.flip, noteData);
-
-                if (customData.HasMember("_animation")) {
-                    rapidjson::Value const& animation = customData["_animation"];
-                    ad.animationData = AnimationObjectData(beatmapAD, animation);
-                } else {
-                    ad.animationData = AnimationObjectData();
-                }
-                ad.parsed = true;
-            }
+            ad.parsed = true;
         }
     }
 }
@@ -181,7 +174,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
     if (!isType) {
         return;
     }
-    rapidjson::Value &eventData = *customEventData->data;
+    rapidjson::Value const& eventData = *customEventData->data;
     auto& eventAD = getEventAD(customEventData);
 
     if (eventAD.parsed)
@@ -208,28 +201,28 @@ void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
     }
 
     // Parse events
-    for (auto const& customEventData : *beatmap->customEventsData) {
-        LoadNoodleEvent(beatmapAD, &customEventData);
+    for (auto const& customEventData : beatmap->GetBeatmapItemsCpp<CustomJSONData::CustomEventData*>()) {
+        LoadNoodleEvent(beatmapAD, customEventData);
     }
 }
 
 MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData, IReadonlyBeatmapData *,
-                IReadonlyBeatmapData *beatmapData, IPreviewBeatmapLevel *beatmapLevel,
-                GameplayModifiers *gameplayModifiers, PracticeSettings *practiceSettings,
-                bool leftHanded, EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
-                EnvironmentIntensityReductionOptions *environmentIntensityReductionOptions,
-                bool screenDisplacementEffectsEnabled) {
+                GlobalNamespace::IReadonlyBeatmapData* beatmapData, ::GlobalNamespace::IPreviewBeatmapLevel* beatmapLevel,
+                ::GlobalNamespace::GameplayModifiers* gameplayModifiers, bool leftHanded,
+                ::GlobalNamespace::EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
+                ::GlobalNamespace::EnvironmentIntensityReductionOptions* environmentIntensityReductionOptions,
+                ::GlobalNamespace::MainSettingsModelSO* mainSettingsModel) {
     auto result = BeatmapDataTransformHelper_CreateTransformedBeatmapData(
-        beatmapData, beatmapLevel, gameplayModifiers, practiceSettings, leftHanded,
+        beatmapData, beatmapLevel, gameplayModifiers, leftHanded,
         environmentEffectsFilterPreset, environmentIntensityReductionOptions,
-        screenDisplacementEffectsEnabled);
+        mainSettingsModel);
 
     if (!Hooks::isNoodleHookEnabled())
         return result;
 
     LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
-    auto *transformedBeatmapData = ReorderLineData(result);
+    auto *transformedBeatmapData = result; // ReorderLineData(result);
 
     LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
 

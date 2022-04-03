@@ -22,11 +22,27 @@
 
 using namespace GlobalNamespace;
 
-SafePtr<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>> coolerList;
 BeatmapCallbacksController* controller;
 
-constexpr bool isObject(Il2CppObject* obj) {
-    return il2cpp_utils::AssignableFrom<NoteData*>(obj->klass) || il2cpp_utils::AssignableFrom<ObstacleData*>(obj->klass);
+
+
+static CustomJSONData::JSONWrapper* customData(Il2CppObject* obj) {
+    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+
+    CustomJSONData::JSONWrapper *customDataWrapper = nullptr;
+    float bpm;
+    if (obj->klass == customObstacleDataClass) {
+        auto *obstacleData = (CustomJSONData::CustomObstacleData *) obj;
+        customDataWrapper = obstacleData->customData;
+        bpm = obstacleData->bpm;
+    } else if (obj->klass == customNoteDataClass) {
+        auto *noteData = (CustomJSONData::CustomNoteData *) obj;
+        customDataWrapper = noteData->customData;
+        bpm = noteData->bpm;
+    }
+
+    return customDataWrapper;
 }
 
 auto SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
@@ -36,11 +52,14 @@ auto SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
         float aAheadOfTime = a->time;
         float bAheadOfTime = b->time;
 
-        if (isObject(a)) {
-            aAheadOfTime = aAheadOfTime - getAD(a).aheadTime;
+        auto wrapper = customData(a);
+        auto wrapperB = customData(b);
+
+        if (wrapper) {
+            aAheadOfTime = aAheadOfTime - getAD(wrapper).aheadTime;
         }
-        if (isObject(b)) {
-            bAheadOfTime = bAheadOfTime - getAD(b).aheadTime;
+        if (wrapperB) {
+            bAheadOfTime = bAheadOfTime - getAD(wrapperB).aheadTime;
         }
 
         return aAheadOfTime < bAheadOfTime;

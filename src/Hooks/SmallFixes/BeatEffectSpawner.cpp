@@ -49,7 +49,7 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
     {
         return;
     }
-    if (noteController->get_hide())
+    if (noteController->hidden)
     {
         return;
     }

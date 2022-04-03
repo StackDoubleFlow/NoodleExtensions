@@ -22,7 +22,7 @@ extern BeatmapObjectSpawnController *spawnController;
 DEFINE_TYPE(TrackParenting, ParentObject);
 
 void ParentObject::Update() {
-    float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+    float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
 
     std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
     std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
@@ -92,7 +92,7 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     if (parentTrackEventData.pos.has_value()) {
         instance->startPos = *parentTrackEventData.pos;
         transform->set_localPosition(
-                instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
+                instance->startPos * spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance());
     }
 
     if (parentTrackEventData.rot.has_value()) {

@@ -23,14 +23,6 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace NEVector;
 
-BeatmapCallbacksController *spawnController;
-
-MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapCallbacksController::Start, void,
-                BeatmapCallbacksController *self) {
-    spawnController = self;
-    BeatmapObjectSpawnController_Start(self);
-}
-
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData);
 
 void CustomEventCallback(BeatmapCallbacksController *callbackController,
@@ -74,6 +66,4 @@ void CustomEventCallback(BeatmapCallbacksController *callbackController,
 void NEEvents::AddEventCallbacks(Logger &logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
     custom_types::Register::AutoRegister();
-
-    INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start);
 }

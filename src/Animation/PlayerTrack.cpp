@@ -72,7 +72,7 @@ void PlayerTrack::Update() {
     }
 
     if (!paused) {
-        float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+        float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
 
         std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
         std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);

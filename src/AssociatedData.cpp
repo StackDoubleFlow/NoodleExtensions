@@ -71,7 +71,7 @@ void ::BeatmapObjectAssociatedData::ResetState() {
     cutoutEffect = nullptr;
     mirroredCutoutEffect = nullptr;
     disappearingArrowController = nullptr;
-    mirroredDisappearingArrowController = nullptr;
+//    mirroredDisappearingArrowController = nullptr;
     materialSwitchers = nullptr;
     parsed = false;
 }

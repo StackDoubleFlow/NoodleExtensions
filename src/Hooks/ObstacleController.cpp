@@ -26,7 +26,9 @@
 #include "tracks/shared/AssociatedData.h"
 #include "tracks/shared/TimeSourceHelper.h"
 
+#define ID "Noodle"
 #include "chroma/shared/ObstacleAPI.hpp"
+#undef ID
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
