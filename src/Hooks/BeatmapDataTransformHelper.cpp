@@ -20,6 +20,7 @@
 #include "NELogger.h"
 #include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "GlobalNamespace/SortedList_1.hpp"
 
 #include <optional>
 
@@ -76,6 +77,8 @@ void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
 //
 //    return reinterpret_cast<IReadonlyBeatmapData *>(customBeatmapData);
 //}
+
+extern System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData);
 
 void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     NELogger::GetLogger().info("BeatmapData klass name is %s",
@@ -221,7 +224,10 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     if (!Hooks::isNoodleHookEnabled())
         return result;
 
+    auto customBeatmap = reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result);
+
     LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
+    il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(customBeatmap->allBeatmapData)->items = SortAndOrderList(customBeatmap);
     auto *transformedBeatmapData = result; // ReorderLineData(result);
 
     LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));

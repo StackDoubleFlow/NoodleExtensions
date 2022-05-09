@@ -168,4 +168,4 @@ void InstallBeatmapObjectsInTimeRowProcessorHooks(Logger &logger) {
     INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow);
 }
 
-NEInstallHooks(InstallBeatmapObjectsInTimeRowProcessorHooks);
+//NEInstallHooks(InstallBeatmapObjectsInTimeRowProcessorHooks);

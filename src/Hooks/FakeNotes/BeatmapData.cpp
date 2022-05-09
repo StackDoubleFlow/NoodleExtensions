@@ -115,7 +115,7 @@ MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObje
 
 void InstallBeatmapDataHooks(Logger &logger) {
     // TODO: Replace basic beatmap info
-    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
+//    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
 
     // force CJD to be first
     Modloader::requireMod("CustomJSONData");

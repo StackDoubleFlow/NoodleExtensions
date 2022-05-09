@@ -45,7 +45,7 @@ static CustomJSONData::JSONWrapper* customData(Il2CppObject* obj) {
     return customDataWrapper;
 }
 
-auto SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
+System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
     auto items = beatmapData->GetAllBeatmapItemsCpp();
 
     std::stable_sort(items.begin(), items.end(), [](auto const& a, auto const& b ) {
@@ -80,11 +80,11 @@ auto SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapCallbacksController::ManualUpdate, void, BeatmapCallbacksController *self, float songTime) {
-    if (controller != self) {
-        self = controller;
-        auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(self->beatmapData);
-        il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(beatmap->allBeatmapData)->items = SortAndOrderList(beatmap);
-    }
+//    if (controller != self) {
+//        self = controller;
+//        auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(self->beatmapData);
+//        il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(beatmap->allBeatmapData)->items = SortAndOrderList(beatmap);
+//    }
 
     return BeatmapObjectCallbackController_LateUpdate(self, songTime);
 
