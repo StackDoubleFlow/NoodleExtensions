@@ -4,8 +4,13 @@
 #include "NEHooks.h"
 #include "NECaches.h"
 
+
 float NECaches::noteJumpMovementSpeed;
 float NECaches::noteJumpStartBeatOffset;
+float NECaches::numberOfLines;
+float NECaches::beatsPerMinute;
+float NECaches::noteJumpValue;
+GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType NECaches::noteJumpValueType;
 bool NECaches::LeftHandedMode;
 
 void InstallAndRegisterAll() {

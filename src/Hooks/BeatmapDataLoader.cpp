@@ -12,13 +12,16 @@
 #include "NEHooks.h"
 #include "NELogger.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
 
 #include <optional>
 
 using namespace GlobalNamespace;
 
 // Needed for obstacles, idk why too lazy to figure out
-void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap);
+void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObjectSpawnMovementData *movementData,
+                       BeatmapObjectSpawnController::InitData *initData);
 //
 //MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
 //                &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,

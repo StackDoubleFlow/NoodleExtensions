@@ -1,6 +1,9 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
+#include "GlobalNamespace/IJumpOffsetYProvider.hpp"
+#include "GlobalNamespace/PlayerHeightDetector.hpp"
+#include "GlobalNamespace/PlayerHeightToJumpOffsetYProvider.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapDataObstaclesMergingTransform.hpp"
 #include "GlobalNamespace/BeatmapDataTransformHelper.hpp"
@@ -14,6 +17,7 @@
 #include "System/Func_2.hpp"
 #include "System/Linq/Enumerable.hpp"
 #include "System/Linq/IOrderedEnumerable_1.hpp"
+#include "UnityEngine/Resources.hpp"
 
 #include "AssociatedData.h"
 #include "NEHooks.h"
@@ -21,6 +25,8 @@
 #include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "GlobalNamespace/SortedList_1.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
+#include "SpawnDataHelper.h"
 
 #include <optional>
 
@@ -80,7 +86,13 @@ void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
 
 extern System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData);
 
-void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
+float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData *initData, BeatmapObjectSpawnMovementData *movementData,
+                        std::optional<float> inputNjs, std::optional<float> inputOffset) {
+    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset));
+}
+
+void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObjectSpawnMovementData *movementData,
+                       BeatmapObjectSpawnController::InitData *initData) {
     NELogger::GetLogger().info("BeatmapData klass name is %s",
                                beatmap->klass->name);
 
@@ -120,27 +132,12 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
             continue;
         }
 
-        float const startHalfJumpDurationInBeats = 4;
-        float const maxHalfJumpDistance = 18;
-        float const moveDuration = 0.5f;
 
         BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
         float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
-        float spawnOffset = ad.objectData.noteJumpStartBeatOffset.value_or(NECaches::noteJumpStartBeatOffset);
+        auto spawnOffset = ad.objectData.noteJumpStartBeatOffset; // .value_or(NECaches::noteJumpStartBeatOffset);
 
-        float num = 60.0f / bpm;
-        float num2 = startHalfJumpDurationInBeats;
-        while (njs * num * num2 > maxHalfJumpDistance) {
-            num2 /= 2.0f;
-        }
-
-        num2 += spawnOffset;
-        if (num2 < 1.0f) {
-            num2 = 1.0f;
-        }
-
-        float jumpDuration = num * num2 * 2;
-        ad.aheadTime = moveDuration + (jumpDuration * 0.5f);
+        ad.aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
 
         if (customDataWrapper->value) {
             rapidjson::Value const &customData = *customDataWrapper->value;
@@ -174,8 +171,8 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
     if (!isType && typeHash == (jsonNameHash_##varName))                      \
         isType = true;
 
-    TYPE_GET("AssignTrackParent", AssignTrackParent)
-    TYPE_GET("AssignPlayerToTrack", AssignPlayerToTrack)
+    TYPE_GET(NoodleExtensions::Constants::ASSIGN_TRACK_PARENT, AssignTrackParent)
+    TYPE_GET(NoodleExtensions::Constants::ASSIGN_PLAYER_TO_TRACK, AssignPlayerToTrack)
 
     if (!isType) {
         return;
@@ -232,8 +229,16 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
 
     auto customBeatmap = reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result);
 
-    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
-    il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(customBeatmap->allBeatmapData)->items = SortAndOrderList(customBeatmap);
+  
+    auto initData = BeatmapObjectSpawnController::InitData::New_ctor(NECaches::beatsPerMinute, NECaches::numberOfLines, NECaches::noteJumpMovementSpeed, NECaches::noteJumpValueType, NECaches::noteJumpValue);
+    auto movementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
+    movementData->Init(initData->noteLinesCount, initData->noteJumpMovementSpeed, initData->beatsPerMinute, initData->noteJumpValueType, initData->noteJumpValue, nullptr, NEVector::Vector3::right(), NEVector::Vector3::forward());
+    
+    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result), movementData, initData);
+//    auto linkedList = il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(customBeatmap->allBeatmapData);
+//    linkedList->items = SortAndOrderList(customBeatmap);
+//    linkedList->lastUsedNode = linkedList->items->get_Last();
+
     auto *transformedBeatmapData = result; // ReorderLineData(result);
 
     LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
