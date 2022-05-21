@@ -66,17 +66,21 @@ System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(C
     });
 
 
-    auto newList = System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor();
-    if (items.empty()) return newList;
+    auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
+    auto newListPtr = static_cast<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*>(newList);
+    if (items.empty()) return newListPtr;
+
+
 
     System::Collections::Generic::LinkedListNode_1<BeatmapDataItem *> * prev;
 
     for (auto const& o : items) {
-        if (!prev) prev = newList->AddFirst(o);
-        else prev = newList->AddAfter(prev, o);
+        newList->AddLast(o);
+//        if (!prev) prev = newList->AddFirst(o);
+//        else prev = newList->AddAfter(prev, o);
     }
 
-    return newList;
+    return newListPtr;
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapCallbacksController::ManualUpdate, void, BeatmapCallbacksController *self, float songTime) {

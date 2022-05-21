@@ -35,7 +35,7 @@ MAKE_HOOK_MATCH(CutoutAnimateEffect_Start,
 
 void InstallCutoutEffectHooks(Logger &logger) {
     INSTALL_HOOK(logger, CutoutEffect_SetCutout);
-    INSTALL_HOOK(logger, CutoutAnimateEffect_Start)
+//    INSTALL_HOOK(logger, CutoutAnimateEffect_Start)
 }
 
 NEInstallHooks(InstallCutoutEffectHooks);

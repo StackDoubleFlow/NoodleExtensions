@@ -18,17 +18,17 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
+MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles,
                 &PlayerHeadAndObstacleInteraction::RefreshIntersectingObstacles,
                 void, PlayerHeadAndObstacleInteraction *self, Vector3 worldPos) {
-    PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint(
+    PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles(
         self, worldPos);
 
     if (!Hooks::isNoodleHookEnabled())
         return;
 
     // Replaced in transpile
-    ArrayW<ObstacleController *> vObstacleControllers;
+    ArrayW<ObstacleController *> vObstacleControllers(self->intersectingObstacles->get_Count());
     self->intersectingObstacles->CopyTo(vObstacleControllers);
 
     int size = vObstacleControllers.size();
@@ -44,7 +44,7 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
 }
 
 void InstallPlayerHeadAndObstacleInterationHooks(Logger &logger) {
-    INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint);
+    INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles);
 }
 
 NEInstallHooks(InstallPlayerHeadAndObstacleInterationHooks);

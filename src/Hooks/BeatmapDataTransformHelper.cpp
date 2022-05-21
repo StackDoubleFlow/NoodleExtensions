@@ -105,7 +105,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     std::copy(obstacles.begin(), obstacles.end(), std::back_inserter(objects));
 
     for (BeatmapObjectData *beatmapObjectData : objects) {
-        CustomJSONData::CustomNoteData *noteData;
+        CustomJSONData::CustomNoteData *noteData = nullptr;
         CustomJSONData::JSONWrapper *customDataWrapper;
         float bpm;
         if (beatmapObjectData->klass == customObstacleDataClass) {
@@ -113,7 +113,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
             customDataWrapper = obstacleData->customData;
             bpm = obstacleData->bpm;
         } else if (beatmapObjectData->klass == customNoteDataClass) {
-            auto *noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
+            noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
             customDataWrapper = noteData->customData;
             bpm = noteData->bpm;
         } else {
@@ -180,6 +180,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
     if (!isType) {
         return;
     }
+    CRASH_UNLESS(customEventData->data);
     rapidjson::Value const& eventData = *customEventData->data;
     auto& eventAD = getEventAD(customEventData);
 
@@ -202,13 +203,15 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
 void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
     auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
 
+    auto v2 = beatmap->v2orEarlier;
+
     if (!beatmapAD.valid) {
         TracksAD::readBeatmapDataAD(beatmap);
     }
 
     // Parse events
     for (auto const& customEventData : beatmap->GetBeatmapItemsCpp<CustomJSONData::CustomEventData*>()) {
-        LoadNoodleEvent(beatmapAD, customEventData, false);
+        LoadNoodleEvent(beatmapAD, customEventData, v2);
     }
 }
 

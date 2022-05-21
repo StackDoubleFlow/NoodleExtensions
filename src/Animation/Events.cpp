@@ -54,7 +54,8 @@ void CustomEventCallback(BeatmapCallbacksController *callbackController,
     if (!ad.parsed) {
         auto *customBeatmapData = (CustomJSONData::CustomBeatmapData *)callbackController->beatmapData;
         TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(customBeatmapData->customData);
-        LoadNoodleEvent(beatmapAD, customEventData, false);
+        auto v2 = customBeatmapData->v2orEarlier;
+        LoadNoodleEvent(beatmapAD, customEventData, v2);
     }
 
     if (ad.parentTrackEventData) {
