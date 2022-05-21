@@ -34,10 +34,16 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
     StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused);
 
     std::optional<GlobalNamespace::CustomDifficultyBeatmap *> customBeatmapDataCustomOpt = il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap >(difficultyBeatmap);
-    auto customBeatmapDataCustom = il2cpp_utils::cast<CustomJSONData::v3::CustomBeatmapSaveData>(customBeatmapDataCustomOpt.value()->beatmapSaveData);
+    if (customBeatmapDataCustomOpt) {
+        NELogger::GetLogger().debug("CustomDifficultyBeatmap casted");
+        auto customBeatmapDataCustom = il2cpp_utils::cast<CustomJSONData::v3::CustomBeatmapSaveData>(
+                customBeatmapDataCustomOpt.value()->beatmapSaveData);
 
-    SceneTransitionHelper::Patch(difficultyBeatmap,
-                                 customBeatmapDataCustom, playerSpecificSettings);
+        SceneTransitionHelper::Patch(difficultyBeatmap,
+                                     customBeatmapDataCustom, playerSpecificSettings);
+    } else {
+        NELogger::GetLogger().debug("CustomDifficultyBeatmap not casted");
+    }
 }
 
 void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
