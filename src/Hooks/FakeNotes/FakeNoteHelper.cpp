@@ -29,7 +29,7 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
         return true;
     }
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    return !ad.objectData.interactable || *ad.objectData.interactable;
+    return !ad.objectData.uninteractable || !*ad.objectData.uninteractable;
 }
 
 List<ObstacleController *>*

@@ -8,6 +8,8 @@
 #include "tracks/shared/Animation/Track.h"
 #include "tracks/shared/AssociatedData.h"
 
+#include "Constants.hpp"
+
 namespace GlobalNamespace {
     class CutoutAnimateEffect;
     class CutoutEffect;
@@ -33,7 +35,8 @@ struct AnimationObjectData {
     bool parsed = false;
 
     AnimationObjectData() = default;
-    AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
+    AnimationObjectData(TracksAD::BeatmapAssociatedData &beatmapAD, const rapidjson::Value &animation,
+                        bool v2);
 };
 
 struct ObjectCustomData {
@@ -45,10 +48,9 @@ struct ObjectCustomData {
     std::optional<float> noteJumpMovementSpeed;
     std::optional<float> noteJumpStartBeatOffset;
     std::optional<bool> fake;
-    std::optional<bool> interactable;
+    std::optional<bool> uninteractable;
 
     // notes
-    std::optional<NEVector::Quaternion> cutDirection;
     std::optional<bool> disableNoteGravity;
     bool disableNoteLook;
 
@@ -56,10 +58,13 @@ struct ObjectCustomData {
     std::optional<std::array<std::optional<float>, 3>> scale;
 
     ObjectCustomData() = default;
-    ObjectCustomData(const rapidjson::Value& customData, std::optional<NEVector::Vector2>& flip, CustomJSONData::CustomNoteData* noteData);
+    ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
+                     CustomJSONData::CustomNoteData *noteData, bool v2);
 };
 
 struct BeatmapObjectAssociatedData {
+    BeatmapObjectAssociatedData() {}
+
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     std::optional<float> startNoteLineLayer;
 
@@ -107,7 +112,8 @@ struct PlayerTrackEventData {
 };
 
 struct ParentTrackEventData {
-    explicit ParentTrackEventData(const rapidjson::Value& customData, TracksAD::BeatmapAssociatedData &beatmapAD);
+    explicit ParentTrackEventData(const rapidjson::Value &eventData, TracksAD::BeatmapAssociatedData &beatmapAD,
+                                  bool v2);
 
     Track* parentTrack;
     std::optional<NEVector::Vector3> pos;

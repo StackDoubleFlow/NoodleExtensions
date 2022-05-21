@@ -147,8 +147,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.dissolveEnabled = false;
 
     std::function<void()> const setBounds = [&ad, &self](){
-        auto const& cuttable = ad.objectData.interactable;
-        if (cuttable && !*cuttable) {
+        auto const& cuttable = ad.objectData.uninteractable;
+        if (cuttable && *cuttable) {
             self->bounds.set_size(NEVector::Vector3::zero());
         } else {
             getActiveObstacles()->Add(self);

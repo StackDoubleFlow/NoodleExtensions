@@ -39,7 +39,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
         float lineLayer = noteData->noteLineLayer;
         if (noteData->customData->value) {
             rapidjson::Value const& customData = *noteData->customData->value;
-            auto pos = customData.FindMember("_position");
+            auto pos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
             if (pos != customData.MemberEnd()) {
                 int size = pos->value.Size();
                 if (size >= 1) {
@@ -58,7 +58,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
             float listLineLayer = list[k]->noteLineLayer;
             if (noteData->customData->value) {
                 rapidjson::Value const& customData = *noteData->customData->value;
-                auto listPos = customData.FindMember("_position");
+                auto listPos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
                 if (listPos != customData.MemberEnd()) {
                     if (listPos->value.Size() >= 2) {
                         listLineLayer = listPos->value[1].GetFloat();
@@ -111,7 +111,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
             float lineLayer = noteData->noteLineLayer;
             if (noteData->customData->value) {
                 rapidjson::Value const& customData = *noteData->customData->value;
-                auto pos = customData.FindMember("_position");
+                auto pos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
                 if (pos != customData.MemberEnd()) {
                     int size = pos->value.Size();
                     if (size >= 1) {

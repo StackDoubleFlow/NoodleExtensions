@@ -89,6 +89,11 @@
       "id": "paper",
       "versionRange": "^1.0.5",
       "additionalData": {}
+    },
+    {
+      "id": "songloader",
+      "versionRange": "^0.9.2",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

@@ -23,7 +23,8 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace NEVector;
 
-void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData);
+void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const *customEventData,
+                     bool v2);
 
 void CustomEventCallback(BeatmapCallbacksController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
@@ -53,7 +54,7 @@ void CustomEventCallback(BeatmapCallbacksController *callbackController,
     if (!ad.parsed) {
         auto *customBeatmapData = (CustomJSONData::CustomBeatmapData *)callbackController->beatmapData;
         TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(customBeatmapData->customData);
-        LoadNoodleEvent(beatmapAD, customEventData);
+        LoadNoodleEvent(beatmapAD, customEventData, false);
     }
 
     if (ad.parentTrackEventData) {

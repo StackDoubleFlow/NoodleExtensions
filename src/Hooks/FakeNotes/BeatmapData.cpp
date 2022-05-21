@@ -14,6 +14,8 @@
 
 #include "songloader/shared/API.hpp"
 
+#include "Constants.hpp"
+
 
 typedef rapidjson::GenericDocument<rapidjson::UTF16<char16_t>> DocumentUTF16;
 
@@ -61,7 +63,7 @@ static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObject
     if (customDataWrapper && customDataWrapper->value) {
         rapidjson::Value const& customData = *customDataWrapper->value;
 
-        auto fake = NEJSON::ReadOptionalBool(customData, "_fake");
+        auto fake = NEJSON::ReadOptionalBool(customData, NoodleExtensions::Constants::V2_FAKE_NOTE);
 
         if (fake.value_or(false)) {
             int& countRef = *countField;

@@ -114,23 +114,8 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     moveEndPos.z += zOffset;
     jumpEndPos.z += zOffset;
 
-    auto const &curDir = ad.objectData.cutDirection;
-    if (curDir.has_value()) {
-        NEVector::Quaternion cutQuaternion = curDir.value();
-        noteJump->endRotation = cutQuaternion;
-        NEVector::Vector3 vector = cutQuaternion.get_eulerAngles();
-        if (useRandomRotation) {
-            auto randomRotations = noteJump->randomRotations;
-            auto num = (int) std::round((noteData->time * 10.0f) + (moveEndPos.x * 2.0f) + (moveEndPos.y * 2.0f)) % randomRotations.size();
-            vector = vector +
-                            (noteJump->randomRotations[num] * 20.0f);
-        }
 
-        static auto Quaternion_Euler = il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Vector3)>(&UnityEngine::Quaternion::Euler)>::get();
 
-        NEVector::Quaternion midrotation = Quaternion_Euler(vector);
-        noteJump->middleRotation = midrotation;
-    }
 
     NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
     if (ad.objectData.rotation || ad.objectData.localRotation) {

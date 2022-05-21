@@ -93,6 +93,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
         TracksAD::readBeatmapDataAD(beatmap);
     }
 
+    auto v2 = beatmap->v2orEarlier;
 
     auto notes = beatmap->GetBeatmapItemsCpp<NoteData*>();
     auto obstacles = beatmap->GetBeatmapItemsCpp<ObstacleData*>();
@@ -148,11 +149,12 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
             if (ad.parsed)
                 continue;
 
-            ad.objectData = ObjectCustomData(customData, ad.flip, noteData);
+            ad.objectData = ObjectCustomData(customData, ad.flip, noteData, v2);
 
-            if (customData.HasMember("_animation")) {
-                rapidjson::Value const &animation = customData["_animation"];
-                ad.animationData = AnimationObjectData(beatmapAD, animation);
+            auto animationKey = v2 ? NoodleExtensions::Constants::V2_ANIMATION : NoodleExtensions::Constants::ANIMATION;
+            if (customData.HasMember(animationKey.data())) {
+                rapidjson::Value const &animation = customData[animationKey.data()];
+                ad.animationData = AnimationObjectData(beatmapAD, animation, v2);
             } else {
                 ad.animationData = AnimationObjectData();
             }
@@ -161,7 +163,8 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     }
 }
 
-void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData) {
+void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const *customEventData,
+                     bool v2) {
     bool isType = false;
 
     auto typeHash = customEventData->typeHash;
@@ -184,12 +187,12 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
         return;
 
     if (typeHash == jsonNameHash_AssignTrackParent) {
-        eventAD.parentTrackEventData.emplace(eventData, beatmapAD);
+        eventAD.parentTrackEventData.emplace(eventData, beatmapAD, v2);
     } else if (typeHash == jsonNameHash_AssignPlayerToTrack) {
-        std::string trackName(eventData["_track"].GetString());
-        Track *track = &beatmapAD.tracks[trackName];
+        std::string_view trackName(eventData[v2 ? NoodleExtensions::Constants::V2_TRACK.data() : NoodleExtensions::Constants::TRACK.data()].GetString());
+        Track *track = &beatmapAD.tracks.try_emplace(std::string(trackName), v2).first->second;
         NELogger::GetLogger().debug("Assigning player to track %s at %p",
-                                    trackName.c_str(), track);
+                                    trackName.data(), track);
         eventAD.playerTrackEventData.emplace(track);
     }
 
@@ -205,7 +208,7 @@ void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
 
     // Parse events
     for (auto const& customEventData : beatmap->GetBeatmapItemsCpp<CustomJSONData::CustomEventData*>()) {
-        LoadNoodleEvent(beatmapAD, customEventData);
+        LoadNoodleEvent(beatmapAD, customEventData, false);
     }
 }
 
