@@ -26,10 +26,10 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 
     BaseNoteVisuals_Awake(self);
 
-    static auto ICubeNoteTypeProviderKlass = nullptr;
+    static auto ICubeNoteTypeProviderKlass = classof(GameNoteController*); //classof(INoteMovementProvider*);
     static auto CustomNoteDataKlass = classof(CustomJSONData::CustomNoteData*);
 
-    if (il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->noteController->klass)) {
+    if (self && self->noteController && il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->noteController->klass)) {
         NoteController* noteController = static_cast<NoteController *>(self->noteController);
 
         if (!noteController->noteData)
@@ -57,7 +57,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 }
 
 void InstallBaseNoteVisualsHooks(Logger &logger) {
-//    INSTALL_HOOK(logger, BaseNoteVisuals_Awake);
+    INSTALL_HOOK(logger, BaseNoteVisuals_Awake);
 }
 
 NEInstallHooks(InstallBaseNoteVisualsHooks);

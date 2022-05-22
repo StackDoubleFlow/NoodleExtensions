@@ -36,7 +36,8 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD, const
 }
 
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
-                                   CustomJSONData::CustomNoteData *noteData, bool v2) {
+                                   CustomJSONData::CustomNoteData *noteData,
+                                   CustomJSONData::CustomObstacleData *obstacleData, bool v2) {
     auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::NOTE_OFFSET);
     startX = x;
     startY = y;
@@ -49,7 +50,7 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
     fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
     uninteractable = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_CUTTABLE : NoodleExtensions::Constants::UNINTERACTABLE);
 
-    uninteractable = v2 ? !uninteractable.value_or(false) : uninteractable;
+    uninteractable = v2 ? !uninteractable.value_or(true) : uninteractable;
 
 
     if (noteData && fake.value_or(false)) {
@@ -74,9 +75,21 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
 
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_GRAVITY_DISABLE : NoodleExtensions::Constants::NOTE_GRAVITY_DISABLE);
     disableNoteLook = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_LOOK_DISABLE : NoodleExtensions::Constants::NOTE_LOOK_DISABLE).value_or(false);
-    scale = NEJSON::ReadOptionalScale(customData, v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::SCALE);
+    scale = NEJSON::ReadOptionalScale(customData, v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::OBSTACLE_SIZE);
 
     // TODO: MIRROR WIDTH AND OBSTACLE START X
+
+//    float width = obstacleData->width;
+//    if (scale) {
+//        width = (*scale)[0].value_or(width);
+//    }
+//
+//    if (startX) {
+//        startX = (*startX + width) * -1;
+//    } else if (scale && (*scale)[0]){
+//        auto lineIndex = obstacleData->lineIndex - 2;
+//        (*scale)[0] = (lineIndex + width) * -1;
+//    }
 }
 
 void ::BeatmapObjectAssociatedData::ResetState() {

@@ -146,7 +146,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
     ad.dissolveEnabled = false;
 
-    std::function<void()> const setBounds = [&ad, &self](){
+    auto const setBounds = [&ad, &self]() constexpr{
         auto const& cuttable = ad.objectData.uninteractable;
         if (cuttable && *cuttable) {
             self->bounds.set_size(NEVector::Vector3::zero());
@@ -178,8 +178,18 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     auto const& scale = ad.objectData.scale;
 
-    float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
-    NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
+
+    if (scale) {
+        if (scale->at(0)) {
+            self->width = *scale->at(0) * singleLineWidth;
+        }
+
+        if (scale->at(2)) {
+            self->length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
+        }
+    }
+
+    auto b = NEVector::Vector3((self->width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = NEVector::Vector3(startPos) + b;
     self->midPos = NEVector::Vector3(midPos) + b;
     self->endPos = NEVector::Vector3(endPos) + b;
@@ -187,12 +197,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.moveEndPos = self->midPos;
     ad.jumpEndPos = self->endPos;
 
-    float defaultLength =
-            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).Magnitude() /
-            move2Duration * obstacleData->duration;
-    float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
-    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
+
+    self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, height, self->length,
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 

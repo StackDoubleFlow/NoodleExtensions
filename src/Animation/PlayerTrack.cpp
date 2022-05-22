@@ -51,8 +51,10 @@ void PlayerTrack::AssignTrack(Track *track) {
 
 void PlayerTrack::OnDidPauseEvent() {
     NELogger::GetLogger().debug("PlayerTrack::OnDidPauseEvent");
+    IL2CPP_CATCH_HANDLER(
     origin->set_localRotation(startLocalRot);
     origin->set_localPosition(startPos);
+    )
 }
 
 void PlayerTrack::OnDestroy() {
@@ -72,7 +74,7 @@ void PlayerTrack::Update() {
     }
 
     if (!paused) {
-        float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
+        float noteLinesDistance = 0.6f; //spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
 
         std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
         std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);

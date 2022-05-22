@@ -39,10 +39,10 @@ static Il2CppClass *customNoteDataClass;
 float ObjectSortGetTime(BeatmapObjectData const* n) {
     if (n->klass == customObstacleDataClass) {
         auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
-        return n->time - getAD(obstacle->customData).aheadTime;
+        return n->time - *getAD(obstacle->customData).aheadTime;
     } else if (n->klass == customNoteDataClass) {
         auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
-        return n->time - getAD(note->customData).aheadTime;
+        return n->time - *getAD(note->customData).aheadTime;
     } else {
         return n->time;
     }
@@ -118,16 +118,20 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
 
     for (BeatmapObjectData *beatmapObjectData : objects) {
         CustomJSONData::CustomNoteData *noteData = nullptr;
+        CustomJSONData::CustomObstacleData *obstacleData = nullptr;
         CustomJSONData::JSONWrapper *customDataWrapper;
         float bpm;
+        float* aheadTime;
         if (beatmapObjectData->klass == customObstacleDataClass) {
-            auto *obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
+            obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
             customDataWrapper = obstacleData->customData;
             bpm = obstacleData->bpm;
+            aheadTime = &obstacleData->aheadTimeNoodle;
         } else if (beatmapObjectData->klass == customNoteDataClass) {
             noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
             customDataWrapper = noteData->customData;
             bpm = noteData->bpm;
+            aheadTime = &noteData->aheadTimeNoodle;
         } else {
             continue;
         }
@@ -137,7 +141,9 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
         float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
         auto spawnOffset = ad.objectData.noteJumpStartBeatOffset; // .value_or(NECaches::noteJumpStartBeatOffset);
 
-        ad.aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
+
+        ad.aheadTime = aheadTime;
+        *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
 
         if (customDataWrapper->value) {
             rapidjson::Value const &customData = *customDataWrapper->value;
@@ -146,7 +152,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
             if (ad.parsed)
                 continue;
 
-            ad.objectData = ObjectCustomData(customData, ad.flip, noteData, v2);
+            ad.objectData = ObjectCustomData(customData, ad.flip, noteData, obstacleData, v2);
 
             auto animationKey = v2 ? NoodleExtensions::Constants::V2_ANIMATION : NoodleExtensions::Constants::ANIMATION;
             if (customData.HasMember(animationKey.data())) {

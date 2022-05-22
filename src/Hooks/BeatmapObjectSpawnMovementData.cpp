@@ -53,7 +53,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     std::optional<float> const& njs = ad.objectData.noteJumpMovementSpeed;
     std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
 
-    auto &scale = ad.objectData.scale;
+    auto const& scale = ad.objectData.scale;
     std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
     std::optional<float> height = scale && scale->at(1) ? scale->at(1) : std::nullopt;
 
@@ -85,7 +85,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 
 
     if (height.has_value()) {
-        obstacleHeight = std::min(height.value() * obstacleData->height * 0.6f, self->obstacleTopPosY - obstacleOffset.y);
+        obstacleHeight = height.value() * 0.6f;
     } else {
         // _topObstaclePosY =/= _obstacleTopPosY
         obstacleHeight = std::min(

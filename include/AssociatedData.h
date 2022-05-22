@@ -8,13 +8,16 @@
 #include "tracks/shared/Animation/Track.h"
 #include "tracks/shared/AssociatedData.h"
 
+#include "questui/shared/CustomTypes/Components/WeakPtrGO.hpp"
+
 #include "Constants.hpp"
+
+#include "GlobalNamespace/CutoutEffect.hpp"
+#include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
+#include "GlobalNamespace/CutoutAnimateEffect.hpp"
 
 namespace GlobalNamespace {
     class CutoutAnimateEffect;
-    class CutoutEffect;
-    template<typename T>
-    class DisappearingArrowControllerBase_1;
     class GameNoteController;
     class ConditionalMaterialSwitcher;
 }
@@ -59,7 +62,8 @@ struct ObjectCustomData {
 
     ObjectCustomData() = default;
     ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
-                     CustomJSONData::CustomNoteData *noteData, bool v2);
+                     CustomJSONData::CustomNoteData *noteData,
+                     CustomJSONData::CustomObstacleData *obstacleData, bool v2);
 };
 
 struct BeatmapObjectAssociatedData {
@@ -68,7 +72,7 @@ struct BeatmapObjectAssociatedData {
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     std::optional<float> startNoteLineLayer;
 
-    float aheadTime;
+    float* aheadTime;
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
     NEVector::Vector3 moveStartPos;
@@ -82,12 +86,12 @@ struct BeatmapObjectAssociatedData {
     // set to true is the dissolve material is currently in use
     bool dissolveEnabled;
     // cutout for obstacles
-    GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
+    QuestUI::WeakPtrGO<GlobalNamespace::CutoutAnimateEffect> cutoutAnimationEffect;
     GlobalNamespace::CutoutAnimateEffect *mirroredCutoutAnimationEffect;
     // cutout for notes
-    GlobalNamespace::CutoutEffect *cutoutEffect;
+    QuestUI::WeakPtrGO<GlobalNamespace::CutoutEffect> cutoutEffect;
     GlobalNamespace::CutoutEffect *mirroredCutoutEffect;
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
+    QuestUI::WeakPtrGO<GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *>> disappearingArrowController;
 //    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::Mirror *> *mirroredDisappearingArrowController;
     // conditional material switch for dissolve
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;

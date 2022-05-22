@@ -266,6 +266,8 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
             ad.cutoutEffect = cutoutEffect;
         }
 
+        CRASH_UNLESS(cutoutEffect);
+
         if (noteDissolveConfig) {
             cutoutEffect->SetCutout(1 - *offset.dissolve);
         } else {
@@ -274,7 +276,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     }
 
     if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
-        DisappearingArrowControllerBase_1<GameNoteController *> *disappearingArrowController = ad.disappearingArrowController;
+        auto disappearingArrowController = ad.disappearingArrowController;
         if (!disappearingArrowController) {
             disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
             ad.disappearingArrowController = disappearingArrowController;
