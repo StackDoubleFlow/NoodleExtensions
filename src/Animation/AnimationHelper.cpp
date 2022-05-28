@@ -52,7 +52,6 @@ constexpr std::optional<T> operator*(std::optional<T> const& a, std::optional<T>
 
 std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::span<Track *> tracks, float time) {
     PointDefinition *localDefinitePosition = animationData.definitePosition;
-    CRASH_UNLESS(localDefinitePosition);
 
     std::optional<Vector3> pathDefinitePosition =
             localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time)) : std::nullopt;
