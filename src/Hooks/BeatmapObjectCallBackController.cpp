@@ -81,9 +81,19 @@ System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(C
 }
 
 MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::LateUpdate, void, BeatmapCallbacksUpdater *self) {
-    if (!Hooks::isNoodleHookEnabled()) return BeatmapCallbacksUpdater_LateUpdate(self);
-
     auto selfController = self->beatmapCallbacksController;
+
+    // Reset to avoid overriding non NE maps
+    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData)) {
+        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
+    }
+
+    if (!Hooks::isNoodleHookEnabled()) {
+        controller = nullptr;
+        beatmapData = nullptr;
+        return BeatmapCallbacksUpdater_LateUpdate(self);
+    }
+
     if (controller != selfController || selfController->beatmapData != beatmapData) {
         controller = selfController;
         beatmapData = selfController->beatmapData;
