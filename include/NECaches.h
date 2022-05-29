@@ -14,4 +14,9 @@ static bool LeftHandedMode;
 
 static void ClearObstacleCaches();
 static void ClearNoteCaches();
+
+consteval static auto get_noteLinesDistanceFast() {
+    return 0.6f;
+}
+
 };

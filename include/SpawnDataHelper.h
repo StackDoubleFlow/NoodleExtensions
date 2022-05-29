@@ -15,6 +15,7 @@
 #include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "NECaches.h"
 
 
 namespace GlobalNamespace {
@@ -93,7 +94,7 @@ GetNoteOffset(std::optional<float> startRow, std::optional<float> startHeight, i
 
     float distance = (-(spawnMovementData->noteLinesCount - 1.0f) * 0.5f) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2.0f : 0.0f);
     float lineIndex = startRow.value_or(noteLineIndex);
-    distance = (distance + lineIndex) * spawnMovementData->get_noteLinesDistance();
+    distance = (distance + lineIndex) * NECaches::get_noteLinesDistanceFast();
 
     return (NEVector::Vector3(spawnMovementData->rightVec) * distance) + NEVector::Vector3(0, LineYPosForLineLayer(
             spawnMovementData, startHeight, noteLineLayer), 0);

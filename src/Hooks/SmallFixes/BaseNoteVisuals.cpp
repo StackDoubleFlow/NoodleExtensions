@@ -42,7 +42,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
             CustomJSONData::CustomNoteData* noteData = static_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
             auto &ad = getAD(noteData->customData);
 
-            disappearingArrowController = ad.disappearingArrowController;
+            disappearingArrowController = (DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *) ad.disappearingArrowController;
             if (!disappearingArrowController) {
                 disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
                 ad.disappearingArrowController = disappearingArrowController;

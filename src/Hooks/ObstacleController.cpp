@@ -279,6 +279,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     if (ad.doUnhide) {
         self->Hide(false);
+        ad.doUnhide = false;
     }
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);

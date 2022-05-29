@@ -9,6 +9,7 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "tracks/shared/Vector.h"
+#include "NECaches.h"
 
 using namespace GlobalNamespace;
 
@@ -56,7 +57,7 @@ SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spawnMovem
                                       NoteLineLayer noteLineLayer) {
     if (height) {
         return  0.25f
-                + (height.value() * spawnMovementData->get_noteLinesDistance()); // offset by 0.25
+                + (height.value() * NECaches::get_noteLinesDistanceFast()); // offset by 0.25
     }
 
     return Orig_LineYPosForLineLayer(noteLineLayer);

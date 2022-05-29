@@ -97,7 +97,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
     std::optional<Vector3> definitePosition = positionOffset + pathDefinitePosition;
     if (definitePosition)
         definitePosition = definitePosition.value() *
-                           spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
+                           NECaches::get_noteLinesDistanceFast();
 
     if (NECaches::LeftHandedMode) {
         definitePosition = Animation::MirrorVectorNullable(definitePosition);
@@ -189,7 +189,7 @@ if (!path##name)                                \
     }
 
     if (offset.positionOffset)
-        offset.positionOffset = offset.positionOffset.value() * spawnController->beatmapObjectSpawnMovementData->get_noteLinesDistance();
+        offset.positionOffset = offset.positionOffset.value() * NECaches::get_noteLinesDistanceFast();
 
     if (NECaches::LeftHandedMode) {
         offset.rotationOffset = Animation::MirrorQuaternionNullable(offset.rotationOffset);
