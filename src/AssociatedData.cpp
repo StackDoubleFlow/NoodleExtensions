@@ -16,7 +16,7 @@ PointDefinition *TryGetPointData(BeatmapAssociatedData &beatmapAD,
     PointDefinition *pointDef =
         Animation::TryGetPointData(beatmapAD, anonPointDef, animation, name);
     if (anonPointDef) {
-        beatmapAD.anonPointDefinitions.push_back(anonPointDef);
+        beatmapAD.anonPointDefinitions.emplace(anonPointDef);
     }
     return pointDef;
 }
@@ -33,6 +33,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD, const
     dissolveArrow = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_DISSOLVE_ARROW : NoodleExtensions::Constants::DISSOLVE_ARROW);
     cuttable = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_CUTTABLE : NoodleExtensions::Constants::INTERACTABLE);
     definitePosition = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_DEFINITE_POSITION : NoodleExtensions::Constants::DEFINITE_POSITION);
+    CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Got {} definite position {}", fmt::ptr(this), fmt::ptr(definitePosition));
 }
 
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
@@ -126,6 +127,7 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, Be
 }
 
 static std::unordered_map<CustomJSONData::CustomEventData const*, BeatmapEventAssociatedData> eventDataMap;
+static std::unordered_map<GlobalNamespace::BeatmapObjectData const*, ::BeatmapObjectAssociatedData> obstacleDataMap;
 
 ::BeatmapEventAssociatedData &getEventAD(CustomJSONData::CustomEventData const* customData) {
     return eventDataMap[customData];
@@ -133,6 +135,14 @@ static std::unordered_map<CustomJSONData::CustomEventData const*, BeatmapEventAs
 
 void clearEventADs() {
     eventDataMap.clear();
+}
+
+::BeatmapObjectAssociatedData &getAD(GlobalNamespace::BeatmapObjectData *objectData) {
+    return obstacleDataMap[objectData];
+}
+
+void clearObjectADs() {
+    obstacleDataMap.clear();
 }
 
 
