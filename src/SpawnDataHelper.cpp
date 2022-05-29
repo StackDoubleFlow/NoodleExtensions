@@ -34,8 +34,8 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnController::InitData *
     NEVector::Vector3 const spawnMovementDataForwardVec(spawnMovementData->forwardVec);
     NEVector::Vector3 const spawnMovementDataCenterPos(spawnMovementData->centerPos);
     localMoveStartPos = spawnMovementDataCenterPos + (spawnMovementDataForwardVec * (spawnMovementData->moveDistance + (localJumpDistance * 0.5f)));
-    localMoveEndPos =   spawnMovementDataCenterPos + (spawnMovementDataForwardVec * localJumpDistance * 0.5f);
-    localJumpEndPos =   spawnMovementDataCenterPos - (spawnMovementDataForwardVec * localJumpDistance * 0.5f);
+    localMoveEndPos =   spawnMovementDataCenterPos + (spawnMovementDataForwardVec * (localJumpDistance * 0.5f));
+    localJumpEndPos =   spawnMovementDataCenterPos - (spawnMovementDataForwardVec * (localJumpDistance * 0.5f));
 }
 
 constexpr float Orig_LineYPosForLineLayer(GlobalNamespace::NoteLineLayer lineLayer)

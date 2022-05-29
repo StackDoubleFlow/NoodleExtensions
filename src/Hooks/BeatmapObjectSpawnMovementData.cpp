@@ -138,60 +138,58 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 //    Vector3 moveStartPos = result.moveStartPos;
 //    Vector3 moveEndPos = result.moveEndPos;
 //    Vector3 jumpEndPos = result.jumpEndPos;
-    float jumpGravity = result.jumpGravity;
+//    float jumpGravity = result.jumpGravity;
 
-    Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(
-            self, noteData->lineIndex, noteData->noteLineLayer, startRow, startLineLayer.value_or(noteData->beforeJumpNoteLineLayer));
+    Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(startRow, startLineLayer, noteData->lineIndex,
+                                                              noteData->beforeJumpNoteLineLayer,
+                                                              self);
 
 
     float localJumpDistance;
-    Vector3 localMoveStartPos;
-    Vector3 localMoveEndPos;
-    Vector3 localJumpEndPos;
+    Vector3 moveStartPos;
+    Vector3 moveEndPos;
+    Vector3 jumpEndPos;
     SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->initData, self, njs, spawnOffset, jumpDuration,
-                                       localJumpDistance, localMoveStartPos, localMoveEndPos,
-                                       localJumpEndPos);
+                                       localJumpDistance, moveStartPos, moveEndPos,
+                                       jumpEndPos);
     float const localNoteJumpMovementSpeed = njs.value_or(self->noteJumpMovementSpeed);
 
-    float const startLayerLineYPos = SpawnDataHelper::LineYPosForLineLayer(self, startHeight, noteData->beforeJumpNoteLineLayer);
-    float const lineYPos = SpawnDataHelper::LineYPosForLineLayer(self, startLineLayer, noteData->beforeJumpNoteLineLayer);
+    float const lineYPos = SpawnDataHelper::LineYPosForLineLayer(self, startHeight, noteData->noteLineLayer);
+    float const startLayerLineYPos = SpawnDataHelper::LineYPosForLineLayer(self, startLineLayer, noteData->noteLineLayer);
 
     // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
     float const highestJump = startHeight.has_value()
                         ? (0.875f * lineYPos) + 0.639583f + self->get_jumpOffsetY()
                         : self->HighestJumpPosYForLineLayer(noteData->noteLineLayer);
 
-    std::function<float(float)> const GetJumpGravity = [&startLayerLineYPos, &gravityOverride, &highestJump, &localJumpDistance, &localNoteJumpMovementSpeed](float lineYPos) constexpr {
-        return 2.0f * (highestJump - (gravityOverride ? lineYPos : startLayerLineYPos)) /
-               std::pow(localJumpDistance / localNoteJumpMovementSpeed * 0.5f, 2.0f);
+    float num = localJumpDistance / localNoteJumpMovementSpeed * 0.5f;
+    num = 2 / (num * num);
+
+    std::function<float(float)> const GetJumpGravity = [&](float gravityLineYPos) constexpr {
+        return (highestJump - gravityLineYPos) * num;
     };
 
-    jumpGravity = GetJumpGravity(startLayerLineYPos);
-
-    float const newJumpGravity = gravityOverride ? GetJumpGravity(lineYPos) : jumpGravity;
-
-    Vector3 const jumpEndPos = localJumpEndPos + noteOffset;
+    float jumpGravity = GetJumpGravity(startLayerLineYPos);
 
     std::optional<float> offsetStartRow = flipLineIndex.has_value() ? flipLineIndex : startRow;
     std::optional<float> offsetStartHeight =
             gravityOverride ? startHeight
-                            : float(startLineLayer.value_or((float) noteData->beforeJumpNoteLineLayer));
+                            : startLineLayer;
 
     Vector3 const noteOffset2 =
-            SpawnDataHelper::GetNoteOffset(self, noteData->lineIndex, noteData->noteLineLayer, offsetStartRow, offsetStartHeight);
-    Vector3 const moveStartPos = localMoveStartPos + noteOffset2;
-    Vector3 const moveEndPos = localMoveEndPos + noteOffset2;
+            SpawnDataHelper::GetNoteOffset(offsetStartRow, offsetStartHeight, noteData->flipLineIndex,
+                                           gravityOverride ? noteData->noteLineLayer : noteData->beforeJumpNoteLineLayer, self);
 
     result = BeatmapObjectSpawnMovementData::NoteSpawnData(
-            moveStartPos, moveEndPos, jumpEndPos, newJumpGravity, result.moveDuration, jumpDuration);
+            moveStartPos + noteOffset2, moveEndPos + noteOffset2, jumpEndPos + noteOffset2, gravityOverride ? GetJumpGravity(lineYPos) : jumpGravity, result.moveDuration, jumpDuration);
 
 
 
     // DEFINITE POSITION IS WEIRD, OK?
     // fuck
-    float num = jumpDuration * 0.5f;
-    float startVerticalVelocity = jumpGravity * num;
-    float yOffset = (startVerticalVelocity * num) - (jumpGravity * num * num * 0.5f);
+    float num2 = jumpDuration * 0.5f;
+    float startVerticalVelocity = jumpGravity * num2;
+    float yOffset = (startVerticalVelocity * num2) - (jumpGravity * num2 * num2 * 0.5f);
     ad.noteOffset = Vector3(self->centerPos) + noteOffset + Vector3(0, yOffset, 0);
 
 
