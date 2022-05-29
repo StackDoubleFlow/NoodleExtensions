@@ -199,7 +199,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
 
 
-    self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, height, self->length,
+    self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
@@ -470,6 +470,26 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
     ParametricBoxFakeGlowController_OnEnable(self);
 }
 
+// Kaitlyn's fake glow overbounds fix
+// https://github.com/ItsKaitlyn03/AnyTweaks-old/blob/a723e76506cd7cb8ab6f890b3d6a342f3618aaeb/src/hooks/ParametricBoxFakeGlowController.cpp#L23-L36
+MAKE_HOOK_MATCH(
+        ParametricBoxFakeGlowController_Refresh,
+        &GlobalNamespace::ParametricBoxFakeGlowController::Refresh,
+        void,
+        GlobalNamespace::ParametricBoxFakeGlowController* self
+) {
+    if (!Hooks::isNoodleHookEnabled())
+        return ParametricBoxFakeGlowController_Refresh(self);
+
+
+    float value = std::min({ self->dyn_width(), self->dyn_height(), self->dyn_length() });
+
+    self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, value * 13.5f));
+
+
+    ParametricBoxFakeGlowController_Refresh(self);
+}
+
 // #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
 // MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
 //     if (test && klass && klass->name && klass->namespaze) {
@@ -484,6 +504,7 @@ void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_ManualUpdate);
     INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
     // Temporary fake glow disable hook
+    INSTALL_HOOK(logger, ParametricBoxFakeGlowController_Refresh);
     INSTALL_HOOK(logger, ParametricBoxFakeGlowController_OnEnable);
 
     // Instruction on((const int32_t*) HookTracker::GetOrig(il2cpp_functions::object_new));

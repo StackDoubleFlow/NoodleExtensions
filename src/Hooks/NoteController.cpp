@@ -68,6 +68,8 @@ std::unordered_map<NoteController *, ArrayW<ConditionalMaterialSwitcher *>> cach
 
 void NECaches::ClearNoteCaches() {
     cachedNoteMaterialSwitchers.clear();
+    noteUpdateAD = nullptr;
+    noteTracks.clear();
 }
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
