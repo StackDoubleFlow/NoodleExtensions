@@ -33,7 +33,6 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD, const
     dissolveArrow = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_DISSOLVE_ARROW : NoodleExtensions::Constants::DISSOLVE_ARROW);
     cuttable = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_CUTTABLE : NoodleExtensions::Constants::INTERACTABLE);
     definitePosition = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_DEFINITE_POSITION : NoodleExtensions::Constants::DEFINITE_POSITION);
-    CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Got {} definite position {}", fmt::ptr(this), fmt::ptr(definitePosition));
 }
 
 ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
