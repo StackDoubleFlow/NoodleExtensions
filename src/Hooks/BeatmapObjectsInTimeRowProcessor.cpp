@@ -17,15 +17,8 @@
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
 
-MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice,
-                &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice,
-                void,
-                BeatmapObjectsInTimeRowProcessor* self,
-                GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>* allObjectsTimeSlice, float nextTimeSliceTime) {
-    if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice(self,
-                                                                                                           allObjectsTimeSlice,
-                                                                                                           nextTimeSliceTime);
+void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(BeatmapObjectsInTimeRowProcessor* self,
+               GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>* allObjectsTimeSlice, float nextTimeSliceTime) {
 
 
     auto notesInColumnsReusableProcessingListOfLists = self->notesInColumnsReusableProcessingListOfLists;
@@ -105,13 +98,15 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
     }
 }
 
-MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
-                &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice, void,
-                BeatmapObjectsInTimeRowProcessor *self,
-                GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>* allObjectsTimeSlice,
-                float nextTimeSliceTime) {
+MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice,
+                &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice,
+                void,
+                BeatmapObjectsInTimeRowProcessor* self,
+                GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>* allObjectsTimeSlice, float nextTimeSliceTime) {
     if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
+        return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice(self,
+                                                                                                           allObjectsTimeSlice,
+                                                                                                           nextTimeSliceTime);
 
     auto items = allObjectsTimeSlice->items;
 
@@ -122,7 +117,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
     }
 
     if (customNotes.empty())
-        return BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
+        return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(self, allObjectsTimeSlice, nextTimeSliceTime);
 
 
 
@@ -180,7 +175,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow,
         }
     }
 
-    BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow(self, allObjectsTimeSlice, nextTimeSliceTime);
+    return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(self, allObjectsTimeSlice, nextTimeSliceTime);
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
@@ -191,15 +186,17 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
     if (!Hooks::isNoodleHookEnabled())
         return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
 
-    auto *colorNotesData = reinterpret_cast<List<CustomNoteData *> *>(currentTimeSlice->items);
+    auto items = VList(reinterpret_cast<List<CustomNoteData *> *>(currentTimeSlice->items));
 
-    int const customNoteCount = colorNotesData->get_Count();
+    auto colorNotesData = NoodleExtensions::of_type<CustomNoteData*>(items);
+
+    int const customNoteCount = colorNotesData.size();
 
     if (customNoteCount == 2) {
         std::array<float, 2> lineIndexes{}, lineLayers{};
 
         for (int i = 0; i < customNoteCount; i++) {
-            auto noteData = colorNotesData->get_Item(i);
+            CustomNoteData* noteData = colorNotesData[i];
 
             float lineIndex = noteData->lineIndex - 2.0f;
             float lineLayer = noteData->noteLineLayer;
@@ -221,16 +218,16 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
             lineLayers[i] = lineLayer;
         }
 
-        auto firstNote = colorNotesData->get_Item(0);
-        auto secondNote = colorNotesData->get_Item(1);
+        auto firstNote = colorNotesData[0];
+        auto secondNote = colorNotesData[1];
 
-        if (firstNote->get_colorType() != secondNote->get_colorType() &&
-            ((firstNote->get_colorType() == ColorType::ColorA && lineIndexes[0] > lineIndexes[1]) ||
-             (firstNote->get_colorType() == ColorType::ColorB && lineIndexes[0] < lineIndexes[1]))) {
+        if (firstNote->colorType != secondNote->colorType &&
+            ((firstNote->colorType == ColorType::ColorA && lineIndexes[0] > lineIndexes[1]) ||
+             (firstNote->colorType == ColorType::ColorB && lineIndexes[0] < lineIndexes[1]))) {
             for (int i = 0; i < customNoteCount; i++) {
                 // god aero I hate the mess of code you've made
 
-                auto noteData = colorNotesData->get_Item(i);
+                auto noteData = colorNotesData[i];
 
                 NEVector::Vector2 flipVec;
 
@@ -258,7 +255,6 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
 
 
 void InstallBeatmapObjectsInTimeRowProcessorHooks(Logger &logger) {
-    INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_ProcessAllNotesInTimeRow);
     INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow);
 
     INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice)
