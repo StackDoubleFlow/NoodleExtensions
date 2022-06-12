@@ -64,7 +64,9 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
             // TODO: MIRROR
 //            noteData->SetCutDirectionAngleOffset(Mirror(*cutDirOpt, leftHanded));
             noteData->SetCutDirectionAngleOffset(*cutDirOpt);
-            noteData->ChangeNoteCutDirection(GlobalNamespace::NoteCutDirection::Down);
+            if (noteData->cutDirection != GlobalNamespace::NoteCutDirection::Any) {
+                noteData->ChangeNoteCutDirection(GlobalNamespace::NoteCutDirection::Down);
+            }
         }
     }
 

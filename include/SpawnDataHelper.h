@@ -58,10 +58,10 @@ namespace SpawnDataHelper {
 
     constexpr float GetJumpDuration(BeatmapObjectSpawnController::InitData* initData, BeatmapObjectSpawnMovementData *movementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
 
-        /*if (_initData.noteJumpValueType != BeatmapObjectSpawnMovementData.NoteJumpValueType.BeatOffset)
+        if (!inputNjs && !inputOffset && initData->noteJumpValueType == BeatmapObjectSpawnMovementData::NoteJumpValueType::JumpDuration)
         {
-            return _movementData.jumpDuration;
-        }*/
+            return movementData->jumpDuration;
+        }
 
         float oneBeatDuration = OneBeatDuration(initData->beatsPerMinute);
         float halfJumpDurationInBeats = CalculateHalfJumpDurationInBeats(movementData->startHalfJumpDurationInBeats,
@@ -78,7 +78,7 @@ void GetNoteJumpValues(GlobalNamespace::BeatmapObjectSpawnController::InitData *
                        GlobalNamespace::BeatmapObjectSpawnMovementData* spawnMovementData,
                        std::optional<float> const inputNoteJumpMovementSpeed,
                        std::optional<float> const inputNoteJumpStartBeatOffset,
-                       float &localJumpDuration, float &localJumpDistance,
+                       float &jumpDuration, float &jumpDistance,
                        NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos,
                        NEVector::Vector3 &localJumpEndPos);
 
