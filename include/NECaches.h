@@ -1,6 +1,26 @@
 #pragma once
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
 #include "GlobalNamespace/PlayerHeightDetector.hpp"
+#include "sombrero/shared/ColorUtils.hpp"
+
+#pragma once
+
+namespace GlobalNamespace {
+    class ConditionalMaterialSwitcher;
+    class BaseNoteVisuals;
+    class NoteControllerBase;
+    class GameNoteController;
+    class MirroredCubeNoteController;
+    class CutoutEffect;
+
+    template<typename T>
+    class DisappearingArrowControllerBase_1;
+
+
+    class ObstacleDissolve;
+    class ObstacleControllerBase;
+    class CutoutAnimateEffect;
+}
 
 class NECaches {
 public:
@@ -12,6 +32,33 @@ static GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType noteJu
 static float noteJumpValue;
 
 static bool LeftHandedMode;
+
+struct NoteCache {
+    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> conditionalMaterialSwitchers;
+    GlobalNamespace::BaseNoteVisuals* baseNoteVisuals;
+    GlobalNamespace::CutoutEffect* cutoutEffect;
+
+    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> * disappearingArrowController;
+    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
+};
+
+struct ObstacleCache {
+    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> conditionalMaterialSwitchers;
+    GlobalNamespace::ObstacleDissolve* obstacleDissolve;
+    GlobalNamespace::CutoutAnimateEffect* cutoutAnimateEffect;
+    std::optional<Sombrero::FastColor> color;
+};
+
+static inline std::unordered_map<GlobalNamespace::NoteControllerBase *, NECaches::NoteCache> noteCache;
+static inline std::unordered_map<GlobalNamespace::ObstacleControllerBase *, NECaches::ObstacleCache> obstacleCache;
+
+static inline NECaches::NoteCache& getNoteCache(GlobalNamespace::NoteControllerBase * note) {
+    return noteCache[note];
+}
+
+static inline NECaches::ObstacleCache& getObstacleCache(GlobalNamespace::ObstacleControllerBase * obstacle) {
+    return obstacleCache[obstacle];
+}
 
 static void ClearObstacleCaches();
 static void ClearNoteCaches();

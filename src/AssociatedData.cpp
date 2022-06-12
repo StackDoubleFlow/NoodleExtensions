@@ -95,13 +95,6 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
 }
 
 void ::BeatmapObjectAssociatedData::ResetState() {
-    cutoutAnimationEffect = nullptr;
-    mirroredCutoutAnimationEffect = nullptr;
-    cutoutEffect = nullptr;
-    mirroredCutoutEffect = nullptr;
-    disappearingArrowController = nullptr;
-//    mirroredDisappearingArrowController = nullptr;
-    materialSwitchers = nullptr;
     parsed = false;
 }
 

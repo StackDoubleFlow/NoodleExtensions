@@ -68,6 +68,8 @@ struct ObjectCustomData {
 
 struct BeatmapObjectAssociatedData {
     BeatmapObjectAssociatedData() {}
+    BeatmapObjectAssociatedData(BeatmapObjectAssociatedData&&) = default;
+    BeatmapObjectAssociatedData(BeatmapObjectAssociatedData const&) = default;
 
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     std::optional<float> startNoteLineLayer;
@@ -85,16 +87,6 @@ struct BeatmapObjectAssociatedData {
     float xOffset;
     // set to true is the dissolve material is currently in use
     bool dissolveEnabled;
-    // cutout for obstacles
-    QuestUI::WeakPtrGO<GlobalNamespace::CutoutAnimateEffect> cutoutAnimationEffect;
-    GlobalNamespace::CutoutAnimateEffect *mirroredCutoutAnimationEffect;
-    // cutout for notes
-    QuestUI::WeakPtrGO<GlobalNamespace::CutoutEffect> cutoutEffect;
-    GlobalNamespace::CutoutEffect *mirroredCutoutEffect;
-    QuestUI::WeakPtrGO<GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *>> disappearingArrowController;
-//    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::Mirror *> *mirroredDisappearingArrowController;
-    // conditional material switch for dissolve
-    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
 

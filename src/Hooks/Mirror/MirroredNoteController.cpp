@@ -18,6 +18,7 @@
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "Animation/ParentObject.h"
+#include "NECaches.h"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
@@ -50,10 +51,10 @@ static constexpr bool CheckSkip(Transform* noteTransform, Transform* followedNot
     return true;
 }
 
-static void UpdateMirror(BeatmapObjectAssociatedData& ad,Transform* objectTransform, Transform* noteTransform,
+static void UpdateMirror(NECaches::NoteCache const& ad,Transform* objectTransform, Transform* noteTransform,
                          Transform* followedObjectTransform,
                          NoteControllerBase* mirroredNoteController,
-                         std::function<void(bool hidden)> const& setMirrorHide)
+                         auto&& setMirrorHide)
 {
 
     GameObject* go = nullptr;

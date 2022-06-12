@@ -42,19 +42,14 @@ SafePtr<List<ObstacleController*>>& getActiveObstacles() {
     return activeObstacles;
 }
 
-
-std::unordered_map<ObstacleController *, ArrayW<ConditionalMaterialSwitcher *>> cachedObstacleMaterialSwitchers;
-std::unordered_map<GlobalNamespace::ObstacleControllerBase *, Sombrero::FastColor> cachedObstacleColors;
-
 bool mapLoaded = false;
 
 void OnObstacleChangeColor(GlobalNamespace::ObstacleControllerBase * oc, Sombrero::FastColor const& color) {
-    cachedObstacleColors[oc] = color;
+    NECaches::getObstacleCache(oc).color = color;
 }
 
 void NECaches::ClearObstacleCaches() {
-    cachedObstacleMaterialSwitchers.clear();
-    cachedObstacleColors.clear();
+    NECaches::obstacleCache.clear();
     mapLoaded = false;
 }
 
@@ -105,6 +100,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         return;
     }
 
+    auto& obstacleCache = NECaches::getObstacleCache(self);
+
     if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
         // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
         if (!mapLoaded) {
@@ -121,22 +118,18 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
         auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
         if (color) {
-            cachedObstacleColors[self] = *color;
+            obstacleCache.color = *color;
         } else {
-            cachedObstacleColors.erase(self);
+            obstacleCache.color = std::nullopt;
         }
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
-    auto it = cachedObstacleMaterialSwitchers.find(self);
-    if (it == cachedObstacleMaterialSwitchers.end()) {
-        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    } else {
-        materialSwitchers = it->second;
+    ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
+    if (!materialSwitchers) {
+        materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
     }
-    ad.materialSwitchers = materialSwitchers;
 
     // Reset only if NE dissolve is enabled
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
@@ -352,6 +345,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             self->bounds.set_size(ad.boundsSize);
         }
     }
+    auto& obstacleCache = NECaches::getObstacleCache(self);
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value()) {
@@ -373,14 +367,10 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 bool transparent = true;
 
                 if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
-                    auto colorIt = cachedObstacleColors.find(self);
+                    auto const& colorIt = obstacleCache.color;
 
-                    if (colorIt != cachedObstacleColors.end()) {
-                        auto const &color = colorIt->second;
-
-                        if (color.a <= 0.0f) {
-                            transparent = false;
-                        }
+                    if (colorIt && colorIt->a <= 0.0f) {
+                        transparent = false;
                     }
                 }
 
@@ -390,19 +380,17 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         }
 
         if (wasEnabled != ad.dissolveEnabled) {
-            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
             for (auto *materialSwitcher: materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(
                         ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
             }
         }
 
-        CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
+        CutoutAnimateEffect *& cutoutAnimationEffect = obstacleCache.cutoutAnimateEffect;
         if (!cutoutAnimationEffect) {
-            ObstacleDissolve *obstacleDissolve =
-                self->get_gameObject()->GetComponent<ObstacleDissolve *>();
-            cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
-            ad.cutoutAnimationEffect = cutoutAnimationEffect;
+            obstacleCache.obstacleDissolve = obstacleCache.obstacleDissolve ?: self->get_gameObject()->GetComponent<ObstacleDissolve *>();
+            cutoutAnimationEffect = obstacleCache.obstacleDissolve->cutoutAnimateEffect;
         }
 
         cutoutAnimationEffect->SetCutout(dissolve);

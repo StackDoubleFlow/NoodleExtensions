@@ -64,10 +64,8 @@ float noteTimeAdjust(float original, float jumpDuration) {
     return original;
 }
 
-std::unordered_map<NoteController *, ArrayW<ConditionalMaterialSwitcher *>> cachedNoteMaterialSwitchers;
-
 void NECaches::ClearNoteCaches() {
-    cachedNoteMaterialSwitchers.clear();
+    NECaches::noteCache.clear();
     noteUpdateAD = nullptr;
     noteTracks.clear();
 }
@@ -95,14 +93,14 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!customNoteData->customData)
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
-    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
-    auto it = cachedNoteMaterialSwitchers.find(self);
-    if (it == cachedNoteMaterialSwitchers.end()) {
-        cachedNoteMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    } else {
-        materialSwitchers = it->second;
+
+    auto& noteCache = NECaches::getNoteCache(self);
+
+    ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = noteCache.conditionalMaterialSwitchers;
+    if (!materialSwitchers) {
+         materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
     }
-    ad.materialSwitchers = materialSwitchers;
+
     for (auto *materialSwitcher: materialSwitchers) {
         materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
@@ -242,11 +240,13 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         transform->set_localRotation(worldRotationQuaternion);
     }
 
+    auto& noteCache = NECaches::getNoteCache(self);
+
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
     bool isDissolving = offset.dissolve.value_or(0) > 0 || offset.dissolveArrow.value_or(0) > 0;
     if (hasDissolveOffset && ad.dissolveEnabled != isDissolving && noteDissolveConfig) {
-        ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
+        ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = noteCache.conditionalMaterialSwitchers;
         for (auto *materialSwitcher : materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1 : materialSwitcher->material0);
         }
@@ -254,10 +254,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     }
 
     if (offset.dissolve.has_value()) {
-        CutoutEffect *cutoutEffect = ad.cutoutEffect;
+        CutoutEffect *& cutoutEffect = noteCache.cutoutEffect;
         if (!cutoutEffect) {
-            BaseNoteVisuals *baseNoteVisuals = self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
-            CutoutAnimateEffect *cutoutAnimateEffect = baseNoteVisuals->cutoutAnimateEffect;
+            noteCache.baseNoteVisuals = noteCache.baseNoteVisuals ?: self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
+            CutoutAnimateEffect *cutoutAnimateEffect = noteCache.baseNoteVisuals->cutoutAnimateEffect;
             ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
             for (CutoutEffect *effect : cuttoutEffects) {
                 if (effect->get_name() != u"NoteArrow") {
@@ -265,7 +265,6 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
                     break;
                 }
             }
-            ad.cutoutEffect = cutoutEffect;
         }
 
         CRASH_UNLESS(cutoutEffect);
@@ -278,10 +277,9 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     }
 
     if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
-        auto disappearingArrowController = ad.disappearingArrowController;
+        auto& disappearingArrowController = noteCache.disappearingArrowController;
         if (!disappearingArrowController) {
             disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
-            ad.disappearingArrowController = disappearingArrowController;
         }
 
         if (noteDissolveConfig) {

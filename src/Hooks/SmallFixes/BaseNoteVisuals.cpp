@@ -13,6 +13,7 @@
 
 #include "NEHooks.h"
 #include "AssociatedData.h"
+#include "NECaches.h"
 
 
 using namespace GlobalNamespace;
@@ -39,8 +40,7 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake,
 
         if (il2cpp_functions::class_is_assignable_from(CustomNoteDataKlass, noteController->noteData->klass)) {
 //        if (noteData->customData) {
-            CustomJSONData::CustomNoteData* noteData = static_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
-            auto &ad = getAD(noteData->customData);
+            auto &ad = NECaches::getNoteCache(noteController);
 
             disappearingArrowController = (DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *) ad.disappearingArrowController;
             if (!disappearingArrowController) {
