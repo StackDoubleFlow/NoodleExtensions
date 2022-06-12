@@ -28,13 +28,12 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnController::InitData *
                                         float &jumpDuration, float &jumpDistance,
                                         NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos,
                                         NEVector::Vector3 &localJumpEndPos) {
-    float noteJumpMovementSpeed = inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed);
-    jumpDuration = GetJumpDuration(initData, spawnMovementData, noteJumpMovementSpeed, inputNoteJumpStartBeatOffset);
+    jumpDuration = GetJumpDuration(initData, spawnMovementData, inputNoteJumpMovementSpeed, inputNoteJumpStartBeatOffset);
 
     NEVector::Vector3 const forwardVec(spawnMovementData->forwardVec);
     NEVector::Vector3 const centerPos(spawnMovementData->centerPos);
 
-    jumpDistance = noteJumpMovementSpeed * jumpDuration;
+    jumpDistance = (inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed)) * jumpDuration;
     localMoveEndPos = centerPos + (forwardVec * (jumpDistance * 0.5f));
     localJumpEndPos = centerPos - (forwardVec * (jumpDistance * 0.5f));
     localMoveStartPos = centerPos + (forwardVec * (spawnMovementData->moveDistance + (jumpDistance * 0.5f)));
