@@ -1,3 +1,4 @@
+#pragma once
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
 #include "GlobalNamespace/PlayerHeightDetector.hpp"
 
