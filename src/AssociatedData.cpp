@@ -35,7 +35,7 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData &beatmapAD, const
     definitePosition = TryGetPointData(beatmapAD, animation, v2 ? NoodleExtensions::Constants::V2_DEFINITE_POSITION : NoodleExtensions::Constants::DEFINITE_POSITION);
 }
 
-ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
+ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData,
                                    CustomJSONData::CustomNoteData *noteData,
                                    CustomJSONData::CustomObstacleData *obstacleData, bool v2) {
     auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::NOTE_OFFSET);
@@ -70,9 +70,6 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData, std::opti
         }
     }
 
-    auto newFlip = NEJSON::ReadOptionalVector2_emptyY(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
-    if (newFlip)
-        flip = newFlip;
     // TODO: FLIP X
 
     disableNoteGravity = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_GRAVITY_DISABLE : NoodleExtensions::Constants::NOTE_GRAVITY_DISABLE);

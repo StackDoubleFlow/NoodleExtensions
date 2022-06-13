@@ -153,6 +153,23 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         if (self->noteJumpDidFinishEvent)
             self->noteJumpDidFinishEvent->Invoke();
     }
+    if (normalTime >= 1.0f)
+    {
+        if (!self->missedMarkReported)
+        {
+            self->missedMarkReported = true;
+            auto action4 = self->noteJumpDidPassMissedMarkerEvent;
+            if (action4 != nullptr)
+            {
+                action4->Invoke();
+            }
+        }
+        auto action5 = self->noteJumpDidFinishEvent;
+        if (action5 != nullptr)
+        {
+            action5->Invoke();
+        }
+    }
 
     NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
     selfTransform->set_localPosition(result);

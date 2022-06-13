@@ -27,6 +27,7 @@
 #include "GlobalNamespace/SortedList_1.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "SpawnDataHelper.h"
+#include "tracks/shared/Json.h"
 
 #include <optional>
 
@@ -147,7 +148,11 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
                 if (ad.parsed)
                     continue;
 
-                ad.objectData = ObjectCustomData(customData, ad.flip, noteData, obstacleData, v2);
+                ad.objectData = ObjectCustomData(customData, noteData, obstacleData, v2);
+
+                if (!ad.flip) {
+                    ad.flip = NEJSON::ReadOptionalVector2_emptyY(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
+                }
 
                 auto animationKey = v2 ? NoodleExtensions::Constants::V2_ANIMATION
                                        : NoodleExtensions::Constants::ANIMATION;

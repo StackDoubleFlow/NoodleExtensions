@@ -94,6 +94,18 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
+    // TRANSPILERS SUCK!
+    auto flipYSide = ad.flip ? ad.flip->y : customNoteData->flipYSide;
+
+    if (flipYSide > 0.0f)
+    {
+        self->noteMovement->jump->yAvoidance = flipYSide * self->noteMovement->jump->yAvoidanceUp;
+    }
+    else
+    {
+        self->noteMovement->jump->yAvoidance = flipYSide * self->noteMovement->jump->yAvoidanceDown;
+    }
+
     auto& noteCache = NECaches::getNoteCache(self);
 
     ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = noteCache.conditionalMaterialSwitchers;

@@ -179,7 +179,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
                                            gravityOverride ? noteData->noteLineLayer : noteData->beforeJumpNoteLineLayer, self);
 
     auto result = BeatmapObjectSpawnMovementData::NoteSpawnData(
-            moveStartPos + noteOffset2, moveEndPos + noteOffset2, jumpEndPos + noteOffset2, gravityOverride ? GetJumpGravity(lineYPos) : jumpGravity, self->moveDuration, jumpDuration);
+            moveStartPos + noteOffset2, moveEndPos + noteOffset2, jumpEndPos + noteOffset, gravityOverride ? GetJumpGravity(lineYPos) : jumpGravity, self->moveDuration, jumpDuration);
 
 
 

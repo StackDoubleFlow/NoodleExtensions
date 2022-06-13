@@ -61,7 +61,7 @@ struct ObjectCustomData {
     std::optional<std::array<std::optional<float>, 3>> scale;
 
     ObjectCustomData() = default;
-    ObjectCustomData(const rapidjson::Value &customData, std::optional<NEVector::Vector2> &flip,
+    ObjectCustomData(const rapidjson::Value &customData,
                      CustomJSONData::CustomNoteData *noteData,
                      CustomJSONData::CustomObstacleData *obstacleData, bool v2);
 };

@@ -13,6 +13,7 @@
 #include "custom-json-data/shared/VList.h"
 
 #include "NEUtils.hpp"
+#include "tracks/shared/Json.h"
 
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
@@ -110,11 +111,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
 
     auto items = allObjectsTimeSlice->items;
 
-    std::vector<CustomNoteData*> customNotes;
-
-    for (auto o : VList(items)) {
-        if (o && il2cpp_utils::AssignableFrom<CustomNoteData*>(o->klass)) customNotes.emplace_back((CustomNoteData*) o);
-    }
+    std::vector<CustomNoteData*> customNotes = NoodleExtensions::of_type<CustomNoteData*>(VList(items));
 
     if (customNotes.empty())
         return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(self, allObjectsTimeSlice, nextTimeSliceTime);
@@ -145,8 +142,10 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
         bool flag = false;
         for (int k = 0; k < list.size(); k++) {
             float listLineLayer = list[k]->noteLineLayer;
-            if (noteData->customData->value) {
-                rapidjson::Value const& customData = *noteData->customData->value;
+            auto kNote = list[k];
+
+            if (kNote->customData->value) {
+                rapidjson::Value const& customData = *kNote->customData->value;
                 auto listPos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
                 if (listPos != customData.MemberEnd()) {
                     if (listPos->value.Size() >= 2) {
@@ -165,10 +164,15 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
         if (!flag) {
             list.push_back(noteData);
         }
+
+        if (noteData->customData->value) {
+            rapidjson::Value const &customData = *noteData->customData->value;
+            BeatmapObjectAssociatedData &ad = getAD(noteData->customData);
+            ad.flip = NEJSON::ReadOptionalVector2_emptyY(customData, NoodleExtensions::Constants::V2_FLIP);
+        }
     }
 
-    for (auto &pair : notesInColumn) {
-        auto &list = pair.second;
+    for (auto &[_, list] : notesInColumn) {
         for (int m = 0; m < list.size(); m++) {
             BeatmapObjectAssociatedData &ad = getAD(list[m]->customData);
             ad.startNoteLineLayer = (float) m;
