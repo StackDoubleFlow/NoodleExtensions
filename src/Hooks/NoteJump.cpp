@@ -177,12 +177,6 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);
     }
 
-    // NoteJump.ManualUpdate will be the last place this is used after it was set in
-    // NoteController.ManualUpdate. To make sure it doesn't interfere with future notes, it's set
-    // back to null
-    noteUpdateAD = nullptr;
-    noteTracks.clear();
-
     return result;
 }
 

@@ -27,14 +27,14 @@ namespace UnityEngine {
 }
 
 struct AnimationObjectData {
-    PointDefinition *position;
-    PointDefinition *rotation;
-    PointDefinition *scale;
-    PointDefinition *localRotation;
-    PointDefinition *dissolve;
-    PointDefinition *dissolveArrow;
-    PointDefinition *cuttable;
-    PointDefinition *definitePosition;
+    PointDefinition *position = nullptr;
+    PointDefinition *rotation = nullptr;
+    PointDefinition *scale = nullptr;
+    PointDefinition *localRotation = nullptr;
+    PointDefinition *dissolve = nullptr;
+    PointDefinition *dissolveArrow = nullptr;
+    PointDefinition *cuttable = nullptr;
+    PointDefinition *definitePosition = nullptr;
     bool parsed = false;
 
     AnimationObjectData() = default;

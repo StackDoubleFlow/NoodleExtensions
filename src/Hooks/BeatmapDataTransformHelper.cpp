@@ -100,7 +100,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
-    auto &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
+    TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
 
     if (!beatmapAD.valid) {
         TracksAD::readBeatmapDataAD(beatmap);
@@ -158,7 +158,8 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
                                        : NoodleExtensions::Constants::ANIMATION;
                 if (customData.HasMember(animationKey.data())) {
                     rapidjson::Value const &animation = customData[animationKey.data()];
-                    ad.animationData = AnimationObjectData(beatmapAD, animation, v2);
+                    ad.animationData = {beatmapAD, animation, v2};
+                    ad.animationData.owner = customDataWrapper;
                 } else {
                     ad.animationData = AnimationObjectData();
                 }

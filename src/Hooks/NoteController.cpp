@@ -31,7 +31,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-BeatmapObjectAssociatedData *noteUpdateAD;
+BeatmapObjectAssociatedData *noteUpdateAD = nullptr;
 TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration) {
@@ -116,7 +116,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     for (auto *materialSwitcher: materialSwitchers) {
         materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
-    ad.dissolveEnabled = false;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -175,6 +174,9 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     if (!Hooks::isNoodleHookEnabled())
         return NoteController_ManualUpdate(self);
 
+    noteUpdateAD = nullptr;
+    noteTracks.clear();
+
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
     if (!customNoteData->customData) {
@@ -194,6 +196,11 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     noteUpdateAD = &ad;
     noteTracks = tracks;
+
+    if (ad.animationData.owner && ad.animationData.owner != customNoteData->customData) {
+        CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("NOTE WAS COPIED TO ANOTHER BEATMAP");
+        SAFE_ABORT();
+    }
 
     if (noteTracks.empty() && !ad.animationData.parsed) {
         return NoteController_ManualUpdate(self);
@@ -330,6 +337,12 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     }
 
     NoteController_ManualUpdate(self);
+
+    // NoteJump.ManualUpdate will be the last place this is used after it was set in
+    // NoteController.ManualUpdate. To make sure it doesn't interfere with future notes, it's set
+    // back to null
+    noteUpdateAD = nullptr;
+    noteTracks.clear();
 }
 
 void InstallNoteControllerHooks(Logger &logger) {

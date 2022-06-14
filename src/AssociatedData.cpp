@@ -12,7 +12,7 @@ namespace {
 
 PointDefinition *TryGetPointData(BeatmapAssociatedData &beatmapAD,
                                  const rapidjson::Value &animation, std::string_view name) {
-    PointDefinition *anonPointDef;
+    PointDefinition *anonPointDef = nullptr;
     PointDefinition *pointDef =
         Animation::TryGetPointData(beatmapAD, anonPointDef, animation, name);
     if (anonPointDef) {
