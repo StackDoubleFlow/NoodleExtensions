@@ -197,11 +197,6 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     noteUpdateAD = &ad;
     noteTracks = tracks;
 
-    if (ad.animationData.owner && ad.animationData.owner != customNoteData->customData) {
-        CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("NOTE WAS COPIED TO ANOTHER BEATMAP");
-        SAFE_ABORT();
-    }
-
     if (noteTracks.empty() && !ad.animationData.parsed) {
         return NoteController_ManualUpdate(self);
     }
