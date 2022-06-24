@@ -89,7 +89,7 @@ extern System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrde
 
 float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData *initData, BeatmapObjectSpawnMovementData *movementData,
                         std::optional<float> inputNjs, std::optional<float> inputOffset) {
-    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset));
+    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
 }
 
 void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObjectSpawnMovementData *movementData,

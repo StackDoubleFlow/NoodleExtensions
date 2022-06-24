@@ -54,13 +54,28 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
 
     auto const& scale = ad.objectData.scale;
-    std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
     std::optional<float> height = scale && scale->at(1) ? scale->at(1) : std::nullopt;
+    std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
 
-    Vector3 moveStartPos = result.moveStartPos;
-    Vector3 moveEndPos = result.moveEndPos;
-    Vector3 jumpEndPos = result.jumpEndPos;
-    float obstacleHeight = result.obstacleHeight;
+    Vector3 obstacleOffset =
+            SpawnDataHelper::GetObstacleOffset(self, obstacleData->lineIndex, obstacleData->lineLayer, startX, startY);
+    obstacleOffset.y += self->get_jumpOffsetY();
+
+
+
+
+    // original code has this line, not sure how important it is
+    ////obstacleOffset.y = Mathf.Max(obstacleOffset.y, this._verticalObstaclePosY);
+
+    float obstacleHeight;
+    if (height.has_value()) {
+        obstacleHeight = height.value() * 0.6f;
+    } else {
+        // _topObstaclePosY =/= _obstacleTopPosY
+        obstacleHeight = std::min(
+                obstacleData->height * 0.6f,
+                self->obstacleTopPosY - obstacleOffset.y);
+    }
 
     float jumpDuration;
     float jumpDistance;
@@ -71,30 +86,8 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
                                        jumpDistance,
                                        localMoveStartPos, localMoveEndPos, localJumpEndPos);
 
-    // original code has this line, not sure how important it is
-    ////obstacleOffset.y = Mathf.Max(obstacleOffset.y, this._verticalObstaclePosY);
-
-    Vector3 obstacleOffset =
-            SpawnDataHelper::GetObstacleOffset(self, obstacleData->lineIndex, obstacleData->lineLayer, startX, startY);
-
-    obstacleOffset.y += self->get_jumpOffsetY();
-
-    moveStartPos = localMoveStartPos + obstacleOffset;
-    moveEndPos = localMoveEndPos + obstacleOffset;
-    jumpEndPos = localJumpEndPos + obstacleOffset;
-
-
-    if (height.has_value()) {
-        obstacleHeight = height.value() * 0.6f;
-    } else {
-        // _topObstaclePosY =/= _obstacleTopPosY
-        obstacleHeight = std::min(
-                obstacleData->height * 0.6f,
-                self->obstacleTopPosY - obstacleOffset.y);
-    }
-
     result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
-        moveStartPos, moveEndPos, jumpEndPos, obstacleHeight, result.moveDuration, jumpDuration,
+        localMoveStartPos + obstacleOffset, localMoveEndPos + obstacleOffset, localJumpEndPos + obstacleOffset, obstacleHeight, result.moveDuration, jumpDuration,
         self->get_noteLinesDistance());
 
     ad.noteOffset = NEVector::Vector3(self->centerPos) + obstacleOffset;
