@@ -28,6 +28,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
 
 void CustomEventCallback(BeatmapCallbacksController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
+    PAPER_IL2CPP_CATCH_HANDLER(
     if (!Hooks::isNoodleHookEnabled())
         return;
 
@@ -63,6 +64,7 @@ void CustomEventCallback(BeatmapCallbacksController *callbackController,
     } else if (ad.playerTrackEventData) {
         PlayerTrack::AssignTrack(ad.playerTrackEventData->track);
     }
+    )
 }
 
 void NEEvents::AddEventCallbacks(Logger &logger) {
