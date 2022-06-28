@@ -3,6 +3,7 @@
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
 
 #include "GlobalNamespace/NoteController.hpp"
+#include "GlobalNamespace/MirroredGameNoteController.hpp"
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
 #include "GlobalNamespace/NoteMovement.hpp"
@@ -33,6 +34,45 @@ using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD = nullptr;
 TracksAD::TracksVector noteTracks;
+
+CutoutEffect* NECaches::GetCutout(GlobalNamespace::NoteControllerBase *nc, NECaches::NoteCache &noteCache) {
+    CutoutEffect *&cutoutEffect = noteCache.cutoutEffect;
+    if (!cutoutEffect) {
+        noteCache.baseNoteVisuals = noteCache.baseNoteVisuals
+                                    ?: nc->get_gameObject()->GetComponent<BaseNoteVisuals *>();
+        CutoutAnimateEffect *cutoutAnimateEffect = noteCache.baseNoteVisuals->cutoutAnimateEffect;
+        ArrayW<CutoutEffect *> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
+        for (CutoutEffect *effect: cuttoutEffects) {
+            if (effect->get_name() != u"NoteArrow") {
+                cutoutEffect = effect;
+                break;
+            }
+        }
+    }
+
+    return cutoutEffect;
+}
+
+GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *
+NECaches::GetDisappearingArrowController(GlobalNamespace::GameNoteController *nc, NECaches::NoteCache &noteCache) {
+    auto& disappearingArrowController = noteCache.disappearingArrowController;
+    if (!disappearingArrowController) {
+        disappearingArrowController = nc->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
+    }
+
+    return disappearingArrowController;
+}
+
+GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredGameNoteController *> *
+NECaches::GetDisappearingArrowController(GlobalNamespace::MirroredGameNoteController *nc,
+                                         NECaches::NoteCache &noteCache) {
+    auto& disappearingArrowController = noteCache.mirroredDisappearingArrowController;
+    if (!disappearingArrowController) {
+        disappearingArrowController = nc->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<MirroredGameNoteController *> *>();
+    }
+
+    return disappearingArrowController;
+}
 
 float noteTimeAdjust(float original, float jumpDuration) {
     if (noteTracks.empty())
@@ -110,12 +150,13 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
 
     ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = noteCache.conditionalMaterialSwitchers;
     if (!materialSwitchers) {
-         materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+         materialSwitchers = self->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
     }
 
     for (auto *materialSwitcher: materialSwitchers) {
         materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
+    noteCache.dissolveEnabled = false;
 
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
@@ -259,28 +300,16 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
     bool hasDissolveOffset = offset.dissolve.has_value() || offset.dissolveArrow.has_value();
     bool isDissolving = offset.dissolve.value_or(0) > 0 || offset.dissolveArrow.value_or(0) > 0;
-    if (hasDissolveOffset && ad.dissolveEnabled != isDissolving && noteDissolveConfig) {
+    if (hasDissolveOffset && noteCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
         ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = noteCache.conditionalMaterialSwitchers;
         for (auto *materialSwitcher : materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1 : materialSwitcher->material0);
         }
-        ad.dissolveEnabled = isDissolving;
+        noteCache.dissolveEnabled = isDissolving;
     }
 
     if (offset.dissolve.has_value()) {
-        CutoutEffect *& cutoutEffect = noteCache.cutoutEffect;
-        if (!cutoutEffect) {
-            noteCache.baseNoteVisuals = noteCache.baseNoteVisuals ?: self->get_gameObject()->GetComponent<BaseNoteVisuals *>();
-            CutoutAnimateEffect *cutoutAnimateEffect = noteCache.baseNoteVisuals->cutoutAnimateEffect;
-            ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
-            for (CutoutEffect *effect : cuttoutEffects) {
-                if (effect->get_name() != u"NoteArrow") {
-                    cutoutEffect = effect;
-                    break;
-                }
-            }
-        }
-
+        CutoutEffect * cutoutEffect = NECaches::GetCutout(self, noteCache);
         CRASH_UNLESS(cutoutEffect);
 
         if (noteDissolveConfig) {
@@ -290,43 +319,44 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         }
     }
 
-    if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
-        auto& disappearingArrowController = noteCache.disappearingArrowController;
-        if (!disappearingArrowController) {
-            disappearingArrowController = self->get_gameObject()->GetComponent<DisappearingArrowControllerBase_1<GameNoteController *> *>();
-        }
+    static auto *gameNoteControllerClass = classof(GameNoteController *);
+    static auto *bombNoteControllerClass = classof(BombNoteController *);
 
-        if (noteDissolveConfig) {
-            disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
-        } else {
-            disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow >= 0 ? 1 : 0);
+    if (il2cpp_functions::class_is_assignable_from(gameNoteControllerClass, self->klass)) {
+        if (offset.dissolveArrow.has_value() && self->noteData->colorType != ColorType::None) {
+            auto disappearingArrowController = NECaches::GetDisappearingArrowController((GameNoteController*) self, noteCache);
+            if (noteDissolveConfig) {
+                disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow);
+            } else {
+                disappearingArrowController->SetArrowTransparency(*offset.dissolveArrow >= 0 ? 1 : 0);
+            }
         }
     }
 
-    static auto *gameNoteControllerClass = classof(GameNoteController *);
-    static auto *bombNoteControllerClass = classof(BombNoteController *);
-    if (offset.cuttable.has_value()) {
-        bool enabled = *offset.cuttable >= 1;
+    if (il2cpp_functions::class_is_assignable_from(gameNoteControllerClass, self->klass) || il2cpp_functions::class_is_assignable_from(bombNoteControllerClass, self->klass)) {
+        if (offset.cuttable.has_value()) {
+            bool enabled = *offset.cuttable >= 1;
 
-        if (self->klass == gameNoteControllerClass) {
-            auto *gameNoteController = reinterpret_cast<GameNoteController *>(self);
-            ArrayW<BoxCuttableBySaber *> bigCuttables = gameNoteController->bigCuttableBySaberList;
-            for (auto bigCuttable : bigCuttables) {
-                if (bigCuttable->canBeCut != enabled) {
-                    bigCuttable->set_canBeCut(enabled);
+            if (self->klass == gameNoteControllerClass) {
+                auto *gameNoteController = reinterpret_cast<GameNoteController *>(self);
+                ArrayW<BoxCuttableBySaber *> bigCuttables = gameNoteController->bigCuttableBySaberList;
+                for (auto bigCuttable: bigCuttables) {
+                    if (bigCuttable->canBeCut != enabled) {
+                        bigCuttable->set_canBeCut(enabled);
+                    }
                 }
-            }
-            ArrayW<BoxCuttableBySaber *> smallCuttables = gameNoteController->smallCuttableBySaberList;
-            for (auto smallCuttable : smallCuttables) {
-                if (smallCuttable->canBeCut != enabled) {
-                    smallCuttable->set_canBeCut(enabled);
+                ArrayW<BoxCuttableBySaber *> smallCuttables = gameNoteController->smallCuttableBySaberList;
+                for (auto smallCuttable: smallCuttables) {
+                    if (smallCuttable->canBeCut != enabled) {
+                        smallCuttable->set_canBeCut(enabled);
+                    }
                 }
-            }
-        } else if(self->klass == bombNoteControllerClass) {
-            auto *bombNoteController = reinterpret_cast<BombNoteController *>(self);
-            CuttableBySaber *cuttable = bombNoteController->cuttableBySaber;
-            if (cuttable->get_canBeCut() != enabled) {
-                cuttable->set_canBeCut(enabled);
+            } else if (self->klass == bombNoteControllerClass) {
+                auto *bombNoteController = reinterpret_cast<BombNoteController *>(self);
+                CuttableBySaber *cuttable = bombNoteController->cuttableBySaber;
+                if (cuttable->get_canBeCut() != enabled) {
+                    cuttable->set_canBeCut(enabled);
+                }
             }
         }
     }

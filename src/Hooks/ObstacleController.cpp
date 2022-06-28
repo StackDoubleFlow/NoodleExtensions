@@ -128,7 +128,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
     if (!materialSwitchers) {
-        materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+        materialSwitchers = self->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
     }
 
     // Reset only if NE dissolve is enabled
@@ -137,7 +137,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
         }
     }
-    ad.dissolveEnabled = false;
+    obstacleCache.dissolveEnabled = false;
 
     auto const setBounds = [&ad, &self]() constexpr{
         auto const& cuttable = ad.objectData.uninteractable;
@@ -357,12 +357,12 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             dissolve = *offset.dissolve >= 0 ? 0 : 1;
         }
 
-        bool wasEnabled = ad.dissolveEnabled;
-        ad.dissolveEnabled = obstacleDissolveConfig;
+        bool wasEnabled = obstacleCache.dissolveEnabled;
+        obstacleCache.dissolveEnabled = obstacleDissolveConfig;
 
-        if (ad.dissolveEnabled) {
+        if (obstacleCache.dissolveEnabled) {
             if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::BASIC) {
-                ad.dissolveEnabled |= dissolve > 0.0f;
+                obstacleCache.dissolveEnabled |= dissolve > 0.0f;
             } else {
                 bool transparent = true;
 
@@ -375,15 +375,15 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 }
 
                 if (transparent)
-                    ad.dissolveEnabled = dissolve > 0.0f;
+                    obstacleCache.dissolveEnabled = dissolve > 0.0f;
             }
         }
 
-        if (wasEnabled != ad.dissolveEnabled) {
+        if (wasEnabled != obstacleCache.dissolveEnabled) {
             ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
             for (auto *materialSwitcher: materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(
-                        ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
+                        obstacleCache.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
             }
         }
 

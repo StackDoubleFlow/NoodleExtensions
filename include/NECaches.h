@@ -10,7 +10,7 @@ namespace GlobalNamespace {
     class BaseNoteVisuals;
     class NoteControllerBase;
     class GameNoteController;
-    class MirroredCubeNoteController;
+    class MirroredGameNoteController;
     class CutoutEffect;
 
     template<typename T>
@@ -35,18 +35,20 @@ static bool LeftHandedMode;
 
 struct NoteCache {
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> conditionalMaterialSwitchers;
-    GlobalNamespace::BaseNoteVisuals* baseNoteVisuals;
-    GlobalNamespace::CutoutEffect* cutoutEffect;
+    GlobalNamespace::BaseNoteVisuals* baseNoteVisuals{};
+    GlobalNamespace::CutoutEffect* cutoutEffect{};
 
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> * disappearingArrowController;
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
+    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> * disappearingArrowController{};
+    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredGameNoteController *> *mirroredDisappearingArrowController{};
+    bool dissolveEnabled;
 };
 
 struct ObstacleCache {
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> conditionalMaterialSwitchers;
-    GlobalNamespace::ObstacleDissolve* obstacleDissolve;
-    GlobalNamespace::CutoutAnimateEffect* cutoutAnimateEffect;
+    GlobalNamespace::ObstacleDissolve* obstacleDissolve{};
+    GlobalNamespace::CutoutAnimateEffect* cutoutAnimateEffect{};
     std::optional<Sombrero::FastColor> color;
+    bool dissolveEnabled;
 };
 
 static inline std::unordered_map<GlobalNamespace::NoteControllerBase *, NECaches::NoteCache> noteCache;
@@ -67,4 +69,9 @@ consteval static auto get_noteLinesDistanceFast() {
     return 0.6f;
 }
 
+    static GlobalNamespace::CutoutEffect* GetCutout(GlobalNamespace::NoteControllerBase* nc, NECaches::NoteCache& noteCache);
+
+
+    static GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *>* GetDisappearingArrowController(GlobalNamespace::GameNoteController* nc, NECaches::NoteCache& noteCache);
+    static GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredGameNoteController *>* GetDisappearingArrowController(GlobalNamespace::MirroredGameNoteController* nc, NECaches::NoteCache& noteCache);
 };

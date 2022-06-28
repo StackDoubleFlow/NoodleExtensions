@@ -85,8 +85,6 @@ struct BeatmapObjectAssociatedData {
     float endRotation;
 
     float xOffset;
-    // set to true is the dissolve material is currently in use
-    bool dissolveEnabled;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
 
