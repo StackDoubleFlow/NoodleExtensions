@@ -86,6 +86,14 @@ static void UpdateMirror(Transform* mirroredNoteTransform,
 
     ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = mirrorCache.conditionalMaterialSwitchers;
 
+    if (!getNEConfig().enableMirrorNoteDissolve.GetValue() && followedCutoutEffect) {
+        // rekt
+
+        setMirrorHide(followedNoteCache.cutoutEffect->cutout < 0.8);
+        if (followedNoteCache.cutoutEffect->cutout < 0.8)
+            return;
+    }
+
     if (initMirror && materialSwitchers) {
         for (auto *materialSwitcher: materialSwitchers) {
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
@@ -108,10 +116,7 @@ static void UpdateMirror(Transform* mirroredNoteTransform,
     }
 
     if (followedCutoutEffect) {
-//        // rekt
-//        setMirrorHide(followedNoteCache.cutoutEffect->cutout < 1);
-//        if (followedNoteCache.cutoutEffect->cutout < 1)
-//            return;
+
 
 
         auto cutoutEffect = NECaches::GetCutout(mirroredNoteController, mirrorCache);
