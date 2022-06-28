@@ -105,8 +105,11 @@ static void UpdateMirror(Transform* mirroredNoteTransform,
         materialSwitchers = mirroredNoteController->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
     }
 
+    auto followedCutoutEffectCutout = followedCutoutEffect ? followedCutoutEffect->cutout : 0;
+    auto followedDisappearingArrowControllerCutout = followedDisappearingArrowController ? followedDisappearingArrowController->arrowCutoutEffect->cutout : 0;
+
     bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
-    bool isDissolving = followedCutoutEffect->cutout > 0 || followedDisappearingArrowController->arrowCutoutEffect->cutout > 0;
+    bool isDissolving = followedCutoutEffectCutout > 0 || followedDisappearingArrowControllerCutout > 0;
 
     if (materialSwitchers && mirrorCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
         for (auto *materialSwitcher : materialSwitchers) {
@@ -116,9 +119,6 @@ static void UpdateMirror(Transform* mirroredNoteTransform,
     }
 
     if (followedCutoutEffect) {
-
-
-
         auto cutoutEffect = NECaches::GetCutout(mirroredNoteController, mirrorCache);
         if (cutoutEffect)
             cutoutEffect->SetCutout(followedCutoutEffect->cutout);
