@@ -53,8 +53,9 @@ constexpr std::optional<T> operator*(std::optional<T> const& a, std::optional<T>
 std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(const AnimationObjectData& animationData, std::span<Track *> tracks, float time) {
     PointDefinition *localDefinitePosition = animationData.definitePosition;
 
+    [[maybe_unused]] bool last;
     std::optional<Vector3> pathDefinitePosition =
-            localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time)) : std::nullopt;
+            localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time, last)) : std::nullopt;
 
     if (!pathDefinitePosition && !tracks.empty()) {
         if (tracks.size() == 1) {
@@ -69,7 +70,7 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
         return std::nullopt;
 
     PointDefinition *position = animationData.position;
-    std::optional<Vector3> pathPosition = position ? std::optional(position->Interpolate(time)) : std::nullopt;
+    std::optional<Vector3> pathPosition = position ? std::optional(position->Interpolate(time, last)) : std::nullopt;
     std::optional<Vector3> trackPosition;
 
     std::optional<Vector3> positionOffset;
@@ -109,6 +110,8 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(cons
 ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animationData, std::span<Track *> tracks, float time) {
     ObjectOffset offset;
 
+    [[maybe_unused]] bool last;
+
     PointDefinition *position = animationData.position;
     PointDefinition *rotation = animationData.rotation;
     PointDefinition *scale = animationData.scale;
@@ -117,7 +120,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(const AnimationObjectData& animati
     PointDefinition *dissolveArrow = animationData.dissolveArrow;
     PointDefinition *cuttable = animationData.cuttable;
 #define pathPropPointDef(type, name, interpolate) \
-std::optional<type> path##name = (name) ? std::optional<type>((name)->interpolate(time)) : std::nullopt;
+std::optional<type> path##name = (name) ? std::optional<type>((name)->interpolate(time, last)) : std::nullopt;
 
     pathPropPointDef(Vector3, position, Interpolate)
     pathPropPointDef(Quaternion, rotation, InterpolateQuaternion)
