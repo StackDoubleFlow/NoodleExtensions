@@ -26,45 +26,29 @@ using namespace GlobalNamespace;
 BeatmapCallbacksController* controller;
 static GlobalNamespace::IReadonlyBeatmapData* beatmapData;
 
-
-static CustomJSONData::JSONWrapper* customData(Il2CppObject* obj) {
+float ObjectSortGetTime(BeatmapDataItem const* n) {
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
-    CustomJSONData::JSONWrapper *customDataWrapper = nullptr;
-    float bpm;
-    if (obj->klass == customObstacleDataClass) {
-        auto *obstacleData = (CustomJSONData::CustomObstacleData *) obj;
-        customDataWrapper = obstacleData->customData;
-        bpm = obstacleData->bpm;
-    } else if (obj->klass == customNoteDataClass) {
-        auto *noteData = (CustomJSONData::CustomNoteData *) obj;
-        customDataWrapper = noteData->customData;
-        bpm = noteData->bpm;
+    if (n->klass == customObstacleDataClass) {
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
+        return n->time - obstacle->aheadTimeNoodle;
+    } else if (n->klass == customNoteDataClass) {
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
+        return n->time - note->aheadTimeNoodle;
+    } else {
+        return n->time;
     }
+}
 
-    return customDataWrapper;
+constexpr bool ObjectTimeCompare(BeatmapDataItem const * a, BeatmapDataItem const* b) {
+    return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
 System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
     auto items = beatmapData->GetAllBeatmapItemsCpp();
 
-    std::stable_sort(items.begin(), items.end(), [](auto const& a, auto const& b ) {
-        float aAheadOfTime = a->time;
-        float bAheadOfTime = b->time;
-
-        auto wrapper = customData(a);
-        auto wrapperB = customData(b);
-
-        if (wrapper) {
-            aAheadOfTime = aAheadOfTime - *getAD(wrapper).aheadTime;
-        }
-        if (wrapperB) {
-            bAheadOfTime = bAheadOfTime - *getAD(wrapperB).aheadTime;
-        }
-
-        return aAheadOfTime < bAheadOfTime;
-    });
+    std::stable_sort(items.begin(), items.end(), ObjectTimeCompare);
 
 
     auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
@@ -84,9 +68,9 @@ MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::La
     auto selfController = self->beatmapCallbacksController;
 
     // Reset to avoid overriding non NE maps
-    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData)) {
-        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
-    }
+//    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData)) {
+//        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
+//    }
 
     if (!Hooks::isNoodleHookEnabled()) {
         controller = nullptr;
@@ -95,14 +79,9 @@ MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::La
     }
 
     if (controller != selfController || selfController->beatmapData != beatmapData) {
+        CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Using noodle sorted node");
         controller = selfController;
         beatmapData = selfController->beatmapData;
-
-        // To force CJD to register the callback
-        // if self->prevTime == songTime
-        // early return is called by CJD
-        // TODO: Define this behaviour
-//        BeatmapObjectCallbackController_LateUpdate(self, self->prevSongTime);
 
 
         auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->beatmapData);
@@ -110,17 +89,6 @@ MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::La
 
         auto first = items->get_First();
         CustomJSONData::CustomEventCallbacks::firstNode.emplace(first);
-
-//        auto enumerator = self->callbacksInTimes->GetEnumerator();
-//        while (enumerator.MoveNext()) {
-//            auto keyValuePair = enumerator.get_Current();
-//            auto value = keyValuePair.get_Value();
-//
-//            value->lastProcessedNode = first;
-//        }
-//        enumerator.Dispose();
-
-//        il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(beatmap->allBeatmapData)->items = SortAndOrderList(beatmap);
     }
 
     return BeatmapCallbacksUpdater_LateUpdate(self);

@@ -74,7 +74,6 @@ struct BeatmapObjectAssociatedData {
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     std::optional<float> startNoteLineLayer;
 
-    float* aheadTime;
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
     NEVector::Vector3 moveStartPos;

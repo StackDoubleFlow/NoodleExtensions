@@ -34,30 +34,6 @@
 using namespace GlobalNamespace;
 using namespace System::Collections::Generic;
 
-static Il2CppClass *customObstacleDataClass;
-static Il2CppClass *customNoteDataClass;
-
-float ObjectSortGetTime(BeatmapObjectData const* n) {
-    if (n->klass == customObstacleDataClass) {
-        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
-        return n->time - *getAD(obstacle->customData).aheadTime;
-    } else if (n->klass == customNoteDataClass) {
-        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
-        return n->time - *getAD(note->customData).aheadTime;
-    } else {
-        return n->time;
-    }
-}
-
-constexpr bool ObjectTimeCompare(BeatmapObjectData const * a, BeatmapObjectData const* b) {
-    return ObjectSortGetTime(a) < ObjectSortGetTime(b);
-}
-
-void OrderObjects(List<BeatmapObjectData *> *beatmapObjectsData) {
-    BeatmapObjectData **begin = beatmapObjectsData->items.begin();
-    BeatmapObjectData **end = begin + beatmapObjectsData->get_Count();
-    std::stable_sort(begin, end, ObjectTimeCompare);
-}
 //
 //IReadonlyBeatmapData *ReorderLineData(IReadonlyBeatmapData *beatmapData) {
 //    auto *customBeatmapData = static_cast<CustomJSONData::CustomBeatmapData *>(beatmapData->GetCopy());
@@ -118,7 +94,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
             CustomJSONData::CustomObstacleData *obstacleData = nullptr;
             CustomJSONData::JSONWrapper *customDataWrapper;
             float bpm;
-            float *aheadTime;
+            float* aheadTime;
             if (beatmapObjectData->klass == customObstacleDataClass) {
                 obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
@@ -135,12 +111,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
 
 
             BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-            float njs = ad.objectData.noteJumpMovementSpeed.value_or(NECaches::noteJumpMovementSpeed);
-            auto spawnOffset = ad.objectData.noteJumpStartBeatOffset; // .value_or(NECaches::noteJumpStartBeatOffset);
 
-
-            ad.aheadTime = aheadTime;
-            *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
 
             if (customDataWrapper->value) {
                 rapidjson::Value const &customData = *customDataWrapper->value;
@@ -163,6 +134,11 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
                     ad.animationData = AnimationObjectData();
                 }
                 ad.parsed = true;
+
+                auto njs = ad.objectData.noteJumpMovementSpeed; // .value_or(NECaches::noteJumpMovementSpeed);
+                auto spawnOffset = ad.objectData.noteJumpStartBeatOffset; //.value_or(NECaches::noteJumpStartBeatOffset);
+
+                *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
             }
         }
     };
