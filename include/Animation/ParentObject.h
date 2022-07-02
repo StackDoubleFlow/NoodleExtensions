@@ -12,6 +12,7 @@ DECLARE_CLASS_CODEGEN(TrackParenting, ParentObject, UnityEngine::MonoBehaviour,
     DECLARE_DEFAULT_CTOR();
     DECLARE_SIMPLE_DTOR();
     DECLARE_INSTANCE_METHOD(void, Update);
+    DECLARE_INSTANCE_METHOD(void, OnTransformParentChanged);
 
 private:
     Track *track;
@@ -21,11 +22,13 @@ private:
     NEVector::Quaternion startLocalRot = NEVector::Quaternion::identity();
     NEVector::Vector3 startScale = NEVector::Vector3::one();
     bool worldPositionStays;
+    uint32_t lastCheckedTime;
 public:
     ~ParentObject();
 
     std::unordered_set<Track*> childrenTracks;
 
+    void UpdateData(bool forced);
 
     void ParentToObject(UnityEngine::Transform *transform);
     void HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed);

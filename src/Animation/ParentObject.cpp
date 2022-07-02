@@ -21,13 +21,32 @@ extern BeatmapObjectSpawnController *spawnController;
 
 DEFINE_TYPE(TrackParenting, ParentObject);
 
+// why not?
+template<typename T>
+[[nodiscard]] static constexpr std::optional<T> getPropertyNullableFast(Track *track, const Property &prop, uint32_t lastCheckedTime) {
+    if (prop.lastUpdated < lastCheckedTime) return std::nullopt;
+
+    return getPropertyNullable<T>(track, prop.value);
+}
+
 void ParentObject::Update() {
+    UpdateData(false);
+}
+
+void ParentObject::OnTransformParentChanged() {
+    UpdateData(true);
+}
+
+void ParentObject::UpdateData(bool forced) {
+    if (forced) {
+        lastCheckedTime = 0;
+    }
     float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
 
-    std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
-    std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
-    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
-    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
+    std::optional<NEVector::Quaternion> rotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.rotation, lastCheckedTime);
+    std::optional<NEVector::Vector3> position = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.position, lastCheckedTime);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.localRotation, lastCheckedTime);
+    std::optional<NEVector::Vector3> scale = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.scale, lastCheckedTime);
 
     if (NECaches::LeftHandedMode) {
         rotation = Animation::MirrorQuaternionNullable(rotation);
@@ -58,6 +77,7 @@ void ParentObject::Update() {
     origin->set_localRotation(worldRotationQuaternion);
     origin->set_localPosition(positionVector);
     origin->set_localScale(scaleVector);
+    lastCheckedTime = getCurrentTime();
 }
 
 
