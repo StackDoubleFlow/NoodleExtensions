@@ -14,6 +14,8 @@
 #include "GlobalNamespace/IReadonlyBeatmapData.hpp"
 #include "GlobalNamespace/IBeatmapDataBasicInfo.hpp"
 
+#include "Zenject/DiContainer.hpp"
+
 #include "NECaches.h"
 #include "NEHooks.h"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
@@ -45,6 +47,8 @@ MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, 
     NECaches::numberOfLines = reinterpret_cast<IBeatmapDataBasicInfo*>(self->sceneSetupData->transformedBeatmapData)->get_numberOfLines();
 
     InstallBindings(self);
+
+    NECaches::GameplayCoreContainer = self->get_Container();
 }
 
 void InstallGameplayCoreInstallerHooks(Logger& logger) {

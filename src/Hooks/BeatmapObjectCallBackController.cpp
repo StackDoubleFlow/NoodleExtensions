@@ -20,36 +20,68 @@
 #include "NEHooks.h"
 #include "NELogger.h"
 #include "SharedUpdate.h"
+#include "NECaches.h"
+#include "SpawnDataHelper.h"
 
 using namespace GlobalNamespace;
 
 BeatmapCallbacksController* controller;
 static GlobalNamespace::IReadonlyBeatmapData* beatmapData;
 
-float ObjectSortGetTime(BeatmapDataItem const* n) {
+static BeatmapObjectSpawnController::InitData * initData;
+static GlobalNamespace::BeatmapObjectSpawnMovementData* movementData;
+
+inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData *initData, BeatmapObjectSpawnMovementData *movementData,
+                        std::optional<float> inputNjs, std::optional<float> inputOffset) {
+    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
+}
+
+
+inline float ObjectSortGetTime(BeatmapDataItem* n) {
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
 
+    float* aheadTime;
+    CustomJSONData::JSONWrapper *customDataWrapper;
+
     if (n->klass == customObstacleDataClass) {
-        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData const*>(n);
-        return n->time - obstacle->aheadTimeNoodle;
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData*>(n);
+        aheadTime = &obstacle->aheadTimeNoodle;
+        customDataWrapper = obstacle->customData;
     } else if (n->klass == customNoteDataClass) {
-        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData const*>(n);
-        return n->time - note->aheadTimeNoodle;
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData*>(n);
+        aheadTime = &note->aheadTimeNoodle;
+        customDataWrapper = note->customData;
     } else {
         return n->time;
     }
+
+    auto const& ad = getAD(customDataWrapper);
+
+    auto const njs = ad.objectData.noteJumpMovementSpeed; // .value_or(NECaches::noteJumpMovementSpeed);
+    auto const spawnOffset = ad.objectData.noteJumpStartBeatOffset; //.value_or(NECaches::noteJumpStartBeatOffset);
+
+    *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
+
+    return n->time - *aheadTime;
 }
 
-constexpr bool ObjectTimeCompare(BeatmapDataItem const * a, BeatmapDataItem const* b) {
+constexpr bool ObjectTimeCompare(BeatmapDataItem* a, BeatmapDataItem* b) {
     return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
 System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
+    initData = NECaches::GameplayCoreContainer->Resolve<BeatmapObjectSpawnController::InitData *>();
+    movementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
+    movementData->Init(initData->noteLinesCount, initData->noteJumpMovementSpeed, initData->beatsPerMinute, initData->noteJumpValueType, initData->noteJumpValue, nullptr, NEVector::Vector3::right(), NEVector::Vector3::forward());
+
+
     auto items = beatmapData->GetAllBeatmapItemsCpp();
 
     std::stable_sort(items.begin(), items.end(), ObjectTimeCompare);
 
+    initData = nullptr;
+    movementData = nullptr;
 
     auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
     auto newListPtr = static_cast<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*>(newList);

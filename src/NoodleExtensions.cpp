@@ -3,6 +3,7 @@
 #include "pinkcore/shared/API.hpp"
 #include "NEHooks.h"
 #include "NECaches.h"
+#include "Zenject/DiContainer.hpp"
 
 
 float NECaches::noteJumpMovementSpeed;
@@ -12,6 +13,7 @@ float NECaches::beatsPerMinute;
 float NECaches::noteJumpValue;
 GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType NECaches::noteJumpValueType;
 bool NECaches::LeftHandedMode;
+SafePtr<Zenject::DiContainer> NECaches::GameplayCoreContainer;
 
 void InstallAndRegisterAll() {
     Logger& logger = NELogger::GetLogger();

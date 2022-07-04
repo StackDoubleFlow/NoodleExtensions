@@ -2,6 +2,8 @@
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
 #include "GlobalNamespace/PlayerHeightDetector.hpp"
 #include "sombrero/shared/ColorUtils.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
+#include "Zenject/DiContainer.hpp"
 
 #pragma once
 
@@ -28,6 +30,7 @@ static float noteJumpMovementSpeed;
 static float noteJumpStartBeatOffset;
 static float beatsPerMinute;
 static float numberOfLines;
+static SafePtr<Zenject::DiContainer> GameplayCoreContainer;
 static GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType noteJumpValueType;
 static float noteJumpValue;
 
