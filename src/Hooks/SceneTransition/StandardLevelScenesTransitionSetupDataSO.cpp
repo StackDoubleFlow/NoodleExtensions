@@ -43,6 +43,8 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
                                      customBeatmapDataCustom, playerSpecificSettings);
     } else {
         NELogger::GetLogger().debug("CustomDifficultyBeatmap not casted");
+        SceneTransitionHelper::Patch(nullptr,
+                                     nullptr, playerSpecificSettings);
     }
 }
 

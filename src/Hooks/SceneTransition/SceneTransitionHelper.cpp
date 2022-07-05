@@ -38,8 +38,7 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap *difficultyBeatmap, CustomJ
     bool noodleRequirement = false;
     bool meRequirement = false;
 
-    CRASH_UNLESS(customBeatmapDataCustom);
-    if (customBeatmapDataCustom->levelCustomData) {
+    if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
         auto dynData = customBeatmapDataCustom->levelCustomData;
 
         if (dynData) {
