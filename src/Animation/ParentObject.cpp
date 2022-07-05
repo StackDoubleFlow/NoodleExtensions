@@ -23,10 +23,26 @@ DEFINE_TYPE(TrackParenting, ParentObject);
 
 // why not?
 template<typename T>
-[[nodiscard]] static constexpr std::optional<T> getPropertyNullableFast(Track *track, const Property &prop, uint32_t lastCheckedTime) {
-    if (prop.lastUpdated < lastCheckedTime) return std::nullopt;
+static constexpr std::optional<T> getPropertyNullableFast(Track* track, const Property& prop, uint32_t lastCheckedTime) {
+    if (lastCheckedTime != 0 && prop.lastUpdated != 0 && prop.lastUpdated < lastCheckedTime) return std::nullopt;
 
-    return getPropertyNullable<T>(track, prop.value);
+    auto ret = Animation::getPropertyNullable<T>(track, prop.value);
+
+    if (NECaches::LeftHandedMode) {
+        if constexpr(std::is_same_v<T, NEVector::Vector3>) {
+            return Animation::MirrorVectorNullable(ret);
+        }
+
+        if constexpr(std::is_same_v<T, NEVector::Quaternion>) {
+            return Animation::MirrorQuaternionNullable(ret);
+        }
+    }
+
+    return ret;
+}
+
+void ParentObject::OnEnable() {
+    OnTransformParentChanged();
 }
 
 void ParentObject::Update() {
@@ -37,7 +53,70 @@ void ParentObject::OnTransformParentChanged() {
     UpdateData(true);
 }
 
-void ParentObject::UpdateData(bool forced) {
+void ParentObject::UpdateData(bool force) {
+    if (!track) return;
+
+    if (track->v2) {
+        UpdateDataOld(force);
+        return;
+    }
+    if (force) {
+        lastCheckedTime = 0;
+    }
+
+    float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+
+    const auto& properties = track->properties;
+    auto const rotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.rotation, lastCheckedTime);
+    auto const localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.localRotation, lastCheckedTime);
+    auto const position = getPropertyNullableFast<NEVector::Vector3>(track, properties.position, lastCheckedTime);
+    const auto localPosition = getPropertyNullableFast<NEVector::Vector3>(track, properties.localPosition, lastCheckedTime);
+    const auto scale = getPropertyNullableFast<NEVector::Vector3>(track, properties.scale, lastCheckedTime);
+
+
+    auto transform = origin;
+
+    if (rotation)
+    {
+        transform->set_rotation(rotation.value());
+    }
+    else if (localRotation)
+    {
+        transform->set_localRotation(localRotation.value());
+    }
+
+
+    if (position)
+    {
+        Sombrero::FastVector3 positionValue = position.value();
+
+        if (track->v2) {
+            positionValue *= noteLinesDistance;
+        }
+
+        transform->set_position(positionValue);
+
+    }
+
+    else if (localPosition)
+    {
+        NEVector::Vector3 localPositionValue = localPosition.value();
+        if (track->v2) {
+            localPositionValue *= noteLinesDistance;
+        }
+
+        transform->set_localPosition(localPositionValue);
+    }
+
+    if (scale)
+    {
+        transform->set_localScale(scale.value());
+    }
+
+    lastCheckedTime = getCurrentTime();
+}
+
+void ParentObject::UpdateDataOld(bool forced) {
     if (forced) {
         lastCheckedTime = 0;
     }
@@ -48,11 +127,6 @@ void ParentObject::UpdateData(bool forced) {
     std::optional<NEVector::Quaternion> localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.localRotation, lastCheckedTime);
     std::optional<NEVector::Vector3> scale = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.scale, lastCheckedTime);
 
-    if (NECaches::LeftHandedMode) {
-        rotation = Animation::MirrorQuaternionNullable(rotation);
-        localRotation = Animation::MirrorQuaternionNullable(localRotation);
-        position = Animation::MirrorVectorNullable(position);
-    }
 
     NEVector::Quaternion worldRotationQuaternion = startRot;
     NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
@@ -74,9 +148,16 @@ void ParentObject::UpdateData(bool forced) {
         scaleVector = startScale * scale.value();
     }
 
-    origin->set_localRotation(worldRotationQuaternion);
-    origin->set_localPosition(positionVector);
-    origin->set_localScale(scaleVector);
+
+    if (position || rotation) {
+        origin->set_localPosition(positionVector);
+    }
+    if (localRotation || rotation || position) {
+        origin->set_localRotation(worldRotationQuaternion);
+    }
+    if (scale) {
+        origin->set_localScale(scaleVector);
+    }
     lastCheckedTime = getCurrentTime();
 }
 
@@ -109,22 +190,40 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
     Transform *transform = get_transformMB(instance);
-    if (parentTrackEventData.pos.has_value()) {
-        instance->startPos = *parentTrackEventData.pos;
-        transform->set_localPosition(
-                instance->startPos * NECaches::get_noteLinesDistanceFast());
-    }
+    if (instance->track->v2) {
+        if (parentTrackEventData.pos.has_value()) {
+            instance->startPos = *parentTrackEventData.pos;
+            transform->set_localPosition(
+                    instance->startPos * NECaches::get_noteLinesDistanceFast());
+        }
 
-    if (parentTrackEventData.rot.has_value()) {
-        instance->startRot = *parentTrackEventData.rot;
-        instance->startLocalRot = instance->startRot;
-        transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
-        transform->set_localRotation(instance->startRot);
-    }
+        if (parentTrackEventData.rot.has_value()) {
+            instance->startRot = *parentTrackEventData.rot;
+            instance->startLocalRot = instance->startRot;
+            transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
+            transform->set_localRotation(instance->startRot);
+        }
 
-    if (parentTrackEventData.localRot.has_value()) {
-        instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
-        transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
+        if (parentTrackEventData.localRot.has_value()) {
+            instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
+            transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
+        } else {
+            if (parentTrackEventData.pos.has_value()) {
+                transform->set_position(instance->startPos);
+            } else if (parentTrackEventData.localPos.has_value()) {
+                transform->set_localPosition(instance->startPos);
+            }
+
+            if (parentTrackEventData.rot.has_value()) {
+                transform->set_localRotation(instance->startRot);
+            } else if (parentTrackEventData.localRot.has_value()) {
+                transform->set_localRotation(instance->startLocalRot);
+            }
+
+            if (parentTrackEventData.scale.has_value()) {
+                transform->set_localScale(instance->startScale);
+            }
+        }
     }
 
     if (parentTrackEventData.scale.has_value()) {

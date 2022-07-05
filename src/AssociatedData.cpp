@@ -110,6 +110,7 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, Be
     }
 
     pos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::POSITION);
+    localPos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_LOCAL_POSITION : NoodleExtensions::Constants::LOCAL_POSITION);
     rot = NEJSON::ReadOptionalRotation(eventData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::ROTATION);
     localRot = NEJSON::ReadOptionalRotation(eventData, v2 ? NoodleExtensions::Constants::V2_LOCAL_ROTATION : NoodleExtensions::Constants::LOCAL_ROTATION);
     scale = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::SCALE);

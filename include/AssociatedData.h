@@ -110,6 +110,7 @@ struct ParentTrackEventData {
 
     Track* parentTrack;
     std::optional<NEVector::Vector3> pos;
+    std::optional<NEVector::Vector3> localPos;
     std::optional<NEVector::Quaternion> rot;
     std::optional<NEVector::Quaternion> localRot;
     std::optional<NEVector::Vector3> scale;
