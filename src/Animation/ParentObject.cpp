@@ -122,10 +122,10 @@ void ParentObject::UpdateDataOld(bool forced) {
     }
     float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
 
-    std::optional<NEVector::Quaternion> rotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.rotation, lastCheckedTime);
-    std::optional<NEVector::Vector3> position = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.position, lastCheckedTime);
-    std::optional<NEVector::Quaternion> localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.localRotation, lastCheckedTime);
-    std::optional<NEVector::Vector3> scale = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.scale, lastCheckedTime);
+    std::optional<NEVector::Quaternion> rotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.rotation, 0);
+    std::optional<NEVector::Vector3> position = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.position, 0);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.localRotation, 0);
+    std::optional<NEVector::Vector3> scale = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.scale, 0);
 
 
     NEVector::Quaternion worldRotationQuaternion = startRot;
@@ -149,15 +149,11 @@ void ParentObject::UpdateDataOld(bool forced) {
     }
 
 
-    if (position || rotation) {
-        origin->set_localPosition(positionVector);
-    }
-    if (localRotation || rotation || position) {
-        origin->set_localRotation(worldRotationQuaternion);
-    }
-    if (scale) {
-        origin->set_localScale(scaleVector);
-    }
+
+    origin->set_localPosition(positionVector);
+    origin->set_localRotation(worldRotationQuaternion);
+    origin->set_localScale(scaleVector);
+
     lastCheckedTime = getCurrentTime();
 }
 
