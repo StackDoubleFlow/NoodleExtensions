@@ -7,6 +7,25 @@
 #include "AssociatedData.h"
 
 
+// why not?
+template<typename T>
+inline constexpr std::optional<T> getPropertyNullableFast(Track* track, const Property& prop, uint64_t lastCheckedTime) {
+    if (lastCheckedTime != 0 && prop.lastUpdated != 0 && prop.lastUpdated < lastCheckedTime) return std::nullopt;
+
+    auto ret = Animation::getPropertyNullable<T>(track, prop.value);
+
+    if (NECaches::LeftHandedMode) {
+        if constexpr(std::is_same_v<T, NEVector::Vector3>) {
+            return Animation::MirrorVectorNullable(ret);
+        }
+
+        if constexpr(std::is_same_v<T, NEVector::Quaternion>) {
+            return Animation::MirrorQuaternionNullable(ret);
+        }
+    }
+
+    return ret;
+}
 
 namespace AnimationHelper {
 struct ObjectOffset {

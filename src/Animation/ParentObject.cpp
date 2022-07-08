@@ -21,25 +21,7 @@ extern BeatmapObjectSpawnController *spawnController;
 
 DEFINE_TYPE(TrackParenting, ParentObject);
 
-// why not?
-template<typename T>
-static constexpr std::optional<T> getPropertyNullableFast(Track* track, const Property& prop, uint32_t lastCheckedTime) {
-    if (lastCheckedTime != 0 && prop.lastUpdated != 0 && prop.lastUpdated < lastCheckedTime) return std::nullopt;
 
-    auto ret = Animation::getPropertyNullable<T>(track, prop.value);
-
-    if (NECaches::LeftHandedMode) {
-        if constexpr(std::is_same_v<T, NEVector::Vector3>) {
-            return Animation::MirrorVectorNullable(ret);
-        }
-
-        if constexpr(std::is_same_v<T, NEVector::Quaternion>) {
-            return Animation::MirrorQuaternionNullable(ret);
-        }
-    }
-
-    return ret;
-}
 
 void ParentObject::OnEnable() {
     OnTransformParentChanged();
@@ -88,24 +70,9 @@ void ParentObject::UpdateData(bool force) {
 
     if (position)
     {
-        Sombrero::FastVector3 positionValue = position.value();
-
-        if (track->v2) {
-            positionValue *= noteLinesDistance;
-        }
-
-        transform->set_position(positionValue);
-
-    }
-
-    else if (localPosition)
-    {
-        NEVector::Vector3 localPositionValue = localPosition.value();
-        if (track->v2) {
-            localPositionValue *= noteLinesDistance;
-        }
-
-        transform->set_localPosition(localPositionValue);
+        transform->set_position(position.value());
+    } else if (localPosition) {
+        transform->set_localPosition(localPosition.value());
     }
 
     if (scale)

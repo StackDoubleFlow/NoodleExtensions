@@ -44,6 +44,7 @@ void PlayerTrack::AssignTrack(Track *track) {
 
         startLocalRot = origin->get_localRotation();
         startPos = origin->get_localPosition();
+        instance->UpdateData(true);
     }
 
     PlayerTrack::track = track;
@@ -67,42 +68,93 @@ void PlayerTrack::OnDestroy() {
     track = nullptr;
 }
 
+void PlayerTrack::UpdateDataOld() {
+    float noteLinesDistance = 0.6f; //spawnController->NECaches::get_noteLinesDistanceFast();
+
+    std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track,
+                                                                                             track->properties.rotation);
+    std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track,
+                                                                                       track->properties.position);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track,
+                                                                                                  track->properties.localRotation);
+
+    if (NECaches::LeftHandedMode) {
+        rotation = Animation::MirrorQuaternionNullable(rotation);
+        localRotation = Animation::MirrorQuaternionNullable(localRotation);
+        position = Animation::MirrorVectorNullable(position);
+    }
+
+    NEVector::Quaternion worldRotationQuaternion = startRot;
+    NEVector::Vector3 positionVector = startPos;
+    if (rotation.has_value() || position.has_value()) {
+        NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::identity());
+        worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
+        NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::zero());
+        positionVector = worldRotationQuaternion * ((positionOffset * noteLinesDistance) + startPos);
+    }
+
+    worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
+    if (localRotation.has_value()) {
+        worldRotationQuaternion = worldRotationQuaternion * *localRotation;
+    }
+
+
+    origin->set_localRotation(worldRotationQuaternion);
+    origin->set_localPosition(positionVector);
+}
+
 void PlayerTrack::Update() {
+    UpdateData(false);
+}
+
+void PlayerTrack::UpdateData(bool force) {
+
     bool paused = false;
     if (pauseController) {
         paused = pauseController->paused;
     }
 
-    if (!paused) {
-        float noteLinesDistance = 0.6f; //spawnController->NECaches::get_noteLinesDistanceFast();
+    if (paused) return;
+    if (!track) return;
 
-        std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
-        std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
-        std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
-
-        if (NECaches::LeftHandedMode) {
-            rotation = Animation::MirrorQuaternionNullable(rotation);
-            localRotation = Animation::MirrorQuaternionNullable(localRotation);
-            position = Animation::MirrorVectorNullable(position);
-        }
-
-        NEVector::Quaternion worldRotationQuaternion = startRot;
-        NEVector::Vector3 positionVector = startPos;
-        if (rotation.has_value() || position.has_value()) {
-            NEVector::Quaternion rotationOffset = rotation.value_or(NEVector::Quaternion::identity());
-            worldRotationQuaternion = worldRotationQuaternion * rotationOffset;
-            NEVector::Vector3 positionOffset = position.value_or(NEVector::Vector3::zero());
-            positionVector = worldRotationQuaternion * ((positionOffset * noteLinesDistance) + startPos);
-        }
-
-        worldRotationQuaternion = worldRotationQuaternion * startLocalRot;
-        if (localRotation.has_value()) {
-            worldRotationQuaternion = worldRotationQuaternion * *localRotation;
-        }
-
-
-        origin->set_localRotation(worldRotationQuaternion);
-        origin->set_localPosition(positionVector);
-
+    if (track->v2) {
+        return UpdateDataOld();
     }
+
+    if (force) {
+        lastCheckedTime = 0;
+    }
+
+    float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+
+    const auto &properties = track->properties;
+    auto const rotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.rotation,
+                                                                        lastCheckedTime);
+    auto const localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.localRotation,
+                                                                             lastCheckedTime);
+    auto const position = getPropertyNullableFast<NEVector::Vector3>(track, properties.position, lastCheckedTime);
+    const auto localPosition = getPropertyNullableFast<NEVector::Vector3>(track, properties.localPosition,
+                                                                          lastCheckedTime);
+    const auto scale = getPropertyNullableFast<NEVector::Vector3>(track, properties.scale, lastCheckedTime);
+
+
+    auto transform = origin;
+
+    if (localRotation) {
+        transform->set_localRotation(localRotation.value());
+    } else if (rotation) {
+        transform->set_rotation(rotation.value());
+    }
+
+    if (localPosition) {
+        transform->set_localPosition(localPosition.value());
+    }else if (position) {
+        transform->set_position(position.value());
+    }
+
+    if (scale) {
+        transform->set_localScale(scale.value());
+    }
+
+    lastCheckedTime = getCurrentTime();
 }
