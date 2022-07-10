@@ -67,7 +67,7 @@ struct ObjectCustomData {
 };
 
 struct BeatmapObjectAssociatedData {
-    BeatmapObjectAssociatedData() {}
+    BeatmapObjectAssociatedData() = default;
     BeatmapObjectAssociatedData(BeatmapObjectAssociatedData&&) = default;
     BeatmapObjectAssociatedData(BeatmapObjectAssociatedData const&) = default;
 
@@ -86,6 +86,7 @@ struct BeatmapObjectAssociatedData {
     float xOffset;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
+    bool mirror = true;
 
     // flip for notes
     std::optional<NEVector::Vector2> flip;

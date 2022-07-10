@@ -154,7 +154,11 @@ MAKE_HOOK_FIND_INSTANCE(name##_Mirror, classof(MirroredNoteController_1<generic*
         return; \
     auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote); \
     auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);\
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);          \
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);                                                                                                   \
+    if (!ad.mirror) {              \
+        self->Hide(true);                           \
+        return;                               \
+    }                               \
     AddToTrack(customNoteData, self->get_gameObject());                                                                                                                    \
 }
 

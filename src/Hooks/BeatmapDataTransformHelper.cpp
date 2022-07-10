@@ -79,6 +79,13 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
 
     auto v2 = beatmap->v2orEarlier;
 
+    bool mirror = true;
+
+    if (beatmap->customData->value) {
+        rapidjson::Value const& data = *beatmap->customData->value;
+        mirror = NEJSON::ReadOptionalBool(data, v2 ? "_questNoteMirror" : "questNoteMirror").value_or(true);
+    }
+
     auto notes = beatmap->GetBeatmapItemsCpp<NoteData*>();
     auto obstacles = beatmap->GetBeatmapItemsCpp<ObstacleData*>();
 
@@ -101,6 +108,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
 
             BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
 
+            ad.mirror = mirror;
 
             if (customDataWrapper->value) {
                 rapidjson::Value const &customData = *customDataWrapper->value;
