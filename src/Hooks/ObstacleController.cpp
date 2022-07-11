@@ -53,32 +53,30 @@ void NECaches::ClearObstacleCaches() {
     mapLoaded = false;
 }
 
-float obstacleTimeAdjust(float original, std::span<Track*> tracks, float move1Duration, float finishMovementTime) {
-    if (original > move1Duration && !tracks.empty()) {
-        Track *obstacleTrack = nullptr;
+float obstacleTimeAdjust(float original, std::span<Track*> tracks) {
+    if (tracks.empty()) return original;
 
-        if (tracks.size() > 1) {
-            auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track *track) {
-                return track->properties.time.value.has_value();
-            });
+    Track *obstacleTrack = nullptr;
 
-            if (trackIt != tracks.end()) {
-                obstacleTrack = *trackIt;
-            }
-        } else {
-            obstacleTrack = tracks.front();
+    if (tracks.size() > 1) {
+        auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track *track) {
+            return track->properties.time.value.has_value();
+        });
+
+        if (trackIt != tracks.end()) {
+            obstacleTrack = *trackIt;
         }
-
-        if (obstacleTrack) {
-            Property &timeProperty = obstacleTrack->properties.time;
-            if (timeProperty.value) {
-                float time = timeProperty.value->linear;
-                return (time * (finishMovementTime - move1Duration)) + move1Duration;
-            }
-        }
+    } else {
+        obstacleTrack = tracks.front();
     }
 
-    return original;
+    if (!obstacleTrack) return original;
+    Property &timeProperty = obstacleTrack->properties.time;
+    if (!timeProperty.value) return original;
+
+    float time = timeProperty.value->linear;
+    return time;
+
 }
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
@@ -297,8 +295,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float const elapsedTime = songTime - self->startTimeOffset;
-    float const normalTime =
-        (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
+    float const obstacleOriginalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
+    float const normalTime = obstacleTimeAdjust(obstacleOriginalTime, tracks);
 
     AnimationHelper::ObjectOffset offset =
         AnimationHelper::GetObjectOffset(ad.animationData, tracks, normalTime);
@@ -397,9 +395,9 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     // do transpile only if needed
-    float const obstacleTime = obstacleTimeAdjust(elapsedTime, tracks, self->move1Duration, self->finishMovementTime);
-    if (obstacleTime != elapsedTime) {
-        ObstacleController_ManualUpdateTranspile(self, obstacleTime);
+
+    if (normalTime != obstacleOriginalTime) {
+        ObstacleController_ManualUpdateTranspile(self, normalTime);
         return;
     }
 
