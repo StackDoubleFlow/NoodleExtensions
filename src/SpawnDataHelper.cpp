@@ -53,7 +53,12 @@ constexpr float Orig_LineYPosForLineLayer(GlobalNamespace::NoteLineLayer lineLay
 }
 
 float
-SpawnDataHelper::LineYPosForLineLayer(float height) {
-    return 0.25f
-           + (height * NECaches::get_noteLinesDistanceFast()); // offset by 0.25
+SpawnDataHelper::LineYPosForLineLayer(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> height,
+                                      NoteLineLayer noteLineLayer) {
+    if (height) {
+        return  0.25f
+                + (height.value() * NECaches::get_noteLinesDistanceFast()); // offset by 0.25
+    }
+
+    return Orig_LineYPosForLineLayer(noteLineLayer);
 }
