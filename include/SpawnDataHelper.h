@@ -82,50 +82,29 @@ void GetNoteJumpValues(GlobalNamespace::BeatmapObjectSpawnController::InitData *
                        NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos,
                        NEVector::Vector3 &localJumpEndPos);
 
-float LineYPosForLineLayer(float height);
+float LineYPosForLineLayer(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> height,
+                           GlobalNamespace::NoteLineLayer noteLineLayer);
 
-    constexpr NEVector::Vector2 Get2DNoteOffset(float lineIndex, int noteLinesCount, float lineLayer)
-    {
-        float distance = -(noteLinesCount - 1.0f) * 0.5f;
-        return {(distance + lineIndex) * NECaches::get_noteLinesDistanceFast(), LineYPosForLineLayer(lineLayer)};
-    }
-
-    constexpr NEVector::Vector3 GetNoteOffset(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, float lineIndex, float lineLayer)
-    {
-        NEVector::Vector2 coords = Get2DNoteOffset(lineIndex, spawnMovementData->noteLinesCount, lineLayer);
-        return (spawnMovementData->rightVec * coords.x)
-        + NEVector::Vector3(0, coords.y, 0);
-    }
-
-    constexpr UnityEngine::Vector3 GetObstacleOffset(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, float lineIndex, float lineLayer)
-    {
-        UnityEngine::Vector3 result = GetNoteOffset(spawnMovementData, lineIndex, lineLayer);
-        result.y += -0.15f;
-        return result;
-    }
-
-    constexpr void NoteJumpGravityForLineLayer(
-            GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData,
-            float lineLayer,
-            float startLineLayer,
-            float jumpDistance,
-            std::optional<float> njs,
-    float& gravity,
-            float& noGravity)
+inline NEVector::Vector3
+GetNoteOffset(std::optional<float> startRow, std::optional<float> startHeight, int noteLineIndex,
+              GlobalNamespace::NoteLineLayer noteLineLayer,
+              GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData)
 {
-    float lineYPos = LineYPosForLineLayer(lineLayer);
-    float startLayerLineYPos = LineYPosForLineLayer(startLineLayer);
+    using namespace GlobalNamespace;
 
-    // HighestJumpPosYForLineLayer
-    // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
-    float highestJump = (0.875f * lineYPos) + 0.639583f + spawnMovementData->get_jumpOffsetY();
+    float distance = (-(spawnMovementData->noteLinesCount - 1.0f) * 0.5f) + (startRow.has_value() ? spawnMovementData->noteLinesCount / 2.0f : 0.0f);
+    float lineIndex = startRow.value_or(noteLineIndex);
+    distance = (distance + lineIndex) * NECaches::get_noteLinesDistanceFast();
 
-    // NoteJumpGravityForLineLayer
-    float num = jumpDistance / (njs.value_or(spawnMovementData->noteJumpMovementSpeed)) * 0.5f;
-    num = 2 / (num * num);
-    auto GetJumpGravity = [&](float gravityLineYPos) constexpr { return(highestJump - gravityLineYPos) * num; };
-    gravity = GetJumpGravity(startLayerLineYPos);
-    noGravity = GetJumpGravity(lineYPos);
+    return (NEVector::Vector3(spawnMovementData->rightVec) * distance) + NEVector::Vector3(0, LineYPosForLineLayer(
+            spawnMovementData, startHeight, noteLineLayer), 0);
+}
+
+inline UnityEngine::Vector3 GetObstacleOffset(GlobalNamespace::BeatmapObjectSpawnMovementData *spawnMovementData, int localLineIndex, GlobalNamespace::NoteLineLayer noteLineLayer, std::optional<float> startX, std::optional<float> startY)
+{
+    UnityEngine::Vector3 result = GetNoteOffset(startX, startY, localLineIndex, noteLineLayer, spawnMovementData);
+    result.y -= 0.15f;
+    return result;
 }
 
 }
