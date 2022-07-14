@@ -53,13 +53,13 @@ void NECaches::ClearObstacleCaches() {
     mapLoaded = false;
 }
 
-float obstacleTimeAdjust(float original, std::span<Track*> tracks) {
+float obstacleTimeAdjust(float original, std::span<Track const*> tracks) {
     if (tracks.empty()) return original;
 
-    Track *obstacleTrack = nullptr;
+    Track const* obstacleTrack = nullptr;
 
     if (tracks.size() > 1) {
-        auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track *track) {
+        auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track const* track) {
             return track->properties.time.value.has_value();
         });
 
@@ -71,7 +71,7 @@ float obstacleTimeAdjust(float original, std::span<Track*> tracks) {
     }
 
     if (!obstacleTrack) return original;
-    Property &timeProperty = obstacleTrack->properties.time;
+    Property const& timeProperty = obstacleTrack->properties.time;
     if (!timeProperty.value) return original;
 
     float time = timeProperty.value->linear;
@@ -161,8 +161,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     if (ad.objectData.rotation)
         rotation = *ad.objectData.rotation;
-    else
-        rotation = Quaternion_Euler(0, worldRotation, 0);
 
     self->worldRotation = rotation;
     self->inverseWorldRotation = Quaternion_Inverse(rotation);
