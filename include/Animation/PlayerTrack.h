@@ -32,4 +32,5 @@ private:
     static inline GlobalNamespace::PauseController *pauseController;
 
     static void OnDidPauseEvent();
+    static void OnDidResumeEvent();
 )

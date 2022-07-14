@@ -2,6 +2,8 @@
 #include "Animation/AnimationHelper.h"
 #include "UnityEngine/GameObject.hpp"
 #include "GlobalNamespace/PauseController.hpp"
+#include "GlobalNamespace/PauseMenuManager.hpp"
+#include "GlobalNamespace/MultiplayerLocalActivePlayerInGameMenuController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "System/Action.hpp"
@@ -17,6 +19,7 @@ using namespace Animation;
 extern BeatmapObjectSpawnController *spawnController;
 
 static Action *didPauseEventAction;
+static Action *didResumeEventAction;
 
 DEFINE_TYPE(TrackParenting, PlayerTrack);
 
@@ -28,6 +31,8 @@ void PlayerTrack::ctor() {
 }
 
 void PlayerTrack::AssignTrack(Track *track) {
+    PlayerTrack::track = track;
+
     if (!instance) {
         GameObject *gameObject = GameObject::Find("LocalPlayerGameCore");
         GameObject *noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
@@ -37,24 +42,37 @@ void PlayerTrack::AssignTrack(Track *track) {
 
         instance = noodleObject->AddComponent<PlayerTrack*>();
         pauseController = Object::FindObjectOfType<PauseController*>();
+
         if (pauseController) {
             didPauseEventAction = il2cpp_utils::MakeAction<Action*>(PlayerTrack::OnDidPauseEvent);
             pauseController->add_didPauseEvent(didPauseEventAction);
+            didResumeEventAction = il2cpp_utils::MakeAction<Action*>(PlayerTrack::OnDidResumeEvent);
+            pauseController->add_didResumeEvent(didResumeEventAction);
+        }
+
+        MonoBehaviour* pauseMenuManager = pauseController->pauseMenuManager ?: (MonoBehaviour*) NECaches::GameplayCoreContainer->Resolve<MultiplayerLocalActivePlayerInGameMenuController*>();
+        if (pauseMenuManager)
+        {
+            pauseMenuManager->get_transform()->SetParent(origin, false);
         }
 
         startLocalRot = origin->get_localRotation();
         startPos = origin->get_localPosition();
         instance->UpdateData(true);
     }
-
-    PlayerTrack::track = track;
 }
 
 void PlayerTrack::OnDidPauseEvent() {
     NELogger::GetLogger().debug("PlayerTrack::OnDidPauseEvent");
     IL2CPP_CATCH_HANDLER(
-    origin->set_localRotation(startLocalRot);
-    origin->set_localPosition(startPos);
+            instance->set_enabled(false);
+    )
+}
+
+void PlayerTrack::OnDidResumeEvent() {
+    NELogger::GetLogger().debug("PlayerTrack::OnDidResumeEvent");
+    IL2CPP_CATCH_HANDLER(
+            instance->set_enabled(true);
     )
 }
 
@@ -108,13 +126,6 @@ void PlayerTrack::Update() {
 }
 
 void PlayerTrack::UpdateData(bool force) {
-
-    bool paused = false;
-    if (pauseController) {
-        paused = pauseController->paused;
-    }
-
-    if (paused) return;
     if (!track) return;
 
     if (track->v2) {
