@@ -1,4 +1,5 @@
 # include some defines automatically made by qpm
+set(ANDROID_USE_LEGACY_TOOLCHAIN_FILE OFF)
 include(qpm_defines.cmake)
 
 cmake_minimum_required(VERSION 3.21)

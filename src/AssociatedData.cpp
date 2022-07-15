@@ -43,7 +43,7 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData,
     startY = y;
     // TODO: Mirror X
 
-    rotation = NEJSON::ReadOptionalRotation(customData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::ROTATION);
+    rotation = NEJSON::ReadOptionalRotation(customData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::WORLD_ROTATION);
     localRotation = NEJSON::ReadOptionalRotation(customData, v2 ? NoodleExtensions::Constants::V2_LOCAL_ROTATION : NoodleExtensions::Constants::LOCAL_ROTATION);
     noteJumpMovementSpeed = NEJSON::ReadOptionalFloat(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_JUMP_SPEED : NoodleExtensions::Constants::NOTE_JUMP_SPEED);
     noteJumpStartBeatOffset = NEJSON::ReadOptionalFloat(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_SPAWN_OFFSET : NoodleExtensions::Constants::NOTE_SPAWN_OFFSET);
@@ -109,9 +109,9 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, Be
         childrenTracks.emplace_back(child);
     }
 
-    pos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::POSITION);
+    pos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::OFFSET_POSITION);
     localPos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_LOCAL_POSITION : NoodleExtensions::Constants::LOCAL_POSITION);
-    rot = NEJSON::ReadOptionalRotation(eventData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::ROTATION);
+    rot = NEJSON::ReadOptionalRotation(eventData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::WORLD_ROTATION);
     localRot = NEJSON::ReadOptionalRotation(eventData, v2 ? NoodleExtensions::Constants::V2_LOCAL_ROTATION : NoodleExtensions::Constants::LOCAL_ROTATION);
     scale = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::SCALE);
 
