@@ -9,6 +9,8 @@
 #include "System/Action.hpp"
 #include "NECaches.h"
 
+#include "custom-types/shared/delegate.hpp"
+
 using namespace TrackParenting;
 using namespace UnityEngine;
 using namespace GlobalNamespace;
@@ -44,9 +46,11 @@ void PlayerTrack::AssignTrack(Track *track) {
         pauseController = Object::FindObjectOfType<PauseController*>();
 
         if (pauseController) {
-            didPauseEventAction = il2cpp_utils::MakeAction<Action*>(PlayerTrack::OnDidPauseEvent);
+            std::function<void()> pause = [](){PlayerTrack::OnDidPauseEvent();};
+            std::function<void()> resume = [](){PlayerTrack::OnDidResumeEvent();};
+            didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
             pauseController->add_didPauseEvent(didPauseEventAction);
-            didResumeEventAction = il2cpp_utils::MakeAction<Action*>(PlayerTrack::OnDidResumeEvent);
+            didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
             pauseController->add_didResumeEvent(didResumeEventAction);
         }
 

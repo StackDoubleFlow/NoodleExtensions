@@ -53,7 +53,7 @@ void NECaches::ClearObstacleCaches() {
     mapLoaded = false;
 }
 
-float obstacleTimeAdjust(float original, std::span<Track const*> tracks) {
+float obstacleTimeAdjust(float original, std::span<Track*> tracks) {
     if (tracks.empty()) return original;
 
     Track const* obstacleTrack = nullptr;
