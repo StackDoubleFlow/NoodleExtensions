@@ -49,7 +49,7 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
     {
         return;
     }
-    if (noteController->get_hide())
+    if (noteController->hidden)
     {
         return;
     }
@@ -68,7 +68,7 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
     NEVector::Quaternion worldRotation(GetNoteControllerRotation(transform));
 
     beatEffect->get_transform()->SetPositionAndRotation(
-            NEVector::Quaternion(noteController->get_worldRotation()) * jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
+            jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
             NEVector::Quaternion::identity());
 
 

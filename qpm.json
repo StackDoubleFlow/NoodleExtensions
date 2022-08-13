@@ -22,7 +22,7 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.20.0",
+      "versionRange": "^0.25.0",
       "additionalData": {}
     },
     {
@@ -34,24 +34,24 @@
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.16.0",
+      "versionRange": "^0.17.0",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "<=0.13.2",
+      "versionRange": "^0.16.0",
       "additionalData": {
         "includeQmod": false
       }
     },
     {
       "id": "config-utils",
-      "versionRange": "^0.7.0",
+      "versionRange": "^0.8.0",
       "additionalData": {}
     },
     {
       "id": "tracks",
-      "versionRange": "^0.5.0",
+      "versionRange": "^0.6.0",
       "additionalData": {}
     },
     {
@@ -81,15 +81,18 @@
       }
     },
     {
-      "id": "songloader",
-      "versionRange": "^0.8.0",
-      "additionalData": {
-        "includeQmod": false
-      }
-    },
-    {
       "id": "cpp-semver",
       "versionRange": "^0.1.1",
+      "additionalData": {}
+    },
+    {
+      "id": "paper",
+      "versionRange": "^1.0.5",
+      "additionalData": {}
+    },
+    {
+      "id": "songloader",
+      "versionRange": "^0.10.0",
       "additionalData": {}
     }
   ],

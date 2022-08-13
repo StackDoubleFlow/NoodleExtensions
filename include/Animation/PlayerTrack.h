@@ -13,6 +13,12 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
     DECLARE_CTOR(ctor);
     DECLARE_INSTANCE_METHOD(void, Update);
     DECLARE_INSTANCE_METHOD(void, OnDestroy);
+
+    void UpdateDataOld();
+    void UpdateData(bool force);
+
+    uint64_t lastCheckedTime = 0;
+
 public:
     static void AssignTrack(Track *track);
 private:
@@ -26,4 +32,5 @@ private:
     static inline GlobalNamespace::PauseController *pauseController;
 
     static void OnDidPauseEvent();
+    static void OnDidResumeEvent();
 )

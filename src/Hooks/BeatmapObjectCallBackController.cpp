@@ -1,14 +1,16 @@
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackData.hpp"
-#include "GlobalNamespace/BeatmapEventCallbackData.hpp"
-#include "GlobalNamespace/BeatmapEventCallback.hpp"
-#include "GlobalNamespace/BeatmapObjectCallback.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
+#include "GlobalNamespace/BeatmapCallbacksController.hpp"
+#include "GlobalNamespace/CallbacksInTime.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
+#include "GlobalNamespace/SortedList_1.hpp"
+#include "GlobalNamespace/SortedList_2.hpp"
+#include "GlobalNamespace/BeatmapCallbacksUpdater.hpp"
 #include "System/Collections/Generic/HashSet_1.hpp"
+#include "System/Collections/Generic/Dictionary_2.hpp"
 #include "System/Action.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
@@ -18,94 +20,115 @@
 #include "NEHooks.h"
 #include "NELogger.h"
 #include "SharedUpdate.h"
+#include "NECaches.h"
+#include "SpawnDataHelper.h"
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_MATCH(BeatmapObjectCallbackController_LateUpdate, &BeatmapObjectCallbackController::LateUpdate, void, BeatmapObjectCallbackController *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectCallbackController_LateUpdate(self);
+BeatmapCallbacksController* controller;
+static GlobalNamespace::IReadonlyBeatmapData* beatmapData;
 
-    if (!self->beatmapData) {
-        return;
-    }
+static BeatmapObjectSpawnController::InitData * initData;
+static GlobalNamespace::BeatmapObjectSpawnMovementData* movementData;
 
-    NESharedUpdate::TriggerUpdate();
+inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData *initData, BeatmapObjectSpawnMovementData *movementData,
+                        std::optional<float> inputNjs, std::optional<float> inputOffset) {
+    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
+}
 
+
+inline float ObjectSortGetTime(BeatmapDataItem* n) {
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-    static auto callback_mptr = il2cpp_utils::FindMethodUnsafe("", "BeatmapObjectSpawnController", "HandleBeatmapObjectCallback", 1)->methodPointer;
 
-    float songTime = TimeSourceHelper::getSongTime(self->audioTimeSource);
-    auto *beatmapLinesData = reinterpret_cast<Array<BeatmapLineData *> *>(self->beatmapData->get_beatmapLinesData());
+    float* aheadTime;
+    CustomJSONData::JSONWrapper *customDataWrapper;
 
-    for (int i = 0; i < self->beatmapObjectCallbackData->size; i++) {
-        self->beatmapObjectDataCallbackCacheList->Clear();
-        BeatmapObjectCallbackData *callbackData = self->beatmapObjectCallbackData->items.get(i);
-        for (int j = 0; j < beatmapLinesData->Length(); j++) {
-            while (callbackData->nextObjectIndexInLine.get(j) < ((List<GlobalNamespace::BeatmapObjectData*>*) beatmapLinesData->values[j]->get_beatmapObjectsData())->get_Count()) {
-                BeatmapObjectData *beatmapObjectData = beatmapLinesData->values[j]->get_beatmapObjectsData()->get_Item(callbackData->nextObjectIndexInLine.get(j));
-
-                float aheadTime = callbackData->aheadTime;
-                if (callbackData->callback->method_ptr.m_value == callback_mptr) {
-                    if (beatmapObjectData->klass == customObstacleDataClass) {
-                        auto obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
-                        aheadTime = getAD(obstacleData->customData).aheadTime;
-                    } else if (beatmapObjectData->klass == customNoteDataClass) {
-                        auto noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
-                        aheadTime = getAD(noteData->customData).aheadTime;
-                    }
-                }
-                // NELogger::GetLogger().info("Method name: %s", callbackData->callback->method_info->get_Name());
-
-                if (beatmapObjectData->time - aheadTime >= songTime) {
-                    break;
-                }
-                if (beatmapObjectData->time >= self->spawningStartTime) {
-                    for (int k = self->beatmapObjectDataCallbackCacheList->get_Count(); k >= 0; k--) {
-                        if (k == 0 || self->beatmapObjectDataCallbackCacheList->items.get(k - 1)->time <= beatmapObjectData->time) {
-                            self->beatmapObjectDataCallbackCacheList->Insert(k, beatmapObjectData);
-                            break;
-                        }
-                    }
-                }
-                callbackData->nextObjectIndexInLine.get(j)++;
-            }
-        }
-        for (int j = 0; j < self->beatmapObjectDataCallbackCacheList->size; j++) {
-            callbackData->callback->Invoke(self->beatmapObjectDataCallbackCacheList->items.get(j));
-        }
+    if (n->klass == customObstacleDataClass) {
+        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData*>(n);
+        aheadTime = &obstacle->aheadTimeNoodle;
+        customDataWrapper = obstacle->customData;
+    } else if (n->klass == customNoteDataClass) {
+        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData*>(n);
+        aheadTime = &note->aheadTimeNoodle;
+        customDataWrapper = note->customData;
+    } else {
+        return n->time;
     }
 
-    for (int l = 0; l < self->beatmapEventCallbackData->get_Count(); l++) {
-        BeatmapEventCallbackData *callbackData = self->beatmapEventCallbackData->items.get(l);
-        while (callbackData->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
-            BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(callbackData->nextEventIndex);
-            if (beatmapEventData->time - callbackData->aheadTime >= songTime) {
-                break;
-            }
-            if (self->validEvents->Contains(beatmapEventData->type)) {
-                callbackData->callback->Invoke(beatmapEventData);
-            }
-            callbackData->nextEventIndex++;
-        }
-    }
-    while (self->nextEventIndex < ((List<GlobalNamespace::BeatmapEventData*>*) self->beatmapData->get_beatmapEventsData())->get_Count()) {
-        BeatmapEventData *beatmapEventData = self->beatmapData->get_beatmapEventsData()->get_Item(self->nextEventIndex);
-        if (beatmapEventData->time >= songTime) {
-            break;
-        }
-        self->SendBeatmapEventDidTriggerEvent(beatmapEventData);
-        self->nextEventIndex++;
-    }
-    if (self->callbacksForThisFrameWereProcessedEvent) {
-        self->callbacksForThisFrameWereProcessedEvent->Invoke();
+    auto const& ad = getAD(customDataWrapper);
+
+    auto const njs = ad.objectData.noteJumpMovementSpeed; // .value_or(NECaches::noteJumpMovementSpeed);
+    auto const spawnOffset = ad.objectData.noteJumpStartBeatOffset; //.value_or(NECaches::noteJumpStartBeatOffset);
+
+    *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
+
+    return n->time - *aheadTime;
+}
+
+constexpr bool ObjectTimeCompare(BeatmapDataItem* a, BeatmapDataItem* b) {
+    return ObjectSortGetTime(a) < ObjectSortGetTime(b);
+}
+
+System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
+    initData = NECaches::GameplayCoreContainer->Resolve<BeatmapObjectSpawnController::InitData *>();
+    movementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
+    movementData->Init(initData->noteLinesCount, initData->noteJumpMovementSpeed, initData->beatsPerMinute, initData->noteJumpValueType, initData->noteJumpValue, nullptr, NEVector::Vector3::right(), NEVector::Vector3::forward());
+
+
+    auto items = beatmapData->GetAllBeatmapItemsCpp();
+
+    std::stable_sort(items.begin(), items.end(), ObjectTimeCompare);
+
+    initData = nullptr;
+    movementData = nullptr;
+
+    auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
+    auto newListPtr = static_cast<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*>(newList);
+    if (items.empty()) return newListPtr;
+
+
+
+    for (auto const& o : items) {
+        newList->AddLast(o);
     }
 
+    return newListPtr;
+}
+
+MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::LateUpdate, void, BeatmapCallbacksUpdater *self) {
+    auto selfController = self->beatmapCallbacksController;
+
+    // Reset to avoid overriding non NE maps
+//    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData)) {
+//        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
+//    }
+
+    if (!Hooks::isNoodleHookEnabled()) {
+        controller = nullptr;
+        beatmapData = nullptr;
+        return BeatmapCallbacksUpdater_LateUpdate(self);
+    }
+
+    if (controller != selfController || selfController->beatmapData != beatmapData) {
+        CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Using noodle sorted node");
+        controller = selfController;
+        beatmapData = selfController->beatmapData;
+
+
+        auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->beatmapData);
+        auto items = SortAndOrderList(beatmap);
+
+        auto first = items->get_First();
+        CustomJSONData::CustomEventCallbacks::firstNode.emplace(first);
+    }
+
+    return BeatmapCallbacksUpdater_LateUpdate(self);
 }
 
 
 void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
-    INSTALL_HOOK_ORIG(logger, BeatmapObjectCallbackController_LateUpdate);
+    INSTALL_HOOK(logger, BeatmapCallbacksUpdater_LateUpdate);
 }
 
 NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

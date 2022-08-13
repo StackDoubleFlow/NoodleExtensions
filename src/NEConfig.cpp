@@ -36,6 +36,7 @@ void UIDidActivate(HMUI::ViewController* self, bool firstActivation, bool addedT
 //        auto container = BeatSaberUI::CreateVerticalLayoutGroup()
 
         AddConfigValueToggle(container->get_transform(), getNEConfig().enableNoteDissolve);
+        AddConfigValueToggle(container->get_transform(), getNEConfig().enableMirrorNoteDissolve);
         AddConfigValueToggle(container->get_transform(), getNEConfig().enableObstacleDissolve);
 
 

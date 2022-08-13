@@ -3,13 +3,6 @@
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapDataLoader.hpp"
-#include "GlobalNamespace/BeatmapSaveData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_NoteData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_ObstacleData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_WaypointData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_EventData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_SpecialEventKeywordFiltersData.hpp"
-#include "GlobalNamespace/BeatmapSaveData_SpecialEventsForKeyword.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "pinkcore/shared/API.hpp"
@@ -20,6 +13,8 @@
 #include "NEJSON.h"
 
 #include "songloader/shared/API.hpp"
+
+#include "Constants.hpp"
 
 
 typedef rapidjson::GenericDocument<rapidjson::UTF16<char16_t>> DocumentUTF16;
@@ -68,7 +63,7 @@ static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObject
     if (customDataWrapper && customDataWrapper->value) {
         rapidjson::Value const& customData = *customDataWrapper->value;
 
-        auto fake = NEJSON::ReadOptionalBool(customData, "_fake");
+        auto fake = NEJSON::ReadOptionalBool(customData, NoodleExtensions::Constants::V2_FAKE_NOTE);
 
         if (fake.value_or(false)) {
             int& countRef = *countField;
@@ -121,7 +116,8 @@ MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObje
 }
 
 void InstallBeatmapDataHooks(Logger &logger) {
-    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
+    // TODO: Replace basic beatmap info
+//    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
 
     // force CJD to be first
     Modloader::requireMod("CustomJSONData");

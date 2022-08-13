@@ -19,24 +19,27 @@
 #include "pinkcore/shared/RequirementAPI.hpp"
 
 // needed to compile, idk why
+#define ID "Noodle"
 #include "conditional-dependencies/shared/main.hpp"
 
 #include "qosmetics-api/shared/WallAPI.hpp"
 #include "qosmetics-api/shared/NoteAPI.hpp"
+#include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
+
+#undef ID
 
 using namespace NoodleExtensions;
 using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJSONData::CustomBeatmapData *customBeatmapDataCustom, PlayerSpecificSettings* playerSpecificSettings) {
+void SceneTransitionHelper::Patch(IDifficultyBeatmap *difficultyBeatmap, CustomJSONData::v3::CustomBeatmapSaveData *customBeatmapDataCustom, PlayerSpecificSettings *playerSpecificSettings) {
     NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
     bool noodleRequirement = false;
     bool meRequirement = false;
 
-    CRASH_UNLESS(customBeatmapDataCustom);
-    if (customBeatmapDataCustom->levelCustomData) {
-        auto dynData = customBeatmapDataCustom->levelCustomData->value;
+    if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
+        auto dynData = customBeatmapDataCustom->levelCustomData;
 
         if (dynData) {
             ValueUTF16 const& rapidjsonData = *dynData;
@@ -63,38 +66,38 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap, CustomJ
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-
-    if (difficultyBeatmap) {
-        auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
-
-        for (BeatmapLineData *beatmapLineData : beatmapData->beatmapLinesData) {
-            if (!beatmapLineData)
-                continue;
-
-            for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-                BeatmapObjectData *beatmapObjectData =
-                        beatmapLineData->beatmapObjectsData->items.get(j);
-
-                CustomJSONData::JSONWrapper *customDataWrapper;
-                if (beatmapObjectData->klass == customObstacleDataClass) {
-                    auto obstacleData =
-                            (CustomJSONData::CustomObstacleData *) beatmapObjectData;
-                    customDataWrapper = obstacleData->customData;
-                } else if (beatmapObjectData->klass == customNoteDataClass) {
-                    auto noteData =
-                            (CustomJSONData::CustomNoteData *) beatmapObjectData;
-                    customDataWrapper = noteData->customData;
-                } else {
-                    continue;
-                }
-
-                if (customDataWrapper) {
-                    BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-                    ad.ResetState();
-                }
-            }
-        }
-    }
+//
+//    if (difficultyBeatmap) {
+//        auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
+//
+//        for (BeatmapLineData *beatmapLineData : beatmapData->beatmapLinesData) {
+//            if (!beatmapLineData)
+//                continue;
+//
+//            for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
+//                BeatmapObjectData *beatmapObjectData =
+//                        beatmapLineData->beatmapObjectsData->items.get(j);
+//
+//                CustomJSONData::JSONWrapper *customDataWrapper;
+//                if (beatmapObjectData->klass == customObstacleDataClass) {
+//                    auto obstacleData =
+//                            (CustomJSONData::CustomObstacleData *) beatmapObjectData;
+//                    customDataWrapper = obstacleData->customData;
+//                } else if (beatmapObjectData->klass == customNoteDataClass) {
+//                    auto noteData =
+//                            (CustomJSONData::CustomNoteData *) beatmapObjectData;
+//                    customDataWrapper = noteData->customData;
+//                } else {
+//                    continue;
+//                }
+//
+//                if (customDataWrapper) {
+//                    BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+//                    ad.ResetState();
+//                }
+//            }
+//        }
+//    }
 
     clearEventADs();
     NECaches::ClearNoteCaches();

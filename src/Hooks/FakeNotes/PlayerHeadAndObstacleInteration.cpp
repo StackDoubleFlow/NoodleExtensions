@@ -7,6 +7,7 @@
 
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/PlayerHeadAndObstacleInteraction.hpp"
+#include "System/Collections/Generic/HashSet_1.hpp"
 #include "tracks/shared/Vector.h"
 
 #include "FakeNoteHelper.h"
@@ -17,18 +18,18 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
-                &PlayerHeadAndObstacleInteraction::GetObstaclesContainingPoint,
-                void, PlayerHeadAndObstacleInteraction *self, Vector3 worldPos,
-                List<ObstacleController *> *obstacleControllers) {
-    PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint(
-        self, worldPos, obstacleControllers);
+MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles,
+                &PlayerHeadAndObstacleInteraction::RefreshIntersectingObstacles,
+                void, PlayerHeadAndObstacleInteraction *self, Vector3 worldPos) {
+    PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles(
+        self, worldPos);
 
     if (!Hooks::isNoodleHookEnabled())
         return;
 
     // Replaced in transpile
-    VList<ObstacleController *> vObstacleControllers = obstacleControllers;
+    ArrayW<ObstacleController *> vObstacleControllers(self->intersectingObstacles->get_Count());
+    self->intersectingObstacles->CopyTo(vObstacleControllers);
 
     int size = vObstacleControllers.size();
 
@@ -37,29 +38,13 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint,
 
         auto *obstacleController = vObstacleControllers[i];
         if (NEVector::Vector3(obstacleController->bounds.get_size()) == NEVector::Vector3::zero()) {
-            (*vObstacleControllers)->RemoveAt(i);
-            i--;
-            size--;
+            self->intersectingObstacles->Remove(obstacleController);
         }
     }
 }
 
-MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_get_intersectingObstacles,
-                &PlayerHeadAndObstacleInteraction::get_intersectingObstacles,
-                System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
-                        PlayerHeadAndObstacleInteraction *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return PlayerHeadAndObstacleInteraction_get_intersectingObstacles(self);
-
-    auto obstaclesResult = PlayerHeadAndObstacleInteraction_get_intersectingObstacles(self);
-    auto obstacles = FakeNoteHelper::ObstacleFakeCheck(obstaclesResult);
-
-    return obstacles;
-}
-
 void InstallPlayerHeadAndObstacleInterationHooks(Logger &logger) {
-    INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_GetObstaclesContainingPoint);
-    INSTALL_HOOK(logger, PlayerHeadAndObstacleInteraction_get_intersectingObstacles);
+    INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles);
 }
 
 NEInstallHooks(InstallPlayerHeadAndObstacleInterationHooks);

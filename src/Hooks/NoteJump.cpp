@@ -39,16 +39,9 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTrans
     NEVector::Vector3 baseTransformPosition(baseTransform->get_position());
     NEVector::Quaternion baseTransformRotation(baseTransform->get_rotation());
 
-    NEVector::Quaternion a;
-    if (normalTime < 0.125) {
-        a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation),
-                                        baseTransformRotation * NEVector::Quaternion(self->middleRotation),
-                                        std::sin(normalTime * M_PI * 4));
-    } else {
-        a = NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation),
-                                        baseTransformRotation * NEVector::Quaternion(self->endRotation),
-                                        std::sin((normalTime - 0.125) * M_PI * 2));
-    }
+    NEVector::Quaternion a = normalTime < 0.125
+            ? NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation), baseTransformRotation * NEVector::Quaternion(self->middleRotation), std::sin(normalTime * M_PI * 4))
+            : NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation), baseTransformRotation * NEVector::Quaternion(self->endRotation), std::sin((normalTime - 0.125) * M_PI * 2));
 
     NEVector::Vector3 vector = self->playerTransforms->headWorldPos;
 
@@ -153,18 +146,29 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         if (self->noteJumpDidFinishEvent)
             self->noteJumpDidFinishEvent->Invoke();
     }
+    if (normalTime >= 1.0f)
+    {
+        if (!self->missedMarkReported)
+        {
+            self->missedMarkReported = true;
+            auto action4 = self->noteJumpDidPassMissedMarkerEvent;
+            if (action4 != nullptr)
+            {
+                action4->Invoke();
+            }
+        }
+        auto action5 = self->noteJumpDidFinishEvent;
+        if (action5 != nullptr)
+        {
+            action5->Invoke();
+        }
+    }
 
     NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
     selfTransform->set_localPosition(result);
     if (self->noteJumpDidUpdateProgressEvent) {
         self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);
     }
-
-    // NoteJump.ManualUpdate will be the last place this is used after it was set in
-    // NoteController.ManualUpdate. To make sure it doesn't interfere with future notes, it's set
-    // back to null
-    noteUpdateAD = nullptr;
-    noteTracks.clear();
 
     return result;
 }

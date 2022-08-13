@@ -18,10 +18,13 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init,
                 &BasicBeatmapObjectManager::Init, void,
                 BasicBeatmapObjectManager *self,
                 GlobalNamespace::BasicBeatmapObjectManager::InitData* initData,
-                GlobalNamespace::GameNoteController::Pool* gameNotePool,
-                GlobalNamespace::BombNoteController::Pool* bombNotePool,
-                GlobalNamespace::ObstacleController::Pool* obstaclePool) {
-    BasicBeatmapObjectManager_Init(self, initData, gameNotePool, bombNotePool, obstaclePool);
+                ::GlobalNamespace::GameNoteController::Pool* basicGameNotePool,
+                ::GlobalNamespace::GameNoteController::Pool* burstSliderHeadGameNotePool,
+                ::GlobalNamespace::BurstSliderGameNoteController::Pool* burstSliderGameNotePool,
+                ::GlobalNamespace::BurstSliderGameNoteController::Pool* burstSliderFillPool,
+                ::GlobalNamespace::BombNoteController::Pool* bombNotePool, ::GlobalNamespace::ObstacleController::Pool* obstaclePool,
+                ::GlobalNamespace::SliderController::Pool* sliderPools) {
+    BasicBeatmapObjectManager_Init(self, initData, basicGameNotePool, burstSliderHeadGameNotePool, burstSliderGameNotePool, burstSliderFillPool, bombNotePool, obstaclePool, sliderPools);
     if (!Hooks::isNoodleHookEnabled())
         return;
 

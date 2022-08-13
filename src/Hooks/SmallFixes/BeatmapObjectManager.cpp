@@ -7,6 +7,7 @@
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/ObstacleData.hpp"
 #include "System/Action_1.hpp"
+#include "System/Action_3.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Transform.hpp"
 
@@ -30,40 +31,46 @@ static bool GetHiddenForType(BeatmapObjectManager* beatmapObjectManager) {
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle,
-                &BeatmapObjectManager::SpawnObstacle,
-                GlobalNamespace::ObstacleController*,
+                &BeatmapObjectManager::AddSpawnedObstacleController,
+                void,
                 BeatmapObjectManager *self,
-                GlobalNamespace::ObstacleData* obstacleData,
-                GlobalNamespace::BeatmapObjectSpawnMovementData::ObstacleSpawnData obstacleSpawnData,
+                GlobalNamespace::ObstacleController* obstacleController,
+                ::GlobalNamespace::BeatmapObjectSpawnMovementData::ObstacleSpawnData obstacleSpawnData,
                 float rotation) {
     if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectManager_SpawnObstacle(self, obstacleData, obstacleSpawnData, rotation);
+        return BeatmapObjectManager_SpawnObstacle(self, obstacleController, obstacleSpawnData, rotation);
 
-    auto obstacleController = self->SpawnObstacleInternal(obstacleData, obstacleSpawnData, rotation);
-    if (obstacleController)
+    if (obstacleController == nullptr)
     {
-        self->SetObstacleEventCallbacks(obstacleController);
-        auto action = self->obstacleWasSpawnedEvent;
-        if (action)
-        {
-            action->Invoke(obstacleController);
-        }
-        obstacleController->ManualUpdate();
-
-        // TRANSPILE HERE
-        obstacleController->set_hide(GetHiddenForType(self));
-        ///
+        return;
     }
+    self->SetObstacleEventCallbacks(obstacleController);
+    auto action = self->obstacleWasSpawnedEvent;
+    if (action != nullptr)
+    {
+        action->Invoke(obstacleController);
+    }
+    auto action2 = self->obstacleWasAddedEvent;
+    if (action2 != nullptr)
+    {
+        action2->Invoke(obstacleController->obstacleData, obstacleSpawnData, rotation);
+    }
+    obstacleController->ManualUpdate();
+    // TRANSPILE HERE
+    obstacleController->Hide(GetHiddenForType(self));
+    ///
+    self->allBeatmapObjects->Add(reinterpret_cast<IBeatmapObjectController *>(obstacleController));
+
+
 
     // POST FIX
-    auto *customObstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleData);
+    auto *customObstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleController->obstacleData);
     if (customObstacleData->customData) {
         BeatmapObjectAssociatedData &ad = getAD(customObstacleData->customData);
         ad.doUnhide = true;
     }
 
     //
-    return obstacleController;
 }
 
 void InstallBeatmapObjectManagerSmallFixHooks(Logger &logger) {

@@ -21,19 +21,79 @@ extern BeatmapObjectSpawnController *spawnController;
 
 DEFINE_TYPE(TrackParenting, ParentObject);
 
+
+
+void ParentObject::OnEnable() {
+    OnTransformParentChanged();
+}
+
 void ParentObject::Update() {
-    float noteLinesDistance = spawnController->beatmapObjectSpawnMovementData->noteLinesDistance;
+    UpdateData(false);
+}
 
-    std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.rotation);
-    std::optional<NEVector::Vector3> position = getPropertyNullable<NEVector::Vector3>(track, track->properties.position);
-    std::optional<NEVector::Quaternion> localRotation = getPropertyNullable<NEVector::Quaternion>(track, track->properties.localRotation);
-    std::optional<NEVector::Vector3> scale = getPropertyNullable<NEVector::Vector3>(track, track->properties.scale);
+void ParentObject::OnTransformParentChanged() {
+    UpdateData(true);
+}
 
-    if (NECaches::LeftHandedMode) {
-        rotation = Animation::MirrorQuaternionNullable(rotation);
-        localRotation = Animation::MirrorQuaternionNullable(localRotation);
-        position = Animation::MirrorVectorNullable(position);
+void ParentObject::UpdateData(bool force) {
+    if (!track) return;
+
+    if (track->v2) {
+        UpdateDataOld(force);
+        return;
     }
+    if (force) {
+        lastCheckedTime = 0;
+    }
+
+    float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+
+    const auto& properties = track->properties;
+    auto const rotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.rotation, lastCheckedTime);
+    auto const localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.localRotation, lastCheckedTime);
+    auto const position = getPropertyNullableFast<NEVector::Vector3>(track, properties.position, lastCheckedTime);
+    const auto localPosition = getPropertyNullableFast<NEVector::Vector3>(track, properties.localPosition, lastCheckedTime);
+    const auto scale = getPropertyNullableFast<NEVector::Vector3>(track, properties.scale, lastCheckedTime);
+
+
+    auto transform = origin;
+
+    if (rotation)
+    {
+        transform->set_rotation(rotation.value());
+    }
+    else if (localRotation)
+    {
+        transform->set_localRotation(localRotation.value());
+    }
+
+
+    if (position)
+    {
+        transform->set_position(position.value());
+    } else if (localPosition) {
+        transform->set_localPosition(localPosition.value());
+    }
+
+    if (scale)
+    {
+        transform->set_localScale(scale.value());
+    }
+
+    lastCheckedTime = getCurrentTime();
+}
+
+void ParentObject::UpdateDataOld(bool forced) {
+    if (forced) {
+        lastCheckedTime = 0;
+    }
+    float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+
+    std::optional<NEVector::Quaternion> rotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.rotation, 0);
+    std::optional<NEVector::Vector3> position = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.position, 0);
+    std::optional<NEVector::Quaternion> localRotation = getPropertyNullableFast<NEVector::Quaternion>(track, track->properties.localRotation, 0);
+    std::optional<NEVector::Vector3> scale = getPropertyNullableFast<NEVector::Vector3>(track, track->properties.scale, 0);
+
 
     NEVector::Quaternion worldRotationQuaternion = startRot;
     NEVector::Vector3 positionVector = worldRotationQuaternion * (startPos * noteLinesDistance);
@@ -55,9 +115,13 @@ void ParentObject::Update() {
         scaleVector = startScale * scale.value();
     }
 
-    origin->set_localRotation(worldRotationQuaternion);
+
+
     origin->set_localPosition(positionVector);
+    origin->set_localRotation(worldRotationQuaternion);
     origin->set_localScale(scaleVector);
+
+    lastCheckedTime = getCurrentTime();
 }
 
 
@@ -89,22 +153,40 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
     Transform *transform = get_transformMB(instance);
-    if (parentTrackEventData.pos.has_value()) {
-        instance->startPos = *parentTrackEventData.pos;
-        transform->set_localPosition(
-                instance->startPos * spawnController->beatmapObjectSpawnMovementData->noteLinesDistance);
-    }
+    if (instance->track->v2) {
+        if (parentTrackEventData.pos.has_value()) {
+            instance->startPos = *parentTrackEventData.pos;
+            transform->set_localPosition(
+                    instance->startPos * NECaches::get_noteLinesDistanceFast());
+        }
 
-    if (parentTrackEventData.rot.has_value()) {
-        instance->startRot = *parentTrackEventData.rot;
-        instance->startLocalRot = instance->startRot;
-        transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
-        transform->set_localRotation(instance->startRot);
-    }
+        if (parentTrackEventData.rot.has_value()) {
+            instance->startRot = *parentTrackEventData.rot;
+            instance->startLocalRot = instance->startRot;
+            transform->set_localPosition(instance->startRot * NEVector::Vector3(transform->get_localPosition()));
+            transform->set_localRotation(instance->startRot);
+        }
 
-    if (parentTrackEventData.localRot.has_value()) {
-        instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
-        transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
+        if (parentTrackEventData.localRot.has_value()) {
+            instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
+            transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
+        } else {
+            if (parentTrackEventData.pos.has_value()) {
+                transform->set_position(instance->startPos);
+            } else if (parentTrackEventData.localPos.has_value()) {
+                transform->set_localPosition(instance->startPos);
+            }
+
+            if (parentTrackEventData.rot.has_value()) {
+                transform->set_localRotation(instance->startRot);
+            } else if (parentTrackEventData.localRot.has_value()) {
+                transform->set_localRotation(instance->startLocalRot);
+            }
+
+            if (parentTrackEventData.scale.has_value()) {
+                transform->set_localScale(instance->startScale);
+            }
+        }
     }
 
     if (parentTrackEventData.scale.has_value()) {

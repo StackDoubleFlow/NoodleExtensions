@@ -1,6 +1,6 @@
 #include "Animation/Events.h"
 #include "GlobalNamespace/BeatmapData.hpp"
-#include "GlobalNamespace/BeatmapObjectCallbackController.hpp"
+#include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Vector3.hpp"
@@ -23,18 +23,12 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace NEVector;
 
-BeatmapObjectSpawnController *spawnController;
+void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const *customEventData,
+                     bool v2);
 
-MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnController::Start, void,
-                BeatmapObjectSpawnController *self) {
-    spawnController = self;
-    BeatmapObjectSpawnController_Start(self);
-}
-
-void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const* customEventData);
-
-void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
+void CustomEventCallback(BeatmapCallbacksController *callbackController,
                          CustomJSONData::CustomEventData *customEventData) {
+    PAPER_IL2CPP_CATCH_HANDLER(
     if (!Hooks::isNoodleHookEnabled())
         return;
 
@@ -61,7 +55,8 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
     if (!ad.parsed) {
         auto *customBeatmapData = (CustomJSONData::CustomBeatmapData *)callbackController->beatmapData;
         TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(customBeatmapData->customData);
-        LoadNoodleEvent(beatmapAD, customEventData);
+        auto v2 = customBeatmapData->v2orEarlier;
+        LoadNoodleEvent(beatmapAD, customEventData, v2);
     }
 
     if (ad.parentTrackEventData) {
@@ -69,11 +64,10 @@ void CustomEventCallback(BeatmapObjectCallbackController *callbackController,
     } else if (ad.playerTrackEventData) {
         PlayerTrack::AssignTrack(ad.playerTrackEventData->track);
     }
+    )
 }
 
 void NEEvents::AddEventCallbacks(Logger &logger) {
     CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
     custom_types::Register::AutoRegister();
-
-    INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start);
 }

@@ -8,13 +8,17 @@
 #include "tracks/shared/Animation/Track.h"
 #include "tracks/shared/AssociatedData.h"
 
+#include "questui/shared/CustomTypes/Components/WeakPtrGO.hpp"
+
+#include "Constants.hpp"
+
+#include "GlobalNamespace/CutoutEffect.hpp"
+#include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
+#include "GlobalNamespace/CutoutAnimateEffect.hpp"
+
 namespace GlobalNamespace {
     class CutoutAnimateEffect;
-    class CutoutEffect;
-    template<typename T>
-    class DisappearingArrowControllerBase_1;
     class GameNoteController;
-    class MirroredCubeNoteController;
     class ConditionalMaterialSwitcher;
 }
 
@@ -23,18 +27,19 @@ namespace UnityEngine {
 }
 
 struct AnimationObjectData {
-    PointDefinition *position;
-    PointDefinition *rotation;
-    PointDefinition *scale;
-    PointDefinition *localRotation;
-    PointDefinition *dissolve;
-    PointDefinition *dissolveArrow;
-    PointDefinition *cuttable;
-    PointDefinition *definitePosition;
+    PointDefinition *position = nullptr;
+    PointDefinition *rotation = nullptr;
+    PointDefinition *scale = nullptr;
+    PointDefinition *localRotation = nullptr;
+    PointDefinition *dissolve = nullptr;
+    PointDefinition *dissolveArrow = nullptr;
+    PointDefinition *cuttable = nullptr;
+    PointDefinition *definitePosition = nullptr;
     bool parsed = false;
 
     AnimationObjectData() = default;
-    AnimationObjectData(TracksAD::BeatmapAssociatedData& beatmapAD, const rapidjson::Value& customData);
+    AnimationObjectData(TracksAD::BeatmapAssociatedData &beatmapAD, const rapidjson::Value &animation,
+                        bool v2);
 };
 
 struct ObjectCustomData {
@@ -46,10 +51,9 @@ struct ObjectCustomData {
     std::optional<float> noteJumpMovementSpeed;
     std::optional<float> noteJumpStartBeatOffset;
     std::optional<bool> fake;
-    std::optional<bool> interactable;
+    std::optional<bool> uninteractable;
 
     // notes
-    std::optional<NEVector::Quaternion> cutDirection;
     std::optional<bool> disableNoteGravity;
     bool disableNoteLook;
 
@@ -57,14 +61,19 @@ struct ObjectCustomData {
     std::optional<std::array<std::optional<float>, 3>> scale;
 
     ObjectCustomData() = default;
-    ObjectCustomData(const rapidjson::Value& customData, std::optional<NEVector::Vector2>& flip);
+    ObjectCustomData(const rapidjson::Value &customData,
+                     CustomJSONData::CustomNoteData *noteData,
+                     CustomJSONData::CustomObstacleData *obstacleData, bool v2);
 };
 
 struct BeatmapObjectAssociatedData {
+    BeatmapObjectAssociatedData() = default;
+    BeatmapObjectAssociatedData(BeatmapObjectAssociatedData&&) = default;
+    BeatmapObjectAssociatedData(BeatmapObjectAssociatedData const&) = default;
+
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     std::optional<float> startNoteLineLayer;
 
-    float aheadTime;
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
     NEVector::Vector3 moveStartPos;
@@ -75,20 +84,9 @@ struct BeatmapObjectAssociatedData {
     float endRotation;
 
     float xOffset;
-    // set to true is the dissolve material is currently in use
-    bool dissolveEnabled;
-    // cutout for obstacles
-    GlobalNamespace::CutoutAnimateEffect *cutoutAnimationEffect;
-    GlobalNamespace::CutoutAnimateEffect *mirroredCutoutAnimationEffect;
-    // cutout for notes
-    GlobalNamespace::CutoutEffect *cutoutEffect;
-    GlobalNamespace::CutoutEffect *mirroredCutoutEffect;
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::GameNoteController *> *disappearingArrowController;
-    GlobalNamespace::DisappearingArrowControllerBase_1<GlobalNamespace::MirroredCubeNoteController *> *mirroredDisappearingArrowController;
-    // conditional material switch for dissolve
-    ArrayW<GlobalNamespace::ConditionalMaterialSwitcher *> materialSwitchers;
     AnimationObjectData animationData;
     ObjectCustomData objectData;
+    bool mirror = true;
 
     // flip for notes
     std::optional<NEVector::Vector2> flip;
@@ -108,10 +106,12 @@ struct PlayerTrackEventData {
 };
 
 struct ParentTrackEventData {
-    explicit ParentTrackEventData(const rapidjson::Value& customData, TracksAD::BeatmapAssociatedData &beatmapAD);
+    explicit ParentTrackEventData(const rapidjson::Value &eventData, TracksAD::BeatmapAssociatedData &beatmapAD,
+                                  bool v2);
 
     Track* parentTrack;
     std::optional<NEVector::Vector3> pos;
+    std::optional<NEVector::Vector3> localPos;
     std::optional<NEVector::Quaternion> rot;
     std::optional<NEVector::Quaternion> localRot;
     std::optional<NEVector::Vector3> scale;
