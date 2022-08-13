@@ -18,15 +18,16 @@
 
 #include "pinkcore/shared/RequirementAPI.hpp"
 
-// needed to compile, idk why
-#define ID "Noodle"
-#include "conditional-dependencies/shared/main.hpp"
+// // needed to compile, idk why
+// #define ID "Noodle"
+// #include "conditional-dependencies/shared/main.hpp"
 
-#include "qosmetics-api/shared/WallAPI.hpp"
-#include "qosmetics-api/shared/NoteAPI.hpp"
+// #include "qosmetics-api/shared/WallAPI.hpp"
+// #include "qosmetics-api/shared/NoteAPI.hpp"
+
+// #undef ID
+
 #include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
-
-#undef ID
 
 using namespace NoodleExtensions;
 using namespace GlobalNamespace;
@@ -54,13 +55,13 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap *difficultyBeatmap, CustomJ
     Hooks::setNoodleHookEnabled(noodleRequirement);
 
     auto const& modInfo = NELogger::modInfo;
-    if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
-        Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
-        Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
-    } else {
-        Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
-        Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
-    }
+    // if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
+    //     Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
+    //     Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
+    // } else {
+    //     Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
+    //     Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
+    // }
 
     ParentController::OnDestroy();
 
