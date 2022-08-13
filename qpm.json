@@ -67,13 +67,6 @@
       "additionalData": {}
     },
     {
-      "id": "qosmetics-api",
-      "versionRange": "*",
-      "additionalData": {
-        "includeQmod": false
-      }
-    },
-    {
       "id": "modloader",
       "versionRange": "*",
       "additionalData": {
