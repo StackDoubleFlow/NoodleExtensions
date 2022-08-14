@@ -87,6 +87,11 @@
       "id": "songloader",
       "versionRange": "^0.10.0",
       "additionalData": {}
+    },
+    {
+      "id": "conditional-dependencies",
+      "versionRange": "^0.1.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
