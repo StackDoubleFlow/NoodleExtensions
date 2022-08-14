@@ -178,6 +178,15 @@ jobs:
           asset_name: ${{env.qmodName}}.qmod
           asset_content_type: application/octet-stream
 
+      - name: Upload QMod to Mod Repo
+        uses: BobbyShmurner/mod-uploader@v1.0
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.REPO_TOKEN }}
+          qmod-name: ${{env.qmodName}}.qmod
+          tag: ${{github.ref_name}}
+
 #      - name: Change QPM Package Info
 #        run: |
 #          ./QPM/qpm-rust package edit-extra --branchName "version-${{ steps.get_tag_version.outputs.TAG }}"
