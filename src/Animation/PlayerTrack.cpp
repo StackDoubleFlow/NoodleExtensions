@@ -38,11 +38,11 @@ void PlayerTrack::AssignTrack(Track *track) {
     PlayerTrack::track = track;
 
     if (!instance) {
-        GameObject *gameObject = GameObject::Find("LocalPlayerGameCore");
+        auto *player = GameObject::Find("LocalPlayerGameCore")->get_transform();
         GameObject *noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
         origin = noodleObject->get_transform();
-        origin->SetParent(gameObject->get_transform()->get_parent(), true);
-        gameObject->get_transform()->SetParent(origin, true);
+        origin->SetParent(player->get_parent(), true);
+        player->SetParent(origin, true);
 
         instance = noodleObject->AddComponent<PlayerTrack*>();
         pauseController = Object::FindObjectOfType<PauseController*>();
@@ -54,12 +54,21 @@ void PlayerTrack::AssignTrack(Track *track) {
             pauseController->add_didPauseEvent(didPauseEventAction);
             didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
             pauseController->add_didResumeEvent(didResumeEventAction);
+        }
 
-            MonoBehaviour* pauseMenuManager = pauseController->pauseMenuManager ?: (MonoBehaviour*) NECaches::GameplayCoreContainer->Resolve<MultiplayerLocalActivePlayerInGameMenuController*>();
-            if (pauseMenuManager)
-            {
-                pauseMenuManager->get_transform()->SetParent(origin, false);
-            }
+
+        auto* pauseMenuManager = pauseController ? pauseController->pauseMenuManager : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
+        auto multiPauseMenuManager = NECaches::GameplayCoreContainer->TryResolve<MultiplayerLocalActivePlayerInGameMenuController*>();
+        if (pauseMenuManager)
+        {
+            CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting transform to pause menu");
+            pauseMenuManager->get_transform()->SetParent(origin, false);
+        }
+
+        if (multiPauseMenuManager)
+        {
+            CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting multi transform to pause menu");
+            multiPauseMenuManager->get_transform()->SetParent(origin, false);
         }
 
         startLocalRot = origin->get_localRotation();
