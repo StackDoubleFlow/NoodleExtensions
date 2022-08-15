@@ -30,6 +30,8 @@ void PlayerTrack::ctor() {
     startRot = NEVector::Quaternion::identity();
     startLocalRot = NEVector::Quaternion::identity();
     startScale = NEVector::Vector3::one();
+    if (!pauseController)
+        pauseController.emplace(nullptr);
 }
 
 void PlayerTrack::AssignTrack(Track *track) {
@@ -52,12 +54,12 @@ void PlayerTrack::AssignTrack(Track *track) {
             pauseController->add_didPauseEvent(didPauseEventAction);
             didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
             pauseController->add_didResumeEvent(didResumeEventAction);
-        }
 
-        MonoBehaviour* pauseMenuManager = pauseController->pauseMenuManager ?: (MonoBehaviour*) NECaches::GameplayCoreContainer->Resolve<MultiplayerLocalActivePlayerInGameMenuController*>();
-        if (pauseMenuManager)
-        {
-            pauseMenuManager->get_transform()->SetParent(origin, false);
+            MonoBehaviour* pauseMenuManager = pauseController->pauseMenuManager ?: (MonoBehaviour*) NECaches::GameplayCoreContainer->Resolve<MultiplayerLocalActivePlayerInGameMenuController*>();
+            if (pauseMenuManager)
+            {
+                pauseMenuManager->get_transform()->SetParent(origin, false);
+            }
         }
 
         startLocalRot = origin->get_localRotation();

@@ -5,9 +5,9 @@
 #include "custom-types/shared/macros.hpp"
 #include "NELogger.h"
 
-namespace GlobalNamespace {
-    class PauseController;
-}
+#include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
+
+#include "GlobalNamespace/PauseController.hpp"
 
 DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour, 
     DECLARE_CTOR(ctor);
@@ -29,7 +29,7 @@ private:
     static inline NEVector::Quaternion startLocalRot;
     static inline NEVector::Vector3 startScale;
     static inline UnityEngine::Transform *origin;
-    static inline GlobalNamespace::PauseController *pauseController;
+    static inline SafePtrUnity<GlobalNamespace::PauseController> pauseController;
 
     static void OnDidPauseEvent();
     static void OnDidResumeEvent();
