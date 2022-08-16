@@ -210,20 +210,14 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     auto customBeatmap = reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result);
 
 
-    LoadNoodleObjects(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result));
-    //    auto linkedList = il2cpp_utils::cast<GlobalNamespace::SortedList_1<BeatmapDataItem*>>(customBeatmap->allBeatmapData);
-//    linkedList->items = SortAndOrderList(customBeatmap);
-//    linkedList->lastUsedNode = linkedList->items->get_Last();
+    LoadNoodleObjects(customBeatmap);
+    LoadNoodleEvents(customBeatmap);
 
-    auto *transformedBeatmapData = result; // ReorderLineData(result);
-
-    LoadNoodleEvents(reinterpret_cast<CustomJSONData::CustomBeatmapData *>(transformedBeatmapData));
-
-    return transformedBeatmapData;
+    return customBeatmap->i_IReadonlyBeatmapData();
 }
 
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
-    INSTALL_HOOK_ORIG(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
+    INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
 }
 
 NEInstallHooks(InstallBeatmapDataTransformHelperHooks);
