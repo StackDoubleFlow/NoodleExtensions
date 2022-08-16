@@ -16,11 +16,11 @@ using namespace GlobalNamespace;
 
 bool FakeNoteHelper::GetFakeNote(NoteData *noteData) {
     auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
-    if (!customNoteData || customNoteData.value()->customData->value) {
+    if (!customNoteData || !customNoteData.value()->customData->value) {
         return false;
     }
     BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
-    return ad.objectData.fake && *ad.objectData.fake;
+    return ad.objectData.fake.value_or(false);
 }
 
 bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
@@ -29,7 +29,7 @@ bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
         return true;
     }
     BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
-    return !ad.objectData.uninteractable || !*ad.objectData.uninteractable;
+    return !ad.objectData.uninteractable.value_or(false);
 }
 
 List<ObstacleController *>*
