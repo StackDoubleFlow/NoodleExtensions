@@ -153,13 +153,16 @@ MAKE_HOOK_FIND_INSTANCE(name##_Mirror, classof(MirroredNoteController_1<generic*
     if (!Hooks::isNoodleHookEnabled())   \
         return; \
     auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote); \
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(followedNote->noteData);\
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);                                                                                                   \
+    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(followedNote->noteData);                                                               \
+                                   \
+    if (customNoteData) {                               \
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);                                                                                                   \
     if (!ad.mirror) {              \
         self->Hide(true);                           \
         return;                               \
     }                               \
-    AddToTrack(customNoteData, self->get_gameObject());                                                                                                                    \
+    AddToTrack(customNoteData.value(), self->get_gameObject());                                                                                                                    \
+    } \
 }
 
 

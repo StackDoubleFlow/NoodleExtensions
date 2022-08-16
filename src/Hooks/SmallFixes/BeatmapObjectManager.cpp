@@ -64,9 +64,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle,
 
 
     // POST FIX
-    auto *customObstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(obstacleController->obstacleData);
-    if (customObstacleData->customData) {
-        BeatmapObjectAssociatedData &ad = getAD(customObstacleData->customData);
+    auto customObstacleData = il2cpp_utils::try_cast<CustomJSONData::CustomObstacleData>(obstacleController->obstacleData);
+    if (customObstacleData && customObstacleData.value()->customData) {
+        BeatmapObjectAssociatedData &ad = getAD(customObstacleData.value()->customData);
         ad.doUnhide = true;
     }
 

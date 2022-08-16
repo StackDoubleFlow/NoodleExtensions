@@ -95,6 +95,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                                        move1Duration, move2Duration, singleLineWidth, height);
     ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
                             move1Duration, move2Duration, singleLineWidth, height);
+
+    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
+
+    if (normalObstacleData->klass != CustomKlass) return;
+
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
 
     Transform *transform = self->get_transform();
@@ -130,6 +135,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
+
+    if (!ad.parsed) return;
 
     ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
     if (!materialSwitchers) {
@@ -269,6 +276,11 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 ObstacleController *self) {
     if (!Hooks::isNoodleHookEnabled())
         return ObstacleController_ManualUpdate(self);
+
+    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
+
+    if (self->obstacleData->klass != CustomKlass) return ObstacleController_ManualUpdate(self);
+
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -430,7 +442,9 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
 //    }
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
-    if (!obstacleData->customData->value) {
+    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
+
+    if (self->obstacleData->klass != CustomKlass || !obstacleData->customData->value) {
         return ObstacleController_GetPosForTime(self, time);
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);

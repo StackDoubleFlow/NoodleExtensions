@@ -122,6 +122,10 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!Hooks::isNoodleHookEnabled())
         return;
 
+    static auto CustomKlass = classof(CustomJSONData::CustomNoteData *);
+
+    if (noteData->klass != CustomKlass) return;
+
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
 
@@ -133,6 +137,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     if (!customNoteData->customData)
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+
+    if (!ad.parsed)
+        return;
 
     // TRANSPILERS SUCK!
     auto flipYSide = ad.flip ? ad.flip->y : customNoteData->flipYSide;
@@ -217,6 +224,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     noteUpdateAD = nullptr;
     noteTracks.clear();
+
+    static auto CustomKlass = classof(CustomJSONData::CustomNoteData *);
+
+    if (self->noteData->klass != CustomKlass) return NoteController_ManualUpdate(self);
 
     auto *customNoteData =
         reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);

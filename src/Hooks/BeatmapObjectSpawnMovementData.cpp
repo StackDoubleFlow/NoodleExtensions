@@ -37,6 +37,9 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     if (!Hooks::isNoodleHookEnabled())
         return GetObstacleSpawnData(self, normalObstacleData);
 
+    if (!il2cpp_utils::AssignableFrom<CustomJSONData::CustomObstacleData*>(normalObstacleData->klass))
+        return GetObstacleSpawnData(self, normalObstacleData);
+
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
     BeatmapObjectSpawnMovementData::ObstacleSpawnData result =
         GetObstacleSpawnData(self, obstacleData);

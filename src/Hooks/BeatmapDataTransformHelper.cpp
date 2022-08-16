@@ -130,8 +130,8 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
                 } else {
                     ad.animationData = AnimationObjectData();
                 }
-                ad.parsed = true;
             }
+            ad.parsed = true;
         }
     };
 

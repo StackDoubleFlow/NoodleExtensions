@@ -15,20 +15,20 @@
 using namespace GlobalNamespace;
 
 bool FakeNoteHelper::GetFakeNote(NoteData *noteData) {
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
-    if (!customNoteData->customData->value) {
+    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
+    if (!customNoteData || customNoteData.value()->customData->value) {
         return false;
     }
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
     return ad.objectData.fake && *ad.objectData.fake;
 }
 
 bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
-    auto *customNoteData = reinterpret_cast<CustomJSONData::CustomNoteData *>(noteData);
-    if (!customNoteData->customData->value) {
+    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
+    if (!customNoteData || !customNoteData.value()->customData->value) {
         return true;
     }
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
     return !ad.objectData.uninteractable || !*ad.objectData.uninteractable;
 }
 
@@ -37,7 +37,7 @@ FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> in
 //    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
 
     for (auto const& obstacle : intersectingObstacles) {
-        if (!obstacle || !obstacle->obstacleData)
+        if (!obstacle || !obstacle->obstacleData || il2cpp_utils::AssignableFrom<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData->klass))
             continue;
 
         auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
