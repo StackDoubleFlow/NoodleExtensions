@@ -5,6 +5,8 @@
 #include "GlobalNamespace/BeatmapDataLoader.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
+#include "custom-json-data/shared/VList.h"
 #include "pinkcore/shared/API.hpp"
 
 #include "FakeNoteHelper.h"
@@ -13,6 +15,8 @@
 #include "NEJSON.h"
 
 #include "songloader/shared/API.hpp"
+
+#include "sombrero/shared/linq_functional.hpp"
 
 #include "Constants.hpp"
 
@@ -23,6 +27,7 @@ using namespace System;
 using namespace System::Collections::Generic;
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
+using namespace Sombrero::Linq;
 
 struct BeatmapRemoveData {
     int toRemoveObstacle = 0;
@@ -34,94 +39,53 @@ static std::unordered_map<BeatmapData*, BeatmapRemoveData> beatmapRemoveDatas;
 
 // return true if fake
 // subtracts from object count if fake
-static bool FakeObjectRemove(BeatmapData *self, BeatmapObjectData* beatmapObjectData)
-{
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+template<typename T>
+static bool IsFake(T&& o, bool v2) {
+    auto const optData = o->customData;
 
-    int* countField = nullptr;
-    CustomJSONData::JSONWrapper *customDataWrapper = nullptr;
+    if (!optData) return false;
 
-    if (beatmapObjectData->klass == customObstacleDataClass) {
-        auto obstacleData =
-                (CustomJSONData::CustomObstacleData *)beatmapObjectData;
-        customDataWrapper = obstacleData->customData;
-        countField = &self->obstaclesCount;
-    } else if (beatmapObjectData->klass == customNoteDataClass) {
-        auto noteData = (CustomJSONData::CustomNoteData *)beatmapObjectData;
-        customDataWrapper = noteData->customData;
+    rapidjson::Value const& customData = *optData;
 
-        if (noteData->cutDirection == NoteCutDirection::None)
-        {
-            // bomb
-            countField = &self->bombsCount;
-        } else {
-            countField = &self->cuttableNotesCount;
-        }
-    }
-
-    if (customDataWrapper && customDataWrapper->value) {
-        rapidjson::Value const& customData = *customDataWrapper->value;
-
-        auto fake = NEJSON::ReadOptionalBool(customData, NoodleExtensions::Constants::V2_FAKE_NOTE);
-
-        if (fake.value_or(false)) {
-            int& countRef = *countField;
-            countRef--;
-
-            return true;
-        }
-    }
-
-    return false;
+    auto fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE
+                                                        : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
+    return fake.value_or(false);
 }
 
+template<typename U, typename T>
+auto FakeCount(VList<T> list, bool v2) {
+    int i = list.size();
+    for (auto o : list) {
+        auto note = il2cpp_utils::try_cast<U>(o);
+        if (!note) continue;
 
-static void OnBeatmapLoad(GlobalNamespace::StandardLevelInfoSaveData* infoDat, const std::string& filepath, GlobalNamespace::BeatmapData* beatmapData) {
-    auto it = beatmapRemoveDatas.find(beatmapData);
-
-    if (it != beatmapRemoveDatas.end()) {
-        auto const &data = it->second;
-
-        bool isNoodle = false;
-        if (auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapData)) {
-            if (customBeatmap.value()->levelCustomData) {
-                auto customData = customBeatmap.value()->levelCustomData->value;
-
-                if (customData) {
-                    isNoodle = NoodleExtensions::SceneTransitionHelper::CheckIfNoodle(*customData);
-                }
-            }
-        }
-
-
-        if (isNoodle) {
-            beatmapData->bombsCount -= data.toRemoveBomb;
-            beatmapData->cuttableNotesCount -= data.toRemoveNote;
-            beatmapData->obstaclesCount -= data.toRemoveObstacle;
-        }
-
-        beatmapRemoveDatas.erase(it);
+        if(IsFake(*note, v2)) i--;
     }
+
+    return i;
 }
 
-MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData_t, &BeatmapData::AddBeatmapObjectData, void,
-               BeatmapData *self, BeatmapObjectData* beatmapObjectData) {
-    BeatmapData_AddBeatmapObjectData_t(self, beatmapObjectData);
+MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData, &BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveData, GlobalNamespace::BeatmapDataBasicInfo*,
+                BeatmapSaveDataVersion3::BeatmapSaveData* beatmapSaveData) {
+    auto ret = BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData(beatmapSaveData);
 
-    if (!Hooks::isNoodleHookEnabled())
-        return;
+    auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapSaveData);
 
-    FakeObjectRemove(self, beatmapObjectData);
+    if (!customBeatmap) return ret;
+
+    bool v2 = customBeatmap.value()->v2orEarlier;
+
+    ret->cuttableNotesCount = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(VList(beatmapSaveData->colorNotes), v2);
+    ret->bombsCount = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(VList(beatmapSaveData->bombNotes), v2);
+    ret->obstaclesCount = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(VList(beatmapSaveData->obstacles), v2);
+
+    return ret;
 }
 
 void InstallBeatmapDataHooks(Logger &logger) {
-    // TODO: Replace basic beatmap info
-//    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData_t);
-
     // force CJD to be first
     Modloader::requireMod("CustomJSONData");
-//    RuntimeSongLoader::API::AddBeatmapDataLoadedEvent(&OnBeatmapLoad);
+    INSTALL_HOOK(logger, BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData)
 
 }
 NEInstallHooks(InstallBeatmapDataHooks);
