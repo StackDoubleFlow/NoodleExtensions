@@ -65,6 +65,19 @@ auto FakeCount(VList<T> list, bool v2) {
     return i;
 }
 
+void HandleBasicInfo(CustomJSONData::CustomLevelInfoSaveData*, std::string const&, BeatmapSaveDataVersion3::BeatmapSaveData* beatmap, GlobalNamespace::BeatmapDataBasicInfo* ret) {
+
+    auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmap);
+
+    if (!customBeatmap) return;
+
+    bool v2 = customBeatmap.value()->v2orEarlier;
+
+    ret->cuttableNotesCount = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(VList(beatmap->colorNotes), v2);
+    ret->bombsCount = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(VList(beatmap->bombNotes), v2);
+    ret->obstaclesCount = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(VList(beatmap->obstacles), v2);
+}
+
 MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData, &BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveData, GlobalNamespace::BeatmapDataBasicInfo*,
                 BeatmapSaveDataVersion3::BeatmapSaveData* beatmapSaveData) {
     auto ret = BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData(beatmapSaveData);
@@ -85,6 +98,7 @@ MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData, &BeatmapD
 void InstallBeatmapDataHooks(Logger &logger) {
     // force CJD to be first
     Modloader::requireMod("CustomJSONData");
+    RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleBasicInfo);
     INSTALL_HOOK(logger, BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData)
 
 }
