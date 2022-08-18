@@ -421,8 +421,12 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     // do transpile only if needed
 
-
-    return ObstacleController_ManualUpdateTranspile(self, obstacleTimeAdjust(self, elapsedTime, tracks));
+    auto animatedTimeAdjusted = obstacleTimeAdjust(self, elapsedTime, tracks);
+    if (animatedTimeAdjusted != elapsedTime) {
+        return ObstacleController_ManualUpdateTranspile(self, animatedTimeAdjusted);
+    } else {
+        return ObstacleController_ManualUpdate(self);
+    }
 }
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosForTime, Vector3,
@@ -511,7 +515,7 @@ MAKE_HOOK_MATCH(
 
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);
-    INSTALL_HOOK(logger, ObstacleController_ManualUpdate);
+    INSTALL_HOOK_ORIG(logger, ObstacleController_ManualUpdate);
     INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
     // Temporary fake glow disable hook
     INSTALL_HOOK(logger, ParametricBoxFakeGlowController_Refresh);
