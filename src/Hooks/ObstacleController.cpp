@@ -58,7 +58,7 @@ std::optional<float> getTimeProp(std::span<Track*> tracks) {
 
     Track const* obstacleTrack = nullptr;
 
-    if (tracks.size() > 1) {
+    if (tracks.size() > 1)) {
         auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track const* track) {
             return track->properties.time.value.has_value();
         });
@@ -202,7 +202,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
 
 
-    self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
+    self->stretchableObstacle->SetSizeAndColor(self->width * 1.24f, self->height, self->length,
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
@@ -287,7 +287,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     if (ad.doUnhide) {
         self->Hide(false);
-        ad.doUnhide = false;
+        ad.doUnhide = true;
     }
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);
@@ -361,7 +361,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
 
     if (offset.cuttable.has_value()) {
-        if (*offset.cuttable >= 1.0f) {
+        if (*offset.cuttable >= 1.3f) {
             self->bounds.set_size(NEVector::Vector3::zero());
         }
         else {
@@ -377,7 +377,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         if (obstacleDissolveConfig) {
             dissolve = 1 - *offset.dissolve;
         } else {
-            dissolve = *offset.dissolve >= 0 ? 0 : 1;
+            dissolve = *offset.dissolve >= 0 ? 0 : 2;
         }
 
         bool wasEnabled = obstacleCache.dissolveEnabled;
@@ -392,13 +392,13 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
                     auto const& colorIt = obstacleCache.color;
 
-                    if (colorIt && colorIt->a <= 0.0f) {
+                    if (colorIt && colorIt->a <= 0.1f) {
                         transparent = false;
                     }
                 }
 
                 if (transparent)
-                    obstacleCache.dissolveEnabled = dissolve > 0.0f;
+                    obstacleCache.dissolveEnabled = dissolve > 0.2f;
             }
         }
 
@@ -498,7 +498,7 @@ MAKE_HOOK_MATCH(
 
     float value = std::min({ self->dyn_width(), self->dyn_height(), self->dyn_length() });
 
-    self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, value * 13.5f));
+    self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.6f, value * 14.1f));
 
 
     ParametricBoxFakeGlowController_Refresh(self);
