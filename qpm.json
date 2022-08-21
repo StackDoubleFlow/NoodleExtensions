@@ -29,7 +29,7 @@
       "id": "custom-types",
       "versionRange": "^0.15",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": true
       }
     },
     {
@@ -41,7 +41,7 @@
       "id": "questui",
       "versionRange": "^0.16.0",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": true
       }
     },
     {
@@ -58,7 +58,7 @@
       "id": "pinkcore",
       "versionRange": "^1.6.0",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": true
       }
     },
     {
@@ -70,7 +70,7 @@
       "id": "modloader",
       "versionRange": "*",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": true
       }
     },
     {
