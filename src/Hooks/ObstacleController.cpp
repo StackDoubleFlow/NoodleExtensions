@@ -26,9 +26,7 @@
 #include "tracks/shared/AssociatedData.h"
 #include "tracks/shared/TimeSourceHelper.h"
 
-#define ID "Noodle"
 #include "chroma/shared/ObstacleAPI.hpp"
-#undef ID
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
@@ -42,48 +40,48 @@ SafePtr<List<ObstacleController*>>& getActiveObstacles() {
     return activeObstacles;
 }
 
+
+std::unordered_map<ObstacleController *, ArrayW<ConditionalMaterialSwitcher *>> cachedObstacleMaterialSwitchers;
+std::unordered_map<GlobalNamespace::ObstacleControllerBase *, Sombrero::FastColor> cachedObstacleColors;
+
 bool mapLoaded = false;
 
 void OnObstacleChangeColor(GlobalNamespace::ObstacleControllerBase * oc, Sombrero::FastColor const& color) {
-    NECaches::getObstacleCache(oc).color = color;
+    cachedObstacleColors[oc] = color;
 }
 
 void NECaches::ClearObstacleCaches() {
-    NECaches::obstacleCache.clear();
+    cachedObstacleMaterialSwitchers.clear();
+    cachedObstacleColors.clear();
     mapLoaded = false;
 }
 
-std::optional<float> getTimeProp(std::span<Track*> tracks) {
-    if (tracks.empty()) return {};
+float obstacleTimeAdjust(float original, std::span<Track*> tracks, float move1Duration, float finishMovementTime) {
+    if (original > move1Duration && !tracks.empty()) {
+        Track *obstacleTrack = nullptr;
 
-    Track const* obstacleTrack = nullptr;
+        if (tracks.size() > 1) {
+            auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track *track) {
+                return track->properties.time.value.has_value();
+            });
 
-    if (tracks.size() > 1) {
-        auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track const* track) {
-            return track->properties.time.value.has_value();
-        });
-
-        if (trackIt != tracks.end()) {
-            obstacleTrack = *trackIt;
+            if (trackIt != tracks.end()) {
+                obstacleTrack = *trackIt;
+            }
+        } else {
+            obstacleTrack = tracks.front();
         }
-    } else {
-        obstacleTrack = tracks.front();
+
+        if (obstacleTrack) {
+            Property &timeProperty = obstacleTrack->properties.time;
+            if (timeProperty.value) {
+                float time = timeProperty.value->linear;
+                return (time * (finishMovementTime - move1Duration)) + move1Duration;
+            }
+        }
     }
 
-    if (!obstacleTrack) return {};
-    Property const& timeProperty = obstacleTrack->properties.time;
-    if (!timeProperty.value) return {};
-
-    float time = timeProperty.value->linear;
-    return time;
-}
-
-float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<Track*> tracks) {
-    auto time = getTimeProp(tracks);
-    if (!time) return original;
-
-    return  (time.value() * (oc->finishMovementTime - oc->move1Duration)) + oc->move1Duration;
-
+    return original;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController *self,
@@ -95,11 +93,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                                        move1Duration, move2Duration, singleLineWidth, height);
     ObstacleController_Init(self, normalObstacleData, worldRotation, startPos, midPos, endPos,
                             move1Duration, move2Duration, singleLineWidth, height);
-
-    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
-
-    if (normalObstacleData->klass != CustomKlass) return;
-
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(normalObstacleData);
 
     Transform *transform = self->get_transform();
@@ -109,8 +102,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     if (!obstacleData->customData) {
         return;
     }
-
-    auto& obstacleCache = NECaches::getObstacleCache(self);
 
     if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
         // lazy initialize since Chroma clears the callbacks on map load and ordering that is not easy
@@ -128,20 +119,22 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
         auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
         if (color) {
-            obstacleCache.color = *color;
+            cachedObstacleColors[self] = *color;
         } else {
-            obstacleCache.color = std::nullopt;
+            cachedObstacleColors.erase(self);
         }
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
-    if (!ad.parsed) return;
-
-    ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
-    if (!materialSwitchers) {
-        materialSwitchers = self->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    ArrayW<ConditionalMaterialSwitcher *> materialSwitchers;
+    auto it = cachedObstacleMaterialSwitchers.find(self);
+    if (it == cachedObstacleMaterialSwitchers.end()) {
+        cachedObstacleMaterialSwitchers[self] = materialSwitchers = self->get_gameObject()->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
+    } else {
+        materialSwitchers = it->second;
     }
+    ad.materialSwitchers = materialSwitchers;
 
     // Reset only if NE dissolve is enabled
     if (getNEConfig().enableObstacleDissolve.GetValue()) {
@@ -149,11 +142,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
             materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
         }
     }
-    obstacleCache.dissolveEnabled = false;
+    ad.dissolveEnabled = false;
 
-    auto const setBounds = [&ad, &self]() constexpr{
-        auto const& cuttable = ad.objectData.uninteractable;
-        if (cuttable && *cuttable) {
+    std::function<void()> const setBounds = [&ad, &self](){
+        auto const& cuttable = ad.objectData.interactable;
+        if (cuttable && !*cuttable) {
             self->bounds.set_size(NEVector::Vector3::zero());
         } else {
             getActiveObstacles()->Add(self);
@@ -175,24 +168,16 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
     if (ad.objectData.rotation)
         rotation = *ad.objectData.rotation;
+    else
+        rotation = Quaternion_Euler(0, worldRotation, 0);
 
     self->worldRotation = rotation;
     self->inverseWorldRotation = Quaternion_Inverse(rotation);
 
     auto const& scale = ad.objectData.scale;
 
-
-    if (scale) {
-        if (scale->at(0)) {
-            self->width = *scale->at(0) * singleLineWidth;
-        }
-
-        if (scale->at(2)) {
-            self->length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
-        }
-    }
-
-    auto b = NEVector::Vector3((self->width - singleLineWidth) * 0.5f, 0, 0);
+    float width = (scale && scale->at(0) ? *scale->at(0) : obstacleData->width) * singleLineWidth;
+    NEVector::Vector3 b = NEVector::Vector3((width - singleLineWidth) * 0.5f, 0, 0);
     self->startPos = NEVector::Vector3(startPos) + b;
     self->midPos = NEVector::Vector3(midPos) + b;
     self->endPos = NEVector::Vector3(endPos) + b;
@@ -200,9 +185,12 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     ad.moveEndPos = self->midPos;
     ad.jumpEndPos = self->endPos;
 
+    float defaultLength =
+            NEVector::Vector3(NEVector::Vector3(self->endPos) - NEVector::Vector3(self->midPos)).Magnitude() /
+            move2Duration * obstacleData->duration;
+    float length = (scale && scale->at(2) ? *scale->at(2) * /*NoteLinesDistace*/ 0.6 : defaultLength);
 
-
-    self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
+    self->stretchableObstacle->SetSizeAndColor(width * 0.98, height, length,
                                                self->stretchableObstacle->obstacleFrame->color);
     self->bounds = self->stretchableObstacle->bounds;
 
@@ -276,18 +264,12 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 ObstacleController *self) {
     if (!Hooks::isNoodleHookEnabled())
         return ObstacleController_ManualUpdate(self);
-
-    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
-
-    if (self->obstacleData->klass != CustomKlass) return ObstacleController_ManualUpdate(self);
-
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
 
     if (ad.doUnhide) {
-        self->Hide(false);
-        ad.doUnhide = false;
+        self->set_hide(false);
     }
     if (!obstacleData->customData->value) {
         ObstacleController_ManualUpdate(self);
@@ -312,16 +294,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
     float const elapsedTime = songTime - self->startTimeOffset;
-    float const obstacleOriginalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
-    float normalTime;
-
-    auto animatedTime = getTimeProp(tracks);
-
-    if (animatedTime) {
-        normalTime = *animatedTime;
-    } else {
-        normalTime = obstacleOriginalTime;
-    }
+    float const normalTime =
+        (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
 
     AnimationHelper::ObjectOffset offset =
         AnimationHelper::GetObjectOffset(ad.animationData, tracks, normalTime);
@@ -368,7 +342,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             self->bounds.set_size(ad.boundsSize);
         }
     }
-    auto& obstacleCache = NECaches::getObstacleCache(self);
 
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value()) {
@@ -380,53 +353,59 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
             dissolve = *offset.dissolve >= 0 ? 0 : 1;
         }
 
-        bool wasEnabled = obstacleCache.dissolveEnabled;
-        obstacleCache.dissolveEnabled = obstacleDissolveConfig;
+        bool wasEnabled = ad.dissolveEnabled;
+        ad.dissolveEnabled = obstacleDissolveConfig;
 
-        if (obstacleCache.dissolveEnabled) {
+        if (ad.dissolveEnabled) {
             if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::BASIC) {
-                obstacleCache.dissolveEnabled |= dissolve > 0.0f;
+                ad.dissolveEnabled |= dissolve > 0.0f;
             } else {
                 bool transparent = true;
 
                 if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
-                    auto const& colorIt = obstacleCache.color;
+                    auto colorIt = cachedObstacleColors.find(self);
 
-                    if (colorIt && colorIt->a <= 0.0f) {
-                        transparent = false;
+                    if (colorIt != cachedObstacleColors.end()) {
+                        auto const &color = colorIt->second;
+
+                        if (color.a <= 0.0f) {
+                            transparent = false;
+                        }
                     }
                 }
 
                 if (transparent)
-                    obstacleCache.dissolveEnabled = dissolve > 0.0f;
+                    ad.dissolveEnabled = dissolve > 0.0f;
             }
         }
 
-        if (wasEnabled != obstacleCache.dissolveEnabled) {
-            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
+        if (wasEnabled != ad.dissolveEnabled) {
+            ArrayW<ConditionalMaterialSwitcher *> materialSwitchers = ad.materialSwitchers;
             for (auto *materialSwitcher: materialSwitchers) {
                 materialSwitcher->renderer->set_sharedMaterial(
-                        obstacleCache.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
+                        ad.dissolveEnabled ? materialSwitcher->material1 : materialSwitcher->material0);
             }
         }
 
-        CutoutAnimateEffect *& cutoutAnimationEffect = obstacleCache.cutoutAnimateEffect;
+        CutoutAnimateEffect *cutoutAnimationEffect = ad.cutoutAnimationEffect;
         if (!cutoutAnimationEffect) {
-            obstacleCache.obstacleDissolve = obstacleCache.obstacleDissolve ?: self->get_gameObject()->GetComponent<ObstacleDissolve *>();
-            cutoutAnimationEffect = obstacleCache.obstacleDissolve->cutoutAnimateEffect;
+            ObstacleDissolve *obstacleDissolve =
+                self->get_gameObject()->GetComponent<ObstacleDissolve *>();
+            cutoutAnimationEffect = obstacleDissolve->cutoutAnimateEffect;
+            ad.cutoutAnimationEffect = cutoutAnimationEffect;
         }
 
         cutoutAnimationEffect->SetCutout(dissolve);
     }
 
     // do transpile only if needed
-
-    auto animatedTimeAdjusted = obstacleTimeAdjust(self, elapsedTime, tracks);
-    if (animatedTimeAdjusted != elapsedTime) {
-        return ObstacleController_ManualUpdateTranspile(self, animatedTimeAdjusted);
-    } else {
-        return ObstacleController_ManualUpdate(self);
+    float const obstacleTime = obstacleTimeAdjust(elapsedTime, tracks, self->move1Duration, self->finishMovementTime);
+    if (obstacleTime != elapsedTime) {
+        ObstacleController_ManualUpdateTranspile(self, obstacleTime);
+        return;
     }
+
+    ObstacleController_ManualUpdate(self);
 }
 
 MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosForTime, Vector3,
@@ -446,9 +425,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
 //    }
     auto *obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData *>(self->obstacleData);
 
-    static auto CustomKlass = classof(CustomJSONData::CustomObstacleData *);
-
-    if (self->obstacleData->klass != CustomKlass || !obstacleData->customData->value) {
+    if (!obstacleData->customData->value) {
         return ObstacleController_GetPosForTime(self, time);
     }
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -463,7 +440,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
     if (!position.has_value())
         return ObstacleController_GetPosForTime(self, time);
 
-    NEVector::Vector3 const& noteOffset = ad.noteOffset;
+    NEVector::Vector3 noteOffset = ad.noteOffset;
     NEVector::Vector3 definitePosition = *position + noteOffset;
     definitePosition.x += ad.xOffset;
     if (time < self->move1Duration) {
@@ -484,26 +461,6 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable,
     ParametricBoxFakeGlowController_OnEnable(self);
 }
 
-// Kaitlyn's fake glow overbounds fix
-// https://github.com/ItsKaitlyn03/AnyTweaks-old/blob/a723e76506cd7cb8ab6f890b3d6a342f3618aaeb/src/hooks/ParametricBoxFakeGlowController.cpp#L23-L36
-MAKE_HOOK_MATCH(
-        ParametricBoxFakeGlowController_Refresh,
-        &GlobalNamespace::ParametricBoxFakeGlowController::Refresh,
-        void,
-        GlobalNamespace::ParametricBoxFakeGlowController* self
-) {
-    if (!Hooks::isNoodleHookEnabled())
-        return ParametricBoxFakeGlowController_Refresh(self);
-
-
-    float value = std::min({ self->dyn_width(), self->dyn_height(), self->dyn_length() });
-
-    self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, value * 13.5f));
-
-
-    ParametricBoxFakeGlowController_Refresh(self);
-}
-
 // #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
 // MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
 //     if (test && klass && klass->name && klass->namespaze) {
@@ -515,10 +472,9 @@ MAKE_HOOK_MATCH(
 
 void InstallObstacleControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, ObstacleController_Init);
-    INSTALL_HOOK_ORIG(logger, ObstacleController_ManualUpdate);
+    INSTALL_HOOK(logger, ObstacleController_ManualUpdate);
     INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
     // Temporary fake glow disable hook
-    INSTALL_HOOK(logger, ParametricBoxFakeGlowController_Refresh);
     INSTALL_HOOK(logger, ParametricBoxFakeGlowController_OnEnable);
 
     // Instruction on((const int32_t*) HookTracker::GetOrig(il2cpp_functions::object_new));
