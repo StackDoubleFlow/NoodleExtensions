@@ -124,14 +124,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
                 callback += &OnObstacleChangeColor;
             }
         }
-
-        // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
-        auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
-        if (color) {
-            obstacleCache.color = *color;
-        } else {
-            obstacleCache.color = std::nullopt;
-        }
     }
 
     BeatmapObjectAssociatedData &ad = getAD(obstacleData->customData);
@@ -294,14 +286,6 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
         return;
     }
 
-    // TODO: Cache deserialized animation data
-    // if (!customData.HasMember("_animation")) {
-    //     ObstacleController_Update(self);
-    //     return;
-    // }
-
-
-
     auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
     if (tracks.empty() && !ad.parsed)
@@ -370,6 +354,17 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     }
     auto& obstacleCache = NECaches::getObstacleCache(self);
 
+    if (obstacleCache.cachedData != self->obstacleData) {
+        obstacleCache.cachedData = self->obstacleData;
+        // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably redundantly)
+        auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+        if (color) {
+            obstacleCache.color = *color;
+        } else {
+            obstacleCache.color = std::nullopt;
+        }
+    }
+
     bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
     if (offset.dissolve.has_value()) {
         float dissolve;
@@ -392,7 +387,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                 if (getNEConfig().materialBehaviour.GetValue() == (int) MaterialBehaviour::SMART_COLOR) {
                     auto const& colorIt = obstacleCache.color;
 
-                    if (colorIt && colorIt->a <= 0.0f) {
+                    // multiply rgb by alpha?
+                    if (colorIt && (colorIt->a <= 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).sqrMagnitude() > 3)) {
                         transparent = false;
                     }
                 }

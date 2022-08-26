@@ -51,6 +51,7 @@ struct ObstacleCache {
     GlobalNamespace::ObstacleDissolve* obstacleDissolve{};
     GlobalNamespace::CutoutAnimateEffect* cutoutAnimateEffect{};
     std::optional<Sombrero::FastColor> color;
+    void* cachedData; // just an id
     bool dissolveEnabled;
 };
 
