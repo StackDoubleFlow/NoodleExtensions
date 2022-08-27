@@ -40,7 +40,7 @@ static std::unordered_map<BeatmapData*, BeatmapRemoveData> beatmapRemoveDatas;
 // return true if fake
 // subtracts from object count if fake
 template<typename T>
-static bool IsFake(T&& o, bool v2) {
+static bool IsFake(T* o, bool v2) {
     auto const optData = o->customData;
 
     if (!optData) return false;
