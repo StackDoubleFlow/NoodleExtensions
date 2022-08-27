@@ -388,7 +388,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
                     auto const& colorIt = obstacleCache.color;
 
                     // multiply rgb by alpha?
-                    if (colorIt && (colorIt->a <= 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).sqrMagnitude() > 3)) {
+                    if (colorIt && (colorIt->a > 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).sqrMagnitude() > 3)) {
                         transparent = false;
                     }
                 }
