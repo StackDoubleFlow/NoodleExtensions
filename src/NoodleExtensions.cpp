@@ -26,18 +26,20 @@ void InstallAndRegisterAll() {
 
     PinkCore::API::GetFoundRequirementCallbackSafe() += [](const std::vector<std::string>& requirements){
         bool meRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
-        bool neRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
+        bool neRequirement = std::any_of(requirements.begin(), requirements.end(), [](auto const& s) {return s == NoodleExtensions::U8_REQUIREMENTNAME; });
 
         for (auto const& r : requirements) {
             NELogger::GetLogger().debug("Installed on map %s", r.c_str());
         }
-
-        if (meRequirement && neRequirement) {
+        if (neRequirement && !meRequirement) Hooks::setNoodleHookEnabled(true);
+        else if (meRequirement && neRequirement) {
             NELogger::GetLogger().debug("Remove install");
             PinkCore::RequirementAPI::RemoveInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
+            Hooks::setNoodleHookEnabled(false);
         } else {
             NELogger::GetLogger().debug("Register install");
             PinkCore::RequirementAPI::RegisterInstalled(NoodleExtensions::U8_REQUIREMENTNAME);
+            Hooks::setNoodleHookEnabled(false);
         }
     };
 }
