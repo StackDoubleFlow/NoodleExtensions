@@ -207,13 +207,21 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     if (!Hooks::isNoodleHookEnabled())
         return result;
 
-    auto customBeatmap = reinterpret_cast<CustomJSONData::CustomBeatmapData *>(result);
+    if (auto customBeatmap = il2cpp_utils::try_cast<CustomJSONData::CustomBeatmapData>(result)) {
+        auto &beatmapAD = TracksAD::getBeatmapAD(customBeatmap.value()->customData);
+
+        if (!beatmapAD.valid) {
+            TracksAD::readBeatmapDataAD(*customBeatmap);
+        }
 
 
-    LoadNoodleObjects(customBeatmap);
-    LoadNoodleEvents(customBeatmap);
+        LoadNoodleObjects(*customBeatmap);
+        LoadNoodleEvents(*customBeatmap);
+    }
 
-    return customBeatmap->i_IReadonlyBeatmapData();
+
+
+    return result;
 }
 
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
