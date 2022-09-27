@@ -102,7 +102,7 @@ void PlayerTrack::OnDestroy() {
 }
 
 void PlayerTrack::UpdateDataOld() {
-    float noteLinesDistance = 0.6f; //spawnController->NECaches::get_noteLinesDistanceFast();
+    float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
 
     std::optional<NEVector::Quaternion> rotation = getPropertyNullable<NEVector::Quaternion>(track,
                                                                                              track->properties.rotation);

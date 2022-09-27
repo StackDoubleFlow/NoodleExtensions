@@ -91,11 +91,11 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 
     result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
         localMoveStartPos + obstacleOffset, localMoveEndPos + obstacleOffset, localJumpEndPos + obstacleOffset, obstacleHeight, result.moveDuration, jumpDuration,
-        self->get_noteLinesDistance());
+        NECaches::get_noteLinesDistanceFast());
 
     ad.noteOffset = NEVector::Vector3(self->centerPos) + obstacleOffset;
     ad.xOffset =
-        ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * self->get_noteLinesDistance();
+        ((width.value_or(obstacleData->lineIndex) / 2.0f) - 0.5f) * NECaches::get_noteLinesDistanceFast();
 
     return result;
 }
