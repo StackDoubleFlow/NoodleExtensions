@@ -128,8 +128,10 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
                 ad.objectData = ObjectCustomData(customData, noteData, obstacleData, v2);
                 if (v3Fake) ad.objectData.fake = v3Fake;
 
-                if (!ad.flip) {
-                    ad.flip = NEJSON::ReadOptionalVector2_emptyY(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
+                if (!ad.flipX || !ad.flipY) {
+                    auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
+                    ad.flipX = x;
+                    ad.flipY = y;
                 }
 
                 auto animationKey = v2 ? NoodleExtensions::Constants::V2_ANIMATION

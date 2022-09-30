@@ -73,7 +73,7 @@ struct BeatmapObjectAssociatedData {
 
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
     float startNoteLineLayer = 0;
-    float tailsStartNoteLineLayer = 0;
+    float tailStartNoteLineLayer = 0;
 
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;

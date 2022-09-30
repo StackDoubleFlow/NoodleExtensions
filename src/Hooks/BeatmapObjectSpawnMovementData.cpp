@@ -206,8 +206,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 
     auto const njs = ad.objectData.noteJumpMovementSpeed;
     std::optional<float> const spawnOffset = ad.objectData.noteJumpStartBeatOffset;
-    std::optional<float> const flipLineIndex =
-            ad.flip ? std::optional{ad.flip->x} : std::nullopt;
+    std::optional<float> const flipLineIndex = ad.flipX;
 
 
 
