@@ -109,6 +109,8 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
                                                                                                            allObjectsTimeSlice,
                                                                                                            nextTimeSliceTime);
 
+    bool v2 = true;
+
     auto items = allObjectsTimeSlice->items;
 
     std::vector<CustomNoteData*> customNotes = NoodleExtensions::of_type<CustomNoteData*>(VList(items));
@@ -165,10 +167,19 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
             list.push_back(noteData);
         }
 
+        BeatmapObjectAssociatedData &ad = getAD(noteData->customData);
         if (noteData->customData->value) {
             rapidjson::Value const &customData = *noteData->customData->value;
-            BeatmapObjectAssociatedData &ad = getAD(noteData->customData);
-            ad.flip = NEJSON::ReadOptionalVector2_emptyY(customData, NoodleExtensions::Constants::V2_FLIP);
+
+            auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
+
+            ad.flipX = x;
+            ad.flipY = y;
+        }
+
+        if (!ad.flipY) {
+            ad.flipX = lineIndex;
+            ad.flipY = 0;
         }
     }
 

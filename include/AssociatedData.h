@@ -72,7 +72,8 @@ struct BeatmapObjectAssociatedData {
     BeatmapObjectAssociatedData(BeatmapObjectAssociatedData const&) = default;
 
     // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
-    std::optional<float> startNoteLineLayer;
+    float startNoteLineLayer = 0;
+    float tailsStartNoteLineLayer = 0;
 
     NEVector::Quaternion worldRotation;
     NEVector::Quaternion localRotation;
@@ -89,7 +90,8 @@ struct BeatmapObjectAssociatedData {
     bool mirror = true;
 
     // flip for notes
-    std::optional<NEVector::Vector2> flip;
+    std::optional<float> flipX;
+    std::optional<float> flipY;
 
     // hide for obstacles
     bool doUnhide;
