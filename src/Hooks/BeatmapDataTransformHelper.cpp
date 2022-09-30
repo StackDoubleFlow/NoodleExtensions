@@ -23,11 +23,15 @@
 #include "NEHooks.h"
 #include "NELogger.h"
 #include "NECaches.h"
+#include "SceneTransitionHelper.hpp"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
 #include "GlobalNamespace/SortedList_1.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "SpawnDataHelper.h"
 #include "tracks/shared/Json.h"
+
+#include "songloader/shared/API.hpp"
 
 #include <optional>
 
@@ -70,6 +74,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
 
     static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
     static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+    static auto *customSliderDataClass = classof(CustomJSONData::CustomSliderData *);
 
     TracksAD::BeatmapAssociatedData &beatmapAD = TracksAD::getBeatmapAD(beatmap->customData);
 
@@ -94,14 +99,17 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
         for (BeatmapObjectData *beatmapObjectData: objects) {
             CustomJSONData::CustomNoteData *noteData = nullptr;
             CustomJSONData::CustomObstacleData *obstacleData = nullptr;
-            CustomJSONData::JSONWrapper *customDataWrapper;
+            CustomJSONData::CustomSliderData *sliderData = nullptr;
+            CustomJSONData::JSONWrapper *customDataWrapper = nullptr;
             if (beatmapObjectData->klass == customObstacleDataClass) {
                 obstacleData = (CustomJSONData::CustomObstacleData *) beatmapObjectData;
                 customDataWrapper = obstacleData->customData;
             } else if (beatmapObjectData->klass == customNoteDataClass) {
                 noteData = (CustomJSONData::CustomNoteData *) beatmapObjectData;
                 customDataWrapper = noteData->customData;
-            } else {
+            } else if (beatmapObjectData->klass == customSliderDataClass) {
+                sliderData = (CustomJSONData::CustomSliderData*) beatmapObjectData;
+                customDataWrapper = sliderData->customData;
                 continue;
             }
 
@@ -116,7 +124,9 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
                 if (ad.parsed)
                     continue;
 
+                auto v3Fake = ad.objectData.fake;
                 ad.objectData = ObjectCustomData(customData, noteData, obstacleData, v2);
+                if (v3Fake) ad.objectData.fake = v3Fake;
 
                 if (!ad.flip) {
                     ad.flip = NEJSON::ReadOptionalVector2_emptyY(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
@@ -224,7 +234,43 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
     return result;
 }
 
+void HandleFakeObjects(CustomJSONData::CustomLevelInfoSaveData*, std::string const&, BeatmapSaveDataVersion3::BeatmapSaveData* unsafeBeatmap, GlobalNamespace::BeatmapDataBasicInfo* basic) {
+    using namespace CustomJSONData::v3;
+    auto beatmap = il2cpp_utils::cast<CustomBeatmapSaveData>(unsafeBeatmap);
+    if (!beatmap->levelCustomData || !beatmap->customData) return;
+
+    auto noodle = NoodleExtensions::SceneTransitionHelper::CheckIfNoodle(*beatmap->levelCustomData);
+
+    if (!noodle) return;
+
+    rapidjson::Value const& customData = *beatmap->customData;
+
+#define PARSE_ARRAY(key, array, parse) \
+    auto key##it = customData.FindMember(#key); \
+    if (key##it != customData.MemberEnd()) { \
+        for (auto const& it : key##it->value.GetArray()) { \
+            auto item = parse(it); \
+            auto& ad = getAD(item->customData); \
+            ad.objectData.fake = true; \
+            array->Add(item); \
+        } \
+    }
+
+    basic->obstaclesCount = unsafeBeatmap->obstacles->size;
+    basic->cuttableNotesCount = unsafeBeatmap->colorNotes->size;
+    basic->bombsCount = unsafeBeatmap->bombNotes->size;
+
+    PARSE_ARRAY(fakeColorNotes, unsafeBeatmap->colorNotes, Parser::DeserializeColorNote);
+    PARSE_ARRAY(fakeBombNotes, unsafeBeatmap->bombNotes, Parser::DeserializeBombNote);
+    PARSE_ARRAY(fakeObstacles, unsafeBeatmap->obstacles, Parser::DeserializeObstacle);
+    PARSE_ARRAY(fakeBurstSliders, unsafeBeatmap->burstSliders, Parser::DeserializeBurstSlider);
+    PARSE_ARRAY(fakeSliders, unsafeBeatmap->sliders, Parser::DeserializeSlider);
+}
+
 void InstallBeatmapDataTransformHelperHooks(Logger &logger) {
+    Modloader::requireMod("CustomJSONData");
+    RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleFakeObjects);
+
     INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
 }
 

@@ -19,23 +19,12 @@
 #include "sombrero/shared/linq_functional.hpp"
 
 #include "Constants.hpp"
-
-
-typedef rapidjson::GenericDocument<rapidjson::UTF16<char16_t>> DocumentUTF16;
-
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
 using namespace Sombrero::Linq;
 
-struct BeatmapRemoveData {
-    int toRemoveObstacle = 0;
-    int toRemoveNote = 0;
-    int toRemoveBomb = 0;
-};
-
-static std::unordered_map<BeatmapData*, BeatmapRemoveData> beatmapRemoveDatas;
 
 // return true if fake
 // subtracts from object count if fake
@@ -43,9 +32,9 @@ template<typename T>
 static bool IsFake(T* o, bool v2) {
     auto const optData = o->customData;
 
-    if (!optData) return false;
+    if (!optData || !optData->value) return false;
 
-    rapidjson::Value const& customData = *optData;
+    rapidjson::Value const& customData = *optData->value;
 
     auto fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE
                                                         : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
@@ -87,6 +76,9 @@ MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData, &BeatmapD
     if (!customBeatmap) return ret;
 
     bool v2 = customBeatmap.value()->v2orEarlier;
+
+    // Not necessary in v3
+    if (!v2) return ret;
 
     ret->cuttableNotesCount = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(VList(beatmapSaveData->colorNotes), v2);
     ret->bombsCount = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(VList(beatmapSaveData->bombNotes), v2);
