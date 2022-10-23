@@ -8,8 +8,6 @@
 #include "tracks/shared/Animation/Track.h"
 #include "tracks/shared/AssociatedData.h"
 
-#include "questui/shared/CustomTypes/Components/WeakPtrGO.hpp"
-
 #include "Constants.hpp"
 
 #include "GlobalNamespace/CutoutEffect.hpp"

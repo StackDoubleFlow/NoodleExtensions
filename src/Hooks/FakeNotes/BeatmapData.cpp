@@ -43,9 +43,9 @@ template<typename T>
 static bool IsFake(T* o, bool v2) {
     auto const optData = o->customData;
 
-    if (!optData) return false;
+    if (!optData || !optData->value) return false;
 
-    rapidjson::Value const& customData = *optData;
+    rapidjson::Value const& customData = *optData->value;
 
     auto fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE
                                                         : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
