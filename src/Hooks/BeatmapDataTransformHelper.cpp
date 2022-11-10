@@ -87,6 +87,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
     }
 
     auto notes = beatmap->GetBeatmapItemsCpp<NoteData*>();
+    auto sliders = beatmap->GetBeatmapItemsCpp<SliderData*>();
     auto obstacles = beatmap->GetBeatmapItemsCpp<ObstacleData*>();
 
 
@@ -138,6 +139,7 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap) {
     CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Reading Noodle objects");
     doForObjects(obstacles);
     doForObjects(notes);
+    doForObjects(sliders);
 }
 
 void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData::CustomEventData const *customEventData,
