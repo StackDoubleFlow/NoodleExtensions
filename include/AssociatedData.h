@@ -8,8 +8,6 @@
 #include "tracks/shared/Animation/Track.h"
 #include "tracks/shared/AssociatedData.h"
 
-#include "questui/shared/CustomTypes/Components/WeakPtrGO.hpp"
-
 #include "Constants.hpp"
 
 #include "GlobalNamespace/CutoutEffect.hpp"
@@ -58,6 +56,8 @@ struct ObjectCustomData {
     // notes
     std::optional<bool> disableNoteGravity;
     bool disableNoteLook;
+    std::optional<std::string> link;
+
 
     // obstacles
     std::optional<std::array<std::optional<float>, 3>> scale;

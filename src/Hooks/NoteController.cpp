@@ -6,6 +6,7 @@
 #include "GlobalNamespace/MirroredGameNoteController.hpp"
 #include "GlobalNamespace/NoteFloorMovement.hpp"
 #include "GlobalNamespace/NoteJump.hpp"
+#include "GlobalNamespace/NoteCutInfo.hpp"
 #include "GlobalNamespace/NoteMovement.hpp"
 #include "GlobalNamespace/BaseNoteVisuals.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
@@ -27,6 +28,8 @@
 #include "NEHooks.h"
 #include "NECaches.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "sombrero/shared/linq_functional.hpp"
+#include "GlobalNamespace/BeatmapObjectManager.hpp"
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
@@ -34,6 +37,8 @@ using namespace TrackParenting;
 
 BeatmapObjectAssociatedData *noteUpdateAD = nullptr;
 TracksAD::TracksVector noteTracks;
+std::unordered_map<std::string_view, std::unordered_set<NoteController*>> linkedNotes;
+std::unordered_map<NoteController*, std::unordered_set<NoteController*>*> linkedLinkedNotes;
 
 CutoutEffect* NECaches::GetCutout(GlobalNamespace::NoteControllerBase *nc, NECaches::NoteCache &noteCache) {
     CutoutEffect *&cutoutEffect = noteCache.cutoutEffect;
@@ -108,6 +113,8 @@ void NECaches::ClearNoteCaches() {
     NECaches::noteCache.clear();
     noteUpdateAD = nullptr;
     noteTracks.clear();
+    linkedNotes.clear();
+    linkedLinkedNotes.clear();
 }
 
 MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
@@ -138,11 +145,18 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
         return;
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
-    if (!ad.parsed)
-        return;
+
+    CRASH_UNLESS(ad.parsed);
+
+    auto link = ad.objectData.link;
+    if (link) {
+        auto& list = linkedNotes[*link];
+        list.emplace(self);
+        linkedLinkedNotes[self] = &list;
+    }
 
     // TRANSPILERS SUCK!
-    auto flipYSide = ad.flip ? ad.flip->y : customNoteData->flipYSide;
+    auto flipYSide = ad.flipY ? *ad.flipY : customNoteData->flipYSide;
 
     if (flipYSide > 0.0f)
     {
@@ -381,9 +395,74 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     noteTracks.clear();
 }
 
+MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent, &NoteController::SendNoteWasCutEvent, void,
+                NoteController *self, ByRef<::GlobalNamespace::NoteCutInfo> noteCutInfo) {
+    NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+
+    if (!Hooks::isNoodleHookEnabled())
+        return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+
+
+    auto *customNoteData =
+            reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
+    if (!customNoteData->customData) {
+        return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+    }
+
+    BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
+
+    auto link = ad.objectData.link;
+
+    if (!link) return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+
+    auto& list = linkedNotes[*link];
+
+    list.erase(self);
+    linkedLinkedNotes.erase(self);
+
+    auto cuts = list | Sombrero::Linq::Functional::Select([&](auto const& noteController) {
+        return std::pair(noteController, NoteCutInfo(noteController->noteData, noteCutInfo->speedOK, noteCutInfo->directionOK, noteCutInfo->saberTypeOK,
+                           noteCutInfo->wasCutTooSoon, noteCutInfo->saberSpeed, noteCutInfo->saberDir, noteCutInfo->saberType,
+                           noteCutInfo->timeDeviation, noteCutInfo->cutDirDeviation, noteCutInfo->cutPoint, noteCutInfo->cutNormal, noteCutInfo->cutDistanceToCenter,
+                           noteCutInfo->cutAngle, noteCutInfo->worldRotation, noteCutInfo->inverseWorldRotation, noteCutInfo->noteRotation, noteCutInfo->notePosition,
+                           noteCutInfo->saberMovementData));
+    }) | Sombrero::Linq::Functional::ToVector();
+
+    for (auto const& note : list) {
+        linkedLinkedNotes.erase(note);
+    }
+    list.clear();
+
+    for (auto& [noteController, cutInfo] : cuts) {
+        auto ref = ByRef<NoteCutInfo>(cutInfo);
+        noteController->SendNoteWasCutEvent(ref);
+    }
+}
+MAKE_HOOK_MATCH(BeatmapObjectManager_Despawn, static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(::GlobalNamespace::NoteController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
+                BeatmapObjectManager* self, GlobalNamespace::NoteController* noteController) {
+    BeatmapObjectManager_Despawn(self, noteController);
+
+    if (!Hooks::isNoodleHookEnabled())
+        return BeatmapObjectManager_Despawn(self, noteController);
+
+
+    auto *customNoteData =
+            reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
+    if (!customNoteData->customData) {
+        return BeatmapObjectManager_Despawn(self, noteController);
+    }
+
+    auto& linkedLinked = linkedLinkedNotes[noteController];
+    linkedLinked->erase(noteController);
+    linkedLinkedNotes.erase(noteController);
+}
+
 void InstallNoteControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, NoteController_Init);
     INSTALL_HOOK(logger, NoteController_ManualUpdate);
+
+    INSTALL_HOOK(logger, NoteController_SendNoteWasCutEvent);
+    INSTALL_HOOK(logger, BeatmapObjectManager_Despawn);
 }
 
 NEInstallHooks(InstallNoteControllerHooks);

@@ -81,6 +81,8 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData,
     disableNoteLook = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_LOOK_DISABLE : NoodleExtensions::Constants::NOTE_LOOK_DISABLE).value_or(false);
     scale = NEJSON::ReadOptionalScale(customData, v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::OBSTACLE_SIZE);
 
+    link = NEJSON::ReadOptionalString(customData, NoodleExtensions::Constants::LINK);
+
     // TODO: MIRROR WIDTH AND OBSTACLE START X
 
 //    float width = obstacleData->width;

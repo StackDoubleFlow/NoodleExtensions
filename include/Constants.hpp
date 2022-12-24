@@ -43,6 +43,7 @@ namespace NoodleExtensions::Constants {
     inline static constexpr const std::string_view WORLD_POSITION_STAYS = "worldPositionStays";
     inline static constexpr const std::string_view PARENT_TRACK = "parentTrack";
     inline static constexpr const std::string_view CHILDREN_TRACKS = "childrenTracks";
+    inline static constexpr const std::string_view LINK = "link";
 
     inline static constexpr const std::string_view INTERNAL_STARTNOTELINELAYER = "NE_startNoteLineLayer";
     inline static constexpr const std::string_view INTERNAL_FLIPYSIDE = "NE_flipYSide";
