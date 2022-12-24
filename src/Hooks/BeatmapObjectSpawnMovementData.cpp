@@ -62,8 +62,8 @@ MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSp
     float headLineIndex = ad.objectData.startX ? *ad.objectData.startX + offset : sliderData->headLineIndex;
     float headLineLayer = ad.objectData.startY.value_or(sliderData->headLineLayer);
     float headStartlinelayer = ad.startNoteLineLayer;
-    float tailLineIndex = ad.objectData.TailStartX ? *ad.objectData.TailStartX + offset : sliderData->tailLineIndex;
-    float tailLineLayer = ad.objectData.TailStartY.value_or(sliderData->tailLineLayer);
+    float tailLineIndex = ad.objectData.tailStartX ? *ad.objectData.tailStartX + offset : sliderData->tailLineIndex;
+    float tailLineLayer = ad.objectData.tailStartY.value_or(sliderData->tailLineLayer);
     float tailStartlinelayer = ad.tailStartNoteLineLayer;
 
     Vector3 headOffset = SpawnDataHelper::GetNoteOffset(self, headLineIndex, headStartlinelayer);

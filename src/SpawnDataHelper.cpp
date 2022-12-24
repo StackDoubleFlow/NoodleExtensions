@@ -15,10 +15,6 @@ using namespace GlobalNamespace;
 
 
 
-//float SpawnDataHelperF::GetSpawnAheadTime(BeatmapObjectSpawnMovementData *spawnMovementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
-//    return spawnMovementData->moveDuration + (GetJumpDuration(inputNjs, inputOffset) * 0.5f);
-//}
-
 
 
 void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnController::InitData *initData,

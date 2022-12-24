@@ -24,6 +24,7 @@ namespace NoodleExtensions::Constants {
     inline static constexpr const std::string_view V2_CHILDREN_TRACKS = "_childrenTracks";
 
     inline static constexpr const std::string_view NOTE_OFFSET = "coordinates";
+    inline static constexpr const std::string_view TAIL_NOTE_OFFSET = "tailCoordinates";
     inline static constexpr const std::string_view OBSTACLE_SIZE = "size";
     inline static constexpr const std::string_view WORLD_ROTATION = "worldRotation";
     inline static constexpr const std::string_view INTERACTABLE = "interactable";

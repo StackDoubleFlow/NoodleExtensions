@@ -45,6 +45,8 @@ struct AnimationObjectData {
 struct ObjectCustomData {
     std::optional<float> startX;
     std::optional<float> startY;
+    std::optional<float> tailStartX;
+    std::optional<float> tailStartY;
 
     std::optional<NEVector::Quaternion> rotation;
     std::optional<NEVector::Quaternion> localRotation;

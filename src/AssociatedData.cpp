@@ -39,8 +39,13 @@ ObjectCustomData::ObjectCustomData(const rapidjson::Value &customData,
                                    CustomJSONData::CustomNoteData *noteData,
                                    CustomJSONData::CustomObstacleData *obstacleData, bool v2) {
     auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::NOTE_OFFSET);
+    auto [tailX, tailY] = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::TAIL_NOTE_OFFSET);
     startX = x;
     startY = y;
+
+    tailStartX = tailX;
+    tailStartY = tailY;
+
     // TODO: Mirror X
 
     rotation = NEJSON::ReadOptionalRotation(customData, v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::WORLD_ROTATION);
