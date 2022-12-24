@@ -109,8 +109,6 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
                                                                                                            allObjectsTimeSlice,
                                                                                                            nextTimeSliceTime);
 
-    bool v2 = true;
-
     auto items = allObjectsTimeSlice->items;
 
     std::vector<CustomNoteData*> customNotes = NoodleExtensions::of_type<CustomNoteData*>(VList(items));
@@ -127,16 +125,12 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
         float lineLayer = noteData->noteLineLayer;
         if (noteData->customData->value) {
             rapidjson::Value const& customData = *noteData->customData->value;
-            auto pos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
-            if (pos != customData.MemberEnd()) {
-                int size = pos->value.Size();
-                if (size >= 1) {
-                    lineIndex = pos->value[0].GetFloat();
-                }
-                if (size >= 2) {
-                    lineLayer = pos->value[1].GetFloat();
-                }
-            }
+
+            auto pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::V2_POSITION.data());
+            if (!pos.first) pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::POSITION.data());
+
+            lineIndex = pos.first.value_or(lineIndex);
+            lineLayer = pos.second.value_or(lineLayer);
         }
 
         std::vector<CustomNoteData *> &list = notesInColumn[lineIndex];
@@ -148,12 +142,11 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
 
             if (kNote->customData->value) {
                 rapidjson::Value const& customData = *kNote->customData->value;
-                auto listPos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
-                if (listPos != customData.MemberEnd()) {
-                    if (listPos->value.Size() >= 2) {
-                        listLineLayer = listPos->value[1].GetFloat();
-                    }
-                }
+
+                auto pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::V2_POSITION.data());
+                if (!pos.first) pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::POSITION.data());
+
+                listLineLayer = pos.second.value_or(listLineLayer = pos.second.value());
             }
 
             if (listLineLayer > lineLayer) {
@@ -171,7 +164,13 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesA
         if (noteData->customData->value) {
             rapidjson::Value const &customData = *noteData->customData->value;
 
-            auto [x, y] = NEJSON::ReadOptionalPair(customData, v2 ? NoodleExtensions::Constants::V2_FLIP : NoodleExtensions::Constants::FLIP);
+            auto pair = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::V2_FLIP);
+
+            if (!pair.first) {
+                pair = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::FLIP);
+            }
+
+            auto [x, y] = pair;
 
             ad.flipX = x;
             ad.flipY = y;
@@ -217,16 +216,10 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
             float lineLayer = noteData->noteLineLayer;
             if (noteData->customData->value) {
                 rapidjson::Value const& customData = *noteData->customData->value;
-                auto pos = customData.FindMember(NoodleExtensions::Constants::V2_POSITION.data());
-                if (pos != customData.MemberEnd()) {
-                    int size = pos->value.Size();
-                    if (size >= 1) {
-                        lineIndex = pos->value[0].GetFloat();
-                    }
-                    if (size >= 2) {
-                        lineLayer = pos->value[1].GetFloat();
-                    }
-                }
+                auto pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::V2_POSITION.data());
+                if (!pos.first) pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::POSITION.data());
+                lineIndex = pos.first.value_or(lineIndex);
+                lineLayer = pos.second.value_or(lineLayer);
             }
 
             lineIndexes[i] = lineIndex;
