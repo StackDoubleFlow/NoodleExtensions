@@ -42,7 +42,7 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap *difficultyBeatmap, CustomJ
     if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
         auto dynData = customBeatmapDataCustom->levelCustomData;
 
-        if (dynData) {
+        if (dynData && dynData->get().IsObject()) {
             ValueUTF16 const& rapidjsonData = *dynData;
 
             meRequirement = CheckIfME(rapidjsonData);
