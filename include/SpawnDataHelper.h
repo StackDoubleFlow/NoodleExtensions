@@ -74,7 +74,7 @@ constexpr float GetJumpDuration(BeatmapObjectSpawnController::InitData* initData
 
 }
 
-float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData, BeatmapObjectSpawnMovementData *movementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
+inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData, BeatmapObjectSpawnMovementData *movementData, std::optional<float> inputNjs, std::optional<float> inputOffset) {
     return movementData->moveDuration + (GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
 }
 

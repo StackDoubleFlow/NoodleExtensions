@@ -395,25 +395,25 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     noteTracks.clear();
 }
 
-MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent, &NoteController::SendNoteWasCutEvent, void,
+MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent_LinkedNotes, &NoteController::SendNoteWasCutEvent, void,
                 NoteController *self, ByRef<::GlobalNamespace::NoteCutInfo> noteCutInfo) {
-    NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+    NoteController_SendNoteWasCutEvent_LinkedNotes(self, noteCutInfo);
 
     if (!Hooks::isNoodleHookEnabled())
-        return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+        return;
 
 
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
     if (!customNoteData->customData) {
-        return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+        return;
     }
 
     BeatmapObjectAssociatedData &ad = getAD(customNoteData->customData);
 
     auto link = ad.objectData.link;
 
-    if (!link) return NoteController_SendNoteWasCutEvent(self, noteCutInfo);
+    if (!link) return;
 
     auto& list = linkedNotes[*link];
 
@@ -438,18 +438,18 @@ MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent, &NoteController::SendNoteWas
         noteController->SendNoteWasCutEvent(ref);
     }
 }
-MAKE_HOOK_MATCH(BeatmapObjectManager_Despawn, static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(::GlobalNamespace::NoteController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
+MAKE_HOOK_MATCH(BeatmapObjectManager_Despawn_LinkedNotes, static_cast<void (GlobalNamespace::BeatmapObjectManager::*)(::GlobalNamespace::NoteController*)>(&GlobalNamespace::BeatmapObjectManager::Despawn), void,
                 BeatmapObjectManager* self, GlobalNamespace::NoteController* noteController) {
-    BeatmapObjectManager_Despawn(self, noteController);
+    BeatmapObjectManager_Despawn_LinkedNotes(self, noteController);
 
     if (!Hooks::isNoodleHookEnabled())
-        return BeatmapObjectManager_Despawn(self, noteController);
+        return;
 
 
     auto *customNoteData =
             reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
     if (!customNoteData->customData) {
-        return BeatmapObjectManager_Despawn(self, noteController);
+        return;
     }
 
     auto& linkedLinked = linkedLinkedNotes[noteController];
@@ -461,8 +461,8 @@ void InstallNoteControllerHooks(Logger &logger) {
     INSTALL_HOOK(logger, NoteController_Init);
     INSTALL_HOOK(logger, NoteController_ManualUpdate);
 
-    INSTALL_HOOK(logger, NoteController_SendNoteWasCutEvent);
-    INSTALL_HOOK(logger, BeatmapObjectManager_Despawn);
+    INSTALL_HOOK(logger, NoteController_SendNoteWasCutEvent_LinkedNotes);
+    INSTALL_HOOK(logger, BeatmapObjectManager_Despawn_LinkedNotes);
 }
 
 NEInstallHooks(InstallNoteControllerHooks);
