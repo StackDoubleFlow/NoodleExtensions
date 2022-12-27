@@ -446,15 +446,11 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Despawn_LinkedNotes, static_cast<void (Glob
         return;
 
 
-    auto *customNoteData =
-            reinterpret_cast<CustomJSONData::CustomNoteData *>(noteController->noteData);
-    if (!customNoteData->customData) {
-        return;
+    auto linkedLinkedIt = linkedLinkedNotes.find(noteController);
+    if (linkedLinkedIt != linkedLinkedNotes.end()) {
+        linkedLinkedIt->second->erase(noteController);
+        linkedLinkedNotes.erase(linkedLinkedIt);
     }
-
-    auto& linkedLinked = linkedLinkedNotes[noteController];
-    linkedLinked->erase(noteController);
-    linkedLinkedNotes.erase(noteController);
 }
 
 void InstallNoteControllerHooks(Logger &logger) {
