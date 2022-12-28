@@ -134,7 +134,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
         GetObstacleSpawnData(self, obstacleData);
 
     // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
-    if (!obstacleData->customData->value) {
+    if (!obstacleData->customData) {
         return result;
     }
     BeatmapObjectAssociatedData const&ad = getAD(obstacleData->customData);
@@ -205,8 +205,8 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
     float offset = self->noteLinesCount / 2.0f;
 
     auto const njs = ad.objectData.noteJumpMovementSpeed;
-    std::optional<float> const spawnOffset = ad.objectData.noteJumpStartBeatOffset;
-    std::optional<float> const flipLineIndex = ad.flipX;
+    auto const spawnOffset = ad.objectData.noteJumpStartBeatOffset;
+    auto const flipLineIndex = ad.flipX;
 
 
 
@@ -216,7 +216,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
     float lineLayer = ad.objectData.startY.value_or(noteData->noteLineLayer);
     float const startLineLayer = ad.startNoteLineLayer;
 
-    float jumpDuration = self->jumpDuration;
+
 
 //    Vector3 moveStartPos = result.moveStartPos;
 //    Vector3 moveEndPos = result.moveEndPos;
@@ -225,7 +225,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 
     Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(self, lineIndex, startLineLayer);
 
-
+    float jumpDuration;
     float jumpDistance;
     Vector3 moveStartPos;
     Vector3 moveEndPos;
@@ -259,16 +259,6 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 
     auto result = BeatmapObjectSpawnMovementData::NoteSpawnData(
             moveStartPos + noteOffset2, moveEndPos + noteOffset2, jumpEndPos + noteOffset, gravityOverride ? noGravity : jumpGravity, self->moveDuration, jumpDuration);
-
-
-
-    // DEFINITE POSITION IS WEIRD, OK?
-    // fuck
-    float num2 = jumpDuration * 0.5f;
-    float startVerticalVelocity = jumpGravity * num2;
-    float yOffset = (startVerticalVelocity * num2) - (jumpGravity * num2 * num2 * 0.5f);
-    ad.noteOffset = Vector3(self->centerPos) + noteOffset + Vector3(0, yOffset, 0);
-
 
     return result;
 }

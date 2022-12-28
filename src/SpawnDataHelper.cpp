@@ -19,17 +19,17 @@ using namespace GlobalNamespace;
 
 void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnController::InitData *initData,
                                         BeatmapObjectSpawnMovementData *spawnMovementData,
-                                        std::optional<float> const inputNoteJumpMovementSpeed,
-                                        std::optional<float> const inputNoteJumpStartBeatOffset,
+                                        std::optional<float> const njs,
+                                        std::optional<float> const startBeatOffset,
                                         float &jumpDuration, float &jumpDistance,
                                         NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos,
                                         NEVector::Vector3 &localJumpEndPos) {
-    jumpDuration = GetJumpDuration(initData, spawnMovementData, inputNoteJumpMovementSpeed, inputNoteJumpStartBeatOffset);
+    jumpDuration = GetJumpDuration(initData, spawnMovementData, njs, startBeatOffset);
 
     NEVector::Vector3 const forwardVec(spawnMovementData->forwardVec);
     NEVector::Vector3 const centerPos(spawnMovementData->centerPos);
 
-    jumpDistance = (inputNoteJumpMovementSpeed.value_or(spawnMovementData->noteJumpMovementSpeed)) * jumpDuration;
+    jumpDistance = (njs.value_or(spawnMovementData->noteJumpMovementSpeed)) * jumpDuration;
     localMoveEndPos = centerPos + (forwardVec * (jumpDistance * 0.5f));
     localJumpEndPos = centerPos - (forwardVec * (jumpDistance * 0.5f));
     localMoveStartPos = centerPos + (forwardVec * (spawnMovementData->moveDistance + (jumpDistance * 0.5f)));

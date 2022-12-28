@@ -80,8 +80,8 @@ inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData,
 
 void GetNoteJumpValues(GlobalNamespace::BeatmapObjectSpawnController::InitData *initData,
                        GlobalNamespace::BeatmapObjectSpawnMovementData* spawnMovementData,
-                       std::optional<float> const inputNoteJumpMovementSpeed,
-                       std::optional<float> const inputNoteJumpStartBeatOffset,
+                       std::optional<float> const njs,
+                       std::optional<float> const startBeatOffset,
                        float &jumpDuration, float &jumpDistance,
                        NEVector::Vector3 &localMoveStartPos, NEVector::Vector3 &localMoveEndPos,
                        NEVector::Vector3 &localJumpEndPos);
@@ -90,7 +90,7 @@ float LineYPosForLineLayer(float height);
 
 constexpr NEVector::Vector2 Get2DNoteOffset(float lineIndex, int noteLinesCount, float lineLayer)
 {
-    float distance = -(noteLinesCount - 1.0f) * 0.5f;
+    float distance = -(float(noteLinesCount) - 1.0f) * 0.5f;
     return {(distance + lineIndex) * NECaches::get_noteLinesDistanceFast(), LineYPosForLineLayer(lineLayer)};
 }
 

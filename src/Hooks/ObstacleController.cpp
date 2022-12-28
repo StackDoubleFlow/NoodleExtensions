@@ -19,6 +19,7 @@
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "AssociatedData.h"
+#include "NEUtils.hpp"
 #include "NEConfig.h"
 #include "NEHooks.h"
 #include "NECaches.h"
@@ -53,33 +54,9 @@ void NECaches::ClearObstacleCaches() {
     mapLoaded = false;
 }
 
-std::optional<float> getTimeProp(std::span<Track*> tracks) {
-    if (tracks.empty()) return {};
-
-    Track const* obstacleTrack = nullptr;
-
-    if (tracks.size() > 1) {
-        auto trackIt = std::find_if(tracks.begin(), tracks.end(), [](Track const* track) {
-            return track->properties.time.value.has_value();
-        });
-
-        if (trackIt != tracks.end()) {
-            obstacleTrack = *trackIt;
-        }
-    } else {
-        obstacleTrack = tracks.front();
-    }
-
-    if (!obstacleTrack) return {};
-    Property const& timeProperty = obstacleTrack->properties.time;
-    if (!timeProperty.value) return {};
-
-    float time = timeProperty.value->linear;
-    return time;
-}
 
 float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<Track*> tracks) {
-    auto time = getTimeProp(tracks);
+    auto time = NoodleExtensions::getTimeProp(tracks);
     if (!time) return original;
 
     return  (time.value() * (oc->finishMovementTime - oc->move1Duration)) + oc->move1Duration;
@@ -219,7 +196,9 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
         }
     }
 
-
+    Vector3 noteOffset = self->endPos;
+    noteOffset.z = 0;
+    ad.noteOffset = noteOffset;
 
     self->Update();
 }
@@ -299,7 +278,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     float const obstacleOriginalTime = (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
     float normalTime;
 
-    auto animatedTime = getTimeProp(tracks);
+    auto animatedTime = NoodleExtensions::getTimeProp(tracks);
 
     if (animatedTime) {
         normalTime = *animatedTime;
@@ -461,7 +440,6 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
 
     NEVector::Vector3 const& noteOffset = ad.noteOffset;
     NEVector::Vector3 definitePosition = *position + noteOffset;
-    definitePosition.x += ad.xOffset;
     if (time < self->move1Duration) {
         NEVector::Vector3 result = NEVector::Vector3::LerpUnclamped(
                 self->startPos, self->midPos, time / self->move1Duration);

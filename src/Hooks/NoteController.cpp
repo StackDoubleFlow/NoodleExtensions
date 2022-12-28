@@ -21,6 +21,7 @@
 #include "UnityEngine/GameObject.hpp"
 
 #include "NEConfig.h"
+#include "NEUtils.hpp"
 #include "Animation/AnimationHelper.h"
 #include "Animation/ParentObject.h"
 #include "tracks/shared/TimeSourceHelper.h"
@@ -83,27 +84,10 @@ float noteTimeAdjust(float original, float jumpDuration) {
     if (noteTracks.empty())
         return original;
 
-    Track* noteTrack = nullptr;
+    auto time = NoodleExtensions::getTimeProp(noteTracks);
 
-    if (noteTracks.size() > 1) {
-        auto trackIt = std::find_if(noteTracks.begin(), noteTracks.end(), [](Track *track) {
-            return track->properties.time.value.has_value();
-        });
-
-        if (trackIt != noteTracks.end()) {
-            noteTrack = *trackIt;
-        }
-    } else {
-        noteTrack = noteTracks.front();
-    }
-
-
-    if (noteTrack) {
-        Property &timeProperty = noteTrack->properties.time;
-        if (timeProperty.value) {
-            float time = timeProperty.value->linear;
-            return time * jumpDuration;
-        }
+    if (time) {
+        return *time * jumpDuration;
     }
 
     return original;
@@ -226,6 +210,14 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void,
     ad.worldRotation = self->get_worldRotation();
     ad.localRotation = localRotation;
 
+    float num2 = jumpDuration * 0.5f;
+    float startVerticalVelocity = jumpGravity * num2;
+    float yOffset = (startVerticalVelocity * num2) - (jumpGravity * num2 * num2 * 0.5f);
+    Vector3 noteOffset = jumpEndPos;
+    noteOffset.z = 0;
+    noteOffset.y += yOffset;
+    ad.noteOffset = noteOffset;
+
 
     self->Update();
 }
@@ -270,10 +262,18 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     NoteJump *noteJump = self->noteMovement->jump;
     NoteFloorMovement *floorMovement = self->noteMovement->floorMovement;
 
-    float songTime = TimeSourceHelper::getSongTime(noteJump->audioTimeSyncController);
-    float elapsedTime = songTime - (customNoteData->time - (noteJump->jumpDuration * 0.5f));
-    elapsedTime = noteTimeAdjust(elapsedTime, noteJump->jumpDuration);
-    float normalTime = elapsedTime / noteJump->jumpDuration;
+    auto time = NoodleExtensions::getTimeProp(tracks);
+    float normalTime;
+    if (time)
+    {
+        normalTime = time.value();
+    }
+    else
+    {
+        float jumpDuration = noteJump->jumpDuration;
+        float elapsedTime = TimeSourceHelper::getSongTime(noteJump->audioTimeSyncController) - (customNoteData->time - (jumpDuration * 0.5f));
+        normalTime = elapsedTime / jumpDuration;
+    }
 
 
     AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(
