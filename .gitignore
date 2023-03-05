@@ -10,7 +10,6 @@ build/
 *.cmake
 
 # QPM
-qpm.shared.json
 extern/
 *.backup
 
