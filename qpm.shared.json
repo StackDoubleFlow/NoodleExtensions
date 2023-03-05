@@ -1,0 +1,314 @@
+{
+  "config": {
+    "sharedDir": "shared",
+    "dependenciesDir": "extern",
+    "info": {
+      "name": "Noodle Extensions",
+      "id": "NoodleExtensions",
+      "version": "1.0.0",
+      "url": null,
+      "additionalData": {
+        "overrideSoName": "libnoodleextensions.so"
+      }
+    },
+    "dependencies": [
+      {
+        "id": "beatsaber-hook",
+        "versionRange": "^3.14.0",
+        "additionalData": {
+          "extraFiles": [
+            "src/inline-hook"
+          ]
+        }
+      },
+      {
+        "id": "codegen",
+        "versionRange": "^0.32.0",
+        "additionalData": {}
+      },
+      {
+        "id": "custom-types",
+        "versionRange": "^0.15.0",
+        "additionalData": {
+          "includeQmod": true
+        }
+      },
+      {
+        "id": "custom-json-data",
+        "versionRange": "^0.19.0",
+        "additionalData": {}
+      },
+      {
+        "id": "questui",
+        "versionRange": "^0.17.0",
+        "additionalData": {
+          "includeQmod": true
+        }
+      },
+      {
+        "id": "config-utils",
+        "versionRange": "^0.8.0",
+        "additionalData": {}
+      },
+      {
+        "id": "tracks",
+        "versionRange": "^0.8.0",
+        "additionalData": {}
+      },
+      {
+        "id": "pinkcore",
+        "versionRange": "^1.6.0",
+        "additionalData": {
+          "includeQmod": true
+        }
+      },
+      {
+        "id": "sombrero",
+        "versionRange": "*",
+        "additionalData": {}
+      },
+      {
+        "id": "modloader",
+        "versionRange": "*",
+        "additionalData": {
+          "includeQmod": true
+        }
+      },
+      {
+        "id": "cpp-semver",
+        "versionRange": "^0.1.1",
+        "additionalData": {}
+      },
+      {
+        "id": "paper",
+        "versionRange": "^1.0.5",
+        "additionalData": {}
+      },
+      {
+        "id": "songloader",
+        "versionRange": "^0.10.0",
+        "additionalData": {}
+      },
+      {
+        "id": "conditional-dependencies",
+        "versionRange": "^0.1.0",
+        "additionalData": {}
+      }
+    ]
+  },
+  "restoredDependencies": [
+    {
+      "dependency": {
+        "id": "libil2cpp",
+        "versionRange": "=0.2.3",
+        "additionalData": {
+          "headersOnly": true
+        }
+      },
+      "version": "0.2.3"
+    },
+    {
+      "dependency": {
+        "id": "tracks",
+        "versionRange": "=0.8.0",
+        "additionalData": {
+          "overrideSoName": "libtracks.so"
+        }
+      },
+      "version": "0.8.0"
+    },
+    {
+      "dependency": {
+        "id": "sombrero",
+        "versionRange": "=0.1.37",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version-v0.1.37"
+        }
+      },
+      "version": "0.1.37"
+    },
+    {
+      "dependency": {
+        "id": "custom-json-data",
+        "versionRange": "=0.19.0",
+        "additionalData": {
+          "overrideSoName": "libcustom-json-data.so",
+          "branchName": "main",
+          "compileOptions": {
+            "cppFlags": [
+              "-DRAPIDJSON_NEON"
+            ]
+          }
+        }
+      },
+      "version": "0.19.0"
+    },
+    {
+      "dependency": {
+        "id": "conditional-dependencies",
+        "versionRange": "=0.1.0",
+        "additionalData": {
+          "headersOnly": true
+        }
+      },
+      "version": "0.1.0"
+    },
+    {
+      "dependency": {
+        "id": "pinkcore",
+        "versionRange": "=1.8.8",
+        "additionalData": {
+          "soLink": "https://github.com/BSMGPink/PinkCore/releases/download/v1.8.8/libpinkcore.so",
+          "debugSoLink": "https://github.com/BSMGPink/PinkCore/releases/download/v1.8.8/debug_libpinkcore.so",
+          "overrideSoName": "libpinkcore.so",
+          "modLink": "https://github.com/BSMGPink/PinkCore/releases/download/v1.8.8/PinkCore.qmod",
+          "branchName": "version-v1.8.8"
+        }
+      },
+      "version": "1.8.8"
+    },
+    {
+      "dependency": {
+        "id": "questui",
+        "versionRange": "=0.17.10",
+        "additionalData": {
+          "soLink": "https://github.com/darknight1050/QuestUI/releases/download/v0.17.10/libquestui.so",
+          "debugSoLink": "https://github.com/darknight1050/QuestUI/releases/download/v0.17.10/debug_libquestui.so",
+          "overrideSoName": "libquestui.so",
+          "modLink": "https://github.com/darknight1050/QuestUI/releases/download/v0.17.10/QuestUI.qmod",
+          "branchName": "version-v0.17.10",
+          "compileOptions": {
+            "systemIncludes": [
+              "shared/cppcodec"
+            ]
+          }
+        }
+      },
+      "version": "0.17.10"
+    },
+    {
+      "dependency": {
+        "id": "paper",
+        "versionRange": "=1.2.9",
+        "additionalData": {
+          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/libpaperlog.so",
+          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/debug_libpaperlog.so",
+          "overrideSoName": "libpaperlog.so",
+          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.9/paperlog.qmod",
+          "branchName": "version-v1.2.9"
+        }
+      },
+      "version": "1.2.9"
+    },
+    {
+      "dependency": {
+        "id": "modloader",
+        "versionRange": "=1.2.3",
+        "additionalData": {
+          "soLink": "https://github.com/sc2ad/QuestLoader/releases/download/v1.2.3/libmodloader64.so",
+          "overrideSoName": "libmodloader.so",
+          "branchName": "version-v1.2.3"
+        }
+      },
+      "version": "1.2.3"
+    },
+    {
+      "dependency": {
+        "id": "songloader",
+        "versionRange": "=0.10.14",
+        "additionalData": {
+          "soLink": "https://github.com/darknight1050/SongLoader/releases/download/v0.10.14/libsongloader.so",
+          "debugSoLink": "https://github.com/darknight1050/SongLoader/releases/download/v0.10.14/debug_libsongloader.so",
+          "overrideSoName": "libsongloader.so",
+          "modLink": "https://github.com/darknight1050/SongLoader/releases/download/v0.10.14/SongLoader.qmod",
+          "branchName": "version-v0.10.14"
+        }
+      },
+      "version": "0.10.14"
+    },
+    {
+      "dependency": {
+        "id": "custom-types",
+        "versionRange": "=0.15.22",
+        "additionalData": {
+          "soLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.22/libcustom-types.so",
+          "debugSoLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.22/debug_libcustom-types.so",
+          "overrideSoName": "libcustom-types.so",
+          "modLink": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.15.22/CustomTypes.qmod",
+          "branchName": "version-v0.15.22"
+        }
+      },
+      "version": "0.15.22"
+    },
+    {
+      "dependency": {
+        "id": "config-utils",
+        "versionRange": "=0.8.0",
+        "additionalData": {
+          "headersOnly": true,
+          "soLink": "https://github.com/darknight1050/config-utils/releases/download/v0.8.0/libconfig-utils_test.so",
+          "debugSoLink": "https://github.com/darknight1050/config-utils/releases/download/v0.8.0/debug_libconfig-utils_test.so",
+          "overrideSoName": "libconfig-utils_test.so",
+          "branchName": "version-v0.8.0"
+        }
+      },
+      "version": "0.8.0"
+    },
+    {
+      "dependency": {
+        "id": "cpp-semver",
+        "versionRange": "=0.1.2",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version-v0.1.2"
+        }
+      },
+      "version": "0.1.2"
+    },
+    {
+      "dependency": {
+        "id": "beatsaber-hook",
+        "versionRange": "=3.14.0",
+        "additionalData": {
+          "soLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/libbeatsaber-hook_3_14_0.so",
+          "debugSoLink": "https://github.com/sc2ad/beatsaber-hook/releases/download/v3.14.0/debug_libbeatsaber-hook_3_14_0.so",
+          "branchName": "version-v3.14.0"
+        }
+      },
+      "version": "3.14.0"
+    },
+    {
+      "dependency": {
+        "id": "codegen",
+        "versionRange": "=0.32.0",
+        "additionalData": {
+          "soLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.32.0/libcodegen.so",
+          "overrideSoName": "libcodegen.so",
+          "modLink": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.32.0/Codegen.qmod",
+          "branchName": "version-v0.32.0"
+        }
+      },
+      "version": "0.32.0"
+    },
+    {
+      "dependency": {
+        "id": "fmt",
+        "versionRange": "=9.0.0",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version-v9.0.0",
+          "compileOptions": {
+            "systemIncludes": [
+              "fmt/include/"
+            ],
+            "cppFlags": [
+              "-DFMT_HEADER_ONLY"
+            ]
+          }
+        }
+      },
+      "version": "9.0.0"
+    }
+  ]
+}
