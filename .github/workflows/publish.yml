@@ -48,13 +48,14 @@ jobs:
           publish_token: ${{secrets.QPM_TOKEN}}
 
           version: ${{ steps.get_tag_version.outputs.VERSION }}
+          tag: ${{ steps.get_tag_version.outputs.TAG }}
 
           # set to true if applicable, ASSUMES the file is already a release asset
           qpm_release_bin: true
           qpm_debug_bin: true
 
           # Name of qmod in release asset. Assumes exists, same as prior
-          qpm_qmod: ${{env.qmodName}}
+          qpm_qmod: ${{env.qmodName}}.qmod
 
       - name: List Post Restore
         run: |

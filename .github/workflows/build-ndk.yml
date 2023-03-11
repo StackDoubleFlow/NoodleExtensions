@@ -39,7 +39,7 @@ jobs:
           cache: true #will cache dependencies
 
           # Name of qmod in release asset. Assumes exists, same as prior
-          qpm_qmod: ${{env.qmodName}}
+          qpm_qmod: ${{env.qmodName}}.qmod
 
       - name: QPM Collapse
         run: |
