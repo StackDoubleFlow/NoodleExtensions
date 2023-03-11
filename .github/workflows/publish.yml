@@ -71,6 +71,14 @@ jobs:
           qpm-rust s build
           qpm-rust qmod build
 
+      - name: Get Library Name
+        id: libname
+        run: |
+          cd ./build/
+          pattern="lib${module_id}*.so"
+          files=( $pattern )
+          echo ::set-output name=NAME::"${files[0]}"
+
       - name: Rename debug
         run: |
           mv ./build/debug/${{ steps.libname.outputs.NAME }} ./build/debug/debug_${{ steps.libname.outputs.NAME }}
@@ -80,13 +88,6 @@ jobs:
         run: |
           pwsh -Command ./createqmod.ps1 ${{env.qmodName}}
 
-      - name: Get Library Name
-        id: libname
-        run: |
-          cd ./build/
-          pattern="lib${module_id}*.so"
-          files=( $pattern )
-          echo ::set-output name=NAME::"${files[0]}"
 
       - name: Upload to Release
         id: upload_file_release
