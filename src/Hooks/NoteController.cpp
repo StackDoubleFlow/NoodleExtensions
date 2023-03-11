@@ -404,7 +404,7 @@ MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent_LinkedNotes, &NoteController:
 
 
     auto *customNoteData =
-            reinterpret_cast<CustomJSONData::CustomNoteData *>(self->noteData);
+            il2cpp_utils::cast<CustomJSONData::CustomNoteData>(self->noteData);
     if (!customNoteData->customData) {
         return;
     }
