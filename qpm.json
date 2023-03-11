@@ -10,6 +10,11 @@
       "overrideSoName": "libnoodleextensions.so"
     }
   },
+  "workspace": {
+    "scripts": {
+      "build": ["pwsh ./build.ps1"]
+    }
+  },
   "dependencies": [
     {
       "id": "beatsaber-hook",
