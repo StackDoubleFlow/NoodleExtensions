@@ -94,7 +94,8 @@
         "versionRange": "^0.1.0",
         "additionalData": {}
       }
-    ]
+    ],
+    "workspace": null
   },
   "restoredDependencies": [
     {
