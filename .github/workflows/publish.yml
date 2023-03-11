@@ -91,7 +91,7 @@ jobs:
 
       - name: Upload to Release
         id: upload_file_release
-        uses: softprops/action-gh-release@v0.1.12
+        uses: softprops/action-gh-release@v0.1.15
         with:
           name: ${{ github.event.inputs.release_msg }}
           tag_name: ${{ github.event.inputs.version }}
@@ -101,14 +101,3 @@ jobs:
             ./${{ env.qmodName }}.qmod
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Qmod Asset
-        id: upload_qmod_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
-          asset_path: ./${{env.qmodName}}.qmod
-          asset_name: ${{env.qmodName}}.qmod
-          asset_content_type: application/octet-stream
