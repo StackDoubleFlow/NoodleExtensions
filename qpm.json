@@ -5,7 +5,6 @@
     "name": "Noodle Extensions",
     "id": "NoodleExtensions",
     "version": "1.0.0",
-    "url": null,
     "additionalData": {
       "overrideSoName": "libnoodleextensions.so"
     }
