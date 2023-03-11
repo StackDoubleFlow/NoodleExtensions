@@ -1,9 +1,9 @@
 name: Publish QPM Package
 
 env:
-  module_id: custom-json-data
-  qmodName: custom-json-data
-  cache-name: custom-json-data_cache
+  module_id: noodleextensions
+  qmodName: noodle_extensions
+  cache-name: noodleextensions_cache
 
 on:
   push:
@@ -44,8 +44,7 @@ jobs:
           restore: true # will run restore on download
           cache: true #will cache dependencies
 
-          publish: true
-          publish_token: ${{secrets.QPM_TOKEN}}
+          publish: false
 
           version: ${{ steps.get_tag_version.outputs.VERSION }}
           tag: ${{ steps.get_tag_version.outputs.TAG }}
