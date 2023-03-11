@@ -35,7 +35,7 @@
       },
       {
         "id": "custom-json-data",
-        "versionRange": "^0.19.0",
+        "versionRange": "^0.19.3",
         "additionalData": {}
       },
       {
@@ -52,7 +52,7 @@
       },
       {
         "id": "tracks",
-        "versionRange": "^0.8.0",
+        "versionRange": "^0.8.1",
         "additionalData": {}
       },
       {
@@ -95,7 +95,13 @@
         "additionalData": {}
       }
     ],
-    "workspace": null
+    "workspace": {
+      "scripts": {
+        "build": [
+          "pwsh ./build.ps1"
+        ]
+      }
+    }
   },
   "restoredDependencies": [
     {
@@ -111,12 +117,16 @@
     {
       "dependency": {
         "id": "tracks",
-        "versionRange": "=0.8.0",
+        "versionRange": "=0.8.1",
         "additionalData": {
-          "overrideSoName": "libtracks.so"
+          "soLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.8.1/libtracks.so",
+          "debugSoLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.8.1/debug_libtracks.so",
+          "overrideSoName": "libtracks.so",
+          "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v0.8.1/tracks",
+          "branchName": "version/v0_8_1"
         }
       },
-      "version": "0.8.0"
+      "version": "0.8.1"
     },
     {
       "dependency": {
@@ -132,10 +142,13 @@
     {
       "dependency": {
         "id": "custom-json-data",
-        "versionRange": "=0.19.0",
+        "versionRange": "=0.19.3",
         "additionalData": {
+          "soLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.19.3/libcustom-json-data.so",
+          "debugSoLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.19.3/debug_libcustom-json-data.so",
           "overrideSoName": "libcustom-json-data.so",
-          "branchName": "main",
+          "modLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.19.3/custom-json-data.qmod",
+          "branchName": "version/v0_19_3",
           "compileOptions": {
             "cppFlags": [
               "-DRAPIDJSON_NEON"
@@ -143,7 +156,7 @@
           }
         }
       },
-      "version": "0.19.0"
+      "version": "0.19.3"
     },
     {
       "dependency": {
