@@ -104,7 +104,7 @@ void ::BeatmapObjectAssociatedData::ResetState() {
 
 ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, BeatmapAssociatedData &beatmapAD,
                                            bool v2) {
-    parentTrack = &beatmapAD.tracks.try_emplace(eventData[v2 ? NoodleExtensions::Constants::V2_PARENT_TRACK.data() : NoodleExtensions::Constants::PARENT_TRACK.data()].GetString(), v2).first->second;
+    parentTrack = beatmapAD.getTrack(eventData[v2 ? NoodleExtensions::Constants::V2_PARENT_TRACK.data() : NoodleExtensions::Constants::PARENT_TRACK.data()].GetString());
 
     rapidjson::Value const &rawChildrenTracks = eventData[v2 ? NoodleExtensions::Constants::V2_CHILDREN_TRACKS.data() : NoodleExtensions::Constants::CHILDREN_TRACKS.data()];
 
@@ -112,12 +112,12 @@ ParentTrackEventData::ParentTrackEventData(const rapidjson::Value &eventData, Be
         childrenTracks.reserve(rawChildrenTracks.Size());
         for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin();
              itr != rawChildrenTracks.End(); itr++) {
-            Track *child = &beatmapAD.tracks.try_emplace(itr->GetString(), v2).first->second;
+            Track *child = beatmapAD.getTrack(itr->GetString());
             // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child, eventData["_parentTrack"].GetString(), track);
             childrenTracks.emplace_back(child);
         }
     } else {
-        childrenTracks = {&beatmapAD.tracks.try_emplace(rawChildrenTracks.GetString(), v2).first->second};
+        childrenTracks = {beatmapAD.getTrack(rawChildrenTracks.GetString())};
     }
 
     pos = NEJSON::ReadOptionalVector3(eventData, v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::OFFSET_POSITION);

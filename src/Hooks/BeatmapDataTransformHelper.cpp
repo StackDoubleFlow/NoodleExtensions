@@ -175,7 +175,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData &beatmapAD, CustomJSONData:
     } else if (typeHash == jsonNameHash_AssignPlayerToTrack) {
         std::string_view trackName(eventData[v2 ? NoodleExtensions::Constants::V2_TRACK.data()
                                                 : NoodleExtensions::Constants::TRACK.data()].GetString());
-        Track *track = &beatmapAD.tracks.try_emplace(std::string(trackName), v2).first->second;
+        Track *track = beatmapAD.getTrack(trackName);
         NELogger::GetLogger().debug("Assigning player to track %s at %p",
                                     trackName.data(), track);
         eventAD.playerTrackEventData.emplace(track);
