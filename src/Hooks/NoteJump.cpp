@@ -29,6 +29,10 @@ constexpr static float InOutQuad(float t)
     return 2.0f * t * t;
 }
 
+constexpr float NoteMissedTimeAdjust(float beatTime, float jumpDuration, float num) {
+    return num + (beatTime - (jumpDuration * 0.5f));
+}
+
 
 void NoteJump_ManualUpdateNoteLookTranspile(NoteJump *self, Transform* selfTransform, float const normalTime) {
     if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
@@ -129,7 +133,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
         if (self->noteJumpDidPassThreeQuartersEvent)
             self->noteJumpDidPassThreeQuartersEvent->Invoke(self);
     }
-    if (songTime >= self->missedTime && !self->missedMarkReported) {
+    if (NoteMissedTimeAdjust(self->beatTime, self->jumpDuration, elapsedTime)  >= self->missedTime && !self->missedMarkReported) {
         self->missedMarkReported = true;
         if (self->noteJumpDidPassMissedMarkerEvent)
             self->noteJumpDidPassMissedMarkerEvent->Invoke();

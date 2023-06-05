@@ -35,6 +35,9 @@ void PlayerTrack::ctor() {
 }
 
 void PlayerTrack::AssignTrack(Track *track) {
+    if (PlayerTrack::track && PlayerTrack::instance && !track->v2) {
+        PlayerTrack::track->RemoveGameObject(PlayerTrack::instance->get_gameObject());
+    }
     PlayerTrack::track = track;
 
     if (!instance) {
@@ -74,6 +77,10 @@ void PlayerTrack::AssignTrack(Track *track) {
         startLocalRot = origin->get_localRotation();
         startPos = origin->get_localPosition();
         instance->UpdateData(true);
+    }
+
+    if (PlayerTrack::track && PlayerTrack::instance && !track->v2) {
+        PlayerTrack::track->AddGameObject(PlayerTrack::instance->get_gameObject());
     }
 }
 
