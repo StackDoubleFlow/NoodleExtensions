@@ -18,24 +18,21 @@ using namespace UnityEngine;
 using namespace TrackParenting;
 
 MAKE_HOOK_MATCH(CutoutEffect_SetCutout,
-                static_cast<void (GlobalNamespace::CutoutEffect::*)(float, UnityEngine::Vector3)>(&GlobalNamespace::CutoutEffect::SetCutout), void,
-                CutoutEffect *self,
-                float cutout, UnityEngine::Vector3 cutoutOffset) {
-    // Do not run SetCutout if the new value is the same as old.
-    if (std::abs(cutout - self->cutout) <= 0.005) return;
+                static_cast<void (GlobalNamespace::CutoutEffect::*)(float, UnityEngine::Vector3)>(
+                    &GlobalNamespace::CutoutEffect::SetCutout),
+                void, CutoutEffect* self, float cutout, UnityEngine::Vector3 cutoutOffset) {
+  // Do not run SetCutout if the new value is the same as old.
+  if (std::abs(cutout - self->cutout) <= 0.005) return;
 
-    CutoutEffect_SetCutout(self, cutout, cutoutOffset);
+  CutoutEffect_SetCutout(self, cutout, cutoutOffset);
 }
 
-MAKE_HOOK_MATCH(CutoutAnimateEffect_Start,
-                &GlobalNamespace::CutoutAnimateEffect::Start, void,
-                CutoutAnimateEffect *self) {
+MAKE_HOOK_MATCH(CutoutAnimateEffect_Start, &GlobalNamespace::CutoutAnimateEffect::Start, void,
+                CutoutAnimateEffect* self) {}
 
-}
-
-void InstallCutoutEffectHooks(Logger &logger) {
-    INSTALL_HOOK(logger, CutoutEffect_SetCutout);
-//    INSTALL_HOOK(logger, CutoutAnimateEffect_Start)
+void InstallCutoutEffectHooks(Logger& logger) {
+  INSTALL_HOOK(logger, CutoutEffect_SetCutout);
+  //    INSTALL_HOOK(logger, CutoutAnimateEffect_Start)
 }
 
 NEInstallHooks(InstallCutoutEffectHooks);

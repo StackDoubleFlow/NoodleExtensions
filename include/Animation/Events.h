@@ -4,6 +4,6 @@
 
 namespace NEEvents {
 
-void AddEventCallbacks(Logger &logger);
+void AddEventCallbacks(Logger& logger);
 
 } // namespace NEEvents

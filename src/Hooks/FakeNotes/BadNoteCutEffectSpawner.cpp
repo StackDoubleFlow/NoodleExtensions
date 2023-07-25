@@ -11,16 +11,16 @@
 using namespace GlobalNamespace;
 
 MAKE_HOOK_MATCH(BadNoteCutEffectSpawner_HandleNoteWasCut, &BadNoteCutEffectSpawner::HandleNoteWasCut, void,
-                BadNoteCutEffectSpawner *self, GlobalNamespace::NoteController* noteController, ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
-    if (!Hooks::isNoodleHookEnabled())
-        return BadNoteCutEffectSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
+                BadNoteCutEffectSpawner* self, GlobalNamespace::NoteController* noteController,
+                ByRef<GlobalNamespace::NoteCutInfo> noteCutInfo) {
+  if (!Hooks::isNoodleHookEnabled()) return BadNoteCutEffectSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
 
-    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
-        BadNoteCutEffectSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
-    }
+  if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
+    BadNoteCutEffectSpawner_HandleNoteWasCut(self, noteController, noteCutInfo);
+  }
 }
 
-void InstallBadNoteCutEffectSpawnerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, BadNoteCutEffectSpawner_HandleNoteWasCut);
+void InstallBadNoteCutEffectSpawnerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, BadNoteCutEffectSpawner_HandleNoteWasCut);
 }
 NEInstallHooks(InstallBadNoteCutEffectSpawnerHooks);

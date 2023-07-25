@@ -1,0 +1,15 @@
+BasedOnStyle: LLVM
+
+#Stolen from scad
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: true
+CommentPragmas: NOLINT:.*
+DerivePointerAlignment: false
+IncludeBlocks: Preserve
+PointerAlignment: Left
+UseTab: Never
+Cpp11BracedListStyle: false
+QualifierAlignment: Right
+SortIncludes: Never
+ColumnLimit: 120

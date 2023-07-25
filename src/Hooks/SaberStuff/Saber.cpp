@@ -19,45 +19,36 @@ Saber* saber = nullptr;
 
 // We store all positions as localpositions so that abrupt changes in world position do not affect this
 // it gets converted back to world position to calculate cut
-MAKE_HOOK_MATCH(Saber_ManualUpdate,
-                &Saber::ManualUpdate,
-                void,
-                Saber* self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return Saber_ManualUpdate(self);
+MAKE_HOOK_MATCH(Saber_ManualUpdate, &Saber::ManualUpdate, void, Saber* self) {
+  if (!Hooks::isNoodleHookEnabled()) return Saber_ManualUpdate(self);
 
-    movementData = self->movementData;
-    saber = self;
+  movementData = self->movementData;
+  saber = self;
 
-    Saber_ManualUpdate(self);
+  Saber_ManualUpdate(self);
 
-    movementData = nullptr;
-    saber = nullptr;
+  movementData = nullptr;
+  saber = nullptr;
 }
 
-MAKE_HOOK_MATCH(SaberMovementData_AddNewData,
-                &SaberMovementData::AddNewData,
-                void,
-                SaberMovementData* self,
+MAKE_HOOK_MATCH(SaberMovementData_AddNewData, &SaberMovementData::AddNewData, void, SaberMovementData* self,
                 UnityEngine::Vector3 topPos, UnityEngine::Vector3 bottomPos, float time) {
-    if (!Hooks::isNoodleHookEnabled())
-        return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
+  if (!Hooks::isNoodleHookEnabled()) return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
 
-    if (self != movementData || !movementData || !saber)
-        return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
-
-
-    auto playerTransform = saber->get_transform()->get_parent()->get_parent();
-
-    topPos = playerTransform->InverseTransformPoint(topPos);
-    bottomPos = playerTransform->InverseTransformPoint(bottomPos);
-
+  if (self != movementData || !movementData || !saber)
     return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
+
+  auto playerTransform = saber->get_transform()->get_parent()->get_parent();
+
+  topPos = playerTransform->InverseTransformPoint(topPos);
+  bottomPos = playerTransform->InverseTransformPoint(bottomPos);
+
+  return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
 }
 
-void InstallSaberHooks(Logger &logger) {
-    INSTALL_HOOK(logger, Saber_ManualUpdate);
-    INSTALL_HOOK(logger, SaberMovementData_AddNewData);
+void InstallSaberHooks(Logger& logger) {
+  INSTALL_HOOK(logger, Saber_ManualUpdate);
+  INSTALL_HOOK(logger, SaberMovementData_AddNewData);
 }
 
 NEInstallHooks(InstallSaberHooks);

@@ -23,21 +23,19 @@
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_MATCH(EnvironmentSceneSetup_InstallBindings, &EnvironmentSceneSetup::InstallBindings, void, EnvironmentSceneSetup *self) {
-    EnvironmentSceneSetup_InstallBindings(self);
+MAKE_HOOK_MATCH(EnvironmentSceneSetup_InstallBindings, &EnvironmentSceneSetup::InstallBindings, void,
+                EnvironmentSceneSetup* self) {
+  EnvironmentSceneSetup_InstallBindings(self);
 
-    if (!Hooks::isNoodleHookEnabled())
-        return;
+  if (!Hooks::isNoodleHookEnabled()) return;
 
-    static const int _trackLaneYPositionPropertyId = UnityEngine::Shader::PropertyToID("_TrackLaneYPosition");
+  static int const _trackLaneYPositionPropertyId = UnityEngine::Shader::PropertyToID("_TrackLaneYPosition");
 
-    UnityEngine::Shader::SetGlobalFloat(_trackLaneYPositionPropertyId, -1000000.0f);
-
-
+  UnityEngine::Shader::SetGlobalFloat(_trackLaneYPositionPropertyId, -1000000.0f);
 }
 
 void InstallEnvironmentSceneSetupHooks(Logger& logger) {
-    INSTALL_HOOK(logger, EnvironmentSceneSetup_InstallBindings);
+  INSTALL_HOOK(logger, EnvironmentSceneSetup_InstallBindings);
 }
 
 NEInstallHooks(InstallEnvironmentSceneSetupHooks);

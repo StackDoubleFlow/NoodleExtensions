@@ -22,18 +22,24 @@ using namespace TrackParenting;
 using namespace CustomJSONData;
 using namespace NoodleExtensions;
 
-MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, &MissionLevelScenesTransitionSetupDataSO::Init, void, MissionLevelScenesTransitionSetupDataSO *self,
-                StringW missionId, GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap,
-                GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, ::ArrayW<GlobalNamespace::MissionObjective*> missionObjectives,
-                GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::GameplayModifiers* gameplayModifiers,
+MAKE_HOOK_MATCH(MissionLevelScenesTransitionSetupDataSO_Init, &MissionLevelScenesTransitionSetupDataSO::Init, void,
+                MissionLevelScenesTransitionSetupDataSO* self, StringW missionId,
+                GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap,
+                GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel,
+                ::ArrayW<GlobalNamespace::MissionObjective*> missionObjectives,
+                GlobalNamespace::ColorScheme* overrideColorScheme,
+                GlobalNamespace::GameplayModifiers* gameplayModifiers,
                 GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, StringW backButtonText) {
-    MissionLevelScenesTransitionSetupDataSO_Init(self, missionId, difficultyBeatmap, previewBeatmapLevel, missionObjectives, overrideColorScheme, gameplayModifiers, playerSpecificSettings, backButtonText);
+  MissionLevelScenesTransitionSetupDataSO_Init(self, missionId, difficultyBeatmap, previewBeatmapLevel,
+                                               missionObjectives, overrideColorScheme, gameplayModifiers,
+                                               playerSpecificSettings, backButtonText);
 
-//    SceneTransitionHelper::Patch(difficultyBeatmap,
-//                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()), playerSpecificSettings);
+  //    SceneTransitionHelper::Patch(difficultyBeatmap,
+  //                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()),
+  //                                 playerSpecificSettings);
 }
 
 void InstallMissionLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
-    INSTALL_HOOK(logger, MissionLevelScenesTransitionSetupDataSO_Init);
+  INSTALL_HOOK(logger, MissionLevelScenesTransitionSetupDataSO_Init);
 }
 NEInstallHooks(InstallMissionLevelScenesTransitionSetupDataSOHooks);

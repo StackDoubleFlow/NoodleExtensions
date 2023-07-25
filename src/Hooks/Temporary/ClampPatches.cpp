@@ -13,8 +13,8 @@
 
 using namespace GlobalNamespace;
 //
-//int addBeatmapObjectDataLineIndex;
-//MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData,
+// int addBeatmapObjectDataLineIndex;
+// MAKE_HOOK_MATCH(BeatmapData_AddBeatmapObjectData,
 //                &BeatmapData::AddBeatmapObjectData, void, BeatmapData *self,
 //                BeatmapObjectData *item) {
 //    addBeatmapObjectDataLineIndex = item->lineIndex;
@@ -28,14 +28,14 @@ using namespace GlobalNamespace;
 //
 //    BeatmapData_AddBeatmapObjectData(self, item);
 //}
-//MAKE_HOOK_MATCH(BeatmapLineData_AddBeatmapObjectData,
+// MAKE_HOOK_MATCH(BeatmapLineData_AddBeatmapObjectData,
 //                &BeatmapLineData::AddBeatmapObjectData, void,
 //                BeatmapLineData *self, BeatmapObjectData *item) {
 //    item->lineIndex = addBeatmapObjectDataLineIndex;
 //    BeatmapLineData_AddBeatmapObjectData(self, item);
 //}
 //
-//MAKE_HOOK_MATCH(NoteProcessorClampPatch,
+// MAKE_HOOK_MATCH(NoteProcessorClampPatch,
 //                &BeatmapObjectsInTimeRowProcessor::ProcessAllNotesInTimeRow, void,
 //                BeatmapObjectsInTimeRowProcessor *self, List<NoteData *> *notes) {
 //    std::map<int, int> extendedLanesMap;
@@ -123,7 +123,7 @@ using namespace GlobalNamespace;
 //    }
 //}
 //
-//MAKE_HOOK_MATCH(BeatmapObjectsDataClampPatch,
+// MAKE_HOOK_MATCH(BeatmapObjectsDataClampPatch,
 //                &BeatmapData::$get_beatmapObjectsData$d__31::MoveNext, bool,
 //                BeatmapData::$get_beatmapObjectsData$d__31 *self) {
 //    int num = self->$$1__state;
@@ -169,10 +169,10 @@ using namespace GlobalNamespace;
 //    return true;
 //}
 
-//void InstallClampPatches(Logger &logger) {
-//    INSTALL_HOOK(logger, BeatmapObjectsDataClampPatch);
-//    INSTALL_HOOK(logger, NoteProcessorClampPatch);
-//    INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData);
-//    INSTALL_HOOK(logger, BeatmapLineData_AddBeatmapObjectData);
-//}
-// NEInstallHooks(InstallClampPatches);
+// void InstallClampPatches(Logger &logger) {
+//     INSTALL_HOOK(logger, BeatmapObjectsDataClampPatch);
+//     INSTALL_HOOK(logger, NoteProcessorClampPatch);
+//     INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData);
+//     INSTALL_HOOK(logger, BeatmapLineData_AddBeatmapObjectData);
+// }
+//  NEInstallHooks(InstallClampPatches);

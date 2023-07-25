@@ -14,45 +14,46 @@
 
 using namespace GlobalNamespace;
 
-bool FakeNoteHelper::GetFakeNote(NoteData *noteData) {
-    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
-    if (!customNoteData || !customNoteData.value()->customData->value) {
-        return false;
-    }
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
-    return ad.objectData.fake.value_or(false);
+bool FakeNoteHelper::GetFakeNote(NoteData* noteData) {
+  auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
+  if (!customNoteData || !customNoteData.value()->customData->value) {
+    return false;
+  }
+  BeatmapObjectAssociatedData& ad = getAD(customNoteData.value()->customData);
+  return ad.objectData.fake.value_or(false);
 }
 
-bool FakeNoteHelper::GetCuttable(NoteData *noteData) {
-    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
-    if (!customNoteData || !customNoteData.value()->customData->value) {
-        return true;
-    }
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);
-    return !ad.objectData.uninteractable.value_or(false);
+bool FakeNoteHelper::GetCuttable(NoteData* noteData) {
+  auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(noteData);
+  if (!customNoteData || !customNoteData.value()->customData->value) {
+    return true;
+  }
+  BeatmapObjectAssociatedData& ad = getAD(customNoteData.value()->customData);
+  return !ad.objectData.uninteractable.value_or(false);
 }
 
-List<ObstacleController *>*
+List<ObstacleController*>*
 FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles) {
-//    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
+  //    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
 
-    for (auto const& obstacle : intersectingObstacles) {
-        if (!obstacle || !obstacle->obstacleData || il2cpp_utils::AssignableFrom<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData->klass))
-            continue;
+  for (auto const& obstacle : intersectingObstacles) {
+    if (!obstacle || !obstacle->obstacleData ||
+        il2cpp_utils::AssignableFrom<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData->klass))
+      continue;
 
-        auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
+    auto customData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(obstacle->obstacleData)->customData;
 
-        bool add = !customData || !customData->value;
+    bool add = !customData || !customData->value;
 
-        if (!add) {
-            auto const &ad = getAD(customData);
-            add = !ad.objectData.fake.value_or(false);
-        }
-
-        if (!add) {
-            (*intersectingObstacles)->Remove(obstacle);
-        }
+    if (!add) {
+      auto const& ad = getAD(customData);
+      add = !ad.objectData.fake.value_or(false);
     }
 
-    return intersectingObstacles;
+    if (!add) {
+      (*intersectingObstacles)->Remove(obstacle);
+    }
+  }
+
+  return intersectingObstacles;
 }

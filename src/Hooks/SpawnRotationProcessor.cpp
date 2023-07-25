@@ -11,35 +11,35 @@
 
 using namespace GlobalNamespace;
 
-//MAKE_HOOK_MATCH(ProcessBeatmapEventData,
-//                &SpawnRotationProcessor::ProcessBeatmapEventData, bool,
-//                SpawnRotationProcessor *self,
-//                BeatmapEventData *normalEventData) {
-//    if (!Hooks::isNoodleHookEnabled())
-//        return ProcessBeatmapEventData(self, normalEventData);
+// MAKE_HOOK_MATCH(ProcessBeatmapEventData,
+//                 &SpawnRotationProcessor::ProcessBeatmapEventData, bool,
+//                 SpawnRotationProcessor *self,
+//                 BeatmapEventData *normalEventData) {
+//     if (!Hooks::isNoodleHookEnabled())
+//         return ProcessBeatmapEventData(self, normalEventData);
 //
-//    auto *beatmapEventData = reinterpret_cast<CustomJSONData::CustomBeatmapEventData *>(normalEventData);
-//    if (BeatmapEventTypeExtensions::IsRotationEvent(beatmapEventData->type)) {
-//        if (!beatmapEventData->customData->value) {
-//            return ProcessBeatmapEventData(self, beatmapEventData);
-//        }
+//     auto *beatmapEventData = reinterpret_cast<CustomJSONData::CustomBeatmapEventData *>(normalEventData);
+//     if (BeatmapEventTypeExtensions::IsRotationEvent(beatmapEventData->type)) {
+//         if (!beatmapEventData->customData->value) {
+//             return ProcessBeatmapEventData(self, beatmapEventData);
+//         }
 //
-//        rapidjson::Value const &customData = *beatmapEventData->customData->value;
-//        std::optional<float> rotation =
-//            customData.HasMember("_rotation")
-//                ? std::optional{customData["_rotation"].GetFloat()}
-//                : std::nullopt;
+//         rapidjson::Value const &customData = *beatmapEventData->customData->value;
+//         std::optional<float> rotation =
+//             customData.HasMember("_rotation")
+//                 ? std::optional{customData["_rotation"].GetFloat()}
+//                 : std::nullopt;
 //
-//        if (rotation.has_value()) {
-//            self->rotation += *rotation;
-//            return true;
-//        }
-//    }
-//    return ProcessBeatmapEventData(self, beatmapEventData);
-//}
+//         if (rotation.has_value()) {
+//             self->rotation += *rotation;
+//             return true;
+//         }
+//     }
+//     return ProcessBeatmapEventData(self, beatmapEventData);
+// }
 
-void InstallSpawnRotationProcessorHooks(Logger &logger) {
-//    INSTALL_HOOK(logger, ProcessBeatmapEventData);
+void InstallSpawnRotationProcessorHooks(Logger& logger) {
+  //    INSTALL_HOOK(logger, ProcessBeatmapEventData);
 }
 
 NEInstallHooks(InstallSpawnRotationProcessorHooks);

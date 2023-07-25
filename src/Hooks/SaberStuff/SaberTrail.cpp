@@ -14,23 +14,19 @@
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_MATCH(SaberTrail_Init,
-                &SaberTrail::Init,
-                void,
-                SaberTrail* self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return SaberTrail_Init(self);
+MAKE_HOOK_MATCH(SaberTrail_Init, &SaberTrail::Init, void, SaberTrail* self) {
+  if (!Hooks::isNoodleHookEnabled()) return SaberTrail_Init(self);
 
-    SaberTrail_Init(self);
-    // parent to VRGameCore
+  SaberTrail_Init(self);
+  // parent to VRGameCore
 
-    auto vrGameCore = self->get_transform()->get_parent()->get_parent()->get_parent();
+  auto vrGameCore = self->get_transform()->get_parent()->get_parent()->get_parent();
 
-    self->trailRenderer->get_transform()->SetParent(vrGameCore, false);
+  self->trailRenderer->get_transform()->SetParent(vrGameCore, false);
 }
 
-void InstallSaber_TrailHooks(Logger &logger) {
-    INSTALL_HOOK(logger, SaberTrail_Init);
+void InstallSaber_TrailHooks(Logger& logger) {
+  INSTALL_HOOK(logger, SaberTrail_Init);
 }
 
 NEInstallHooks(InstallSaber_TrailHooks);

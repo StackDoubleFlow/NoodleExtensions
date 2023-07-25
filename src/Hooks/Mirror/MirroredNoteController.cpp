@@ -30,169 +30,158 @@ using namespace UnityEngine;
 using MirroredNote = MirroredNoteController_1<INoteMirrorable*>;
 using MirroredGameNote = MirroredNoteController_1<IGameNoteMirrorable*>;
 
-template<>
-struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<&MirroredNoteController_1<Il2CppObject*>::UpdatePositionAndRotation> {
-    static const MethodInfo* get() {
-        return il2cpp_utils::FindMethodUnsafe(classof(MirroredNoteController_1<Il2CppObject*>*), "UpdatePositionAndRotation", 0);
-    }
+template <>
+struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<
+    &MirroredNoteController_1<Il2CppObject*>::UpdatePositionAndRotation> {
+  static MethodInfo const* get() {
+    return il2cpp_utils::FindMethodUnsafe(classof(MirroredNoteController_1<Il2CppObject*>*),
+                                          "UpdatePositionAndRotation", 0);
+  }
 };
 
-static constexpr void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject)
-{
-    if (noteData->customData && noteData->customData->value) {
-        auto const &tracks = TracksAD::getAD(noteData->customData).tracks;
-        if (!tracks.empty()) {
-            for (auto &track: tracks) {
-                track->AddGameObject(gameObject);
-            }
-        }
+static constexpr void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject) {
+  if (noteData->customData && noteData->customData->value) {
+    auto const& tracks = TracksAD::getAD(noteData->customData).tracks;
+    if (!tracks.empty()) {
+      for (auto& track : tracks) {
+        track->AddGameObject(gameObject);
+      }
     }
+  }
 }
 
 static bool initMirror = false;
 
-static constexpr bool CheckSkip(Transform* noteTransform, Transform* followedNoteTransform)
-{
-    auto const position = followedNoteTransform->get_position();
-    auto const noteTransformGameObject = noteTransform->get_gameObject();
+static constexpr bool CheckSkip(Transform* noteTransform, Transform* followedNoteTransform) {
+  auto const position = followedNoteTransform->get_position();
+  auto const noteTransformGameObject = noteTransform->get_gameObject();
 
-    if (position.y < 0)
-    {
-        noteTransformGameObject->SetActive(false);
+  if (position.y < 0) {
+    noteTransformGameObject->SetActive(false);
 
-        return false;
-    }
+    return false;
+  }
 
-    noteTransformGameObject->SetActive(true);
-    return true;
+  noteTransformGameObject->SetActive(true);
+  return true;
 }
 
-static void UpdateMirror(Transform* mirroredNoteTransform,
-                         Transform* followedObjectTransform,
-                         NoteControllerBase* mirroredNoteController,
-                         NoteControllerBase* followedNote,
-                         auto&& setMirrorHide)
-{
+static void UpdateMirror(Transform* mirroredNoteTransform, Transform* followedObjectTransform,
+                         NoteControllerBase* mirroredNoteController, NoteControllerBase* followedNote,
+                         auto&& setMirrorHide) {
 
-    auto const followedObjectTransformLocalScale = followedObjectTransform->get_localScale();
+  auto const followedObjectTransformLocalScale = followedObjectTransform->get_localScale();
 
-    mirroredNoteTransform->set_localScale(followedObjectTransformLocalScale);
+  mirroredNoteTransform->set_localScale(followedObjectTransformLocalScale);
 
-    auto& mirrorCache = NECaches::getNoteCache(mirroredNoteController);
-    auto& followedNoteCache = NECaches::getNoteCache(followedNote);
+  auto& mirrorCache = NECaches::getNoteCache(mirroredNoteController);
+  auto& followedNoteCache = NECaches::getNoteCache(followedNote);
 
-    auto followedCutoutEffect = NECaches::GetCutout(followedNote, followedNoteCache);
-    auto followedDisappearingArrowController = NECaches::GetDisappearingArrowController((GameNoteController*) followedNote, followedNoteCache);
+  auto followedCutoutEffect = NECaches::GetCutout(followedNote, followedNoteCache);
+  auto followedDisappearingArrowController =
+      NECaches::GetDisappearingArrowController((GameNoteController*)followedNote, followedNoteCache);
 
-    ArrayW<ConditionalMaterialSwitcher *>& materialSwitchers = mirrorCache.conditionalMaterialSwitchers;
+  ArrayW<ConditionalMaterialSwitcher*>& materialSwitchers = mirrorCache.conditionalMaterialSwitchers;
 
-    if (!getNEConfig().enableMirrorNoteDissolve.GetValue() && followedCutoutEffect) {
-        // rekt
+  if (!getNEConfig().enableMirrorNoteDissolve.GetValue() && followedCutoutEffect) {
+    // rekt
 
-        setMirrorHide(followedNoteCache.cutoutEffect->cutout < 0.8);
-        if (followedNoteCache.cutoutEffect->cutout < 0.8)
-            return;
+    setMirrorHide(followedNoteCache.cutoutEffect->cutout < 0.8);
+    if (followedNoteCache.cutoutEffect->cutout < 0.8) return;
+  }
+
+  if (initMirror && materialSwitchers) {
+    for (auto* materialSwitcher : materialSwitchers) {
+      materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
     }
+    mirrorCache.dissolveEnabled = false;
+  }
 
-    if (initMirror && materialSwitchers) {
-        for (auto *materialSwitcher: materialSwitchers) {
-            materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
-        }
-        mirrorCache.dissolveEnabled = false;
+  if (!materialSwitchers) {
+    materialSwitchers = mirroredNoteController->GetComponentsInChildren<ConditionalMaterialSwitcher*>();
+  }
+
+  auto followedCutoutEffectCutout = followedCutoutEffect ? followedCutoutEffect->cutout : 0;
+  auto followedDisappearingArrowControllerCutout =
+      followedDisappearingArrowController ? followedDisappearingArrowController->arrowCutoutEffect->cutout : 0;
+
+  bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
+  bool isDissolving = followedCutoutEffectCutout > 0 || followedDisappearingArrowControllerCutout > 0;
+
+  if (materialSwitchers && mirrorCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
+    for (auto* materialSwitcher : materialSwitchers) {
+      materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1
+                                                                  : materialSwitcher->material0);
     }
+    mirrorCache.dissolveEnabled = isDissolving;
+  }
 
-    if (!materialSwitchers) {
-        materialSwitchers = mirroredNoteController->GetComponentsInChildren<ConditionalMaterialSwitcher *>();
-    }
+  if (followedCutoutEffect) {
+    auto cutoutEffect = NECaches::GetCutout(mirroredNoteController, mirrorCache);
+    if (cutoutEffect) cutoutEffect->SetCutout(followedCutoutEffect->cutout);
+  }
 
-    auto followedCutoutEffectCutout = followedCutoutEffect ? followedCutoutEffect->cutout : 0;
-    auto followedDisappearingArrowControllerCutout = followedDisappearingArrowController ? followedDisappearingArrowController->arrowCutoutEffect->cutout : 0;
+  static auto MirrorKlass = classof(GlobalNamespace::MirroredGameNoteController*);
+  static auto GameKlass = classof(GameNoteController*);
 
-    bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
-    bool isDissolving = followedCutoutEffectCutout > 0 || followedDisappearingArrowControllerCutout > 0;
+  if (il2cpp_functions::class_is_assignable_from(GameKlass, followedNote->klass) &&
+      il2cpp_functions::class_is_assignable_from(MirrorKlass, mirroredNoteController->klass)) {
+    auto disappearingArrowController =
+        NECaches::GetDisappearingArrowController((MirroredGameNoteController*)mirroredNoteController, mirrorCache);
 
-    if (materialSwitchers && mirrorCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
-        for (auto *materialSwitcher : materialSwitchers) {
-            materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1 : materialSwitcher->material0);
-        }
-        mirrorCache.dissolveEnabled = isDissolving;
-    }
-
-    if (followedCutoutEffect) {
-        auto cutoutEffect = NECaches::GetCutout(mirroredNoteController, mirrorCache);
-        if (cutoutEffect)
-            cutoutEffect->SetCutout(followedCutoutEffect->cutout);
-    }
-
-    static auto MirrorKlass = classof(GlobalNamespace::MirroredGameNoteController*);
-    static auto GameKlass = classof(GameNoteController*);
-
-
-
-    if (
-            il2cpp_functions::class_is_assignable_from(GameKlass, followedNote->klass) &&
-            il2cpp_functions::class_is_assignable_from(MirrorKlass, mirroredNoteController->klass)
-    ) {
-        auto disappearingArrowController = NECaches::GetDisappearingArrowController((MirroredGameNoteController*) mirroredNoteController, mirrorCache);
-
-        if (disappearingArrowController && followedDisappearingArrowController)
-            // SetArrowTransparency does 1 - x, so we resolve for x
-            // 1 - x = y
-            // -x = y - 1
-            // x = -y + 1
-            disappearingArrowController->SetArrowTransparency((followedDisappearingArrowController->arrowCutoutEffect->cutout - 1) * -1);
-    }
-
+    if (disappearingArrowController && followedDisappearingArrowController)
+      // SetArrowTransparency does 1 - x, so we resolve for x
+      // 1 - x = y
+      // -x = y - 1
+      // x = -y + 1
+      disappearingArrowController->SetArrowTransparency(
+          (followedDisappearingArrowController->arrowCutoutEffect->cutout - 1) * -1);
+  }
 }
 
-#define MIRROR_HOOK(name, generic) \
-MAKE_HOOK_FIND_INSTANCE(name##_Mirror, classof(MirroredNoteController_1<generic*> *), "Mirror", void, MirroredNoteController_1<generic*> *self, generic *noteController) { \
-    initMirror = true;                               \
-    name##_Mirror(self, noteController);                                                                                                                                   \
-    initMirror = false;                               \
-    if (!Hooks::isNoodleHookEnabled())   \
-        return; \
-    auto *followedNote = reinterpret_cast<GameNoteController *>(self->followedNote); \
-    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(followedNote->noteData);                                                               \
-                                   \
-    if (customNoteData) {                               \
-    BeatmapObjectAssociatedData &ad = getAD(customNoteData.value()->customData);                                                                                                   \
-    if (!ad.mirror) {              \
-        self->Hide(true);                           \
-        return;                               \
-    }                               \
-    AddToTrack(customNoteData.value(), self->get_gameObject());                                                                                                                    \
-    } \
-}
-
-
+#define MIRROR_HOOK(name, generic)                                                                                     \
+  MAKE_HOOK_FIND_INSTANCE(name##_Mirror, classof(MirroredNoteController_1<generic*>*), "Mirror", void,                 \
+                          MirroredNoteController_1<generic*>* self, generic* noteController) {                         \
+    initMirror = true;                                                                                                 \
+    name##_Mirror(self, noteController);                                                                               \
+    initMirror = false;                                                                                                \
+    if (!Hooks::isNoodleHookEnabled()) return;                                                                         \
+    auto* followedNote = reinterpret_cast<GameNoteController*>(self->followedNote);                                    \
+    auto customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(followedNote->noteData);              \
+                                                                                                                       \
+    if (customNoteData) {                                                                                              \
+      BeatmapObjectAssociatedData& ad = getAD(customNoteData.value()->customData);                                     \
+      if (!ad.mirror) {                                                                                                \
+        self->Hide(true);                                                                                              \
+        return;                                                                                                        \
+      }                                                                                                                \
+      AddToTrack(customNoteData.value(), self->get_gameObject());                                                      \
+    }                                                                                                                  \
+  }
 
 MIRROR_HOOK(MirroredNote, INoteMirrorable)
 MIRROR_HOOK(MirroredGameNote, IGameNoteMirrorable)
 
-
 // I love generics and il2cpp
 // MirroredNoteController_1_System_Object__UpdatePositionAndRotation
-MAKE_HOOK(Mirror_UpdatePositionAndRotation, nullptr, void, MirroredNoteController_1<Il2CppObject*> *self, MethodInfo* methodInfo) {
-    if (!Hooks::isNoodleHookEnabled())
-        return Mirror_UpdatePositionAndRotation(self, methodInfo);
-    if (!CheckSkip(self->noteTransform, self->dyn__followedNoteTransform())) {
-        return;
-    }
-    Mirror_UpdatePositionAndRotation(self, methodInfo);
-    UpdateMirror(self->noteTransform, self->followedNoteTransform,
-                 self, il2cpp_utils::cast<NoteControllerBase>(self->followedNote),
-                 [self](bool hide) {
-                     self->Hide(hide);
-                 });
+MAKE_HOOK(Mirror_UpdatePositionAndRotation, nullptr, void, MirroredNoteController_1<Il2CppObject*>* self,
+          MethodInfo* methodInfo) {
+  if (!Hooks::isNoodleHookEnabled()) return Mirror_UpdatePositionAndRotation(self, methodInfo);
+  if (!CheckSkip(self->noteTransform, self->dyn__followedNoteTransform())) {
+    return;
+  }
+  Mirror_UpdatePositionAndRotation(self, methodInfo);
+  UpdateMirror(self->noteTransform, self->followedNoteTransform, self,
+               il2cpp_utils::cast<NoteControllerBase>(self->followedNote), [self](bool hide) { self->Hide(hide); });
 }
 
-void InstallMirroredNoteControllerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, MirroredNote_Mirror);
-    INSTALL_HOOK(logger, MirroredGameNote_Mirror);
+void InstallMirroredNoteControllerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, MirroredNote_Mirror);
+  INSTALL_HOOK(logger, MirroredGameNote_Mirror);
 
-    auto mInfo = il2cpp_utils::il2cpp_type_check::MetadataGetter<&MirroredNoteController_1<Il2CppObject*>::UpdatePositionAndRotation>::get();
-    INSTALL_HOOK_DIRECT(logger, Mirror_UpdatePositionAndRotation, (void *) (mInfo->methodPointer));
+  auto mInfo = il2cpp_utils::il2cpp_type_check::MetadataGetter<
+      &MirroredNoteController_1<Il2CppObject*>::UpdatePositionAndRotation>::get();
+  INSTALL_HOOK_DIRECT(logger, Mirror_UpdatePositionAndRotation, (void*)(mInfo->methodPointer));
 }
 
 NEInstallHooks(InstallMirroredNoteControllerHooks);

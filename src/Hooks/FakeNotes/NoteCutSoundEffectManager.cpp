@@ -15,77 +15,72 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-static NoteCutSoundEffectManager *currentSoundEffectManager;
+static NoteCutSoundEffectManager* currentSoundEffectManager;
 static int lastFrame = -1;
 static int cutCount = -1;
-static const int maxNotesPerFrame = 30;
-static std::vector<NoteController *> hitsoundQueue;
+static int const maxNotesPerFrame = 30;
+static std::vector<NoteController*> hitsoundQueue;
 
-static bool ProcessHitSound(NoteController *noteController) {
-    int frameCount = Time::get_frameCount();
-    if (frameCount == lastFrame) {
-        cutCount++;
-    } else {
-        lastFrame = frameCount;
-        cutCount = 0;
-    }
+static bool ProcessHitSound(NoteController* noteController) {
+  int frameCount = Time::get_frameCount();
+  if (frameCount == lastFrame) {
+    cutCount++;
+  } else {
+    lastFrame = frameCount;
+    cutCount = 0;
+  }
 
-    return cutCount < maxNotesPerFrame;
+  return cutCount < maxNotesPerFrame;
 }
 
 custom_types::Helpers::Coroutine AddNotesLater() {
-    while(currentSoundEffectManager) {
-        if (hitsoundQueue.empty())
-            co_yield nullptr;
+  while (currentSoundEffectManager) {
+    if (hitsoundQueue.empty()) co_yield nullptr;
 
-        int notesRemaining = maxNotesPerFrame - cutCount;
+    int notesRemaining = maxNotesPerFrame - cutCount;
 
-        notesRemaining = std::clamp(notesRemaining, 0, (int) hitsoundQueue.size());
+    notesRemaining = std::clamp(notesRemaining, 0, (int)hitsoundQueue.size());
 
-        for (int i = 0; i < notesRemaining; i++) {
-            auto noteController = hitsoundQueue.back();
-            hitsoundQueue.pop_back();
+    for (int i = 0; i < notesRemaining; i++) {
+      auto noteController = hitsoundQueue.back();
+      hitsoundQueue.pop_back();
 
-            currentSoundEffectManager->HandleNoteWasSpawned(noteController);
-        }
-
-        cutCount += notesRemaining;
-
-
-        co_yield nullptr;
+      currentSoundEffectManager->HandleNoteWasSpawned(noteController);
     }
-    co_return;
+
+    cutCount += notesRemaining;
+
+    co_yield nullptr;
+  }
+  co_return;
 }
 
 MAKE_HOOK_MATCH(NoteCutSoundEffectManager_Start, &NoteCutSoundEffectManager::Start, void,
-                NoteCutSoundEffectManager *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return NoteCutSoundEffectManager_Start(self);
+                NoteCutSoundEffectManager* self) {
+  if (!Hooks::isNoodleHookEnabled()) return NoteCutSoundEffectManager_Start(self);
 
-    currentSoundEffectManager = self;
-    cutCount = 0;
-    hitsoundQueue.clear();
-    self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(AddNotesLater()));
-    NoteCutSoundEffectManager_Start(self);
+  currentSoundEffectManager = self;
+  cutCount = 0;
+  hitsoundQueue.clear();
+  self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(AddNotesLater()));
+  NoteCutSoundEffectManager_Start(self);
 }
 
-MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned,
-                &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
-                NoteCutSoundEffectManager *self, NoteController *noteController) {
-    if (!Hooks::isNoodleHookEnabled())
-        return NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
+MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned, &NoteCutSoundEffectManager::HandleNoteWasSpawned, void,
+                NoteCutSoundEffectManager* self, NoteController* noteController) {
+  if (!Hooks::isNoodleHookEnabled()) return NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
 
-    if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
-        if (ProcessHitSound(noteController)) {
-            NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
-        } else {
-            hitsoundQueue.emplace_back(noteController);
-        }
+  if (!FakeNoteHelper::GetFakeNote(noteController->noteData)) {
+    if (ProcessHitSound(noteController)) {
+      NoteCutSoundEffectManager_HandleNoteWasSpawned(self, noteController);
+    } else {
+      hitsoundQueue.emplace_back(noteController);
     }
+  }
 }
 
-void InstallNoteCutSoundEffectManagerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, NoteCutSoundEffectManager_Start);
-    INSTALL_HOOK(logger, NoteCutSoundEffectManager_HandleNoteWasSpawned);
+void InstallNoteCutSoundEffectManagerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, NoteCutSoundEffectManager_Start);
+  INSTALL_HOOK(logger, NoteCutSoundEffectManager_HandleNoteWasSpawned);
 }
 NEInstallHooks(InstallNoteCutSoundEffectManagerHooks);

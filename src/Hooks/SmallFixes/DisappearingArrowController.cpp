@@ -5,33 +5,31 @@
 #include "GlobalNamespace/GameNoteController.hpp"
 #include "GlobalNamespace/CutoutEffect.hpp"
 
-
 #include "NEHooks.h"
-
 
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-template<>
-struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<&DisappearingArrowControllerBase_1<GameNoteController*>::SetArrowTransparency> {
-    static const MethodInfo* get() {
-        return il2cpp_utils::FindMethodUnsafe(classof(GlobalNamespace::DisappearingArrowControllerBase_1<GameNoteController*>*), "SetArrowTransparency", 1);
-    }
+template <>
+struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<
+    &DisappearingArrowControllerBase_1<GameNoteController*>::SetArrowTransparency> {
+  static MethodInfo const* get() {
+    return il2cpp_utils::FindMethodUnsafe(
+        classof(GlobalNamespace::DisappearingArrowControllerBase_1<GameNoteController*>*), "SetArrowTransparency", 1);
+  }
 };
 
 MAKE_HOOK_MATCH(DisappearingArrowControllerBase_SetArrowTransparency,
                 &DisappearingArrowControllerBase_1<GameNoteController*>::SetArrowTransparency, void,
-                DisappearingArrowControllerBase_1<GameNoteController*> *self,
-                float arrowTransparency) {
-    DisappearingArrowControllerBase_SetArrowTransparency(self, arrowTransparency);
-    if (!Hooks::isNoodleHookEnabled())
-        return;
-    if (!self->arrowCutoutEffect) return;
-    self->arrowCutoutEffect->SetCutout(1.0f - arrowTransparency);
+                DisappearingArrowControllerBase_1<GameNoteController*>* self, float arrowTransparency) {
+  DisappearingArrowControllerBase_SetArrowTransparency(self, arrowTransparency);
+  if (!Hooks::isNoodleHookEnabled()) return;
+  if (!self->arrowCutoutEffect) return;
+  self->arrowCutoutEffect->SetCutout(1.0f - arrowTransparency);
 }
 
-void InstallDisappearingArrowControllerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, DisappearingArrowControllerBase_SetArrowTransparency);
+void InstallDisappearingArrowControllerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, DisappearingArrowControllerBase_SetArrowTransparency);
 }
 
 NEInstallHooks(InstallDisappearingArrowControllerHooks);

@@ -23,62 +23,50 @@
 #include "NEHooks.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
-
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-constexpr static NEVector::Vector3 GetNoteControllerPosition(Transform* transform)
-{
-    return transform->get_position();
+constexpr static NEVector::Vector3 GetNoteControllerPosition(Transform* transform) {
+  return transform->get_position();
 }
 
-constexpr static NEVector::Quaternion GetNoteControllerRotation(Transform* transform)
-{
-    return transform->get_rotation();
+constexpr static NEVector::Quaternion GetNoteControllerRotation(Transform* transform) {
+  return transform->get_rotation();
 }
 
-MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump,
-                &BeatEffectSpawner::HandleNoteDidStartJump,
-                void,
-                BeatEffectSpawner *self,
-                NoteController* noteController) {
-    if (!Hooks::isNoodleHookEnabled())
-        return BeatEffectSpawner_HandleNoteDidStartJump(self, noteController);
+MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump, &BeatEffectSpawner::HandleNoteDidStartJump, void,
+                BeatEffectSpawner* self, NoteController* noteController) {
+  if (!Hooks::isNoodleHookEnabled()) return BeatEffectSpawner_HandleNoteDidStartJump(self, noteController);
 
-    if (self->initData->hideNoteSpawnEffect)
-    {
-        return;
-    }
-    if (noteController->hidden)
-    {
-        return;
-    }
-    if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->songTime)
-    {
-        return;
-    }
-    ColorType colorType = noteController->noteData->colorType;
-    Color color = (colorType != ColorType::None) ? self->colorManager->ColorForType(colorType) : self->bombColorEffect;
-    auto beatEffect = self->beatEffectPoolContainer->Spawn();
-    beatEffect->didFinishEvent->Add(reinterpret_cast<IBeatEffectDidFinishEvent *>(self));
+  if (self->initData->hideNoteSpawnEffect) {
+    return;
+  }
+  if (noteController->hidden) {
+    return;
+  }
+  if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->songTime) {
+    return;
+  }
+  ColorType colorType = noteController->noteData->colorType;
+  Color color = (colorType != ColorType::None) ? self->colorManager->ColorForType(colorType) : self->bombColorEffect;
+  auto beatEffect = self->beatEffectPoolContainer->Spawn();
+  beatEffect->didFinishEvent->Add(reinterpret_cast<IBeatEffectDidFinishEvent*>(self));
 
-    // TRANSPILE HERE
-    auto transform = noteController->get_transform();
-    NEVector::Vector3 jumpStartPos(GetNoteControllerPosition(transform));
-    NEVector::Quaternion worldRotation(GetNoteControllerRotation(transform));
+  // TRANSPILE HERE
+  auto transform = noteController->get_transform();
+  NEVector::Vector3 jumpStartPos(GetNoteControllerPosition(transform));
+  NEVector::Quaternion worldRotation(GetNoteControllerRotation(transform));
 
-    beatEffect->get_transform()->SetPositionAndRotation(
-            jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
-            NEVector::Quaternion::identity());
+  beatEffect->get_transform()->SetPositionAndRotation(jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
+                                                      NEVector::Quaternion::identity());
 
+  beatEffect->Init(color, self->effectDuration, worldRotation);
 
-    beatEffect->Init(color, self->effectDuration, worldRotation);
-
-    //
+  //
 }
 
-void InstallBeatEffectSpawnerHooks(Logger &logger) {
-    INSTALL_HOOK_ORIG(logger, BeatEffectSpawner_HandleNoteDidStartJump);
+void InstallBeatEffectSpawnerHooks(Logger& logger) {
+  INSTALL_HOOK_ORIG(logger, BeatEffectSpawner_HandleNoteDidStartJump);
 }
 
 NEInstallHooks(InstallBeatEffectSpawnerHooks);

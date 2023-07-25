@@ -7,22 +7,18 @@
 
 #include "NEHooks.h"
 
-
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-MAKE_HOOK_MATCH(PlayerTransforms_Update,
-                &PlayerTransforms::Update, void,
-                PlayerTransforms *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return PlayerTransforms_Update(self);
+MAKE_HOOK_MATCH(PlayerTransforms_Update, &PlayerTransforms::Update, void, PlayerTransforms* self) {
+  if (!Hooks::isNoodleHookEnabled()) return PlayerTransforms_Update(self);
 
-    PlayerTransforms_Update(self);
-    self->headPseudoLocalPos = self->headTransform->get_localPosition();
+  PlayerTransforms_Update(self);
+  self->headPseudoLocalPos = self->headTransform->get_localPosition();
 }
 
-void InstallPlayerTransformsHooks(Logger &logger) {
-    INSTALL_HOOK(logger, PlayerTransforms_Update);
+void InstallPlayerTransformsHooks(Logger& logger) {
+  INSTALL_HOOK(logger, PlayerTransforms_Update);
 }
 
 NEInstallHooks(InstallPlayerTransformsHooks);

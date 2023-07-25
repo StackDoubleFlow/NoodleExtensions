@@ -28,107 +28,108 @@ using namespace GlobalNamespace;
 BeatmapCallbacksController* controller;
 static GlobalNamespace::IReadonlyBeatmapData* beatmapData;
 
-static BeatmapObjectSpawnController::InitData * initData;
+static BeatmapObjectSpawnController::InitData* initData;
 static GlobalNamespace::BeatmapObjectSpawnMovementData* movementData;
 
-inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData *initData, BeatmapObjectSpawnMovementData *movementData,
-                        std::optional<float> inputNjs, std::optional<float> inputOffset) {
-    return movementData->moveDuration + (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
+inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData,
+                               BeatmapObjectSpawnMovementData* movementData, std::optional<float> inputNjs,
+                               std::optional<float> inputOffset) {
+  return movementData->moveDuration +
+         (SpawnDataHelper::GetJumpDuration(initData, movementData, inputNjs, inputOffset) * 0.5f);
 }
 
-
 inline float ObjectSortGetTime(BeatmapDataItem* n) {
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
+  static auto* customObstacleDataClass = classof(CustomJSONData::CustomObstacleData*);
+  static auto* customNoteDataClass = classof(CustomJSONData::CustomNoteData*);
 
-    float* aheadTime;
-    CustomJSONData::JSONWrapper *customDataWrapper;
+  float* aheadTime;
+  CustomJSONData::JSONWrapper* customDataWrapper;
 
-    if (n->klass == customObstacleDataClass) {
-        auto *obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData*>(n);
-        aheadTime = &obstacle->aheadTimeNoodle;
-        customDataWrapper = obstacle->customData;
-    } else if (n->klass == customNoteDataClass) {
-        auto *note = reinterpret_cast<CustomJSONData::CustomNoteData*>(n);
-        aheadTime = &note->aheadTimeNoodle;
-        customDataWrapper = note->customData;
-    } else {
-        return n->time;
-    }
+  if (n->klass == customObstacleDataClass) {
+    auto* obstacle = reinterpret_cast<CustomJSONData::CustomObstacleData*>(n);
+    aheadTime = &obstacle->aheadTimeNoodle;
+    customDataWrapper = obstacle->customData;
+  } else if (n->klass == customNoteDataClass) {
+    auto* note = reinterpret_cast<CustomJSONData::CustomNoteData*>(n);
+    aheadTime = &note->aheadTimeNoodle;
+    customDataWrapper = note->customData;
+  } else {
+    return n->time;
+  }
 
-    auto const& ad = getAD(customDataWrapper);
+  auto const& ad = getAD(customDataWrapper);
 
-    auto const njs = ad.objectData.noteJumpMovementSpeed; // .value_or(NECaches::noteJumpMovementSpeed);
-    auto const spawnOffset = ad.objectData.noteJumpStartBeatOffset; //.value_or(NECaches::noteJumpStartBeatOffset);
+  auto const njs = ad.objectData.noteJumpMovementSpeed;           // .value_or(NECaches::noteJumpMovementSpeed);
+  auto const spawnOffset = ad.objectData.noteJumpStartBeatOffset; //.value_or(NECaches::noteJumpStartBeatOffset);
 
-    *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
+  *aheadTime = GetSpawnAheadTime(initData, movementData, njs, spawnOffset);
 
-    return n->time - *aheadTime;
+  return n->time - *aheadTime;
 }
 
 constexpr bool ObjectTimeCompare(BeatmapDataItem* a, BeatmapDataItem* b) {
-    return ObjectSortGetTime(a) < ObjectSortGetTime(b);
+  return ObjectSortGetTime(a) < ObjectSortGetTime(b);
 }
 
-System::Collections::Generic::LinkedList_1<BeatmapDataItem*>* SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
-    initData = NECaches::GameplayCoreContainer->Resolve<BeatmapObjectSpawnController::InitData *>();
-    movementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
-    movementData->Init(initData->noteLinesCount, initData->noteJumpMovementSpeed, initData->beatsPerMinute, initData->noteJumpValueType, initData->noteJumpValue, nullptr, NEVector::Vector3::right(), NEVector::Vector3::forward());
+System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*
+SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
+  initData = NECaches::GameplayCoreContainer->Resolve<BeatmapObjectSpawnController::InitData*>();
+  movementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
+  movementData->Init(initData->noteLinesCount, initData->noteJumpMovementSpeed, initData->beatsPerMinute,
+                     initData->noteJumpValueType, initData->noteJumpValue, nullptr, NEVector::Vector3::right(),
+                     NEVector::Vector3::forward());
 
+  auto items = beatmapData->GetAllBeatmapItemsCpp();
 
-    auto items = beatmapData->GetAllBeatmapItemsCpp();
+  std::stable_sort(items.begin(), items.end(), ObjectTimeCompare);
 
-    std::stable_sort(items.begin(), items.end(), ObjectTimeCompare);
+  initData = nullptr;
+  movementData = nullptr;
 
-    initData = nullptr;
-    movementData = nullptr;
+  auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
+  auto newListPtr = static_cast<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*>(newList);
+  if (items.empty()) return newListPtr;
 
-    auto newList = SafePtr(System::Collections::Generic::LinkedList_1<BeatmapDataItem*>::New_ctor());
-    auto newListPtr = static_cast<System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*>(newList);
-    if (items.empty()) return newListPtr;
+  for (auto const& o : items) {
+    newList->AddLast(o);
+  }
 
-
-
-    for (auto const& o : items) {
-        newList->AddLast(o);
-    }
-
-    return newListPtr;
+  return newListPtr;
 }
 
-MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::LateUpdate, void, BeatmapCallbacksUpdater *self) {
-    auto selfController = self->beatmapCallbacksController;
+MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::LateUpdate, void,
+                BeatmapCallbacksUpdater* self) {
+  auto selfController = self->beatmapCallbacksController;
 
-    // Reset to avoid overriding non NE maps
-//    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData)) {
-//        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
-//    }
+  // Reset to avoid overriding non NE maps
+  //    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData))
+  //    {
+  //        CustomJSONData::CustomEventCallbacks::firstNode.emplace(nullptr);
+  //    }
 
-    if (!Hooks::isNoodleHookEnabled()) {
-        controller = nullptr;
-        beatmapData = nullptr;
-        return BeatmapCallbacksUpdater_LateUpdate(self);
-    }
-
-    if (controller != selfController || selfController->beatmapData != beatmapData) {
-        CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Using noodle sorted node");
-        controller = selfController;
-        beatmapData = selfController->beatmapData;
-
-
-        auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->beatmapData);
-        auto items = SortAndOrderList(beatmap);
-
-        auto first = items->get_First();
-        CustomJSONData::CustomEventCallbacks::firstNode.emplace(first);
-    }
-
+  if (!Hooks::isNoodleHookEnabled()) {
+    controller = nullptr;
+    beatmapData = nullptr;
     return BeatmapCallbacksUpdater_LateUpdate(self);
-}
+  }
 
+  if (controller != selfController || selfController->beatmapData != beatmapData) {
+    CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Using noodle sorted node");
+    controller = selfController;
+    beatmapData = selfController->beatmapData;
+
+    auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->beatmapData);
+    auto items = SortAndOrderList(beatmap);
+
+    auto first = items->get_First();
+    CustomJSONData::CustomEventCallbacks::firstNode.emplace(first);
+  }
+
+  return BeatmapCallbacksUpdater_LateUpdate(self);
+}
 
 void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
-    INSTALL_HOOK(logger, BeatmapCallbacksUpdater_LateUpdate);
+  INSTALL_HOOK(logger, BeatmapCallbacksUpdater_LateUpdate);
 }
 
 NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

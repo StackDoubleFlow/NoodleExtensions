@@ -15,55 +15,52 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-MAKE_HOOK_MATCH(MirroredObstacleController_Mirror,
-                &MirroredObstacleController::Mirror, void,
-                MirroredObstacleController *self,
-                ObstacleController* obstacleController) {
-    if (Hooks::isNoodleHookEnabled()) {
-        self->set_hide(true);
-        return;
-    }
+MAKE_HOOK_MATCH(MirroredObstacleController_Mirror, &MirroredObstacleController::Mirror, void,
+                MirroredObstacleController* self, ObstacleController* obstacleController) {
+  if (Hooks::isNoodleHookEnabled()) {
+    self->set_hide(true);
+    return;
+  }
 
-    MirroredObstacleController_Mirror(self, obstacleController);
+  MirroredObstacleController_Mirror(self, obstacleController);
 }
 
 MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
-                &MirroredObstacleController::UpdatePositionAndRotation, void,
-                MirroredObstacleController *self) {
-    // static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    // if (self->followedObstacle && self->followedObstacle->obstacleData->klass == customObstacleDataClass) {
-    if (Hooks::isNoodleHookEnabled()) {
-        self->set_hide(true);
-        return;
-    }
-    // }
+                &MirroredObstacleController::UpdatePositionAndRotation, void, MirroredObstacleController* self) {
+  // static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
+  // if (self->followedObstacle && self->followedObstacle->obstacleData->klass == customObstacleDataClass) {
+  if (Hooks::isNoodleHookEnabled()) {
+    self->set_hide(true);
+    return;
+  }
+  // }
 
-    // if (self->followedTransform->get_position().y < 0) {
-    //     // Hide without disabling update
-    //     self->transform->set_position(Vector3(0, 100, 0));
-    // }
+  // if (self->followedTransform->get_position().y < 0) {
+  //     // Hide without disabling update
+  //     self->transform->set_position(Vector3(0, 100, 0));
+  // }
 
-    // Vector3 position = self->followedTransform->get_position();
-    // Quaternion quaternion = self->followedTransform->get_rotation();
-    // position.y = -position.y;
+  // Vector3 position = self->followedTransform->get_position();
+  // Quaternion quaternion = self->followedTransform->get_rotation();
+  // position.y = -position.y;
 
-    // // TODO:
-    // // quaternion = quaternion.Reflect(Vector3::get_up());
+  // // TODO:
+  // // quaternion = quaternion.Reflect(Vector3::get_up());
 
-    // self->transform->SetPositionAndRotation(position, quaternion);
+  // self->transform->SetPositionAndRotation(position, quaternion);
 
-    // if (self->followedTransform->get_localScale() !=
-    //     self->transform->get_localScale()) {
-    //     self->transform->set_localScale(
-    //         self->followedTransform->get_localScale());
-    // }
+  // if (self->followedTransform->get_localScale() !=
+  //     self->transform->get_localScale()) {
+  //     self->transform->set_localScale(
+  //         self->followedTransform->get_localScale());
+  // }
 
-    MirroredObstacleController_UpdatePositionAndRotation(self);
+  MirroredObstacleController_UpdatePositionAndRotation(self);
 }
 
-void InstallMirroredObstacleControllerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, MirroredObstacleController_Mirror);
-    INSTALL_HOOK(logger, MirroredObstacleController_UpdatePositionAndRotation);
+void InstallMirroredObstacleControllerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, MirroredObstacleController_Mirror);
+  INSTALL_HOOK(logger, MirroredObstacleController_UpdatePositionAndRotation);
 }
 
 NEInstallHooks(InstallMirroredObstacleControllerHooks);

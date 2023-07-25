@@ -15,7 +15,8 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace UnityEngine::SceneManagement;
 //
-//MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start2, &BeatmapObjectSpawnController::Start, void, BeatmapObjectSpawnController *self) {
+// MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start2, &BeatmapObjectSpawnController::Start, void,
+// BeatmapObjectSpawnController *self) {
 //    auto *beatmapObjectManager = reinterpret_cast<BeatmapObjectManager *>(self->beatmapObjectSpawner);
 //    auto *coreSetup = reinterpret_cast<BeatmapObjectCallbackController *>(self->beatmapObjectCallbackController);
 //    IAudioTimeSource* IAudioTimeSource = coreSetup->audioTimeSource;
@@ -63,7 +64,7 @@ using namespace UnityEngine::SceneManagement;
 //    BeatmapObjectSpawnController_Start2(self);
 //}
 
-//void InstallBeatmapObjectSpawnControllerHooks(Logger& logger) {
-//    INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start2);
-//}
-// NEInstallHooks(InstallBeatmapObjectSpawnControllerHooks);
+// void InstallBeatmapObjectSpawnControllerHooks(Logger& logger) {
+//     INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start2);
+// }
+//  NEInstallHooks(InstallBeatmapObjectSpawnControllerHooks);

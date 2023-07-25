@@ -9,17 +9,15 @@
 
 using namespace GlobalNamespace;
 
-MAKE_HOOK_MATCH(NoteDidStartJump, &GameNoteController::NoteDidStartJump, void,
-                GameNoteController *self) {
-    if (!Hooks::isNoodleHookEnabled())
-        return NoteDidStartJump(self);
+MAKE_HOOK_MATCH(NoteDidStartJump, &GameNoteController::NoteDidStartJump, void, GameNoteController* self) {
+  if (!Hooks::isNoodleHookEnabled()) return NoteDidStartJump(self);
 
-    if (FakeNoteHelper::GetCuttable(self->noteData)) {
-        NoteDidStartJump(self);
-    }
+  if (FakeNoteHelper::GetCuttable(self->noteData)) {
+    NoteDidStartJump(self);
+  }
 }
 
-void InstallGameNoteControllerHooks(Logger &logger) {
-    INSTALL_HOOK(logger, NoteDidStartJump);
+void InstallGameNoteControllerHooks(Logger& logger) {
+  INSTALL_HOOK(logger, NoteDidStartJump);
 }
 NEInstallHooks(InstallGameNoteControllerHooks);

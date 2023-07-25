@@ -22,38 +22,39 @@ using namespace TrackParenting;
 using namespace CustomJSONData;
 using namespace NoodleExtensions;
 
-MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init,
-                &MultiplayerLevelScenesTransitionSetupDataSO::Init,
-                void,MultiplayerLevelScenesTransitionSetupDataSO* self,
-                StringW gameMode, GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel,
-                GlobalNamespace::BeatmapDifficulty beatmapDifficulty, GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic,
-                GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, GlobalNamespace::ColorScheme* overrideColorScheme,
-                GlobalNamespace::GameplayModifiers* gameplayModifiers, GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
+MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &MultiplayerLevelScenesTransitionSetupDataSO::Init,
+                void, MultiplayerLevelScenesTransitionSetupDataSO* self, StringW gameMode,
+                GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel,
+                GlobalNamespace::BeatmapDifficulty beatmapDifficulty,
+                GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic,
+                GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap,
+                GlobalNamespace::ColorScheme* overrideColorScheme,
+                GlobalNamespace::GameplayModifiers* gameplayModifiers,
+                GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
                 GlobalNamespace::PracticeSettings* practiceSettings, bool useTestNoteCutSoundEffects) {
-    MultiplayerLevelScenesTransitionSetupDataSO_Init(self, gameMode, previewBeatmapLevel,beatmapDifficulty, beatmapCharacteristic,
-                                                     difficultyBeatmap,
-                                                     overrideColorScheme, gameplayModifiers,
-                                                     playerSpecificSettings, practiceSettings, useTestNoteCutSoundEffects);
+  MultiplayerLevelScenesTransitionSetupDataSO_Init(
+      self, gameMode, previewBeatmapLevel, beatmapDifficulty, beatmapCharacteristic, difficultyBeatmap,
+      overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, useTestNoteCutSoundEffects);
 
-    std::optional<GlobalNamespace::CustomDifficultyBeatmap *> customBeatmapDataCustomOpt = il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap >(difficultyBeatmap);
-    if (customBeatmapDataCustomOpt) {
-        NELogger::GetLogger().debug("CustomDifficultyBeatmap casted");
-        auto customBeatmapDataCustom = il2cpp_utils::cast<CustomJSONData::v3::CustomBeatmapSaveData>(
-                customBeatmapDataCustomOpt.value()->beatmapSaveData);
+  std::optional<GlobalNamespace::CustomDifficultyBeatmap*> customBeatmapDataCustomOpt =
+      il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap>(difficultyBeatmap);
+  if (customBeatmapDataCustomOpt) {
+    NELogger::GetLogger().debug("CustomDifficultyBeatmap casted");
+    auto customBeatmapDataCustom = il2cpp_utils::cast<CustomJSONData::v3::CustomBeatmapSaveData>(
+        customBeatmapDataCustomOpt.value()->beatmapSaveData);
 
-        SceneTransitionHelper::Patch(difficultyBeatmap,
-                                     customBeatmapDataCustom, playerSpecificSettings);
-    } else {
-        NELogger::GetLogger().debug("CustomDifficultyBeatmap not casted");
-        SceneTransitionHelper::Patch(nullptr,
-                                     nullptr, playerSpecificSettings);
-    }
+    SceneTransitionHelper::Patch(difficultyBeatmap, customBeatmapDataCustom, playerSpecificSettings);
+  } else {
+    NELogger::GetLogger().debug("CustomDifficultyBeatmap not casted");
+    SceneTransitionHelper::Patch(nullptr, nullptr, playerSpecificSettings);
+  }
 
-//    SceneTransitionHelper::Patch(difficultyBeatmap,
-//                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()), playerSpecificSettings);
+  //    SceneTransitionHelper::Patch(difficultyBeatmap,
+  //                                 static_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData()),
+  //                                 playerSpecificSettings);
 }
 
 void InstallMultiplayerLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
-    INSTALL_HOOK(logger, MultiplayerLevelScenesTransitionSetupDataSO_Init);
+  INSTALL_HOOK(logger, MultiplayerLevelScenesTransitionSetupDataSO_Init);
 }
 NEInstallHooks(InstallMultiplayerLevelScenesTransitionSetupDataSOHooks);

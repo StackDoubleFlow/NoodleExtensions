@@ -20,10 +20,10 @@
 using namespace GlobalNamespace;
 
 // Needed for obstacles, idk why too lazy to figure out
-void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObjectSpawnMovementData *movementData,
-                       BeatmapObjectSpawnController::InitData *initData);
+void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap, BeatmapObjectSpawnMovementData* movementData,
+                       BeatmapObjectSpawnController::InitData* initData);
 //
-//MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
+// MAKE_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData,
 //                &BeatmapDataLoader::GetBeatmapDataFromBeatmapSaveData,
 //                BeatmapData *, BeatmapDataLoader *self,
 //                List<BeatmapSaveData::NoteData *> *notesSaveData,
@@ -45,8 +45,8 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData *beatmap, BeatmapObject
 //    return result;
 //}
 
-void InstallBeatmapDataLoaderHooks(Logger &logger) {
-//    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
+void InstallBeatmapDataLoaderHooks(Logger& logger) {
+  //    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
 }
 
 NEInstallHooks(InstallBeatmapDataLoaderHooks);

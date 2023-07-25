@@ -34,73 +34,75 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-void SceneTransitionHelper::Patch(IDifficultyBeatmap *difficultyBeatmap, CustomJSONData::v3::CustomBeatmapSaveData *customBeatmapDataCustom, PlayerSpecificSettings *playerSpecificSettings) {
-    NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
-    bool noodleRequirement = false;
-    bool meRequirement = false;
+void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap,
+                                  CustomJSONData::v3::CustomBeatmapSaveData* customBeatmapDataCustom,
+                                  PlayerSpecificSettings* playerSpecificSettings) {
+  NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
+  bool noodleRequirement = false;
+  bool meRequirement = false;
 
-    if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
-        auto dynData = customBeatmapDataCustom->levelCustomData;
+  if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
+    auto dynData = customBeatmapDataCustom->levelCustomData;
 
-        if (dynData && dynData->get().IsObject()) {
-            ValueUTF16 const& rapidjsonData = *dynData;
+    if (dynData && dynData->get().IsObject()) {
+      ValueUTF16 const& rapidjsonData = *dynData;
 
-            meRequirement = CheckIfME(rapidjsonData);
-            noodleRequirement = CheckIfNoodle(rapidjsonData);
-        }
+      meRequirement = CheckIfME(rapidjsonData);
+      noodleRequirement = CheckIfNoodle(rapidjsonData);
     }
+  }
 
-    noodleRequirement = !meRequirement && noodleRequirement;
+  noodleRequirement = !meRequirement && noodleRequirement;
 
-    Hooks::setNoodleHookEnabled(noodleRequirement);
+  Hooks::setNoodleHookEnabled(noodleRequirement);
 
-    auto const& modInfo = NELogger::modInfo;
-    // if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
-    //     Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
-    //     Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
-    // } else {
-    //     Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
-    //     Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
-    // }
+  auto const& modInfo = NELogger::modInfo;
+  // if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
+  //     Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
+  //     Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
+  // } else {
+  //     Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
+  //     Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
+  // }
 
-    ParentController::OnDestroy();
+  ParentController::OnDestroy();
 
-    static auto *customObstacleDataClass = classof(CustomJSONData::CustomObstacleData *);
-    static auto *customNoteDataClass = classof(CustomJSONData::CustomNoteData *);
-//
-//    if (difficultyBeatmap) {
-//        auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
-//
-//        for (BeatmapLineData *beatmapLineData : beatmapData->beatmapLinesData) {
-//            if (!beatmapLineData)
-//                continue;
-//
-//            for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
-//                BeatmapObjectData *beatmapObjectData =
-//                        beatmapLineData->beatmapObjectsData->items.get(j);
-//
-//                CustomJSONData::JSONWrapper *customDataWrapper;
-//                if (beatmapObjectData->klass == customObstacleDataClass) {
-//                    auto obstacleData =
-//                            (CustomJSONData::CustomObstacleData *) beatmapObjectData;
-//                    customDataWrapper = obstacleData->customData;
-//                } else if (beatmapObjectData->klass == customNoteDataClass) {
-//                    auto noteData =
-//                            (CustomJSONData::CustomNoteData *) beatmapObjectData;
-//                    customDataWrapper = noteData->customData;
-//                } else {
-//                    continue;
-//                }
-//
-//                if (customDataWrapper) {
-//                    BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
-//                    ad.ResetState();
-//                }
-//            }
-//        }
-//    }
+  static auto* customObstacleDataClass = classof(CustomJSONData::CustomObstacleData*);
+  static auto* customNoteDataClass = classof(CustomJSONData::CustomNoteData*);
+  //
+  //    if (difficultyBeatmap) {
+  //        auto *beatmapData = reinterpret_cast<CustomBeatmapData *>(difficultyBeatmap->get_beatmapData());
+  //
+  //        for (BeatmapLineData *beatmapLineData : beatmapData->beatmapLinesData) {
+  //            if (!beatmapLineData)
+  //                continue;
+  //
+  //            for (int j = 0; j < beatmapLineData->beatmapObjectsData->size; j++) {
+  //                BeatmapObjectData *beatmapObjectData =
+  //                        beatmapLineData->beatmapObjectsData->items.get(j);
+  //
+  //                CustomJSONData::JSONWrapper *customDataWrapper;
+  //                if (beatmapObjectData->klass == customObstacleDataClass) {
+  //                    auto obstacleData =
+  //                            (CustomJSONData::CustomObstacleData *) beatmapObjectData;
+  //                    customDataWrapper = obstacleData->customData;
+  //                } else if (beatmapObjectData->klass == customNoteDataClass) {
+  //                    auto noteData =
+  //                            (CustomJSONData::CustomNoteData *) beatmapObjectData;
+  //                    customDataWrapper = noteData->customData;
+  //                } else {
+  //                    continue;
+  //                }
+  //
+  //                if (customDataWrapper) {
+  //                    BeatmapObjectAssociatedData &ad = getAD(customDataWrapper);
+  //                    ad.ResetState();
+  //                }
+  //            }
+  //        }
+  //    }
 
-    clearEventADs();
-    NECaches::ClearNoteCaches();
-    NECaches::ClearObstacleCaches();
+  clearEventADs();
+  NECaches::ClearNoteCaches();
+  NECaches::ClearObstacleCaches();
 }
