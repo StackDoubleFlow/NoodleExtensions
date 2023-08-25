@@ -34,19 +34,19 @@ void PlayerTrack::ctor() {
 }
 
 void PlayerTrack::AssignTrack(Track* track) {
-  if (PlayerTrack::track && PlayerTrack::instance && !track->v2) {
+  if (PlayerTrack::track && PlayerTrack::instance) {
     PlayerTrack::track->RemoveGameObject(PlayerTrack::instance->get_gameObject());
   }
   PlayerTrack::track = track;
 
-  if (!instance) {
+  if (!instance && !trackController) {
     auto* player = GameObject::Find("LocalPlayerGameCore")->get_transform();
     GameObject* noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
     origin = noodleObject->get_transform();
     origin->SetParent(player->get_parent(), true);
     player->SetParent(origin, true);
 
-    instance = noodleObject->AddComponent<PlayerTrack*>();
+
     pauseController = Object::FindObjectOfType<PauseController*>();
 
     if (pauseController) {
@@ -74,22 +74,47 @@ void PlayerTrack::AssignTrack(Track* track) {
 
     startLocalRot = origin->get_localRotation();
     startPos = origin->get_localPosition();
-    instance->UpdateData(true);
+    instance = noodleObject->AddComponent<PlayerTrack*>();
+    instance->set_enabled(track->v2);
+
+    if (track->v2) {
+      instance->Update();
+    } else {
+      trackController = Tracks::GameObjectTrackController::HandleTrackData(noodleObject, {track}, 0.6, track->v2, true).value_or(nullptr);
+      trackController->UpdateData(true);
+    }
   }
 
-  if (PlayerTrack::track && PlayerTrack::instance && !track->v2) {
+  if (PlayerTrack::track && PlayerTrack::instance) {
     PlayerTrack::track->AddGameObject(PlayerTrack::instance->get_gameObject());
   }
 }
 
 void PlayerTrack::OnDidPauseEvent() {
   NELogger::GetLogger().debug("PlayerTrack::OnDidPauseEvent");
-  IL2CPP_CATCH_HANDLER(instance->set_enabled(false);)
+  IL2CPP_CATCH_HANDLER(
+    if (instance) {
+      instance->set_enabled(false);
+    }
+
+    
+    if (trackController) {
+      trackController->set_enabled(false);
+    }
+  )
 }
 
 void PlayerTrack::OnDidResumeEvent() {
   NELogger::GetLogger().debug("PlayerTrack::OnDidResumeEvent");
-  IL2CPP_CATCH_HANDLER(instance->set_enabled(true);)
+  IL2CPP_CATCH_HANDLER(
+    if (instance) {
+      instance->set_enabled(track->v2);
+    }
+
+    if (trackController) {
+      trackController->set_enabled(true);
+    }
+  )
 }
 
 void PlayerTrack::OnDestroy() {
@@ -99,6 +124,7 @@ void PlayerTrack::OnDestroy() {
     // pauseController->remove_didPauseEvent(didPauseEventAction);
   }
   instance = nullptr;
+  trackController = nullptr;
   track = nullptr;
 }
 
@@ -136,48 +162,7 @@ void PlayerTrack::UpdateDataOld() {
 }
 
 void PlayerTrack::Update() {
-  UpdateData(false);
-}
-
-void PlayerTrack::UpdateData(bool force) {
-  if (!track) return;
-
   if (track->v2) {
     return UpdateDataOld();
   }
-
-  if (force) {
-    lastCheckedTime = 0;
-  }
-
-  float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
-
-  auto const& properties = track->properties;
-  auto const rotation = getPropertyNullableFast<NEVector::Quaternion>(track, properties.rotation, lastCheckedTime);
-  auto const localRotation =
-      getPropertyNullableFast<NEVector::Quaternion>(track, properties.localRotation, lastCheckedTime);
-  auto const position = getPropertyNullableFast<NEVector::Vector3>(track, properties.position, lastCheckedTime);
-  auto const localPosition =
-      getPropertyNullableFast<NEVector::Vector3>(track, properties.localPosition, lastCheckedTime);
-  auto const scale = getPropertyNullableFast<NEVector::Vector3>(track, properties.scale, lastCheckedTime);
-
-  auto transform = origin;
-
-  if (localRotation) {
-    transform->set_localRotation(localRotation.value());
-  } else if (rotation) {
-    transform->set_rotation(rotation.value());
-  }
-
-  if (localPosition) {
-    transform->set_localPosition(localPosition.value());
-  } else if (position) {
-    transform->set_position(position.value());
-  }
-
-  if (scale) {
-    transform->set_localScale(scale.value());
-  }
-
-  lastCheckedTime = getCurrentTime();
 }

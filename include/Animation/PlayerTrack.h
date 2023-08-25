@@ -8,21 +8,30 @@
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
 
 #include "GlobalNamespace/PauseController.hpp"
+#include "tracks/shared/Animation/GameObjectTrackController.hpp"
 
-DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour, DECLARE_CTOR(ctor);
-                      DECLARE_INSTANCE_METHOD(void, Update); DECLARE_INSTANCE_METHOD(void, OnDestroy);
+DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
+                    DECLARE_CTOR(ctor);
+                    DECLARE_INSTANCE_METHOD(void, Update);
+                    DECLARE_INSTANCE_METHOD(void, OnDestroy);
 
-                      void UpdateDataOld(); void UpdateData(bool force);
+                    void UpdateDataOld();
 
-                      uint64_t lastCheckedTime = 0;
+                    uint64_t lastCheckedTime = 0;
 
-                      public
-                      : static void AssignTrack(Track* track);
-                      private
-                      : static inline PlayerTrack * instance;
-                      static inline Track * track; static inline NEVector::Vector3 startPos;
-                      static inline NEVector::Quaternion startRot; static inline NEVector::Quaternion startLocalRot;
-                      static inline NEVector::Vector3 startScale; static inline UnityEngine::Transform * origin;
-                      static inline SafePtrUnity<GlobalNamespace::PauseController> pauseController;
+                    public:
+                    static void AssignTrack(Track* track);
+                    private:
+                    static inline PlayerTrack * instance;
+                    static inline Tracks::GameObjectTrackController * trackController;
+                    static inline Track * track; 
+                    static inline NEVector::Vector3 startPos;
+                    static inline NEVector::Quaternion startRot;
+                    static inline NEVector::Quaternion startLocalRot;
+                    static inline NEVector::Vector3 startScale;
+                    static inline UnityEngine::Transform * origin;
+                    static inline SafePtrUnity<GlobalNamespace::PauseController> pauseController;
 
-                      static void OnDidPauseEvent(); static void OnDidResumeEvent();)
+                    static void OnDidPauseEvent(); 
+                    static void OnDidResumeEvent();
+                      )
