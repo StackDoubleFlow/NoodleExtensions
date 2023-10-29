@@ -198,16 +198,12 @@
     {
       "dependency": {
         "id": "paper",
-        "versionRange": "=1.2.14",
+        "versionRange": "=1.2.16",
         "additionalData": {
-          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.14/libpaperlog.so",
-          "debugSoLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.14/debug_libpaperlog.so",
-          "overrideSoName": "libpaperlog.so",
-          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v1.2.14/paperlog.qmod",
-          "branchName": "version/v1_2_14"
+          "overrideSoName": "libpaperlog.so"
         }
       },
-      "version": "1.2.14"
+      "version": "1.2.16"
     },
     {
       "dependency": {
