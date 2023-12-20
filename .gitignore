@@ -1,3 +1,8 @@
+build/
+debug_scripts*
+.idea*
+.cache
+
 # Build files
 *.so
 obj/
