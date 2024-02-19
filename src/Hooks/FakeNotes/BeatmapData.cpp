@@ -60,9 +60,9 @@ void HandleBasicInfo(CustomJSONData::CustomLevelInfoSaveData*, std::string const
 
   bool v2 = customBeatmap.value()->v2orEarlier;
 
-  ret->cuttableNotesCount = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(VList(beatmap->colorNotes), v2);
-  ret->bombsCount = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(VList(beatmap->bombNotes), v2);
-  ret->obstaclesCount = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(VList(beatmap->obstacles), v2);
+  ret->_cuttableNotesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(ListW<v3::CustomBeatmapSaveData_ColorNoteData*>(beatmap->colorNotes), v2);
+  ret->_bombsCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(ListW<v3::CustomBeatmapSaveData_BombNoteData*>(beatmap->bombNotes), v2);
+  ret->_obstaclesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(ListW<v3::CustomBeatmapSaveData_ObstacleData*>(beatmap->obstacles), v2);
 }
 
 MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData,
@@ -79,16 +79,16 @@ MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData,
   // Not necessary in v3
   if (!v2) return ret;
 
-  ret->cuttableNotesCount = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(VList(beatmapSaveData->colorNotes), v2);
-  ret->bombsCount = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(VList(beatmapSaveData->bombNotes), v2);
-  ret->obstaclesCount = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(VList(beatmapSaveData->obstacles), v2);
+  ret->_cuttableNotesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(ListW<v3::CustomBeatmapSaveData_ColorNoteData*>(beatmapSaveData->colorNotes), v2);
+  ret->_bombsCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(ListW<v3::CustomBeatmapSaveData_BombNoteData*>(beatmapSaveData->bombNotes), v2);
+  ret->_obstaclesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(ListW<v3::CustomBeatmapSaveData_ObstacleData*>(beatmapSaveData->obstacles), v2);
 
   return ret;
 }
 
 void InstallBeatmapDataHooks(Logger& logger) {
   // force CJD to be first
-  Modloader::requireMod("CustomJSONData");
+  //Modloader::requireMod("CustomJSONData");
   RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleBasicInfo);
   INSTALL_HOOK(logger, BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData)
 }

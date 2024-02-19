@@ -12,7 +12,7 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
-SafePtr<List<ObstacleController*>>& getActiveObstacles();
+SafePtr<System::Collections::Generic::List_1<UnityW<ObstacleController>>>& getActiveObstacles();
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init, &BasicBeatmapObjectManager::Init, void, BasicBeatmapObjectManager* self,
                 GlobalNamespace::BasicBeatmapObjectManager::InitData* initData,
@@ -27,16 +27,17 @@ MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init, &BasicBeatmapObjectManager::Init
                                  burstSliderGameNotePool, burstSliderFillPool, bombNotePool, obstaclePool, sliderPools);
   if (!Hooks::isNoodleHookEnabled()) return;
 
-  getActiveObstacles().emplace(List<ObstacleController*>::New_ctor());
+  //TODO: WHAT DOES THIS MEAN????
+  //getActiveObstacles().emplace(List<ObstacleController*>::New_ctor());
 }
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_get_activeObstacleControllers,
                 &BasicBeatmapObjectManager::get_activeObstacleControllers,
-                System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*,
+                System::Collections::Generic::List_1<UnityW<GlobalNamespace::ObstacleController>>*,
                 BasicBeatmapObjectManager* self) {
   if (!Hooks::isNoodleHookEnabled()) return BasicBeatmapObjectManager_get_activeObstacleControllers(self);
 
-  return (List<ObstacleController*>*)getActiveObstacles();
+  return getActiveObstacles().ptr();
 }
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_DespawnInternal,

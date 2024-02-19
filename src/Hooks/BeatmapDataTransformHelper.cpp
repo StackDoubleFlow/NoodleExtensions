@@ -242,9 +242,9 @@ void HandleFakeObjects(CustomJSONData::CustomLevelInfoSaveData*, std::string con
     }                                                                                                                  \
   }
 
-  basic->obstaclesCount = unsafeBeatmap->obstacles->size;
-  basic->cuttableNotesCount = unsafeBeatmap->colorNotes->size;
-  basic->bombsCount = unsafeBeatmap->bombNotes->size;
+  basic->_obstaclesCount_k__BackingField = unsafeBeatmap->obstacles->_size;
+  basic->_cuttableNotesCount_k__BackingField = unsafeBeatmap->colorNotes->_size;
+  basic->_bombsCount_k__BackingField = unsafeBeatmap->bombNotes->_size;
 
   PARSE_ARRAY(fakeColorNotes, unsafeBeatmap->colorNotes, Parser::DeserializeColorNote);
   PARSE_ARRAY(fakeBombNotes, unsafeBeatmap->bombNotes, Parser::DeserializeBombNote);
@@ -254,7 +254,7 @@ void HandleFakeObjects(CustomJSONData::CustomLevelInfoSaveData*, std::string con
 }
 
 void InstallBeatmapDataTransformHelperHooks(Logger& logger) {
-  Modloader::requireMod("CustomJSONData");
+  //Modloader::requireMod("CustomJSONData");
   RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleFakeObjects);
 
   INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);

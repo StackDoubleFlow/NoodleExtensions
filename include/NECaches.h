@@ -1,8 +1,8 @@
 #pragma once
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/PlayerHeightDetector.hpp"
 #include "sombrero/shared/ColorUtils.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "Zenject/DiContainer.hpp"
 
 #pragma once

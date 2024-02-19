@@ -18,7 +18,7 @@ MAKE_HOOK_MATCH(BombNoteController_Init, &BombNoteController::Init, void, BombNo
   if (!Hooks::isNoodleHookEnabled()) return;
 
   if (!FakeNoteHelper::GetCuttable(noteData)) {
-    self->cuttableBySaber->set_canBeCut(false);
+    self->_cuttableBySaber->set_canBeCut(false);
   }
 }
 

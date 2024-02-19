@@ -16,7 +16,4 @@ DECLARE_CONFIG(NEConfig, CONFIG_VALUE(enableNoteDissolve, bool, "Enable note dis
                CONFIG_VALUE(qosmeticsModelDisable, bool, "Disable Qosmetics models on NE maps", true,
                             "If enabled, NE will disable qosmetics walls and notes to improve performance");
                CONFIG_VALUE(materialBehaviour, int, "Obstacle material behaviour", 0);
-
-               CONFIG_INIT_FUNCTION(CONFIG_INIT_VALUE(enableNoteDissolve); CONFIG_INIT_VALUE(enableMirrorNoteDissolve);
-                                    CONFIG_INIT_VALUE(enableObstacleDissolve); CONFIG_INIT_VALUE(qosmeticsModelDisable);
-                                    CONFIG_INIT_VALUE(materialBehaviour);))
+)

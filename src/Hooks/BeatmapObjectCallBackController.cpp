@@ -99,7 +99,7 @@ SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData) {
 
 MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::LateUpdate, void,
                 BeatmapCallbacksUpdater* self) {
-  auto selfController = self->beatmapCallbacksController;
+  auto selfController = self->_beatmapCallbacksController;
 
   // Reset to avoid overriding non NE maps
   //    if ((controller || beatmapData) && (controller != selfController || selfController->beatmapData != beatmapData))
@@ -113,12 +113,12 @@ MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::La
     return BeatmapCallbacksUpdater_LateUpdate(self);
   }
 
-  if (controller != selfController || selfController->beatmapData != beatmapData) {
+  if (controller != selfController || selfController->_beatmapData != beatmapData) {
     CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Using noodle sorted node");
     controller = selfController;
-    beatmapData = selfController->beatmapData;
+    beatmapData = selfController->_beatmapData;
 
-    auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->beatmapData);
+    auto beatmap = il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(selfController->_beatmapData);
     auto items = SortAndOrderList(beatmap);
 
     auto first = items->get_First();

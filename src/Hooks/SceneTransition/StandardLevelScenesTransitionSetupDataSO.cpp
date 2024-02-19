@@ -12,6 +12,7 @@
 #include "GlobalNamespace/PracticeSettings.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
 #include "GlobalNamespace/CustomDifficultyBeatmap.hpp"
+#include "GlobalNamespace/RecordingToolManager.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
 
@@ -31,14 +32,15 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelSce
                 ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel,
                 ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings,
                 ::GlobalNamespace::ColorScheme* overrideColorScheme,
+                ::GlobalNamespace::ColorScheme* beatmapOverrideColorScheme,
                 ::GlobalNamespace::GameplayModifiers* gameplayModifiers,
                 ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
                 ::GlobalNamespace::PracticeSettings* practiceSettings, ::StringW backButtonText,
-                bool useTestNoteCutSoundEffects, bool startPaused, BeatmapDataCache* cache) {
+                bool useTestNoteCutSoundEffects, bool startPaused, BeatmapDataCache* cache, System::Nullable_1<GlobalNamespace::RecordingToolManager::SetupData> recordingToolData) {
   StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel,
-                                                overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers,
-                                                playerSpecificSettings, practiceSettings, backButtonText,
-                                                useTestNoteCutSoundEffects, startPaused, cache);
+                                                overrideEnvironmentSettings, overrideColorScheme, beatmapOverrideColorScheme,
+                                                gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText,
+                                                useTestNoteCutSoundEffects, startPaused, cache, recordingToolData);
 
   std::optional<GlobalNamespace::CustomDifficultyBeatmap*> customBeatmapDataCustomOpt =
       il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap>(difficultyBeatmap);

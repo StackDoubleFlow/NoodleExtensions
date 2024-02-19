@@ -26,9 +26,9 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake, &BaseNoteVisuals::Awake, void, BaseNoteVi
   static auto ICubeNoteTypeProviderKlass = classof(GameNoteController*); // classof(INoteMovementProvider*);
   static auto CustomNoteDataKlass = classof(CustomJSONData::CustomNoteData*);
 
-  if (self && self->noteController &&
-      il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->noteController->klass)) {
-    NoteController* noteController = static_cast<NoteController*>(self->noteController);
+  if (self && self->_noteController &&
+      il2cpp_functions::class_is_assignable_from(ICubeNoteTypeProviderKlass, self->_noteController->klass)) {
+    NoteController* noteController = static_cast<NoteController*>(self->_noteController.ptr());
 
     if (!noteController->noteData) return;
 

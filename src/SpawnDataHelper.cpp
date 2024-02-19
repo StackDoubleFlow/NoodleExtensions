@@ -1,10 +1,10 @@
 #include "NELogger.h"
 #include "SpawnDataHelper.h"
 
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
@@ -20,13 +20,13 @@ void SpawnDataHelper::GetNoteJumpValues(BeatmapObjectSpawnController::InitData* 
                                         NEVector::Vector3& localMoveEndPos, NEVector::Vector3& localJumpEndPos) {
   jumpDuration = GetJumpDuration(initData, spawnMovementData, njs, startBeatOffset);
 
-  NEVector::Vector3 const forwardVec(spawnMovementData->forwardVec);
+  NEVector::Vector3 const forwardVec(spawnMovementData->_forwardVec);
   NEVector::Vector3 const centerPos(spawnMovementData->centerPos);
 
   jumpDistance = (njs.value_or(spawnMovementData->noteJumpMovementSpeed)) * jumpDuration;
   localMoveEndPos = centerPos + (forwardVec * (jumpDistance * 0.5f));
   localJumpEndPos = centerPos - (forwardVec * (jumpDistance * 0.5f));
-  localMoveStartPos = centerPos + (forwardVec * (spawnMovementData->moveDistance + (jumpDistance * 0.5f)));
+  localMoveStartPos = centerPos + (forwardVec * (spawnMovementData->_moveDistance + (jumpDistance * 0.5f)));
 }
 
 constexpr float Orig_LineYPosForLineLayer(GlobalNamespace::NoteLineLayer lineLayer) {

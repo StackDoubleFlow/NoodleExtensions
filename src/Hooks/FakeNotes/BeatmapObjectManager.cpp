@@ -38,7 +38,7 @@ void HandleNoteWasCut(NoteCutCoreEffectsSpawner* self, GlobalNamespace::NoteCont
   static auto* ___internal__method = THROW_UNLESS((::il2cpp_utils::FindMethod(
       self, "HandleNoteWasCut", std::vector<Il2CppClass*>{},
       ::std::vector<Il2CppType const*>{ ::il2cpp_utils::ExtractType(noteController), ::NoteCutInfoT(noteCutInfo) })));
-  ::il2cpp_utils::RunMethodThrow<void, false>(self, ___internal__method, noteController, byref(noteCutInfo));
+  ::il2cpp_utils::RunMethodRethrow<void, false>(self, ___internal__method, noteController, byref(noteCutInfo));
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectManager_HandleNoteControllerNoteWasCut,

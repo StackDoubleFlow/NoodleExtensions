@@ -14,7 +14,7 @@ MAKE_HOOK_MATCH(PlayerTransforms_Update, &PlayerTransforms::Update, void, Player
   if (!Hooks::isNoodleHookEnabled()) return PlayerTransforms_Update(self);
 
   PlayerTransforms_Update(self);
-  self->headPseudoLocalPos = self->headTransform->get_localPosition();
+  self->_headPseudoLocalPos = self->_headTransform->get_localPosition();
 }
 
 void InstallPlayerTransformsHooks(Logger& logger) {

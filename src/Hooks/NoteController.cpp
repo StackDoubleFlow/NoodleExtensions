@@ -45,8 +45,8 @@ CutoutEffect* NECaches::GetCutout(GlobalNamespace::NoteControllerBase* nc, NECac
   CutoutEffect*& cutoutEffect = noteCache.cutoutEffect;
   if (!cutoutEffect) {
     noteCache.baseNoteVisuals = noteCache.baseNoteVisuals ?: nc->get_gameObject()->GetComponent<BaseNoteVisuals*>();
-    CutoutAnimateEffect* cutoutAnimateEffect = noteCache.baseNoteVisuals->cutoutAnimateEffect;
-    ArrayW<CutoutEffect*> cuttoutEffects = cutoutAnimateEffect->cuttoutEffects;
+    CutoutAnimateEffect* cutoutAnimateEffect = noteCache.baseNoteVisuals->_cutoutAnimateEffect;
+    ArrayW<UnityW<CutoutEffect>> cuttoutEffects = cutoutAnimateEffect->_cuttoutEffects;
     for (CutoutEffect* effect : cuttoutEffects) {
       if (effect->get_name() != u"NoteArrow") {
         cutoutEffect = effect;
@@ -137,9 +137,9 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
   auto flipYSide = ad.flipY ? *ad.flipY : customNoteData->flipYSide;
 
   if (flipYSide > 0.0f) {
-    self->noteMovement->jump->yAvoidance = flipYSide * self->noteMovement->jump->yAvoidanceUp;
+    self->_noteMovement->_jump->_yAvoidance = flipYSide * self->_noteMovement->_jump->_yAvoidanceUp;
   } else {
-    self->noteMovement->jump->yAvoidance = flipYSide * self->noteMovement->jump->yAvoidanceDown;
+    self->_noteMovement->_jump->_yAvoidance = flipYSide * self->_noteMovement->_jump->_yAvoidanceDown;
   }
 
   auto& noteCache = NECaches::getNoteCache(self);
@@ -150,14 +150,14 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
   }
 
   for (auto* materialSwitcher : materialSwitchers) {
-    materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+    materialSwitcher->_renderer->set_sharedMaterial(materialSwitcher->_material0);
   }
   noteCache.dissolveEnabled = false;
 
-  NoteJump* noteJump = self->noteMovement->jump;
-  NoteFloorMovement* floorMovement = self->noteMovement->floorMovement;
+  NoteJump* noteJump = self->_noteMovement->_jump;
+  NoteFloorMovement* floorMovement = self->_noteMovement->_floorMovement;
 
-  float zOffset = self->noteMovement->zOffset;
+  float zOffset = self->_noteMovement->_zOffset;
   moveStartPos.z += zOffset;
   moveEndPos.z += zOffset;
   jumpEndPos.z += zOffset;
@@ -172,10 +172,10 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
       NEVector::Quaternion worldRotationQuatnerion = *ad.objectData.rotation;
 
       NEVector::Quaternion inverseWorldRotation = NEVector::Quaternion::Inverse(worldRotationQuatnerion);
-      noteJump->worldRotation = worldRotationQuatnerion;
-      noteJump->inverseWorldRotation = inverseWorldRotation;
-      floorMovement->worldRotation = worldRotationQuatnerion;
-      floorMovement->inverseWorldRotation = inverseWorldRotation;
+      noteJump->_worldRotation = worldRotationQuatnerion;
+      noteJump->_inverseWorldRotation = inverseWorldRotation;
+      floorMovement->_worldRotation = worldRotationQuatnerion;
+      floorMovement->_inverseWorldRotation = inverseWorldRotation;
 
       worldRotationQuatnerion = worldRotationQuatnerion * localRotation;
       transform->set_localRotation(worldRotationQuatnerion);
@@ -243,8 +243,8 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     return NoteController_ManualUpdate(self);
   }
 
-  NoteJump* noteJump = self->noteMovement->jump;
-  NoteFloorMovement* floorMovement = self->noteMovement->floorMovement;
+  NoteJump* noteJump = self->_noteMovement->_jump;
+  NoteFloorMovement* floorMovement = self->_noteMovement->_floorMovement;
 
   auto time = NoodleExtensions::getTimeProp(tracks);
   float normalTime;
@@ -252,7 +252,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     normalTime = time.value();
   } else {
     float jumpDuration = noteJump->jumpDuration;
-    float elapsedTime = TimeSourceHelper::getSongTime(noteJump->audioTimeSyncController) -
+    float elapsedTime = TimeSourceHelper::getSongTime(noteJump->_audioTimeSyncController) -
                         (customNoteData->time - (jumpDuration * 0.5f));
     normalTime = elapsedTime / jumpDuration;
   }
@@ -261,10 +261,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
   if (offset.positionOffset.has_value()) {
     auto const& offsetPos = *offset.positionOffset;
-    floorMovement->startPos = ad.moveStartPos + offsetPos;
-    floorMovement->endPos = ad.moveEndPos + offsetPos;
-    noteJump->startPos = ad.moveEndPos + offsetPos;
-    noteJump->endPos = ad.jumpEndPos + offsetPos;
+    floorMovement->_startPos = ad.moveStartPos + offsetPos;
+    floorMovement->_endPos = ad.moveEndPos + offsetPos;
+    noteJump->_startPos = ad.moveEndPos + offsetPos;
+    noteJump->_endPos = ad.jumpEndPos + offsetPos;
   }
 
   auto transform = self->get_transform();
@@ -281,10 +281,10 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
     if (offset.rotationOffset.has_value()) {
       worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
       NEVector::Quaternion inverseWorldRotation = NEVector::Quaternion::Inverse(worldRotationQuaternion);
-      noteJump->worldRotation = worldRotationQuaternion;
-      noteJump->inverseWorldRotation = inverseWorldRotation;
-      floorMovement->worldRotation = worldRotationQuaternion;
-      floorMovement->inverseWorldRotation = inverseWorldRotation;
+      noteJump->_worldRotation = worldRotationQuaternion;
+      noteJump->_inverseWorldRotation = inverseWorldRotation;
+      floorMovement->_worldRotation = worldRotationQuaternion;
+      floorMovement->_inverseWorldRotation = inverseWorldRotation;
     }
 
     worldRotationQuaternion = worldRotationQuaternion * localRotation;
@@ -304,8 +304,8 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
   if (hasDissolveOffset && noteCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
     ArrayW<ConditionalMaterialSwitcher*> materialSwitchers = noteCache.conditionalMaterialSwitchers;
     for (auto* materialSwitcher : materialSwitchers) {
-      materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1
-                                                                  : materialSwitcher->material0);
+      materialSwitcher->_renderer->set_sharedMaterial(isDissolving ? materialSwitcher->_material1
+                                                                  : materialSwitcher->_material0);
     }
     noteCache.dissolveEnabled = isDissolving;
   }
@@ -342,13 +342,13 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
       if (self->klass == gameNoteControllerClass) {
         auto* gameNoteController = reinterpret_cast<GameNoteController*>(self);
-        ArrayW<BoxCuttableBySaber*> bigCuttables = gameNoteController->bigCuttableBySaberList;
+        ArrayW<UnityW<BoxCuttableBySaber>> bigCuttables = gameNoteController->_bigCuttableBySaberList;
         for (auto bigCuttable : bigCuttables) {
           if (bigCuttable->canBeCut != enabled) {
             bigCuttable->set_canBeCut(enabled);
           }
         }
-        ArrayW<BoxCuttableBySaber*> smallCuttables = gameNoteController->smallCuttableBySaberList;
+        ArrayW<UnityW<BoxCuttableBySaber>> smallCuttables = gameNoteController->_smallCuttableBySaberList;
         for (auto smallCuttable : smallCuttables) {
           if (smallCuttable->canBeCut != enabled) {
             smallCuttable->set_canBeCut(enabled);
@@ -356,7 +356,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
         }
       } else if (self->klass == bombNoteControllerClass) {
         auto* bombNoteController = reinterpret_cast<BombNoteController*>(self);
-        CuttableBySaber* cuttable = bombNoteController->cuttableBySaber;
+        CuttableBySaber* cuttable = bombNoteController->_cuttableBySaber;
         if (cuttable->get_canBeCut() != enabled) {
           cuttable->set_canBeCut(enabled);
         }

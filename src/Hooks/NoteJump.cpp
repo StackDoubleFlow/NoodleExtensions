@@ -33,7 +33,7 @@ constexpr float NoteMissedTimeAdjust(float beatTime, float jumpDuration, float n
 
 void NoteJump_ManualUpdateNoteLookTranspile(NoteJump* self, Transform* selfTransform, float const normalTime) {
   if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
-    self->rotatedObject->set_localRotation(self->endRotation);
+    self->_rotatedObject->set_localRotation(self->_endRotation);
     return;
   }
   Transform* baseTransform = selfTransform; // lazy
@@ -42,24 +42,24 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump* self, Transform* selfTrans
 
   NEVector::Quaternion a =
       normalTime < 0.125
-          ? NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->startRotation),
-                                        baseTransformRotation * NEVector::Quaternion(self->middleRotation),
+          ? NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->_startRotation),
+                                        baseTransformRotation * NEVector::Quaternion(self->_middleRotation),
                                         std::sin(normalTime * M_PI * 4))
-          : NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->middleRotation),
-                                        baseTransformRotation * NEVector::Quaternion(self->endRotation),
+          : NEVector::Quaternion::Slerp(baseTransformRotation * NEVector::Quaternion(self->_middleRotation),
+                                        baseTransformRotation * NEVector::Quaternion(self->_endRotation),
                                         std::sin((normalTime - 0.125) * M_PI * 2));
 
-  NEVector::Vector3 vector = self->playerTransforms->headWorldPos;
+  NEVector::Vector3 vector = self->_playerTransforms->headWorldPos;
 
   // Aero doesn't know what's happening anymore
-  NEVector::Quaternion worldRot = self->inverseWorldRotation;
+  NEVector::Quaternion worldRot = self->_inverseWorldRotation;
   auto baseTransformParent = baseTransform->get_parent();
   if (baseTransformParent) {
     // Handle parenting
     worldRot = worldRot * (NEVector::Quaternion)NEVector::Quaternion::Inverse(baseTransformParent->get_rotation());
   }
 
-  Transform* headTransform = self->playerTransforms->headTransform;
+  Transform* headTransform = self->_playerTransforms->_headTransform;
   NEVector::Quaternion inverse = NEVector::Quaternion::Inverse(worldRot);
   NEVector::Vector3 upVector = inverse * NEVector::Vector3::up();
 
@@ -73,15 +73,15 @@ void NoteJump_ManualUpdateNoteLookTranspile(NoteJump* self, Transform* selfTrans
   NEVector::Vector3 normalized = NEVector::Quaternion(baseTransformRotation) *
                                  (worldRot * Sombrero::vector3subtract(baseTransformPosition, vector).get_normalized());
 
-  NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->rotatedObject->get_up());
-  self->rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
+  NEVector::Quaternion b = NEVector::Quaternion::LookRotation(normalized, self->_rotatedObject->get_up());
+  self->_rotatedObject->set_rotation(NEVector::Quaternion::Lerp(a, b, normalTime * 2));
 }
 
 MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJump* self) {
   if (!Hooks::isNoodleHookEnabled()) return NoteJump_ManualUpdate(self);
   auto selfTransform = self->get_transform();
-  float songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
-  float elapsedTime = songTime - (self->beatTime - self->jumpDuration * 0.5f);
+  float songTime = TimeSourceHelper::getSongTime(self->_audioTimeSyncController);
+  float elapsedTime = songTime - (self->_beatTime - self->jumpDuration * 0.5f);
   // transpile here
   if (noteUpdateAD) {
     elapsedTime = noteTimeAdjust(elapsedTime, self->jumpDuration);
@@ -89,20 +89,20 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
   //
   float normalTime = elapsedTime / self->jumpDuration;
 
-  if (self->startPos.x == self->endPos.x) {
-    self->localPosition.x = self->startPos.x;
+  if (self->_startPos.x == self->_endPos.x) {
+    self->_localPosition.x = self->_startPos.x;
   } else if (normalTime < 0.25) {
-    self->localPosition.x = self->startPos.x + (self->endPos.x - self->startPos.x) * InOutQuad(normalTime * 4);
+    self->_localPosition.x = self->_startPos.x + (self->_endPos.x - self->_startPos.x) * InOutQuad(normalTime * 4);
   } else {
-    self->localPosition.x = self->endPos.x;
+    self->_localPosition.x = self->_endPos.x;
   }
-  self->localPosition.z =
-      self->playerTransforms->MoveTowardsHead(self->startPos.z, self->endPos.z, self->inverseWorldRotation, normalTime);
-  self->localPosition.y =
-      self->startPos.y + self->startVerticalVelocity * elapsedTime - self->gravity * elapsedTime * elapsedTime * 0.5;
-  if (self->yAvoidance != 0 && normalTime < 0.25) {
+  self->_localPosition.z =
+      self->_playerTransforms->MoveTowardsHead(self->_startPos.z, self->_endPos.z, self->_inverseWorldRotation, normalTime);
+  self->_localPosition.y =
+      self->_startPos.y + self->_startVerticalVelocity * elapsedTime - self->_gravity * elapsedTime * elapsedTime * 0.5;
+  if (self->_yAvoidance != 0 && normalTime < 0.25) {
     float num3 = 0.5 - std::cos(normalTime * 8 * M_PI) * 0.5;
-    self->localPosition.y = self->localPosition.y + num3 * self->yAvoidance;
+    self->_localPosition.y = self->localPosition.y + num3 * self->_yAvoidance;
   }
 
   // transpile here
@@ -113,7 +113,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     std::optional<NEVector::Vector3> position =
         AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, normalTime);
     if (position.has_value()) {
-      self->localPosition = *position + noteUpdateAD->noteOffset;
+      self->_localPosition = *position + noteUpdateAD->noteOffset;
       definitePosition = true;
     }
   }
@@ -122,33 +122,33 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
   if (normalTime < 0.5) {
     NoteJump_ManualUpdateNoteLookTranspile(self, selfTransform, normalTime);
   }
-  if (normalTime >= 0.5 && !self->halfJumpMarkReported) {
-    self->halfJumpMarkReported = true;
+  if (normalTime >= 0.5 && !self->_halfJumpMarkReported) {
+    self->_halfJumpMarkReported = true;
     if (self->noteJumpDidPassHalfEvent) self->noteJumpDidPassHalfEvent->Invoke();
   }
-  if (normalTime >= 0.75 && !self->threeQuartersMarkReported) {
-    self->threeQuartersMarkReported = true;
+  if (normalTime >= 0.75 && !self->_threeQuartersMarkReported) {
+    self->_threeQuartersMarkReported = true;
     if (self->noteJumpDidPassThreeQuartersEvent) self->noteJumpDidPassThreeQuartersEvent->Invoke(self);
   }
-  if (NoteMissedTimeAdjust(self->beatTime, self->jumpDuration, elapsedTime) >= self->missedTime &&
-      !self->missedMarkReported) {
-    self->missedMarkReported = true;
+  if (NoteMissedTimeAdjust(self->_beatTime, self->jumpDuration, elapsedTime) >= self->_missedTime &&
+      !self->_missedMarkReported) {
+    self->_missedMarkReported = true;
     if (self->noteJumpDidPassMissedMarkerEvent) self->noteJumpDidPassMissedMarkerEvent->Invoke();
   }
 
   // transpile here
-  if (self->threeQuartersMarkReported && !definitePosition) {
+  if (self->_threeQuartersMarkReported && !definitePosition) {
     //
     float num4 = (normalTime - 0.75f) / 0.25f;
     num4 = num4 * num4 * num4;
-    self->localPosition.z = self->localPosition.z - std::lerp(0, self->endDistanceOffset, num4);
+    self->_localPosition.z = self->localPosition.z - std::lerp(0, self->_endDistanceOffset, num4);
   }
   if (normalTime >= 1) {
     if (self->noteJumpDidFinishEvent) self->noteJumpDidFinishEvent->Invoke();
   }
   if (normalTime >= 1.0f) {
-    if (!self->missedMarkReported) {
-      self->missedMarkReported = true;
+    if (!self->_missedMarkReported) {
+      self->_missedMarkReported = true;
       auto action4 = self->noteJumpDidPassMissedMarkerEvent;
       if (action4 != nullptr) {
         action4->Invoke();
@@ -160,7 +160,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
     }
   }
 
-  NEVector::Vector3 result = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
+  NEVector::Vector3 result = NEVector::Quaternion(self->_worldRotation) * NEVector::Vector3(self->localPosition);
   selfTransform->set_localPosition(result);
   if (self->noteJumpDidUpdateProgressEvent) {
     self->noteJumpDidUpdateProgressEvent->Invoke(normalTime);

@@ -9,10 +9,10 @@
 #include "NELogger.h"
 #include "SpawnDataHelper.h"
 
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/NoteData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "NECaches.h"
@@ -59,9 +59,9 @@ constexpr float GetJumpDuration(BeatmapObjectSpawnController::InitData* initData
 
   float oneBeatDuration = OneBeatDuration(initData->beatsPerMinute);
   float halfJumpDurationInBeats =
-      CalculateHalfJumpDurationInBeats(movementData->startHalfJumpDurationInBeats, movementData->maxHalfJumpDistance,
+      CalculateHalfJumpDurationInBeats(movementData->_startHalfJumpDurationInBeats, movementData->_maxHalfJumpDistance,
                                        inputNjs.value_or(movementData->noteJumpMovementSpeed), oneBeatDuration,
-                                       inputOffset.value_or(movementData->noteJumpStartBeatOffset));
+                                       inputOffset.value_or(movementData->_noteJumpStartBeatOffset));
 
   return oneBeatDuration * halfJumpDurationInBeats * 2.0f;
 }
@@ -88,7 +88,7 @@ constexpr NEVector::Vector2 Get2DNoteOffset(float lineIndex, int noteLinesCount,
 constexpr NEVector::Vector3 GetNoteOffset(GlobalNamespace::BeatmapObjectSpawnMovementData* spawnMovementData,
                                           float lineIndex, float lineLayer) {
   NEVector::Vector2 coords = Get2DNoteOffset(lineIndex, spawnMovementData->noteLinesCount, lineLayer);
-  return (spawnMovementData->rightVec * coords.x) + NEVector::Vector3(0, coords.y, 0);
+  return NEVector::Vector3(0, coords.y, 0) + NEVector::Vector3::op_Multiply(spawnMovementData->_rightVec, coords.x);
 }
 
 constexpr UnityEngine::Vector3 GetObstacleOffset(GlobalNamespace::BeatmapObjectSpawnMovementData* spawnMovementData,

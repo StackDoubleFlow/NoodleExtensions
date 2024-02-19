@@ -3,10 +3,6 @@
 
 #include "NEHooks.h"
 
-#include "questui/shared/QuestUI.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
-#include "questui/shared/CustomTypes/Components/MainThreadScheduler.hpp"
-
 #include "custom-types/shared/coroutine.hpp"
 
 #include "sombrero/shared/Vector2Utils.hpp"
@@ -44,13 +40,13 @@ static const std::string ChromaVersionRange = ">=2.5.7";
 
 static const std::string MappingExtensionsID = "MappingExtensions";
 
-static std::vector<const ModInfo> outdatedMods;
+static std::vector<const modloader::ModInfo> outdatedMods;
 static bool MEInstalled = false;
 
-static void AddToDependencyIfOutdated(std::string const& modName, std::string const& versionRange,
+/*static void AddToDependencyIfOutdated(std::string const& modName, std::string const& versionRange,
                                       std::unordered_map<std::string, const Mod> const& modList,
-                                      std::vector<const ModInfo>& outdatedMods) {
-  auto modLoaded = Modloader::requireMod(modName);
+                                      std::vector<const modloader::ModInfo>& outdatedMods) {
+  auto modLoaded = false;//Modloader::requireMod(modName);
 
   if (modLoaded) {
     auto modInfo = modList.find(modName);
@@ -61,11 +57,11 @@ static void AddToDependencyIfOutdated(std::string const& modName, std::string co
       }
     }
   }
-}
+}*/
 
 custom_types::Helpers::Coroutine openDialogLater() {
 
-  co_yield reinterpret_cast<System::Collections::IEnumerator*>(CRASH_UNLESS(WaitForSecondsRealtime::New_ctor(0.5f)));
+  /*co_yield reinterpret_cast<System::Collections::IEnumerator*>(CRASH_UNLESS(WaitForSecondsRealtime::New_ctor(0.5f)));
 
   using namespace QuestUI;
 
@@ -134,7 +130,7 @@ custom_types::Helpers::Coroutine openDialogLater() {
     }
   }
 
-  modalTransform->Show(true, true, nullptr);
+  modalTransform->Show(true, true, nullptr);*/
 
   co_return;
 }
@@ -152,20 +148,20 @@ MAKE_HOOK_MATCH(MainFlowCoordinator_DidActivate, &GlobalNamespace::MainFlowCoord
 }
 
 void InstallOutdatedModsHooks(Logger& logger) {
-  auto const modList = Modloader::getMods();
+  //auto const modList = Modloader::getMods();
 
-  AddToDependencyIfOutdated(QosID, QosVersionRange, modList, outdatedMods);
-  AddToDependencyIfOutdated(SongLoaderID, SongLoaderVersionRange, modList, outdatedMods);
-  AddToDependencyIfOutdated(PinkCoreID, PinkCoreVersionRange, modList, outdatedMods);
-  AddToDependencyIfOutdated(ChromaID, ChromaVersionRange, modList, outdatedMods);
+  //AddToDependencyIfOutdated(QosID, QosVersionRange, modList, outdatedMods);
+  //AddToDependencyIfOutdated(SongLoaderID, SongLoaderVersionRange, modList, outdatedMods);
+  //AddToDependencyIfOutdated(PinkCoreID, PinkCoreVersionRange, modList, outdatedMods);
+  //AddToDependencyIfOutdated(ChromaID, ChromaVersionRange, modList, outdatedMods);
 
-  if (modList.contains(MappingExtensionsID)) {
-    MEInstalled = true;
-  }
+  //if (modList.contains(MappingExtensionsID)) {
+  //  MEInstalled = true;
+  //}
 
   if (outdatedMods.empty() && !MEInstalled) return;
 
-  QuestUI::Init();
+  //QuestUI::Init();
   INSTALL_HOOK(logger, MainFlowCoordinator_DidActivate);
 }
 

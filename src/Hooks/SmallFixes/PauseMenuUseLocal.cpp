@@ -19,11 +19,11 @@ using namespace UnityEngine;
 MAKE_HOOK_MATCH(PauseMenuManager_ShowMenu, &PauseMenuManager::ShowMenu, void, PauseMenuManager* self) {
   if (!Hooks::isNoodleHookEnabled()) return PauseMenuManager_ShowMenu(self);
 
-  auto transform = self->pauseContainerTransform->get_transform();
+  auto transform = self->_pauseContainerTransform->get_transform();
   auto eulerAngle = transform->get_eulerAngles();
   PauseMenuManager_ShowMenu(self);
   transform->set_eulerAngles(eulerAngle);
-  transform->set_localEulerAngles({ 0, self->environmentSpawnRotation->targetRotation, 0 });
+  transform->set_localEulerAngles({ 0, self->_environmentSpawnRotation->targetRotation, 0 });
 }
 
 void InstallPauseManagerHooks(Logger& logger) {

@@ -13,7 +13,7 @@
 #include "GlobalNamespace/Saber.hpp"
 #include "GlobalNamespace/SaberType.hpp"
 #include "GlobalNamespace/SaberTypeExtensions.hpp"
-#include "GlobalNamespace/HapticFeedbackController.hpp"
+#include "GlobalNamespace/HapticFeedbackManager.hpp"
 #include "System/Action_1.hpp"
 
 #include "UnityEngine/Color.hpp"
@@ -32,7 +32,7 @@ MAKE_HOOK_MATCH(ObstacleSaberSparkleEffectManager_GetBurnMarkPos, &ObstacleSaber
     return ObstacleSaberSparkleEffectManager_GetBurnMarkPos(self, bounds, transform, bladeBottomPos, bladeTopPos,
                                                             burnMarkPos);
 
-  if (bounds.get_size() == NEVector::Vector3::zero()) {
+  if (NEVector::Vector3(bounds.get_size()) == NEVector::Vector3::zero()) {
     // burnMarkPos is out ref, must assign
     burnMarkPos.heldRef = NEVector::Vector3::zero();
     return false;

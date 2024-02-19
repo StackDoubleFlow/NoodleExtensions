@@ -3,7 +3,7 @@
 
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
 #include "GlobalNamespace/BasicBeatmapObjectManager.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/ObstacleController.hpp"
 #include "GlobalNamespace/ObstacleData.hpp"
 #include "System/Action_1.hpp"
@@ -51,7 +51,7 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle, &BeatmapObjectManager::AddSp
   // TRANSPILE HERE
   obstacleController->Hide(GetHiddenForType(self));
   ///
-  self->allBeatmapObjects->Add(reinterpret_cast<IBeatmapObjectController*>(obstacleController));
+  self->_allBeatmapObjects->Add(reinterpret_cast<IBeatmapObjectController*>(obstacleController));
 
   // POST FIX
   auto customObstacleData =
