@@ -4,8 +4,6 @@
 #include "beatsaber-hook/shared/utils/typedefs-array.hpp"
 
 #include "GlobalNamespace/NoteCutter.hpp"
-#include "GlobalNamespace/NoteCutter_CuttableBySaberSortParams.hpp"
-#include "GlobalNamespace/NoteCutter_CuttableBySaberSortParamsComparer.hpp"
 #include "GlobalNamespace/Saber.hpp"
 #include "GlobalNamespace/SaberTypeObject.hpp"
 #include "GlobalNamespace/SaberMovementData.hpp"
@@ -45,9 +43,9 @@ static void ConvertToWorld(Saber* saber, NEVector::Vector3& topPos, NEVector::Ve
 }
 
 static int getPrevAddedIndex(SaberMovementData* self) {
-  int num = self->nextAddIndex - 2;
+  int num = self->_nextAddIndex - 2;
   if (num < 0) {
-    num += self->data.size();
+    num += self->_data.size();
   }
 
   return num;
@@ -119,7 +117,7 @@ MAKE_HOOK_MATCH(NoteCutter_Cut, &NoteCutter::Cut, void, NoteCutter* self, Saber*
 
   auto prevIndex = getPrevAddedIndex(saber->movementData);
   // get as reference so no copy modification
-  auto& prevData = saber->movementData->data[prevIndex];
+  auto& prevData = saber->movementData->_data[prevIndex];
 
   auto saberTopPos = prevData.topPos;
   auto saberBottomPos = prevData.bottomPos;

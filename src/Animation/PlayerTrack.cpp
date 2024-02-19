@@ -40,7 +40,7 @@ void PlayerTrack::AssignTrack(Track* track) {
   PlayerTrack::track = track;
 
   if (!instance && !trackController) {
-    auto* player = GameObject::Find("LocalPlayerGameCore")->get_transform();
+    auto player = GameObject::Find("LocalPlayerGameCore")->get_transform();
     GameObject* noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
     origin = noodleObject->get_transform();
     origin->SetParent(player->get_parent(), true);
@@ -58,7 +58,7 @@ void PlayerTrack::AssignTrack(Track* track) {
       pauseController->add_didResumeEvent(didResumeEventAction);
     }
 
-    auto* pauseMenuManager = pauseController ? pauseController->pauseMenuManager
+    auto* pauseMenuManager = pauseController ? pauseController->_pauseMenuManager.ptr()
                                              : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
     auto multiPauseMenuManager =
         NECaches::GameplayCoreContainer->TryResolve<MultiplayerLocalActivePlayerInGameMenuController*>();

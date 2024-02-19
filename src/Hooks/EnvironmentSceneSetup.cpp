@@ -14,7 +14,7 @@
 #include "GlobalNamespace/IReadonlyBeatmapData.hpp"
 #include "GlobalNamespace/IBeatmapDataBasicInfo.hpp"
 
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "UnityEngine/Shader.hpp"
 
 #include "Zenject/DiContainer.hpp"

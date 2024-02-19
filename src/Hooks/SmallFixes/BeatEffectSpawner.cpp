@@ -3,13 +3,14 @@
 
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
 #include "GlobalNamespace/BeatEffectSpawner.hpp"
-#include "GlobalNamespace/BeatEffectSpawner_InitData.hpp"
+#include "GlobalNamespace/BeatEffect.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/ColorType.hpp"
 #include "GlobalNamespace/ColorManager.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
 #include "GlobalNamespace/MemoryPoolContainer_1.hpp"
+#include "GlobalNamespace/ILazyCopyHashSet_1.hpp"
 #include "GlobalNamespace/LazyCopyHashSet_1.hpp"
 
 #include "System/Action_1.hpp"
@@ -38,18 +39,18 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump, &BeatEffectSpawner::Ha
                 BeatEffectSpawner* self, NoteController* noteController) {
   if (!Hooks::isNoodleHookEnabled()) return BeatEffectSpawner_HandleNoteDidStartJump(self, noteController);
 
-  if (self->initData->hideNoteSpawnEffect) {
+  if (self->_initData->hideNoteSpawnEffect) {
     return;
   }
   if (noteController->hidden) {
     return;
   }
-  if (noteController->noteData->time + 0.1f < self->audioTimeSyncController->songTime) {
+  if (noteController->noteData->time + 0.1f < self->_audioTimeSyncController->songTime) {
     return;
   }
   ColorType colorType = noteController->noteData->colorType;
-  Color color = (colorType != ColorType::None) ? self->colorManager->ColorForType(colorType) : self->bombColorEffect;
-  auto beatEffect = self->beatEffectPoolContainer->Spawn();
+  Color color = (colorType != ColorType::None) ? self->_colorManager->ColorForType(colorType) : self->_bombColorEffect;
+  auto beatEffect = self->_beatEffectPoolContainer->Spawn();
   beatEffect->didFinishEvent->Add(reinterpret_cast<IBeatEffectDidFinishEvent*>(self));
 
   // TRANSPILE HERE
@@ -60,7 +61,7 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump, &BeatEffectSpawner::Ha
   beatEffect->get_transform()->SetPositionAndRotation(jumpStartPos - NEVector::Vector3(0.0f, 0.15f, 0.0f),
                                                       NEVector::Quaternion::identity());
 
-  beatEffect->Init(color, self->effectDuration, worldRotation);
+  beatEffect->Init(color, self->_effectDuration, worldRotation);
 
   //
 }

@@ -3,9 +3,7 @@
 
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapEventData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteSpawnData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_ObstacleSpawnData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_SliderSpawnData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/NoteCutDirection.hpp"
 #include "GlobalNamespace/NoteData.hpp"
 #include "GlobalNamespace/NoteLineLayer.hpp"
@@ -56,10 +54,10 @@ MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSp
 
   float offset = self->noteLinesCount / 2.f;
   float headLineIndex = ad.objectData.startX ? *ad.objectData.startX + offset : sliderData->headLineIndex;
-  float headLineLayer = ad.objectData.startY.value_or(sliderData->headLineLayer);
+  float headLineLayer = ad.objectData.startY.value_or(sliderData->headLineLayer.value__);
   float headStartlinelayer = ad.startNoteLineLayer;
   float tailLineIndex = ad.objectData.tailStartX ? *ad.objectData.tailStartX + offset : sliderData->tailLineIndex;
-  float tailLineLayer = ad.objectData.tailStartY.value_or(sliderData->tailLineLayer);
+  float tailLineLayer = ad.objectData.tailStartY.value_or(sliderData->tailLineLayer.value__);
   float tailStartlinelayer = ad.tailStartNoteLineLayer;
 
   Vector3 headOffset =
@@ -73,7 +71,7 @@ MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSp
   Vector3 moveEndPos;
   Vector3 jumpEndPos;
 
-  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->initData, self, njs, spawnoffset, jumpDuration,
+  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->_initData, self, njs, spawnoffset, jumpDuration,
                                      jumpDistance, moveStartPos, moveEndPos, jumpEndPos);
 
   float headJumpGravity;
@@ -115,7 +113,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 
   float lineIndex =
       ad.objectData.startX ? (*ad.objectData.startX + (self->noteLinesCount / 2.f)) : obstacleData->lineIndex;
-  float lineLayer = ad.objectData.startY.value_or(obstacleData->lineLayer);
+  float lineLayer = ad.objectData.startY.value_or(obstacleData->lineLayer.value__);
 
   std::optional<float> const& njs = ad.objectData.noteJumpMovementSpeed;
   std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
@@ -135,7 +133,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     obstacleHeight = height.value() * 0.6f;
   } else {
     // _topObstaclePosY =/= _obstacleTopPosY
-    obstacleHeight = std::min(obstacleData->height * 0.6f, self->obstacleTopPosY - obstacleOffset.y);
+    obstacleHeight = std::min(obstacleData->height * 0.6f, self->_obstacleTopPosY - obstacleOffset.y);
   }
 
   float jumpDuration;
@@ -143,7 +141,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
   Vector3 localMoveStartPos;
   Vector3 localMoveEndPos;
   Vector3 localJumpEndPos;
-  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->initData, self, njs, spawnOffset, jumpDuration,
+  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->_initData, self, njs, spawnOffset, jumpDuration,
                                      jumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
 
   result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
@@ -177,7 +175,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
   bool const gravityOverride = ad.objectData.disableNoteGravity.value_or(false);
 
   float lineIndex = ad.objectData.startX ? (*ad.objectData.startX + offset) : noteData->lineIndex;
-  float lineLayer = ad.objectData.startY.value_or(noteData->noteLineLayer);
+  float lineLayer = ad.objectData.startY.value_or(noteData->noteLineLayer.value__);
   float const startLineLayer = ad.startNoteLineLayer;
 
   //    Vector3 moveStartPos = result.moveStartPos;
@@ -192,7 +190,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
   Vector3 moveStartPos;
   Vector3 moveEndPos;
   Vector3 jumpEndPos;
-  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->initData, self, njs, spawnOffset, jumpDuration,
+  SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->_initData, self, njs, spawnOffset, jumpDuration,
                                      jumpDistance, moveStartPos, moveEndPos, jumpEndPos);
 
   float jumpGravity;

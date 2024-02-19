@@ -2,11 +2,9 @@
 #include "custom-json-data/shared/CustomBeatmapData.h"
 
 #include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor.hpp"
-#include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor_TimeSliceContainer_1.hpp"
 #include "GlobalNamespace/StaticBeatmapObjectSpawnMovementData.hpp"
 #include "GlobalNamespace/NoteCutDirectionExtensions.hpp"
 #include "GlobalNamespace/Vector2Extensions.hpp"
-#include "GlobalNamespace/BeatmapObjectsInTimeRowProcessor_SliderTailData.hpp"
 
 #include "AssociatedData.h"
 #include "NEHooks.h"
@@ -24,12 +22,12 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
         allObjectsTimeSlice,
     float nextTimeSliceTime) {
 
-  auto notesInColumnsReusableProcessingListOfLists = self->notesInColumnsReusableProcessingListOfLists;
+  auto notesInColumnsReusableProcessingListOfLists = self->_notesInColumnsReusableProcessingListOfLists;
   for (auto const& l : notesInColumnsReusableProcessingListOfLists) {
     l->Clear();
   }
 
-  auto items = VList(allObjectsTimeSlice->items);
+  auto items = ListW<GlobalNamespace::BeatmapDataItem*>(allObjectsTimeSlice->_items);
 
   auto enumerable = NoodleExtensions::of_type<NoteData*>(items);
   auto enumerable2 = NoodleExtensions::of_type<SliderData*>(items);
@@ -38,7 +36,7 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
 
     // TRANSPILE HERE
     // CLAMP
-    auto list = VList(self->notesInColumnsReusableProcessingListOfLists[std::clamp(noteData->lineIndex, 0, 3)]);
+    auto list = ListW<GlobalNamespace::NoteData*>(self->_notesInColumnsReusableProcessingListOfLists[std::clamp(noteData->lineIndex, 0, 3)]);
     // TRANSPILE HERE
 
     bool flag = false;
@@ -54,8 +52,8 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
       list.push_back(noteData);
     }
   }
-  for (auto const& notesInColumnsReusableProcessingListOfList : self->notesInColumnsReusableProcessingListOfLists) {
-    auto list2 = VList(notesInColumnsReusableProcessingListOfList);
+  for (auto const& notesInColumnsReusableProcessingListOfList : self->_notesInColumnsReusableProcessingListOfLists) {
+    auto list2 = ListW<GlobalNamespace::NoteData*>(notesInColumnsReusableProcessingListOfList);
     for (int l = 0; l < list2.size(); l++) {
       list2[l]->SetBeforeJumpNoteLineLayer((NoteLineLayer)l);
     }
@@ -63,41 +61,6 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
   /// TRANSPILE HERE
   return;
   ///
-  for (auto sliderData : enumerable2) {
-    for (auto noteData2 : enumerable) {
-      if (BeatmapObjectsInTimeRowProcessor::SliderHeadPositionOverlapsWithNote(sliderData, noteData2)) {
-        sliderData->SetHasHeadNote(true);
-        sliderData->SetHeadBeforeJumpLineLayer(noteData2->beforeJumpNoteLineLayer);
-        if (sliderData->sliderType == SliderData::Type::Burst) {
-          noteData2->ChangeToBurstSliderHead();
-          if (noteData2->cutDirection == sliderData->tailCutDirection) {
-            auto line = StaticBeatmapObjectSpawnMovementData::Get2DNoteOffset(noteData2->lineIndex, self->numberOfLines,
-                                                                              noteData2->noteLineLayer) -
-                        StaticBeatmapObjectSpawnMovementData::Get2DNoteOffset(
-                            sliderData->tailLineIndex, self->numberOfLines, sliderData->tailLineLayer);
-            float num = Vector2Extensions::SignedAngleToLine(
-                NoteCutDirectionExtensions::Direction(noteData2->cutDirection), line);
-            if (std::abs(num) <= 40.0f) {
-              noteData2->SetCutDirectionAngleOffset(num);
-              sliderData->SetCutDirectionAngleOffset(num, num);
-            }
-          }
-        } else {
-          noteData2->ChangeToSliderHead();
-        }
-      }
-    }
-  }
-  for (auto sliderTailData : enumerable3) {
-    auto slider = sliderTailData->slider;
-    for (auto noteData3 : enumerable) {
-      if (BeatmapObjectsInTimeRowProcessor::SliderTailPositionOverlapsWithNote(slider, noteData3)) {
-        slider->SetHasTailNote(true);
-        slider->SetTailBeforeJumpLineLayer(noteData3->beforeJumpNoteLineLayer);
-        noteData3->ChangeToSliderTail();
-      }
-    }
-  }
 }
 
 MAKE_HOOK_MATCH(
@@ -113,18 +76,18 @@ MAKE_HOOK_MATCH(
 
   auto items = allObjectsTimeSlice->items;
 
-  std::vector<CustomNoteData*> customNotes = NoodleExtensions::of_type<CustomNoteData*>(VList(items));
+  std::vector<CustomNoteData*> customNotes = NoodleExtensions::of_type<CustomNoteData*>(ListW<GlobalNamespace::BeatmapDataItem*>(items));
 
   if (customNotes.empty())
     return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(
         self, allObjectsTimeSlice, nextTimeSliceTime);
 
-  float offset = self->numberOfLines / 2.0f;
+  float offset = self->_numberOfLines / 2.0f;
 
   std::unordered_map<float, std::vector<CustomNoteData*>> notesInColumn;
   for (auto noteData : customNotes) {
     float lineIndex = noteData->lineIndex;
-    float lineLayer = noteData->noteLineLayer;
+    float lineLayer = noteData->noteLineLayer.value__;
 
     if (noteData->customData->value) {
       rapidjson::Value const& customData = *noteData->customData->value;
@@ -140,7 +103,7 @@ MAKE_HOOK_MATCH(
 
     bool flag = false;
     for (int k = 0; k < list.size(); k++) {
-      float listLineLayer = list[k]->noteLineLayer;
+      float listLineLayer = list[k]->noteLineLayer.value__;
       auto kNote = list[k];
 
       if (kNote->customData->value) {
@@ -208,13 +171,13 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
   if (!Hooks::isNoodleHookEnabled())
     return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
 
-  auto items = VList(reinterpret_cast<List<CustomNoteData*>*>(currentTimeSlice->items));
+  auto items = ListW<GlobalNamespace::NoteData*>(currentTimeSlice->items);
 
   auto colorNotesData = NoodleExtensions::of_type<CustomNoteData*>(items);
 
   int const customNoteCount = colorNotesData.size();
 
-  float offset = self->numberOfLines / 2.0f;
+  float offset = self->_numberOfLines / 2.0f;
 
   if (customNoteCount == 2) {
     std::array<float, 2> lineIndexes{}, lineLayers{};
@@ -223,7 +186,7 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
       CustomNoteData* noteData = colorNotesData[i];
 
       float lineIndex = noteData->lineIndex;
-      float lineLayer = noteData->noteLineLayer;
+      float lineLayer = noteData->noteLineLayer.value__;
       if (noteData->customData->value) {
         rapidjson::Value const& customData = *noteData->customData->value;
         auto pos = NEJSON::ReadOptionalPair(customData, NoodleExtensions::Constants::V2_POSITION.data());

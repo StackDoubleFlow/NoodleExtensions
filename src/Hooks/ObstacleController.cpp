@@ -35,9 +35,9 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace TrackParenting;
 
-static SafePtr<List<ObstacleController*>> activeObstacles;
-SafePtr<List<ObstacleController*>>& getActiveObstacles() {
-  if (!activeObstacles) activeObstacles.emplace(List<ObstacleController*>::New_ctor());
+static SafePtr<System::Collections::Generic::List_1<UnityW<ObstacleController>>> activeObstacles;
+SafePtr<System::Collections::Generic::List_1<UnityW<ObstacleController>>>& getActiveObstacles() {
+  if (!activeObstacles) activeObstacles = System::Collections::Generic::List_1<UnityW<ObstacleController>>::New_ctor();
 
   return activeObstacles;
 }
@@ -57,7 +57,7 @@ float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<Track
   auto time = NoodleExtensions::getTimeProp(tracks);
   if (!time) return original;
 
-  return (time.value() * (oc->finishMovementTime - oc->move1Duration)) + oc->move1Duration;
+  return (time.value() * (oc->_finishMovementTime - oc->move1Duration)) + oc->move1Duration;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController* self,
@@ -110,7 +110,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   // Reset only if NE dissolve is enabled
   if (getNEConfig().enableObstacleDissolve.GetValue()) {
     for (auto* materialSwitcher : materialSwitchers) {
-      materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+      materialSwitcher->_renderer->set_sharedMaterial(materialSwitcher->_material0);
     }
   }
   obstacleCache.dissolveEnabled = false;
@@ -142,32 +142,32 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
   if (ad.objectData.rotation) rotation = *ad.objectData.rotation;
 
-  self->worldRotation = rotation;
-  self->inverseWorldRotation = Quaternion_Inverse(rotation);
+  self->_worldRotation = rotation;
+  self->_inverseWorldRotation = Quaternion_Inverse(rotation);
 
   auto const& scale = ad.objectData.scale;
 
   if (scale) {
     if (scale->at(0)) {
-      self->width = *scale->at(0) * singleLineWidth;
+      self->_width = *scale->at(0) * singleLineWidth;
     }
 
     if (scale->at(2)) {
-      self->length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
+      self->_length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
     }
   }
 
   auto b = NEVector::Vector3((self->width - singleLineWidth) * 0.5f, 0, 0);
-  self->startPos = NEVector::Vector3(startPos) + b;
-  self->midPos = NEVector::Vector3(midPos) + b;
-  self->endPos = NEVector::Vector3(endPos) + b;
-  ad.moveStartPos = self->startPos;
-  ad.moveEndPos = self->midPos;
-  ad.jumpEndPos = self->endPos;
+  self->_startPos = NEVector::Vector3(startPos) + b;
+  self->_midPos = NEVector::Vector3(midPos) + b;
+  self->_endPos = NEVector::Vector3(endPos) + b;
+  ad.moveStartPos = self->_startPos;
+  ad.moveEndPos = self->_midPos;
+  ad.jumpEndPos = self->_endPos;
 
-  self->stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
-                                             self->stretchableObstacle->obstacleFrame->color);
-  self->bounds = self->stretchableObstacle->bounds;
+  self->_stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
+                                             self->_stretchableObstacle->_obstacleFrame->color);
+  self->_bounds = self->_stretchableObstacle->bounds;
 
   setBounds();
 
@@ -178,7 +178,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     localRotation = *localrot;
   }
   transform->set_localPosition(startPos);
-  transform->set_localRotation(NEVector::Quaternion(self->worldRotation) * localRotation);
+  transform->set_localRotation(NEVector::Quaternion(self->_worldRotation) * localRotation);
   ad.localRotation = localRotation;
   ad.worldRotation = rotation;
 
@@ -190,7 +190,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     }
   }
 
-  Vector3 noteOffset = self->endPos;
+  Vector3 noteOffset = self->_endPos;
   noteOffset.z = 0;
   ad.noteOffset = noteOffset;
 
@@ -202,26 +202,26 @@ static void ObstacleController_ManualUpdateTranspile(ObstacleController* self, f
   float num = elapsedTime;
   // TRANSPILE HERE
   NEVector::Vector3 posForTime = self->GetPosForTime(num);
-  self->get_transform()->set_localPosition(NEVector::Quaternion(self->worldRotation) * posForTime);
+  self->get_transform()->set_localPosition(NEVector::Quaternion(self->_worldRotation) * posForTime);
   auto action = self->didUpdateProgress;
   if (action) {
     action->Invoke(self, num);
   }
-  if (!self->passedThreeQuartersOfMove2Reported && num > self->move1Duration + self->move2Duration * 0.75f) {
-    self->passedThreeQuartersOfMove2Reported = true;
+  if (!self->_passedThreeQuartersOfMove2Reported && num > self->move1Duration + self->move2Duration * 0.75f) {
+    self->_passedThreeQuartersOfMove2Reported = true;
     auto action2 = self->passedThreeQuartersOfMove2Event;
     if (action2) {
       action2->Invoke(self);
     }
   }
-  if (!self->passedAvoidedMarkReported && num > self->passedAvoidedMarkTime) {
-    self->passedAvoidedMarkReported = true;
+  if (!self->_passedAvoidedMarkReported && num > self->_passedAvoidedMarkTime) {
+    self->_passedAvoidedMarkReported = true;
     auto action3 = self->passedAvoidedMarkEvent;
     if (action3) {
       action3->Invoke(self);
     }
   }
-  if (num > self->finishMovementTime) {
+  if (num > self->_finishMovementTime) {
     auto action4 = self->finishedMovementEvent;
     if (!action4) {
       return;
@@ -257,10 +257,10 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     return;
   }
 
-  float const songTime = TimeSourceHelper::getSongTime(self->audioTimeSyncController);
-  float const elapsedTime = songTime - self->startTimeOffset;
+  float const songTime = TimeSourceHelper::getSongTime(self->_audioTimeSyncController);
+  float const elapsedTime = songTime - self->_startTimeOffset;
   float const obstacleOriginalTime =
-      (elapsedTime - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
+      (elapsedTime - self->move1Duration) / (self->move2Duration + self->_obstacleDuration);
   float normalTime;
 
   auto animatedTime = NoodleExtensions::getTimeProp(tracks);
@@ -274,9 +274,9 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
   AnimationHelper::ObjectOffset offset = AnimationHelper::GetObjectOffset(ad.animationData, tracks, normalTime);
 
   if (offset.positionOffset.has_value()) {
-    self->startPos = ad.moveStartPos + *offset.positionOffset;
-    self->midPos = ad.moveEndPos + *offset.positionOffset;
-    self->endPos = ad.jumpEndPos + *offset.positionOffset;
+    self->_startPos = ad.moveStartPos + *offset.positionOffset;
+    self->_midPos = ad.moveEndPos + *offset.positionOffset;
+    self->_endPos = ad.jumpEndPos + *offset.positionOffset;
   }
 
   Transform* transform = self->get_transform();
@@ -293,8 +293,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     if (offset.rotationOffset.has_value()) {
       worldRotationQuaternion = worldRotationQuaternion * *offset.rotationOffset;
       NEVector::Quaternion inverseWorldRotation = NEVector::Quaternion::Inverse(worldRotationQuaternion);
-      self->worldRotation = worldRotationQuaternion;
-      self->inverseWorldRotation = inverseWorldRotation;
+      self->_worldRotation = worldRotationQuaternion;
+      self->_inverseWorldRotation = inverseWorldRotation;
     }
 
     worldRotationQuaternion = worldRotationQuaternion * localRotation;
@@ -363,8 +363,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     if (wasEnabled != obstacleCache.dissolveEnabled) {
       ArrayW<ConditionalMaterialSwitcher*> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
       for (auto* materialSwitcher : materialSwitchers) {
-        materialSwitcher->renderer->set_sharedMaterial(obstacleCache.dissolveEnabled ? materialSwitcher->material1
-                                                                                     : materialSwitcher->material0);
+        materialSwitcher->_renderer->set_sharedMaterial(obstacleCache.dissolveEnabled ? materialSwitcher->_material1
+                                                                                     : materialSwitcher->_material0);
       }
     }
 
@@ -372,7 +372,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     if (!cutoutAnimationEffect) {
       obstacleCache.obstacleDissolve =
           obstacleCache.obstacleDissolve ?: self->get_gameObject()->GetComponent<ObstacleDissolve*>();
-      cutoutAnimationEffect = obstacleCache.obstacleDissolve->cutoutAnimateEffect;
+      cutoutAnimationEffect = obstacleCache.obstacleDissolve->_cutoutAnimateEffect;
     }
 
     cutoutAnimationEffect->SetCutout(dissolve);
@@ -413,7 +413,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
 
   auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
 
-  float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->obstacleDuration);
+  float jumpTime = (time - self->move1Duration) / (self->move2Duration + self->_obstacleDuration);
   jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
   std::optional<NEVector::Vector3> position =
       AnimationHelper::GetDefinitePositionOffset(ad.animationData, tracks, jumpTime);
@@ -424,8 +424,8 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
   NEVector::Vector3 definitePosition = *position + noteOffset;
   if (time < self->move1Duration) {
     NEVector::Vector3 result =
-        NEVector::Vector3::LerpUnclamped(self->startPos, self->midPos, time / self->move1Duration);
-    return result + (definitePosition - static_cast<NEVector::Vector3>(self->midPos));
+        NEVector::Vector3::LerpUnclamped(self->_startPos, self->_midPos, time / self->move1Duration);
+    return result + (definitePosition - static_cast<NEVector::Vector3>(self->_midPos));
   } else {
     return definitePosition;
   }
@@ -444,7 +444,7 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_Refresh, &GlobalNamespace::Param
                 void, GlobalNamespace::ParametricBoxFakeGlowController* self) {
   if (!Hooks::isNoodleHookEnabled()) return ParametricBoxFakeGlowController_Refresh(self);
 
-  float value = std::min({ self->dyn_width(), self->dyn_height(), self->dyn_length() });
+  float value = std::min({ self->width, self->height, self->length });
 
   self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, value * 13.5f));
 

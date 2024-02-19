@@ -56,7 +56,7 @@ void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap,
 
   Hooks::setNoodleHookEnabled(noodleRequirement);
 
-  auto const& modInfo = NELogger::modInfo;
+  //auto const& modInfo = NELogger::modInfo;
   // if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
   //     Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
   //     Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);

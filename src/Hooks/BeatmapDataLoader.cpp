@@ -13,7 +13,7 @@
 #include "NELogger.h"
 #include "custom-json-data/shared/CustomBeatmapData.h"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnController_InitData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 
 #include <optional>
 

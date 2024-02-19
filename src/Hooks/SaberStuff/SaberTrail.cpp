@@ -22,7 +22,7 @@ MAKE_HOOK_MATCH(SaberTrail_Init, &SaberTrail::Init, void, SaberTrail* self) {
 
   auto vrGameCore = self->get_transform()->get_parent()->get_parent()->get_parent();
 
-  self->trailRenderer->get_transform()->SetParent(vrGameCore, false);
+  self->_trailRenderer->get_transform()->SetParent(vrGameCore, false);
 }
 
 void InstallSaber_TrailHooks(Logger& logger) {

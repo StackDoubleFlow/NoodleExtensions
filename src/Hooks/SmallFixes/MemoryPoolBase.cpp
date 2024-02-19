@@ -22,7 +22,7 @@ using namespace Zenject;
 
 template <>
 struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::MemoryPoolBase_1<Il2CppObject*>::Despawn> {
-  static MethodInfo const* get() {
+  static MethodInfo const* methodInfo() {
     return il2cpp_utils::FindMethodUnsafe(classof(Zenject::MemoryPoolBase_1<Il2CppObject*>*), "Despawn", 1);
   }
 };
@@ -92,15 +92,15 @@ MAKE_HOOK(MemoryPoolBase_Despawn, nullptr, void, MemoryPoolBase_1<Il2CppObject*>
   }
 
   if (self) {
-    self->activeCount--;
-    if (self->inactiveItems) {
-      self->inactiveItems->Push(item);
+    self->_activeCount--;
+    if (self->_inactiveItems) {
+      self->_inactiveItems->Push(item);
     }
     self->OnDespawned(item);
 
-    if (self->inactiveItems && self->settings) {
-      if (self->inactiveItems->size > self->settings->MaxSize) {
-        self->Resize(self->settings->MaxSize);
+    if (self->_inactiveItems && self->_settings) {
+      if (self->_inactiveItems->_size > self->_settings->MaxSize) {
+        self->Resize(self->_settings->MaxSize);
       }
     }
   }
@@ -115,7 +115,7 @@ MAKE_HOOK(MemoryPoolBase_Despawn, nullptr, void, MemoryPoolBase_1<Il2CppObject*>
 
 void InstallMemoryPoolBaseHooks(Logger& logger) {
   auto mInfo =
-      il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::MemoryPoolBase_1<Il2CppObject*>::Despawn>::get();
+      il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::MemoryPoolBase_1<Il2CppObject*>::Despawn>::methodInfo();
   INSTALL_HOOK_DIRECT(logger, MemoryPoolBase_Despawn, (void*)(mInfo->methodPointer));
 }
 

@@ -1,14 +1,13 @@
 #pragma once
 
 #include <vector>
+#include "custom-json-data/shared/VList.h"
 
 namespace GlobalNamespace {
 class NoteController;
 class NoteData;
 class ObstacleController;
 } // namespace GlobalNamespace
-
-template <typename T> class VList;
 
 namespace System::Collections::Generic {
 template <typename T> class List_1;

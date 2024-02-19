@@ -35,10 +35,10 @@ static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, N
 
 MAKE_HOOK_MATCH(NoteFloorMovement_ManualUpdate, &NoteFloorMovement::ManualUpdate, Vector3, NoteFloorMovement* self) {
   if (!Hooks::isNoodleHookEnabled()) return NoteFloorMovement_ManualUpdate(self);
-  float num = TimeSourceHelper::getSongTime(self->audioTimeSyncController) - self->startTime;
+  float num = TimeSourceHelper::getSongTime(self->_audioTimeSyncController) - self->startTime;
 
-  self->localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
-  self->localPosition = DefinitePositionTranspile(self->localPosition, self);
+  self->_localPosition = NEVector::Vector3::Lerp(self->startPos, self->endPos, num / self->moveDuration);
+  self->_localPosition = DefinitePositionTranspile(self->localPosition, self);
 
   NEVector::Vector3 vector = NEVector::Quaternion(self->worldRotation) * NEVector::Vector3(self->localPosition);
   self->get_transform()->set_localPosition(vector);
@@ -62,7 +62,7 @@ MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, Un
           &UnityEngine::Quaternion::Euler)>::get();
 
   if (noteUpdateAD && noteUpdateAD->objectData.disableNoteLook) {
-    self->rotatedObject->set_localRotation(Quaternion_Euler({ 0, 0, noteUpdateAD->endRotation }));
+    self->_rotatedObject->set_localRotation(Quaternion_Euler({ 0, 0, noteUpdateAD->endRotation }));
   }
 
   return ret;

@@ -18,18 +18,18 @@
 
 #include "NECaches.h"
 #include "NEHooks.h"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData_NoteJumpValueType.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 
 using namespace GlobalNamespace;
 
 MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, GameplayCoreInstaller* self) {
   if (!Hooks::isNoodleHookEnabled()) return InstallBindings(self);
 
-  IDifficultyBeatmap* difficultyBeatmap = self->sceneSetupData->difficultyBeatmap;
-  GameplayModifiers* gameplayModifiers = self->sceneSetupData->gameplayModifiers;
+  IDifficultyBeatmap* difficultyBeatmap = self->_sceneSetupData->difficultyBeatmap;
+  GameplayModifiers* gameplayModifiers = self->_sceneSetupData->gameplayModifiers;
 
   BeatmapObjectSpawnControllerHelpers::GetNoteJumpValues(
-      self->sceneSetupData->playerSpecificSettings, difficultyBeatmap->get_noteJumpStartBeatOffset(),
+      self->_sceneSetupData->playerSpecificSettings, difficultyBeatmap->get_noteJumpStartBeatOffset(),
       ByRef(NECaches::noteJumpValueType), ByRef(NECaches::noteJumpValue));
 
   float njs = difficultyBeatmap->get_noteJumpMovementSpeed();
@@ -44,10 +44,10 @@ MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, 
   auto* previewBeatmapLevel = reinterpret_cast<IPreviewBeatmapLevel*>(difficultyBeatmap->get_level());
 
   NECaches::noteJumpStartBeatOffset = difficultyBeatmap->get_noteJumpStartBeatOffset() +
-                                      self->sceneSetupData->playerSpecificSettings->noteJumpStartBeatOffset;
+                                      self->_sceneSetupData->playerSpecificSettings->noteJumpStartBeatOffset;
   NECaches::beatsPerMinute = previewBeatmapLevel->get_beatsPerMinute();
   NECaches::numberOfLines =
-      reinterpret_cast<IBeatmapDataBasicInfo*>(self->sceneSetupData->transformedBeatmapData)->get_numberOfLines();
+      reinterpret_cast<IBeatmapDataBasicInfo*>(self->_sceneSetupData->transformedBeatmapData)->get_numberOfLines();
 
   InstallBindings(self);
 

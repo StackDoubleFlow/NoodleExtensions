@@ -1,27 +1,23 @@
-#include "questui/shared/QuestUI.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
 #include "NEConfig.h"
 #include "NEHooks.h"
 
 #include "UnityEngine/UI/LayoutElement.hpp"
+#include "HMUI/ViewController.hpp"
 
 #include <algorithm>
 
 using namespace UnityEngine;
-using namespace QuestUI;
-
-DEFINE_CONFIG(NEConfig);
 
 void UIDidActivate(HMUI::ViewController* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
   if (firstActivation) {
-    auto* scroll = BeatSaberUI::CreateScrollableSettingsContainer(self->get_transform());
+    //auto* scroll = BeatSaberUI::CreateScrollableSettingsContainer(self->get_transform());
 
-    auto container = scroll->GetComponent<UI::HorizontalOrVerticalLayoutGroup*>();
+    //auto container = scroll->GetComponent<UI::HorizontalOrVerticalLayoutGroup*>();
     //        auto horizontal = BeatSaberUI::CreateHorizontalLayoutGroup(scroll->get_transform());
     //        auto container = BeatSaberUI::CreateVerticalLayoutGroup(horizontal->get_transform());
 
     // Align and size children properly
-    container->set_childAlignment(UnityEngine::TextAnchor::MiddleCenter);
+    /*container->set_childAlignment(UnityEngine::TextAnchor::MiddleCenter);
 
     container->set_childControlHeight(true);
     container->set_childForceExpandHeight(true);
@@ -65,12 +61,12 @@ void UIDidActivate(HMUI::ViewController* self, bool firstActivation, bool addedT
     text->set_fontSize(text->get_fontSize() * 1.125f);
     text->set_enableWordWrapping(true);
 
-    AddConfigValueToggle(container->get_transform(), getNEConfig().qosmeticsModelDisable);
+    AddConfigValueToggle(container->get_transform(), getNEConfig().qosmeticsModelDisable);*/
   }
 }
 
 void InstallNEConfigHooks(Logger& logger) {
-  QuestUI::Init();
-  QuestUI::Register::RegisterModSettingsViewController(NELogger::modInfo, UIDidActivate);
+  //QuestUI::Init();
+  //QuestUI::Register::RegisterModSettingsViewController(NELogger::modInfo, UIDidActivate);
 }
 NEInstallHooks(InstallNEConfigHooks);

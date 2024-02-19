@@ -54,7 +54,7 @@ static bool initMirror = false;
 
 static constexpr bool CheckSkip(Transform* noteTransform, Transform* followedNoteTransform) {
   auto const position = followedNoteTransform->get_position();
-  auto const noteTransformGameObject = noteTransform->get_gameObject();
+  auto noteTransformGameObject = noteTransform->get_gameObject();
 
   if (position.y < 0) {
     noteTransformGameObject->SetActive(false);
@@ -86,13 +86,13 @@ static void UpdateMirror(Transform* mirroredNoteTransform, Transform* followedOb
   if (!getNEConfig().enableMirrorNoteDissolve.GetValue() && followedCutoutEffect) {
     // rekt
 
-    setMirrorHide(followedNoteCache.cutoutEffect->cutout < 0.8);
-    if (followedNoteCache.cutoutEffect->cutout < 0.8) return;
+    setMirrorHide(followedNoteCache.cutoutEffect->_cutout < 0.8);
+    if (followedNoteCache.cutoutEffect->_cutout < 0.8) return;
   }
 
   if (initMirror && materialSwitchers) {
     for (auto* materialSwitcher : materialSwitchers) {
-      materialSwitcher->renderer->set_sharedMaterial(materialSwitcher->material0);
+      materialSwitcher->_renderer->set_sharedMaterial(materialSwitcher->_material0);
     }
     mirrorCache.dissolveEnabled = false;
   }
@@ -101,24 +101,24 @@ static void UpdateMirror(Transform* mirroredNoteTransform, Transform* followedOb
     materialSwitchers = mirroredNoteController->GetComponentsInChildren<ConditionalMaterialSwitcher*>();
   }
 
-  auto followedCutoutEffectCutout = followedCutoutEffect ? followedCutoutEffect->cutout : 0;
+  auto followedCutoutEffectCutout = followedCutoutEffect ? followedCutoutEffect->_cutout : 0;
   auto followedDisappearingArrowControllerCutout =
-      followedDisappearingArrowController ? followedDisappearingArrowController->arrowCutoutEffect->cutout : 0;
+      followedDisappearingArrowController ? followedDisappearingArrowController->_arrowCutoutEffect->_cutout : 0;
 
   bool noteDissolveConfig = getNEConfig().enableNoteDissolve.GetValue();
   bool isDissolving = followedCutoutEffectCutout > 0 || followedDisappearingArrowControllerCutout > 0;
 
   if (materialSwitchers && mirrorCache.dissolveEnabled != isDissolving && noteDissolveConfig) {
     for (auto* materialSwitcher : materialSwitchers) {
-      materialSwitcher->renderer->set_sharedMaterial(isDissolving ? materialSwitcher->material1
-                                                                  : materialSwitcher->material0);
+      materialSwitcher->_renderer->set_sharedMaterial(isDissolving ? materialSwitcher->_material1
+                                                                  : materialSwitcher->_material0);
     }
     mirrorCache.dissolveEnabled = isDissolving;
   }
 
   if (followedCutoutEffect) {
     auto cutoutEffect = NECaches::GetCutout(mirroredNoteController, mirrorCache);
-    if (cutoutEffect) cutoutEffect->SetCutout(followedCutoutEffect->cutout);
+    if (cutoutEffect) cutoutEffect->SetCutout(followedCutoutEffect->_cutout);
   }
 
   static auto MirrorKlass = classof(GlobalNamespace::MirroredGameNoteController*);
@@ -135,7 +135,7 @@ static void UpdateMirror(Transform* mirroredNoteTransform, Transform* followedOb
       // -x = y - 1
       // x = -y + 1
       disappearingArrowController->SetArrowTransparency(
-          (followedDisappearingArrowController->arrowCutoutEffect->cutout - 1) * -1);
+          (followedDisappearingArrowController->_arrowCutoutEffect->_cutout - 1) * -1);
   }
 }
 
@@ -167,11 +167,11 @@ MIRROR_HOOK(MirroredGameNote, IGameNoteMirrorable)
 MAKE_HOOK(Mirror_UpdatePositionAndRotation, nullptr, void, MirroredNoteController_1<Il2CppObject*>* self,
           MethodInfo* methodInfo) {
   if (!Hooks::isNoodleHookEnabled()) return Mirror_UpdatePositionAndRotation(self, methodInfo);
-  if (!CheckSkip(self->noteTransform, self->dyn__followedNoteTransform())) {
+  if (!CheckSkip(self->_noteTransform, self->_followedNoteTransform)) {
     return;
   }
   Mirror_UpdatePositionAndRotation(self, methodInfo);
-  UpdateMirror(self->noteTransform, self->followedNoteTransform, self,
+  UpdateMirror(self->_noteTransform, self->_followedNoteTransform, self,
                il2cpp_utils::cast<NoteControllerBase>(self->followedNote), [self](bool hide) { self->Hide(hide); });
 }
 
