@@ -1,6 +1,6 @@
 & $PSScriptRoot/build.ps1
 if ($?) {
-    adb push build/libnoodleextensions.so /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libnoodleextensions.so
+    adb push build/libnoodleextensions.so /sdcard/ModData/com.beatgames.beatsaber/Modloader/mods/libnoodleextensions.so
     if ($?) {
         adb shell am force-stop com.beatgames.beatsaber
         adb shell am start com.beatgames.beatsaber/com.unity3d.player.UnityPlayerActivity
