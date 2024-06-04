@@ -55,9 +55,9 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Obstacle_Despawn,
   BeatmapObjectManager_Obstacle_Despawn(self, obstacleController);
 }
 
-void InstallBeatmapObjectManagerHooksTrack(Logger& logger) {
-  INSTALL_HOOK(logger, BeatmapObjectManager_Note_Despawn);
-  INSTALL_HOOK(logger, BeatmapObjectManager_Obstacle_Despawn);
+void InstallBeatmapObjectManagerHooksTrack() {
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectManager_Note_Despawn);
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectManager_Obstacle_Despawn);
 }
 
 NEInstallHooks(InstallBeatmapObjectManagerHooksTrack);

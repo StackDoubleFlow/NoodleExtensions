@@ -19,6 +19,8 @@
 #include "System/Linq/IOrderedEnumerable_1.hpp"
 #include "UnityEngine/Resources.hpp"
 
+#include "GlobalNamespace/BeatmapDataBasicInfo.hpp"
+
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NELogger.h"
@@ -30,8 +32,6 @@
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "SpawnDataHelper.h"
 #include "tracks/shared/Json.h"
-
-#include "songloader/shared/API.hpp"
 
 #include <optional>
 
@@ -69,7 +69,7 @@ extern System::Collections::Generic::LinkedList_1<BeatmapDataItem*>*
 SortAndOrderList(CustomJSONData::CustomBeatmapData* beatmapData);
 
 void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
-  NELogger::GetLogger().info("BeatmapData klass name is %s", beatmap->klass->name);
+  NELogger::Logger.info("BeatmapData klass name is {}", beatmap->klass->name);
 
   static auto* customObstacleDataClass = classof(CustomJSONData::CustomObstacleData*);
   static auto* customNoteDataClass = classof(CustomJSONData::CustomNoteData*);
@@ -168,7 +168,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData& beatmapAD, CustomJSONData:
         eventData[v2 ? NoodleExtensions::Constants::V2_TRACK.data() : NoodleExtensions::Constants::TRACK.data()]
             .GetString());
     Track* track = beatmapAD.getTrack(trackName);
-    NELogger::GetLogger().debug("Assigning player to track %s at %p", trackName.data(), track);
+    NELogger::Logger.debug("Assigning player to track {} at {}", trackName.data(), fmt::ptr(track));
     eventAD.playerTrackEventData.emplace(track);
   }
 
@@ -192,15 +192,14 @@ void LoadNoodleEvents(CustomJSONData::CustomBeatmapData* beatmap) {
 
 MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 &BeatmapDataTransformHelper::CreateTransformedBeatmapData, IReadonlyBeatmapData*,
-                GlobalNamespace::IReadonlyBeatmapData* beatmapData,
-                ::GlobalNamespace::IPreviewBeatmapLevel* beatmapLevel,
+                ::GlobalNamespace::IReadonlyBeatmapData* beatmapData, ::GlobalNamespace::BeatmapLevel* beatmapLevel,
                 ::GlobalNamespace::GameplayModifiers* gameplayModifiers, bool leftHanded,
                 ::GlobalNamespace::EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
                 ::GlobalNamespace::EnvironmentIntensityReductionOptions* environmentIntensityReductionOptions,
-                ::GlobalNamespace::MainSettingsModelSO* mainSettingsModel) {
+                ::BeatSaber::PerformancePresets::PerformancePreset* performancePreset) {
   auto result = BeatmapDataTransformHelper_CreateTransformedBeatmapData(
       beatmapData, beatmapLevel, gameplayModifiers, leftHanded, environmentEffectsFilterPreset,
-      environmentIntensityReductionOptions, mainSettingsModel);
+      environmentIntensityReductionOptions, performancePreset);
 
   if (!Hooks::isNoodleHookEnabled()) return result;
 
@@ -218,7 +217,7 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
   return result;
 }
 
-void HandleFakeObjects(CustomJSONData::CustomLevelInfoSaveData*, std::string const&,
+void HandleFakeObjects(SongCore::CustomJSONData::CustomLevelInfoSaveDataV2*, std::string const&,
                        BeatmapSaveDataVersion3::BeatmapSaveData* unsafeBeatmap,
                        GlobalNamespace::BeatmapDataBasicInfo* basic) {
   using namespace CustomJSONData::v3;
@@ -246,18 +245,19 @@ void HandleFakeObjects(CustomJSONData::CustomLevelInfoSaveData*, std::string con
   basic->_cuttableNotesCount_k__BackingField = unsafeBeatmap->colorNotes->_size;
   basic->_bombsCount_k__BackingField = unsafeBeatmap->bombNotes->_size;
 
-  PARSE_ARRAY(fakeColorNotes, unsafeBeatmap->colorNotes, Parser::DeserializeColorNote);
-  PARSE_ARRAY(fakeBombNotes, unsafeBeatmap->bombNotes, Parser::DeserializeBombNote);
-  PARSE_ARRAY(fakeObstacles, unsafeBeatmap->obstacles, Parser::DeserializeObstacle);
-  PARSE_ARRAY(fakeBurstSliders, unsafeBeatmap->burstSliders, Parser::DeserializeBurstSlider);
-  PARSE_ARRAY(fakeSliders, unsafeBeatmap->sliders, Parser::DeserializeSlider);
+  // TODO: Reimplement fake objects
+  // PARSE_ARRAY(fakeColorNotes, unsafeBeatmap->colorNotes, Parser::DeserializeColorNote);
+  // PARSE_ARRAY(fakeBombNotes, unsafeBeatmap->bombNotes, Parser::DeserializeBombNote);
+  // PARSE_ARRAY(fakeObstacles, unsafeBeatmap->obstacles, Parser::DeserializeObstacle);
+  // PARSE_ARRAY(fakeBurstSliders, unsafeBeatmap->burstSliders, Parser::DeserializeBurstSlider);
+  // PARSE_ARRAY(fakeSliders, unsafeBeatmap->sliders, Parser::DeserializeSlider);
 }
 
-void InstallBeatmapDataTransformHelperHooks(Logger& logger) {
+void InstallBeatmapDataTransformHelperHooks() {
   //Modloader::requireMod("CustomJSONData");
-  RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleFakeObjects);
+  // RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleFakeObjects);
 
-  INSTALL_HOOK(logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
+  INSTALL_HOOK(NELogger::Logger, BeatmapDataTransformHelper_CreateTransformedBeatmapData);
 }
 
 NEInstallHooks(InstallBeatmapDataTransformHelperHooks);

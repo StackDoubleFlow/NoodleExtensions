@@ -59,7 +59,7 @@ void CustomEventCallback(BeatmapCallbacksController* callbackController,
       } else if (ad.playerTrackEventData) { PlayerTrack::AssignTrack(ad.playerTrackEventData->track); })
 }
 
-void NEEvents::AddEventCallbacks(Logger& logger) {
+void NEEvents::AddEventCallbacks() {
   CustomJSONData::CustomEventCallbacks::AddCustomEventCallback(&CustomEventCallback);
   custom_types::Register::AutoRegister();
 }

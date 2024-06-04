@@ -27,12 +27,12 @@ MAKE_HOOK_MATCH(CutoutEffect_SetCutout,
   CutoutEffect_SetCutout(self, cutout, cutoutOffset);
 }
 
-MAKE_HOOK_MATCH(CutoutAnimateEffect_Start, &GlobalNamespace::CutoutAnimateEffect::Start, void,
-                CutoutAnimateEffect* self) {}
+// MAKE_HOOK_MATCH(CutoutAnimateEffect_Start, &GlobalNamespace::CutoutAnimateEffect::Start, void,
+//                 CutoutAnimateEffect* self) {}
 
-void InstallCutoutEffectHooks(Logger& logger) {
-  INSTALL_HOOK(logger, CutoutEffect_SetCutout);
-  //    INSTALL_HOOK(logger, CutoutAnimateEffect_Start)
+void InstallCutoutEffectHooks() {
+  INSTALL_HOOK(NELogger::Logger, CutoutEffect_SetCutout);
+  //    INSTALL_HOOK(NELogger::Logger, CutoutAnimateEffect_Start)
 }
 
 NEInstallHooks(InstallCutoutEffectHooks);

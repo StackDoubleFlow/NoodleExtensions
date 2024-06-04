@@ -2,17 +2,15 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/GameplayCoreInstaller.hpp"
-#include "GlobalNamespace/IDifficultyBeatmap.hpp"
 #include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/BeatmapDifficultyMethods.hpp"
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnControllerHelpers.hpp"
-#include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
 #include "GlobalNamespace/IReadonlyBeatmapData.hpp"
-#include "GlobalNamespace/IBeatmapDataBasicInfo.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapBasicData.hpp"
 
 #include "Zenject/DiContainer.hpp"
 
@@ -25,37 +23,36 @@ using namespace GlobalNamespace;
 MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, GameplayCoreInstaller* self) {
   if (!Hooks::isNoodleHookEnabled()) return InstallBindings(self);
 
-  IDifficultyBeatmap* difficultyBeatmap = self->_sceneSetupData->difficultyBeatmap;
+  auto* difficultyBeatmap = self->_sceneSetupData->beatmapBasicData;
   GameplayModifiers* gameplayModifiers = self->_sceneSetupData->gameplayModifiers;
 
-  BeatmapObjectSpawnControllerHelpers::GetNoteJumpValues(
-      self->_sceneSetupData->playerSpecificSettings, difficultyBeatmap->get_noteJumpStartBeatOffset(),
-      ByRef(NECaches::noteJumpValueType), ByRef(NECaches::noteJumpValue));
 
-  float njs = difficultyBeatmap->get_noteJumpMovementSpeed();
+
+      BeatmapObjectSpawnControllerHelpers::GetNoteJumpValues(
+          self->_sceneSetupData->playerSpecificSettings, difficultyBeatmap->noteJumpStartBeatOffset,
+          ByRef(NECaches::noteJumpValueType), ByRef(NECaches::noteJumpValue));
+
+  float njs = difficultyBeatmap->noteJumpMovementSpeed;
   if (njs <= 0) {
-    njs = BeatmapDifficultyMethods::NoteJumpMovementSpeed(difficultyBeatmap->get_difficulty());
+    njs = BeatmapDifficultyMethods::NoteJumpMovementSpeed(self->_sceneSetupData->beatmapKey.difficulty);
   }
   if (gameplayModifiers->fastNotes) {
     njs = 20;
   }
   NECaches::noteJumpMovementSpeed = njs;
 
-  auto* previewBeatmapLevel = reinterpret_cast<IPreviewBeatmapLevel*>(difficultyBeatmap->get_level());
-
-  NECaches::noteJumpStartBeatOffset = difficultyBeatmap->get_noteJumpStartBeatOffset() +
+  NECaches::noteJumpStartBeatOffset = difficultyBeatmap->noteJumpStartBeatOffset +
                                       self->_sceneSetupData->playerSpecificSettings->noteJumpStartBeatOffset;
-  NECaches::beatsPerMinute = previewBeatmapLevel->get_beatsPerMinute();
-  NECaches::numberOfLines =
-      reinterpret_cast<IBeatmapDataBasicInfo*>(self->_sceneSetupData->transformedBeatmapData)->get_numberOfLines();
+  NECaches::beatsPerMinute = self->_sceneSetupData->___beatmapLevel->beatsPerMinute;
+  NECaches::numberOfLines = self->_sceneSetupData->transformedBeatmapData->numberOfLines;
 
   InstallBindings(self);
 
   NECaches::GameplayCoreContainer = self->get_Container();
 }
 
-void InstallGameplayCoreInstallerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, InstallBindings);
+void InstallGameplayCoreInstallerHooks() {
+  INSTALL_HOOK(NELogger::Logger, InstallBindings);
 }
 
 NEInstallHooks(InstallGameplayCoreInstallerHooks);

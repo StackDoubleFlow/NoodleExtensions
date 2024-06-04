@@ -3,16 +3,6 @@
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
-#include "GlobalNamespace/IDifficultyBeatmap.hpp"
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
-#include "GlobalNamespace/OverrideEnvironmentSettings.hpp"
-#include "GlobalNamespace/ColorScheme.hpp"
-#include "GlobalNamespace/GameplayModifiers.hpp"
-#include "GlobalNamespace/PlayerSpecificSettings.hpp"
-#include "GlobalNamespace/PracticeSettings.hpp"
-#include "GlobalNamespace/BeatmapLineData.hpp"
-#include "GlobalNamespace/CustomDifficultyBeatmap.hpp"
-#include "GlobalNamespace/RecordingToolManager.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
 
@@ -26,38 +16,25 @@ using namespace TrackParenting;
 using namespace CustomJSONData;
 using namespace NoodleExtensions;
 
-MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init, &StandardLevelScenesTransitionSetupDataSO::Init, void,
-                StandardLevelScenesTransitionSetupDataSO* self, StringW gameMode,
-                ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap,
-                ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel,
-                ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings,
-                ::GlobalNamespace::ColorScheme* overrideColorScheme,
-                ::GlobalNamespace::ColorScheme* beatmapOverrideColorScheme,
-                ::GlobalNamespace::GameplayModifiers* gameplayModifiers,
-                ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
-                ::GlobalNamespace::PracticeSettings* practiceSettings, ::StringW backButtonText,
-                bool useTestNoteCutSoundEffects, bool startPaused, BeatmapDataCache* cache, System::Nullable_1<GlobalNamespace::RecordingToolManager::SetupData> recordingToolData) {
-  StandardLevelScenesTransitionSetupDataSO_Init(self, gameMode, difficultyBeatmap, previewBeatmapLevel,
-                                                overrideEnvironmentSettings, overrideColorScheme, beatmapOverrideColorScheme,
-                                                gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText,
-                                                useTestNoteCutSoundEffects, startPaused, cache, recordingToolData);
-
-  std::optional<GlobalNamespace::CustomDifficultyBeatmap*> customBeatmapDataCustomOpt =
-      il2cpp_utils::try_cast<GlobalNamespace::CustomDifficultyBeatmap>(difficultyBeatmap);
-  if (customBeatmapDataCustomOpt) {
-    NELogger::GetLogger().debug("CustomDifficultyBeatmap casted");
-    auto customBeatmapDataCustom = il2cpp_utils::cast<CustomJSONData::v3::CustomBeatmapSaveData>(
-        customBeatmapDataCustomOpt.value()->beatmapSaveData);
-
-    SceneTransitionHelper::Patch(difficultyBeatmap, customBeatmapDataCustom, playerSpecificSettings);
-  } else {
-    NELogger::GetLogger().debug("CustomDifficultyBeatmap not casted");
-    SceneTransitionHelper::Patch(nullptr, nullptr, playerSpecificSettings);
+MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init,
+                &StandardLevelScenesTransitionSetupDataSO::InitAndSetupScenes, void,
+                StandardLevelScenesTransitionSetupDataSO* self,
+                ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, ::StringW backButtonText,
+                bool startPaused) {
+  auto customBeatmapLevel = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(self->get_beatmapLevel());
+  if (!customBeatmapLevel) {
+    StandardLevelScenesTransitionSetupDataSO_Init(self, playerSpecificSettings, backButtonText, startPaused);
   }
+
+  // TODO: Fix environment override
+  SceneTransitionHelper::Patch(customBeatmapLevel.value(), self->beatmapKey, self->environmentInfo,
+                               playerSpecificSettings);
+
+  StandardLevelScenesTransitionSetupDataSO_Init(self, playerSpecificSettings, backButtonText, startPaused);
 }
 
-void InstallStandardLevelScenesTransitionSetupDataSOHooks(Logger& logger) {
-  INSTALL_HOOK(logger, StandardLevelScenesTransitionSetupDataSO_Init);
+void InstallStandardLevelScenesTransitionSetupDataSOHooks() {
+  INSTALL_HOOK(NELogger::Logger, StandardLevelScenesTransitionSetupDataSO_Init);
 }
 
 NEInstallHooks(InstallStandardLevelScenesTransitionSetupDataSOHooks);

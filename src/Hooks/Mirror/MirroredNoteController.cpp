@@ -175,13 +175,13 @@ MAKE_HOOK(Mirror_UpdatePositionAndRotation, nullptr, void, MirroredNoteControlle
                il2cpp_utils::cast<NoteControllerBase>(self->followedNote), [self](bool hide) { self->Hide(hide); });
 }
 
-void InstallMirroredNoteControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, MirroredNote_Mirror);
-  INSTALL_HOOK(logger, MirroredGameNote_Mirror);
+void InstallMirroredNoteControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, MirroredNote_Mirror);
+  INSTALL_HOOK(NELogger::Logger, MirroredGameNote_Mirror);
 
   auto mInfo = il2cpp_utils::il2cpp_type_check::MetadataGetter<
       &MirroredNoteController_1<Il2CppObject*>::UpdatePositionAndRotation>::get();
-  INSTALL_HOOK_DIRECT(logger, Mirror_UpdatePositionAndRotation, (void*)(mInfo->methodPointer));
+  INSTALL_HOOK_DIRECT(NELogger::Logger, Mirror_UpdatePositionAndRotation, (void*)(mInfo->methodPointer));
 }
 
 NEInstallHooks(InstallMirroredNoteControllerHooks);

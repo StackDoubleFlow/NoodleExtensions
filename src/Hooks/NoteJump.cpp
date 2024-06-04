@@ -169,8 +169,8 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
   return result;
 }
 
-void InstallNoteJumpHooks(Logger& logger) {
-  INSTALL_HOOK_ORIG(logger, NoteJump_ManualUpdate);
+void InstallNoteJumpHooks() {
+  INSTALL_HOOK_ORIG(NELogger::Logger, NoteJump_ManualUpdate);
 }
 
 NEInstallHooks(InstallNoteJumpHooks);

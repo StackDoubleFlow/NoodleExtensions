@@ -42,8 +42,8 @@ MAKE_HOOK_MATCH(BeatmapDataMirrorTransform_CreateTransformedData, &BeatmapDataMi
   //    return newBeatmap;
 }
 
-void InstallBeatmapDataMirrorTransformHooks(Logger& logger) {
-  //    INSTALL_HOOK(logger, BeatmapDataMirrorTransform_CreateTransformedData);
+void InstallBeatmapDataMirrorTransformHooks() {
+  //    INSTALL_HOOK(NELogger::Logger, BeatmapDataMirrorTransform_CreateTransformedData);
 }
 
 NEInstallHooks(InstallBeatmapDataMirrorTransformHooks);

@@ -68,9 +68,9 @@ MAKE_HOOK_MATCH(NoteFloorMovement_SetToStart, &NoteFloorMovement::SetToStart, Un
   return ret;
 }
 
-void InstallNoteFloorMovementHooks(Logger& logger) {
-  INSTALL_HOOK_ORIG(logger, NoteFloorMovement_ManualUpdate);
-  INSTALL_HOOK(logger, NoteFloorMovement_SetToStart);
+void InstallNoteFloorMovementHooks() {
+  INSTALL_HOOK_ORIG(NELogger::Logger, NoteFloorMovement_ManualUpdate);
+  INSTALL_HOOK(NELogger::Logger, NoteFloorMovement_SetToStart);
 }
 
 NEInstallHooks(InstallNoteFloorMovementHooks);

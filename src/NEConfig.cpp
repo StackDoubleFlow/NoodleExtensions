@@ -65,7 +65,7 @@ void UIDidActivate(HMUI::ViewController* self, bool firstActivation, bool addedT
   }
 }
 
-void InstallNEConfigHooks(Logger& logger) {
+void InstallNEConfigHooks() {
   //QuestUI::Init();
   //QuestUI::Register::RegisterModSettingsViewController(NELogger::modInfo, UIDidActivate);
 }

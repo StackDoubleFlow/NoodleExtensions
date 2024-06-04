@@ -58,9 +58,9 @@ MAKE_HOOK_MATCH(MirroredObstacleController_UpdatePositionAndRotation,
   MirroredObstacleController_UpdatePositionAndRotation(self);
 }
 
-void InstallMirroredObstacleControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, MirroredObstacleController_Mirror);
-  INSTALL_HOOK(logger, MirroredObstacleController_UpdatePositionAndRotation);
+void InstallMirroredObstacleControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, MirroredObstacleController_Mirror);
+  INSTALL_HOOK(NELogger::Logger, MirroredObstacleController_UpdatePositionAndRotation);
 }
 
 NEInstallHooks(InstallMirroredObstacleControllerHooks);

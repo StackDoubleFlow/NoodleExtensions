@@ -54,7 +54,7 @@ using namespace GlobalNamespace;
 // }
 //
 // void InstallNoteDataHooks(Logger &logger) {
-//     INSTALL_HOOK(logger, NoteData_Mirror);
+//     INSTALL_HOOK(NELogger::Logger, NoteData_Mirror);
 // }
 //
 // NEInstallHooks(InstallNoteDataHooks);

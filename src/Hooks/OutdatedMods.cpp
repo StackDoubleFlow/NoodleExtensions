@@ -147,7 +147,7 @@ MAKE_HOOK_MATCH(MainFlowCoordinator_DidActivate, &GlobalNamespace::MainFlowCoord
   }
 }
 
-void InstallOutdatedModsHooks(Logger& logger) {
+void InstallOutdatedModsHooks() {
   //auto const modList = Modloader::getMods();
 
   //AddToDependencyIfOutdated(QosID, QosVersionRange, modList, outdatedMods);
@@ -162,7 +162,7 @@ void InstallOutdatedModsHooks(Logger& logger) {
   if (outdatedMods.empty() && !MEInstalled) return;
 
   //QuestUI::Init();
-  INSTALL_HOOK(logger, MainFlowCoordinator_DidActivate);
+  INSTALL_HOOK(NELogger::Logger, MainFlowCoordinator_DidActivate);
 }
 
 // NEInstallHooks(InstallOutdatedModsHooks);

@@ -12,10 +12,10 @@ extern "C" void setup(CModInfo* info) {
 }
 
 extern "C" void load() {
-  NELogger::GetLogger().info("Installing NoodleExtensions Hooks!");
+  NELogger::Logger.info("Installing NoodleExtensions Hooks!");
 
   // Install hooks
   InstallAndRegisterAll();
 
-  NELogger::GetLogger().info("Installed NoodleExtensions Hooks!");
+  NELogger::Logger.info("Installed NoodleExtensions Hooks!");
 }

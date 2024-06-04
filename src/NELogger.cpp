@@ -40,9 +40,9 @@ void PrintBacktrace(size_t maxLines) {
   size_t lines = maxLines + 1;
   void* buffer[lines];
   captureBacktrace(buffer, lines);
-  NELogger::GetLogger().debug("Printing backtrace with %zu max lines:", maxLines);
-  NELogger::GetLogger().debug("*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***");
-  NELogger::GetLogger().debug("pid: %i, tid: %i", getpid(), gettid());
+  NELogger::Logger.debug("Printing backtrace with %zu max lines:", maxLines);
+  NELogger::Logger.debug("*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***");
+  NELogger::Logger.debug("pid: {}, tid: {}", getpid(), gettid());
   for (int i = 0; i < maxLines; i++) {
     Dl_info info;
     if (dladdr(buffer[i + 1], &info)) {
@@ -54,13 +54,13 @@ void PrintBacktrace(size_t maxLines) {
         if (status) {
           demangled = info.dli_sname;
         }
-        NELogger::GetLogger().debug("        #%02i  pc %016lx  %s (%s)", i, addr, info.dli_fname, demangled);
+        NELogger::Logger.debug("        #%02i  pc %016lx  {} ({})", i, addr, info.dli_fname, demangled);
       } else {
-        NELogger::GetLogger().debug("        #%02i  pc %016lx  %s", i, addr, info.dli_fname);
+        NELogger::Logger.debug("        #%02i  pc %016lx  {}", i, addr, info.dli_fname);
       }
     }
   }
-  NELogger::GetLogger().debug("Backtrace end.");
+  NELogger::Logger.debug("Backtrace end.");
 }
 
 void PrintJSONValue(rapidjson::Value const& json) {
@@ -70,5 +70,5 @@ void PrintJSONValue(rapidjson::Value const& json) {
   PrettyWriter<StringBuffer> writer(sb);
   json.Accept(writer);
   auto str = sb.GetString();
-  NELogger::GetLogger().info("%s", str);
+  NELogger::Logger.info("{}", str);
 }

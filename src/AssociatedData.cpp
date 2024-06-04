@@ -136,7 +136,7 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
     childrenTracks.reserve(rawChildrenTracks.Size());
     for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin(); itr != rawChildrenTracks.End(); itr++) {
       Track* child = beatmapAD.getTrack(itr->GetString());
-      // NELogger::GetLogger().debug("Assigning track %s(%p) to parent track %s(%p)", itr->GetString(), child,
+      // NELogger::Logger.debug("Assigning track {}(%p) to parent track {}(%p)", itr->GetString(), child,
       // eventData["_parentTrack"].GetString(), track);
       childrenTracks.emplace_back(child);
     }

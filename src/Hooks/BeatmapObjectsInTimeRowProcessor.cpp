@@ -233,10 +233,10 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
   BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
 }
 
-void InstallBeatmapObjectsInTimeRowProcessorHooks(Logger& logger) {
-  INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow);
+void InstallBeatmapObjectsInTimeRowProcessorHooks() {
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow);
 
-  INSTALL_HOOK(logger, BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice)
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice)
 }
 
 NEInstallHooks(InstallBeatmapObjectsInTimeRowProcessorHooks);

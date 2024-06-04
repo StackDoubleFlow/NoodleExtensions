@@ -52,8 +52,8 @@ MAKE_HOOK_MATCH(ObstacleData_Mirror, &ObstacleData::Mirror, void, ObstacleData* 
   return ObstacleData_Mirror(self, lineCount);
 }
 
-void InstallObstacleDataHooks(Logger& logger) {
-  INSTALL_HOOK(logger, ObstacleData_Mirror);
+void InstallObstacleDataHooks() {
+  INSTALL_HOOK(NELogger::Logger, ObstacleData_Mirror);
 }
 
 NEInstallHooks(InstallObstacleDataHooks);

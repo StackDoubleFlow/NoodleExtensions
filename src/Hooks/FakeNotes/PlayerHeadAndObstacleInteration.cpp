@@ -40,8 +40,8 @@ MAKE_HOOK_MATCH(PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles,
   }
 }
 
-void InstallPlayerHeadAndObstacleInterationHooks(Logger& logger) {
-  INSTALL_HOOK_ORIG(logger, PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles);
+void InstallPlayerHeadAndObstacleInterationHooks() {
+  INSTALL_HOOK_ORIG(NELogger::Logger, PlayerHeadAndObstacleInteraction_RefreshIntersectingObstacles);
 }
 
 NEInstallHooks(InstallPlayerHeadAndObstacleInterationHooks);

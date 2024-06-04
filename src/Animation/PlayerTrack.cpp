@@ -91,7 +91,7 @@ void PlayerTrack::AssignTrack(Track* track) {
 }
 
 void PlayerTrack::OnDidPauseEvent() {
-  NELogger::GetLogger().debug("PlayerTrack::OnDidPauseEvent");
+  NELogger::Logger.debug("PlayerTrack::OnDidPauseEvent");
   IL2CPP_CATCH_HANDLER(
     if (instance) {
       instance->set_enabled(false);
@@ -105,7 +105,7 @@ void PlayerTrack::OnDidPauseEvent() {
 }
 
 void PlayerTrack::OnDidResumeEvent() {
-  NELogger::GetLogger().debug("PlayerTrack::OnDidResumeEvent");
+  NELogger::Logger.debug("PlayerTrack::OnDidResumeEvent");
   IL2CPP_CATCH_HANDLER(
     if (instance) {
       instance->set_enabled(track->v2);
@@ -118,9 +118,9 @@ void PlayerTrack::OnDidResumeEvent() {
 }
 
 void PlayerTrack::OnDestroy() {
-  NELogger::GetLogger().debug("PlayerTrack::OnDestroy");
+  NELogger::Logger.debug("PlayerTrack::OnDestroy");
   if (pauseController) {
-    // NELogger::GetLogger().debug("Removing action didPauseEvent %p", didPauseEventAction);
+    // NELogger::Logger.debug("Removing action didPauseEvent %p", didPauseEventAction);
     // pauseController->remove_didPauseEvent(didPauseEventAction);
   }
   instance = nullptr;

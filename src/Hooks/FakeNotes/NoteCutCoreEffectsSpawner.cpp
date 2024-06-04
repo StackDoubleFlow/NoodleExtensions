@@ -26,8 +26,8 @@ MAKE_HOOK_MATCH(NoteCutCoreEffectsSpawner_OnDestroy, &NoteCutCoreEffectsSpawner:
   noteCutCoreEffectsSpawner = std::nullopt;
 }
 
-void InstallNoteCutCoreEffectsSpawnerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, NoteCutCoreEffectsSpawner_Start);
-  INSTALL_HOOK(logger, NoteCutCoreEffectsSpawner_OnDestroy);
+void InstallNoteCutCoreEffectsSpawnerHooks() {
+  INSTALL_HOOK(NELogger::Logger, NoteCutCoreEffectsSpawner_Start);
+  INSTALL_HOOK(NELogger::Logger, NoteCutCoreEffectsSpawner_OnDestroy);
 }
 NEInstallHooks(InstallNoteCutCoreEffectsSpawnerHooks);

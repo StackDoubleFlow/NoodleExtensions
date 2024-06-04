@@ -22,7 +22,7 @@ MAKE_HOOK_MATCH(BombNoteController_Init, &BombNoteController::Init, void, BombNo
   }
 }
 
-void InstallBombNoteControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, BombNoteController_Init);
+void InstallBombNoteControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, BombNoteController_Init);
 }
 NEInstallHooks(InstallBombNoteControllerHooks);

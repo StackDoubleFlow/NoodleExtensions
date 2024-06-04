@@ -55,8 +55,8 @@ MAKE_HOOK_MATCH(BaseNoteVisuals_Awake, &BaseNoteVisuals::Awake, void, BaseNoteVi
   }
 }
 
-void InstallBaseNoteVisualsHooks(Logger& logger) {
-  INSTALL_HOOK(logger, BaseNoteVisuals_Awake);
+void InstallBaseNoteVisualsHooks() {
+  INSTALL_HOOK(NELogger::Logger, BaseNoteVisuals_Awake);
 }
 
 NEInstallHooks(InstallBaseNoteVisualsHooks);

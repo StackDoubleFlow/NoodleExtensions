@@ -45,8 +45,8 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap, BeatmapObject
 //    return result;
 //}
 
-void InstallBeatmapDataLoaderHooks(Logger& logger) {
-  //    INSTALL_HOOK(logger, GetBeatmapDataFromBeatmapSaveData);
+void InstallBeatmapDataLoaderHooks() {
+  //    INSTALL_HOOK(NELogger::Logger, GetBeatmapDataFromBeatmapSaveData);
 }
 
 NEInstallHooks(InstallBeatmapDataLoaderHooks);

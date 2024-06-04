@@ -38,8 +38,8 @@ using namespace GlobalNamespace;
 //     return ProcessBeatmapEventData(self, beatmapEventData);
 // }
 
-void InstallSpawnRotationProcessorHooks(Logger& logger) {
-  //    INSTALL_HOOK(logger, ProcessBeatmapEventData);
+void InstallSpawnRotationProcessorHooks() {
+  //    INSTALL_HOOK(NELogger::Logger, ProcessBeatmapEventData);
 }
 
 NEInstallHooks(InstallSpawnRotationProcessorHooks);

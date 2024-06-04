@@ -170,9 +170,9 @@ using namespace GlobalNamespace;
 //}
 
 // void InstallClampPatches(Logger &logger) {
-//     INSTALL_HOOK(logger, BeatmapObjectsDataClampPatch);
-//     INSTALL_HOOK(logger, NoteProcessorClampPatch);
-//     INSTALL_HOOK(logger, BeatmapData_AddBeatmapObjectData);
-//     INSTALL_HOOK(logger, BeatmapLineData_AddBeatmapObjectData);
+//     INSTALL_HOOK(NELogger::Logger, BeatmapObjectsDataClampPatch);
+//     INSTALL_HOOK(NELogger::Logger, NoteProcessorClampPatch);
+//     INSTALL_HOOK(NELogger::Logger, BeatmapData_AddBeatmapObjectData);
+//     INSTALL_HOOK(NELogger::Logger, BeatmapLineData_AddBeatmapObjectData);
 // }
 //  NEInstallHooks(InstallClampPatches);

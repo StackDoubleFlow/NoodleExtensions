@@ -129,10 +129,10 @@ MAKE_HOOK_MATCH(NoteCutter_Cut, &NoteCutter::Cut, void, NoteCutter* self, Saber*
   prevData.bottomPos = saberBottomPos;
 }
 
-void InstallNoteCutterHooks(Logger& logger) {
-  INSTALL_HOOK(logger, NoteCutter_Cut);
-  //    INSTALL_HOOK(logger, Saber_get_saberBladeBottomPos);
-  //    INSTALL_HOOK(logger, Saber_get_saberBladeTopPos);
+void InstallNoteCutterHooks() {
+  INSTALL_HOOK(NELogger::Logger, NoteCutter_Cut);
+  //    INSTALL_HOOK(NELogger::Logger, Saber_get_saberBladeBottomPos);
+  //    INSTALL_HOOK(NELogger::Logger, Saber_get_saberBladeTopPos);
 }
 
 NEInstallHooks(InstallNoteCutterHooks);

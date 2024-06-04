@@ -66,8 +66,8 @@ MAKE_HOOK_MATCH(BeatEffectSpawner_HandleNoteDidStartJump, &BeatEffectSpawner::Ha
   //
 }
 
-void InstallBeatEffectSpawnerHooks(Logger& logger) {
-  INSTALL_HOOK_ORIG(logger, BeatEffectSpawner_HandleNoteDidStartJump);
+void InstallBeatEffectSpawnerHooks() {
+  INSTALL_HOOK_ORIG(NELogger::Logger, BeatEffectSpawner_HandleNoteDidStartJump);
 }
 
 NEInstallHooks(InstallBeatEffectSpawnerHooks);

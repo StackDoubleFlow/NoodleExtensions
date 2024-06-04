@@ -113,10 +113,10 @@ MAKE_HOOK(MemoryPoolBase_Despawn, nullptr, void, MemoryPoolBase_1<Il2CppObject*>
 //
 // }
 
-void InstallMemoryPoolBaseHooks(Logger& logger) {
+void InstallMemoryPoolBaseHooks() {
   auto mInfo =
       il2cpp_utils::il2cpp_type_check::MetadataGetter<&Zenject::MemoryPoolBase_1<Il2CppObject*>::Despawn>::methodInfo();
-  INSTALL_HOOK_DIRECT(logger, MemoryPoolBase_Despawn, (void*)(mInfo->methodPointer));
+  INSTALL_HOOK_DIRECT(NELogger::Logger, MemoryPoolBase_Despawn, (void*)(mInfo->methodPointer));
 }
 
 NEInstallHooks(InstallMemoryPoolBaseHooks);

@@ -1,23 +1,30 @@
 {
+  "version": "0.1.0",
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
     "name": "Noodle Extensions",
     "id": "NoodleExtensions",
     "version": "1.0.0",
+    "url": null,
     "additionalData": {
       "overrideSoName": "libnoodleextensions.so"
     }
   },
   "workspace": {
     "scripts": {
-      "build": ["pwsh ./build.ps1"]
-    }
+      "build": [
+        "pwsh ./build.ps1"
+      ]
+    },
+    "qmodIncludeDirs": [],
+    "qmodIncludeFiles": [],
+    "qmodOutput": null
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^3.14.0",
+      "versionRange": ">5.1.0<5.1.7",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -25,42 +32,35 @@
       }
     },
     {
-      "id": "codegen",
-      "versionRange": "^0.33.0",
+      "id": "bs-cordl",
+      "versionRange": "^3602.0.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.0",
-      "additionalData": {
-        "includeQmod": true
-      }
-    },
-    {
-      "id": "custom-json-data",
-      "versionRange": "^0.20.0",
-      "additionalData": {}
-    },
-    {
-      "id": "questui",
       "versionRange": "^0.17.0",
       "additionalData": {
         "includeQmod": true
       }
     },
     {
+      "id": "custom-json-data",
+      "versionRange": "^0.21.0",
+      "additionalData": {}
+    },
+    {
       "id": "config-utils",
-      "versionRange": "^0.8.0",
+      "versionRange": "=1.4.2",
       "additionalData": {}
     },
     {
       "id": "tracks",
-      "versionRange": "^0.9.0",
+      "versionRange": "^1.0.0",
       "additionalData": {}
     },
     {
-      "id": "pinkcore",
-      "versionRange": "^1.6.0",
+      "id": "songcore",
+      "versionRange": "^1.0.0",
       "additionalData": {
         "includeQmod": true
       }
@@ -71,8 +71,8 @@
       "additionalData": {}
     },
     {
-      "id": "modloader",
-      "versionRange": "*",
+      "id": "scotland2",
+      "versionRange": "^0.1.0",
       "additionalData": {
         "includeQmod": true
       }
@@ -84,19 +84,13 @@
     },
     {
       "id": "paper",
-      "versionRange": "^1.0.5",
-      "additionalData": {}
-    },
-    {
-      "id": "songloader",
-      "versionRange": "^0.10.0",
+      "versionRange": "^3.0.0",
       "additionalData": {}
     },
     {
       "id": "conditional-dependencies",
-      "versionRange": "^0.1.0",
+      "versionRange": "^0.3.0",
       "additionalData": {}
     }
-  ],
-  "additionalData": {}
+  ]
 }

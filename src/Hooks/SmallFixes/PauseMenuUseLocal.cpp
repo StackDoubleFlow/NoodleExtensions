@@ -26,8 +26,8 @@ MAKE_HOOK_MATCH(PauseMenuManager_ShowMenu, &PauseMenuManager::ShowMenu, void, Pa
   transform->set_localEulerAngles({ 0, self->_environmentSpawnRotation->targetRotation, 0 });
 }
 
-void InstallPauseManagerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, PauseMenuManager_ShowMenu);
+void InstallPauseManagerHooks() {
+  INSTALL_HOOK(NELogger::Logger, PauseMenuManager_ShowMenu);
 }
 
 NEInstallHooks(InstallPauseManagerHooks);

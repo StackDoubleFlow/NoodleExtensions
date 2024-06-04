@@ -216,10 +216,10 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
   return result;
 }
 
-void InstallBeatmapObjectSpawnMovementDataHooks(Logger& logger) {
-  INSTALL_HOOK(logger, GetObstacleSpawnData);
-  INSTALL_HOOK(logger, GetJumpingNoteSpawnData);
-  INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start)
+void InstallBeatmapObjectSpawnMovementDataHooks() {
+  INSTALL_HOOK(NELogger::Logger, GetObstacleSpawnData);
+  INSTALL_HOOK(NELogger::Logger, GetJumpingNoteSpawnData);
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectSpawnController_Start)
 }
 
 NEInstallHooks(InstallBeatmapObjectSpawnMovementDataHooks);

@@ -46,9 +46,9 @@ MAKE_HOOK_MATCH(SaberMovementData_AddNewData, &SaberMovementData::AddNewData, vo
   return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
 }
 
-void InstallSaberHooks(Logger& logger) {
-  INSTALL_HOOK(logger, Saber_ManualUpdate);
-  INSTALL_HOOK(logger, SaberMovementData_AddNewData);
+void InstallSaberHooks() {
+  INSTALL_HOOK(NELogger::Logger, Saber_ManualUpdate);
+  INSTALL_HOOK(NELogger::Logger, SaberMovementData_AddNewData);
 }
 
 NEInstallHooks(InstallSaberHooks);

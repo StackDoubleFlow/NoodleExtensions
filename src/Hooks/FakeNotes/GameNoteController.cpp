@@ -17,7 +17,7 @@ MAKE_HOOK_MATCH(NoteDidStartJump, &GameNoteController::NoteDidStartJump, void, G
   }
 }
 
-void InstallGameNoteControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, NoteDidStartJump);
+void InstallGameNoteControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, NoteDidStartJump);
 }
 NEInstallHooks(InstallGameNoteControllerHooks);

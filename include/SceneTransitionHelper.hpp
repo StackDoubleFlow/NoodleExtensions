@@ -1,8 +1,14 @@
 #pragma once
 
+#include "GlobalNamespace/BeatmapKey.hpp"
+#include "GlobalNamespace/EnvironmentInfoSO.hpp"
+
+#include "songcore/shared/SongCore.hpp"
+
 #include "custom-json-data/shared/JSONWrapper.h"
 #include "NELogger.h"
 #include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
+
 
 namespace GlobalNamespace {
 class IDifficultyBeatmap;
@@ -16,7 +22,7 @@ class CustomBeatmapData;
 namespace NoodleExtensions {
 class SceneTransitionHelper {
 public:
-  static bool CheckIfInArray(CustomJSONData::ValueUTF16 const& val, std::u16string_view stringToCheck) {
+  static bool CheckIfInArray(SongCore::CustomJSONData::ValueUTF16 const& val, std::u16string_view stringToCheck) {
     if (val.IsArray()) {
       for (auto const& element : val.GetArray()) {
         if (element.IsString() && element.GetString() == stringToCheck) return true;
@@ -36,7 +42,7 @@ public:
                     CustomJSONData::v3::CustomBeatmapSaveData* customBeatmapDataCustom,
                     GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings);
 
-  static bool CheckIfNoodle(CustomJSONData::ValueUTF16 const& rapidjsonData) {
+  static bool CheckIfNoodle(SongCore::CustomJSONData::ValueUTF16 const& rapidjsonData) {
     auto requirements = rapidjsonData.FindMember(u"_requirements");
 
     if (requirements != rapidjsonData.MemberEnd()) {
@@ -46,7 +52,7 @@ public:
     return false;
   }
 
-  static bool CheckIfME(CustomJSONData::ValueUTF16 const& rapidjsonData) {
+  static bool CheckIfME(SongCore::CustomJSONData::ValueUTF16 const& rapidjsonData) {
     auto requirements = rapidjsonData.FindMember(u"_requirements");
 
     if (requirements != rapidjsonData.MemberEnd()) {
@@ -55,5 +61,9 @@ public:
 
     return false;
   }
+
+  static void Patch(SongCore::SongLoader::CustomBeatmapLevel* beatmapLevel, GlobalNamespace::BeatmapKey key,
+                    GlobalNamespace::EnvironmentInfoSO* environment,
+                    GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings);
 };
 } // namespace NoodleExtensions

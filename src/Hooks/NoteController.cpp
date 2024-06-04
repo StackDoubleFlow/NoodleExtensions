@@ -433,12 +433,12 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Despawn_LinkedNotes,
   }
 }
 
-void InstallNoteControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, NoteController_Init);
-  INSTALL_HOOK(logger, NoteController_ManualUpdate);
+void InstallNoteControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, NoteController_Init);
+  INSTALL_HOOK(NELogger::Logger, NoteController_ManualUpdate);
 
-  INSTALL_HOOK(logger, NoteController_SendNoteWasCutEvent_LinkedNotes);
-  INSTALL_HOOK(logger, BeatmapObjectManager_Despawn_LinkedNotes);
+  INSTALL_HOOK(NELogger::Logger, NoteController_SendNoteWasCutEvent_LinkedNotes);
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectManager_Despawn_LinkedNotes);
 }
 
 NEInstallHooks(InstallNoteControllerHooks);

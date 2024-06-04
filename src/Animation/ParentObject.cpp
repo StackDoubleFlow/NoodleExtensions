@@ -121,11 +121,11 @@ void ParentObject::UpdateDataOld(bool forced) {
 static void logTransform(Transform* transform, int hierarchy = 0) {
   if (hierarchy != 0) {
     std::string tab = std::string(hierarchy * 4, ' ');
-    NELogger::GetLogger().debug("%i%sChild: %s %i", hierarchy, tab.c_str(),
-                                to_utf8(csstrtostr(transform->get_gameObject()->get_name())).c_str(),
+    NELogger::Logger.debug("{}{}Child: {} {}", hierarchy, tab.c_str(),
+                                transform->get_gameObject()->get_name(),
                                 transform->GetChildCount());
   } else {
-    NELogger::GetLogger().debug("Self: %s %i", to_utf8(csstrtostr(transform->get_gameObject()->get_name())).c_str(),
+    NELogger::Logger.debug("Self: {} {}", transform->get_gameObject()->get_name(),
                                 transform->GetChildCount());
   }
   for (int i = 0; i < transform->GetChildCount(); i++) {
@@ -195,7 +195,7 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
 
   for (auto& track : parentTrackEventData.childrenTracks) {
     if (track == parentTrackEventData.parentTrack) {
-      NELogger::GetLogger().error("How could a track contain itself?");
+      NELogger::Logger.error("How could a track contain itself?");
     }
 
     for (auto& parentObject : ParentController::parentObjects) {
@@ -249,6 +249,6 @@ ParentObject::~ParentObject() {
 }
 
 void ParentController::OnDestroy() {
-  NELogger::GetLogger().debug("Clearing parent objects");
+  NELogger::Logger.debug("Clearing parent objects");
   parentObjects.clear();
 }

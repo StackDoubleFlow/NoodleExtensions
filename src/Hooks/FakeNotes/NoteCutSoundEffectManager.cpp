@@ -79,8 +79,8 @@ MAKE_HOOK_MATCH(NoteCutSoundEffectManager_HandleNoteWasSpawned, &NoteCutSoundEff
   }
 }
 
-void InstallNoteCutSoundEffectManagerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, NoteCutSoundEffectManager_Start);
-  INSTALL_HOOK(logger, NoteCutSoundEffectManager_HandleNoteWasSpawned);
+void InstallNoteCutSoundEffectManagerHooks() {
+  INSTALL_HOOK(NELogger::Logger, NoteCutSoundEffectManager_Start);
+  INSTALL_HOOK(NELogger::Logger, NoteCutSoundEffectManager_HandleNoteWasSpawned);
 }
 NEInstallHooks(InstallNoteCutSoundEffectManagerHooks);

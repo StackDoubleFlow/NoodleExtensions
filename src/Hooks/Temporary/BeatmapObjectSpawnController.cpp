@@ -64,7 +64,7 @@ using namespace UnityEngine::SceneManagement;
 //    BeatmapObjectSpawnController_Start2(self);
 //}
 
-// void InstallBeatmapObjectSpawnControllerHooks(Logger& logger) {
-//     INSTALL_HOOK(logger, BeatmapObjectSpawnController_Start2);
+// void InstallBeatmapObjectSpawnControllerHooks() {
+//     INSTALL_HOOK(NELogger::Logger, BeatmapObjectSpawnController_Start2);
 // }
 //  NEInstallHooks(InstallBeatmapObjectSpawnControllerHooks);

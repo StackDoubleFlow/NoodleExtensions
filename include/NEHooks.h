@@ -3,18 +3,18 @@
 
 class Hooks {
 private:
-  static inline std::vector<void (*)(Logger& logger)> installFuncs;
+  static inline std::vector<void (*)()> installFuncs;
 
   static inline bool NoodleHookEnabled;
 
 public:
-  static void AddInstallFunc(void (*installFunc)(Logger& logger)) {
+  static void AddInstallFunc(void (*installFunc)()) {
     installFuncs.push_back(installFunc);
   }
 
-  static void InstallHooks(Logger& logger) {
+  static void InstallHooks() {
     for (auto installFunc : installFuncs) {
-      installFunc(logger);
+      installFunc();
     }
   }
 
@@ -31,7 +31,7 @@ public:
   struct __NERegister##func {                                                                                          \
     __NERegister##func() {                                                                                             \
       Hooks::AddInstallFunc(func);                                                                                     \
-      __android_log_print(ANDROID_LOG_DEBUG, "NEInstallHooks", "Registered install func: " #func);                     \
+      NELogger::Logger.info("NEHooks Registered install func: " #func);                                               \
     }                                                                                                                  \
   };                                                                                                                   \
   static __NERegister##func __NERegisterInstance##func;

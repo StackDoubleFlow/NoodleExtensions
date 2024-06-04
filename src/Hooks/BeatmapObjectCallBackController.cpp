@@ -128,8 +128,8 @@ MAKE_HOOK_MATCH(BeatmapCallbacksUpdater_LateUpdate, &BeatmapCallbacksUpdater::La
   return BeatmapCallbacksUpdater_LateUpdate(self);
 }
 
-void InstallBeatmapObjectCallbackControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, BeatmapCallbacksUpdater_LateUpdate);
+void InstallBeatmapObjectCallbackControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, BeatmapCallbacksUpdater_LateUpdate);
 }
 
 NEInstallHooks(InstallBeatmapObjectCallbackControllerHooks);

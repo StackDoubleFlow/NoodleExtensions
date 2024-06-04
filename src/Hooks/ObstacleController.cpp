@@ -395,7 +395,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
   //    static auto CustomObstacleDataKlass = classof(CustomJSONData::CustomObstacleData *);
   //    CRASH_UNLESS(self);
   //    CRASH_UNLESS(self->obstacleData);
-  //    NELogger::GetLogger().debug("ObstacleController::GetPosForTime %p", self->obstacleData);
+  //    NELogger::Logger.debug("ObstacleController::GetPosForTime %p", self->obstacleData);
   //    CRASH_UNLESS(self->obstacleData->klass);
   //    CRASH_UNLESS(CustomObstacleDataKlass);
   //
@@ -454,19 +454,19 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_Refresh, &GlobalNamespace::Param
 // #include "beatsaber-hook/shared/utils/instruction-parsing.hpp"
 // MAKE_HOOK(Object_New, nullptr, Il2CppObject *, Il2CppClass *klass) {
 //     if (test && klass && klass->name && klass->namespaze) {
-//         NELogger::GetLogger().info("Allocating a %s.%s", klass->namespaze, klass->name);
+//         NELogger::Logger.info("Allocating a {}.{}", klass->namespaze, klass->name);
 //         PrintBacktrace(10);
 //     }
 //     return Object_New(klass);
 // }
 
-void InstallObstacleControllerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, ObstacleController_Init);
-  INSTALL_HOOK_ORIG(logger, ObstacleController_ManualUpdate);
-  INSTALL_HOOK(logger, ObstacleController_GetPosForTime);
+void InstallObstacleControllerHooks() {
+  INSTALL_HOOK(NELogger::Logger, ObstacleController_Init);
+  INSTALL_HOOK_ORIG(NELogger::Logger, ObstacleController_ManualUpdate);
+  INSTALL_HOOK(NELogger::Logger, ObstacleController_GetPosForTime);
   // Temporary fake glow disable hook
-  INSTALL_HOOK(logger, ParametricBoxFakeGlowController_Refresh);
-  INSTALL_HOOK(logger, ParametricBoxFakeGlowController_OnEnable);
+  INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_Refresh);
+  INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_OnEnable);
 
   // Instruction on((const int32_t*) HookTracker::GetOrig(il2cpp_functions::object_new));
   // Instruction j2Ob_N_thunk(CRASH_UNLESS(on.findNthCall(1)->label));

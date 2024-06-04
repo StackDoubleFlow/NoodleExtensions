@@ -64,8 +64,8 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle, &BeatmapObjectManager::AddSp
   //
 }
 
-void InstallBeatmapObjectManagerSmallFixHooks(Logger& logger) {
-  INSTALL_HOOK_ORIG(logger, BeatmapObjectManager_SpawnObstacle);
+void InstallBeatmapObjectManagerSmallFixHooks() {
+  INSTALL_HOOK_ORIG(NELogger::Logger, BeatmapObjectManager_SpawnObstacle);
 }
 
 NEInstallHooks(InstallBeatmapObjectManagerSmallFixHooks);

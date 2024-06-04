@@ -4,7 +4,6 @@
 
 #include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
 #include "GlobalNamespace/BeatmapLineData.hpp"
-#include "GlobalNamespace/IDifficultyBeatmap.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
 #include "Animation/ParentObject.h"
@@ -16,7 +15,7 @@
 #include "NEHooks.h"
 #include "SceneTransitionHelper.hpp"
 
-#include "pinkcore/shared/RequirementAPI.hpp"
+#include "songcore/shared/SongCore.hpp"
 
 // // needed to compile, idk why
 // #define ID "Noodle"
@@ -34,36 +33,52 @@ using namespace GlobalNamespace;
 using namespace TrackParenting;
 using namespace CustomJSONData;
 
-void SceneTransitionHelper::Patch(IDifficultyBeatmap* difficultyBeatmap,
-                                  CustomJSONData::v3::CustomBeatmapSaveData* customBeatmapDataCustom,
+void SceneTransitionHelper::Patch(SongCore::SongLoader::CustomBeatmapLevel* beatmapLevel,
+                                  GlobalNamespace::BeatmapKey key, GlobalNamespace::EnvironmentInfoSO* environment,
                                   PlayerSpecificSettings* playerSpecificSettings) {
   NECaches::LeftHandedMode = playerSpecificSettings->leftHanded;
+
+  if (beatmapLevel == nullptr) return;
+
+  NELogger::Logger.debug("Getting Save Data");
+
+  auto saveData = beatmapLevel->standardLevelInfoSaveDataV2;
+
+  if (!saveData) return;
+
+  auto customSaveInfo = saveData.value()->CustomSaveDataInfo;
+
+  if (!customSaveInfo) return;
+
+  NELogger::Logger.debug("Getting Characteristic and diff");
+
+  auto diff = customSaveInfo.value().get().TryGetCharacteristicAndDifficulty(key.beatmapCharacteristic->serializedName,
+                                                                             key.difficulty);
+
+  if (!diff) return;
+
+  NELogger::Logger.debug("Getting Requirements & Suggestions");
+
   bool noodleRequirement = false;
   bool meRequirement = false;
 
-  if (customBeatmapDataCustom && customBeatmapDataCustom->levelCustomData) {
-    auto dynData = customBeatmapDataCustom->levelCustomData;
-
-    if (dynData && dynData->get().IsObject()) {
-      ValueUTF16 const& rapidjsonData = *dynData;
-
-      meRequirement = CheckIfME(rapidjsonData);
-      noodleRequirement = CheckIfNoodle(rapidjsonData);
-    }
-  }
+  auto requirements = diff->get().requirements;
+  auto suggestions = diff->get().suggestions;
+  meRequirement |= std::find(requirements.begin(), requirements.end(), U8_ME_REQUIREMENTNAME) != requirements.end();
+  noodleRequirement |= std::find(suggestions.begin(), suggestions.end(), U8_REQUIREMENTNAME) != suggestions.end();
 
   noodleRequirement = !meRequirement && noodleRequirement;
 
   Hooks::setNoodleHookEnabled(noodleRequirement);
 
-  //auto const& modInfo = NELogger::modInfo;
-  // if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
-  //     Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
-  //     Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
-  // } else {
-  //     Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
-  //     Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
-  // }
+  // auto const& modInfo = NELogger::modInfo;
+  //  if (noodleRequirement && getNEConfig().qosmeticsModelDisable.GetValue()) {
+  //      Qosmetics::NoteAPI::RegisterNoteDisablingInfo(modInfo);
+  //      Qosmetics::WallAPI::RegisterWallDisablingInfo(modInfo);
+  //  } else {
+  //      Qosmetics::NoteAPI::UnregisterNoteDisablingInfo(modInfo);
+  //      Qosmetics::WallAPI::UnregisterWallDisablingInfo(modInfo);
+  //  }
 
   ParentController::OnDestroy();
 

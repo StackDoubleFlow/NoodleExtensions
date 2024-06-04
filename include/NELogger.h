@@ -14,10 +14,7 @@ static inline const std::u16string ME_REQUIREMENTNAME = u"Mapping Extensions";
 
 class NELogger {
 public:
-  static Logger& GetLogger() {
-    static auto logger = new Logger(modloader::ModInfo{"NoodleExtensions", VERSION, 0}, LoggerOptions(false, true));
-    return *logger;
-  }
+  static constexpr auto Logger = Paper::ConstLoggerContext("NoodleExtensions");
 };
 
 void PrintJSONValue(rapidjson::Value const& json);

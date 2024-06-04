@@ -20,7 +20,7 @@ MAKE_HOOK_MATCH(BadNoteCutEffectSpawner_HandleNoteWasCut, &BadNoteCutEffectSpawn
   }
 }
 
-void InstallBadNoteCutEffectSpawnerHooks(Logger& logger) {
-  INSTALL_HOOK(logger, BadNoteCutEffectSpawner_HandleNoteWasCut);
+void InstallBadNoteCutEffectSpawnerHooks() {
+  INSTALL_HOOK(NELogger::Logger, BadNoteCutEffectSpawner_HandleNoteWasCut);
 }
 NEInstallHooks(InstallBadNoteCutEffectSpawnerHooks);

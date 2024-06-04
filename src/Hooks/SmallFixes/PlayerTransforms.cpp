@@ -17,8 +17,8 @@ MAKE_HOOK_MATCH(PlayerTransforms_Update, &PlayerTransforms::Update, void, Player
   self->_headPseudoLocalPos = self->_headTransform->get_localPosition();
 }
 
-void InstallPlayerTransformsHooks(Logger& logger) {
-  INSTALL_HOOK(logger, PlayerTransforms_Update);
+void InstallPlayerTransformsHooks() {
+  INSTALL_HOOK(NELogger::Logger, PlayerTransforms_Update);
 }
 
 NEInstallHooks(InstallPlayerTransformsHooks);

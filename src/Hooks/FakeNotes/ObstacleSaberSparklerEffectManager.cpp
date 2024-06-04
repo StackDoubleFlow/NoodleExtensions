@@ -13,8 +13,6 @@
 #include "GlobalNamespace/Saber.hpp"
 #include "GlobalNamespace/SaberType.hpp"
 #include "GlobalNamespace/SaberTypeExtensions.hpp"
-#include "GlobalNamespace/HapticFeedbackManager.hpp"
-#include "System/Action_1.hpp"
 
 #include "UnityEngine/Color.hpp"
 
@@ -42,8 +40,8 @@ MAKE_HOOK_MATCH(ObstacleSaberSparkleEffectManager_GetBurnMarkPos, &ObstacleSaber
                                                           burnMarkPos);
 }
 
-void ObstacleSaberSparkleEffectManagerHook(Logger& logger) {
-  INSTALL_HOOK(logger, ObstacleSaberSparkleEffectManager_GetBurnMarkPos);
+void ObstacleSaberSparkleEffectManagerHook() {
+  INSTALL_HOOK(NELogger::Logger, ObstacleSaberSparkleEffectManager_GetBurnMarkPos);
 }
 
 NEInstallHooks(ObstacleSaberSparkleEffectManagerHook)
