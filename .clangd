@@ -1,3 +1,6 @@
+Diagnostics:
+  UnusedIncludes: None
+
 If:
   # Note: This is a regexp, notice '.*' at the end of PathMatch string.
   PathMatch: ./extern/.*
