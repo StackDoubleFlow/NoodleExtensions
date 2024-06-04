@@ -11,7 +11,7 @@ extern "C" void setup(CModInfo* info) {
   getNEConfig().Init(modloader::ModInfo(info->id, info->version, info->version_long));
 }
 
-extern "C" void load() {
+extern "C" void late_load() {
   NELogger::Logger.info("Installing NoodleExtensions Hooks!");
 
   // Install hooks
