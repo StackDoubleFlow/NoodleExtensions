@@ -88,7 +88,7 @@ constexpr float GetCustomWidth(float def, BeatmapObjectAssociatedData const& ad)
 
 constexpr float GetCustomLength(float def, BeatmapObjectAssociatedData const& ad) {
   if (!ad.objectData.scale) return def;
-  auto opt = ad.objectData.scale.value()[1];
+  auto opt = ad.objectData.scale.value()[2];
 
   if (!opt) return def;
 
