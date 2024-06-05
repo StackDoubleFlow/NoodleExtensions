@@ -1,5 +1,6 @@
 #include "Animation/ParentObject.h"
 
+#include "NELogger.h"
 #include "beatsaber-hook/shared/utils/il2cpp-type-check.hpp"
 
 #include <utility>
@@ -142,14 +143,12 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
 
   static auto get_transform =
       il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::GameObject::get_transform>::get();
-  static auto get_transformMB =
-      il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::MonoBehaviour::get_transform>::get();
 
   instance->origin = get_transform(parentGameObject);
   instance->track = parentTrackEventData.parentTrack;
   instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
-  Transform* transform = get_transformMB(instance);
+  Transform* transform = instance->origin;
   if (instance->track->v2) {
     if (parentTrackEventData.pos.has_value()) {
       instance->startPos = *parentTrackEventData.pos;
