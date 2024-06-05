@@ -115,13 +115,15 @@ static void ObstacleInitTranspileLite(ObstacleController* self, CustomJSONData::
   // set transform
   transform->localRotation = self->_worldRotation;
 
+  self->_width = GetCustomWidth((float)obstacleData->width * singleLineWidth, ad);
+
   // fixup position
   auto b = NEVector::Vector3((self->width - singleLineWidth) * 0.5f, 0, 0);
   self->_startPos = NEVector::Vector3(startPos) + b;
   self->_midPos = NEVector::Vector3(midPos) + b;
   self->_endPos = NEVector::Vector3(endPos) + b;
 
-  self->_width = GetCustomWidth((float)obstacleData->width * singleLineWidth, ad);
+
 
   float num = (NEVector::Vector3(self->_endPos) - self->_midPos).Magnitude() / self->move2Duration;
   self->_length = GetCustomLength(num * obstacleData->duration, ad);
