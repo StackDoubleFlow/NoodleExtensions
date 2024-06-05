@@ -115,6 +115,9 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
       ad.objectData.startX ? (*ad.objectData.startX + (self->noteLinesCount / 2.f)) : obstacleData->lineIndex;
   float lineLayer = ad.objectData.startY.value_or(obstacleData->lineLayer.value__);
 
+  Vector3 obstacleOffset = SpawnDataHelper::GetObstacleOffset(self, lineIndex, lineLayer);
+  obstacleOffset.y += self->get_jumpOffsetY();
+
   std::optional<float> const& njs = ad.objectData.noteJumpMovementSpeed;
   std::optional<float> const& spawnOffset = ad.objectData.noteJumpStartBeatOffset;
 
@@ -122,8 +125,6 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
   std::optional<float> height = scale && scale->at(1) ? scale->at(1) : std::nullopt;
   std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
 
-  Vector3 obstacleOffset = SpawnDataHelper::GetObstacleOffset(self, lineIndex, lineLayer);
-  obstacleOffset.y += self->get_jumpOffsetY();
 
   // original code has this line, not sure how important it is
   ////obstacleOffset.y = Mathf.Max(obstacleOffset.y, this._verticalObstaclePosY);
