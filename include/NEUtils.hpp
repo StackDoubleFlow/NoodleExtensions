@@ -40,7 +40,7 @@ template <typename ToCast, typename List> inline auto of_type(List list) {
   return of_type<ToCast>(std::begin(list), std::end(list));
 }
 
-inline std::optional<float> getTimeProp(std::span<Track*> tracks) {
+inline std::optional<float> getTimeProp(std::span<Track* const> tracks) {
   if (tracks.empty()) return {};
 
   Track const* timeTrack = nullptr;

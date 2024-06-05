@@ -54,25 +54,26 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(Anim
                                                                             float time) {
   PointDefinition* localDefinitePosition = animationData.definitePosition;
 
-  std::span<Track const*> tracksConst = reinterpret_cast<std::span<Track const*> const&>(tracks);
+
 
   [[maybe_unused]] bool last;
   std::optional<Vector3> pathDefinitePosition =
       localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time, last)) : std::nullopt;
 
+  // track animation only
   if (!pathDefinitePosition && !tracks.empty()) {
     if (tracks.size() == 1) {
-      Track* track = tracks.front();
+      Track const* track = tracks.front();
       pathDefinitePosition =
           getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value, time);
     } else {
-      pathDefinitePosition = MSumTrackPathProps(tracksConst, Vector3::zero(), definitePosition, time);
+      pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), definitePosition, time);
     }
   }
 
   if (!pathDefinitePosition) return std::nullopt;
 
-  PointDefinition* position = animationData.position;
+  PointDefinition const* position = animationData.position;
   std::optional<Vector3> pathPosition = position ? std::optional(position->Interpolate(time, last)) : std::nullopt;
   std::optional<Vector3> trackPosition;
 
@@ -80,16 +81,16 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(Anim
 
   if (!tracks.empty()) {
     if (tracks.size() == 1) {
-      Track* track = tracks.front();
+      Track const* track = tracks.front();
 
       if (!pathPosition)
         pathPosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.position.value, time);
 
       trackPosition = getPropertyNullable<Vector3>(track, track->properties.position);
     } else {
-      trackPosition = MSumTrackProps(tracksConst, Vector3::zero(), position);
+      trackPosition = MSumTrackProps(tracks, Vector3::zero(), position);
 
-      if (!pathPosition) pathPosition = MSumTrackPathProps(tracksConst, Vector3::zero(), position, time);
+      if (!pathPosition) pathPosition = MSumTrackPathProps(tracks, Vector3::zero(), position, time);
     }
 
     positionOffset = pathPosition + trackPosition;
