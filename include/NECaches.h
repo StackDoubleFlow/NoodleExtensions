@@ -35,6 +35,10 @@ public:
   static bool LeftHandedMode;
 
   struct NoteCache {
+    constexpr NoteCache(NoteCache&&) = default;
+    // NoteCache(NoteCache const&) = default;
+    constexpr NoteCache() = default;
+
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher*> conditionalMaterialSwitchers;
     GlobalNamespace::BaseNoteVisuals* baseNoteVisuals{};
     GlobalNamespace::CutoutEffect* cutoutEffect{};
@@ -47,6 +51,10 @@ public:
   };
 
   struct ObstacleCache {
+    constexpr ObstacleCache(ObstacleCache&&) = default;
+    // ObstacleCache(ObstacleCache const&) = default;
+    constexpr ObstacleCache() = default;
+
     ArrayW<GlobalNamespace::ConditionalMaterialSwitcher*> conditionalMaterialSwitchers;
     GlobalNamespace::ObstacleDissolve* obstacleDissolve{};
     GlobalNamespace::CutoutAnimateEffect* cutoutAnimateEffect{};

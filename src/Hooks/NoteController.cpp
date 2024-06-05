@@ -1,3 +1,4 @@
+#include "NELogger.h"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
@@ -28,7 +29,10 @@
 #include "AssociatedData.h"
 #include "NEHooks.h"
 #include "NECaches.h"
+
 #include "custom-json-data/shared/CustomBeatmapData.h"
+#include "custom-json-data/shared/JsonUtils.h"
+
 #include "sombrero/shared/linq_functional.hpp"
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
 
@@ -43,15 +47,17 @@ std::unordered_map<NoteController*, std::unordered_set<NoteController*>*> linked
 
 CutoutEffect* NECaches::GetCutout(GlobalNamespace::NoteControllerBase* nc, NECaches::NoteCache& noteCache) {
   CutoutEffect*& cutoutEffect = noteCache.cutoutEffect;
-  if (!cutoutEffect) {
-    noteCache.baseNoteVisuals = noteCache.baseNoteVisuals ?: nc->get_gameObject()->GetComponent<BaseNoteVisuals*>();
-    CutoutAnimateEffect* cutoutAnimateEffect = noteCache.baseNoteVisuals->_cutoutAnimateEffect;
-    ArrayW<UnityW<CutoutEffect>> cuttoutEffects = cutoutAnimateEffect->_cuttoutEffects;
-    for (CutoutEffect* effect : cuttoutEffects) {
-      if (effect->get_name() != u"NoteArrow") {
-        cutoutEffect = effect;
-        break;
-      }
+
+  if (cutoutEffect) return cutoutEffect;
+
+
+  noteCache.baseNoteVisuals = noteCache.baseNoteVisuals ?: nc->get_gameObject()->GetComponent<BaseNoteVisuals*>();
+  CutoutAnimateEffect* cutoutAnimateEffect = noteCache.baseNoteVisuals->_cutoutAnimateEffect;
+  ArrayW<UnityW<CutoutEffect>> cuttoutEffects = cutoutAnimateEffect->_cuttoutEffects;
+  for (CutoutEffect* effect : cuttoutEffects) {
+    if (effect->get_name() != u"NoteArrow") {
+      cutoutEffect = effect;
+      break;
     }
   }
 

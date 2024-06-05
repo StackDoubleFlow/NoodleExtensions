@@ -40,7 +40,7 @@ struct ObjectOffset {
 };
 
 std::optional<NEVector::Vector3> GetDefinitePositionOffset(AnimationObjectData const& animationData,
-                                                           std::span<Track*> tracks, float time);
-ObjectOffset GetObjectOffset(AnimationObjectData const& customData, std::span<Track*> tracks, float time);
+                                                           std::span<Track* const> tracks, float time);
+ObjectOffset GetObjectOffset(AnimationObjectData const& customData, std::span<Track* const> tracks, float time);
 
 } // end namespace AnimationHelper
