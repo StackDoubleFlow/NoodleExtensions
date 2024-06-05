@@ -62,10 +62,9 @@ void SceneTransitionHelper::Patch(SongCore::SongLoader::CustomBeatmapLevel* beat
   bool noodleRequirement = false;
   bool meRequirement = false;
 
-  auto requirements = diff->get().requirements;
-  auto suggestions = diff->get().suggestions;
+  auto const& requirements = diff->get().requirements;
   meRequirement |= std::find(requirements.begin(), requirements.end(), U8_ME_REQUIREMENTNAME) != requirements.end();
-  noodleRequirement |= std::find(suggestions.begin(), suggestions.end(), U8_REQUIREMENTNAME) != suggestions.end();
+  noodleRequirement |= std::find(requirements.begin(), requirements.end(), U8_REQUIREMENTNAME) != requirements.end();
 
   noodleRequirement = !meRequirement && noodleRequirement;
 
