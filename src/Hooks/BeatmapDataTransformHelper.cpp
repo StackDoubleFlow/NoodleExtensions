@@ -104,7 +104,6 @@ void LoadNoodleObjects(CustomJSONData::CustomBeatmapData* beatmap) {
     } else if (beatmapObjectData->klass == customSliderDataClass) {
       sliderData = (CustomJSONData::CustomSliderData*)beatmapObjectData;
       customDataWrapper = sliderData->customData;
-      continue;
     }
 
     BeatmapObjectAssociatedData& ad = getAD(customDataWrapper);
