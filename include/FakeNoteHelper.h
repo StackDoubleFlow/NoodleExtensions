@@ -6,6 +6,7 @@
 namespace GlobalNamespace {
 class NoteController;
 class NoteData;
+class SliderData;
 class ObstacleController;
 } // namespace GlobalNamespace
 
@@ -17,6 +18,7 @@ namespace FakeNoteHelper {
 
 bool GetFakeNote(GlobalNamespace::NoteData* noteData);
 bool GetCuttable(GlobalNamespace::NoteData* noteData);
+bool GetAttractableArc(GlobalNamespace::SliderData* arcData);
 
 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*
 ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles);

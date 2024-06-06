@@ -32,6 +32,15 @@ bool FakeNoteHelper::GetCuttable(NoteData* noteData) {
   return !ad.objectData.uninteractable.value_or(false);
 }
 
+bool FakeNoteHelper::GetAttractableArc(SliderData* arcData) {
+  auto customArcData = il2cpp_utils::try_cast<CustomJSONData::CustomSliderData>(arcData);
+  if (!customArcData || !customArcData.value()->customData->value) {
+    return true;
+  }
+  BeatmapObjectAssociatedData& ad = getAD(customArcData.value()->customData);\
+  return !ad.objectData.uninteractable.value_or(false);
+}
+
 System::Collections::Generic::List_1<GlobalNamespace::ObstacleController*>*
 FakeNoteHelper::ObstacleFakeCheck(VList<GlobalNamespace::ObstacleController*> intersectingObstacles) {
   //    auto filteredInner = List<GlobalNamespace::ObstacleController*>::New_ctor();
