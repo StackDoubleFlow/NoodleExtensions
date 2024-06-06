@@ -149,13 +149,14 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     self->_worldRotation = rotation;
     self->_inverseWorldRotation = Quaternion_Inverse(rotation);
     ad.worldRotation = rotation;
+    transform->localRotation = rotation;
   }
 
   auto const& scale = ad.objectData.scale;
 
   if (scale) {
     if (scale->at(0)) {
-      self->_width = *scale->at(0) * singleLineWidth;
+      self->_width = *scale->at(0);
     }
 
     if (scale->at(2)) {
@@ -187,7 +188,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   auto const& localrot = ad.objectData.localRotation;
   if (localrot.has_value()) {
     localRotation = *localrot;
-    transform->set_localRotation(NEVector::Quaternion(self->_worldRotation) * localRotation);
+    transform->localRotation = NEVector::Quaternion(self->_worldRotation) * localRotation;
   }
   ad.localRotation = localRotation;
 
