@@ -1,4 +1,3 @@
-#include "NELogger.h"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
@@ -61,77 +60,6 @@ float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<Track
   if (!time) return original;
 
   return (time.value() * (oc->_finishMovementTime - oc->move1Duration)) + oc->move1Duration;
-}
-
-Quaternion GetWorldRotation(CustomJSONData::CustomObstacleData* obstacleData, float def,
-                            BeatmapObjectAssociatedData& ad) {
-  auto worldRotation = NEVector::Quaternion::Euler({ 0, def, 0 });
-
-  if (!obstacleData->customData) {
-    return worldRotation;
-  }
-
-  auto const& worldRotationQuaternion = ad.objectData.rotation;
-  if (worldRotationQuaternion.has_value()) {
-    worldRotation = worldRotationQuaternion.value();
-  }
-
-  ad.worldRotation = worldRotation;
-
-  return worldRotation;
-}
-
-constexpr float GetCustomWidth(float def, BeatmapObjectAssociatedData const& ad) {
-  if (!ad.objectData.scale) return def;
-  return ad.objectData.scale.value()[0].value_or(def);
-}
-
-constexpr float GetCustomLength(float def, BeatmapObjectAssociatedData const& ad) {
-  if (!ad.objectData.scale) return def;
-  auto opt = ad.objectData.scale.value()[2];
-
-  if (!opt) return def;
-
-  return *opt * NECaches::get_noteLinesDistanceFast();
-}
-
-static void ObstacleInitTranspileLite(ObstacleController* self, CustomJSONData::CustomObstacleData* obstacleData,
-                                      BeatmapObjectAssociatedData& ad, float worldRotation, Vector3 startPos,
-                                      Vector3 midPos, Vector3 endPos, float move1Duration, float move2Duration,
-                                      float singleLineWidth, float height) {
-  static auto Quaternion_Inverse =
-      il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(UnityEngine::Quaternion)>(
-          &UnityEngine::Quaternion::Inverse)>::get();
-  static auto Quaternion_Euler =
-      il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(float, float, float)>(
-          &UnityEngine::Quaternion::Euler)>::get();
-
-  Transform* transform = self->get_transform();
-
-  // Now to do the transpiler stuff at the end
-  self->_worldRotation = GetWorldRotation(obstacleData, worldRotation, ad);
-  self->_inverseWorldRotation = Quaternion_Inverse(self->_worldRotation);
-
-  // set transform
-  transform->localRotation = self->_worldRotation;
-
-  self->_width = GetCustomWidth((float)obstacleData->width * singleLineWidth, ad);
-
-  // fixup position
-  auto b = NEVector::Vector3((self->width - singleLineWidth) * 0.5f, 0, 0);
-  self->_startPos = NEVector::Vector3(startPos) + b;
-  self->_midPos = NEVector::Vector3(midPos) + b;
-  self->_endPos = NEVector::Vector3(endPos) + b;
-
-
-
-  float num = (NEVector::Vector3(self->_endPos) - self->_midPos).Magnitude() / self->move2Duration;
-  self->_length = GetCustomLength(num * obstacleData->duration, ad);
-
-  // fix bounds
-  self->_stretchableObstacle->SetSizeAndColor(self->_width * 0.98f, self->_height, self->_length,
-                                              self->_stretchableObstacle->_obstacleFrame->color);
-  self->_bounds = self->_stretchableObstacle->bounds;
 }
 
 MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, ObstacleController* self,
@@ -215,41 +143,54 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
       il2cpp_utils::il2cpp_type_check::FPtrWrapper<static_cast<UnityEngine::Quaternion (*)(float, float, float)>(
           &UnityEngine::Quaternion::Euler)>::get();
 
-  ObstacleInitTranspileLite(self, obstacleData, ad, worldRotation, startPos, midPos, endPos, move1Duration,
-                            move2Duration, singleLineWidth, height);
+  if (ad.objectData.rotation) {
+    auto const& rotation = *ad.objectData.rotation;
 
-  setBounds();
+    self->_worldRotation = rotation;
+    self->_inverseWorldRotation = Quaternion_Inverse(rotation);
+    ad.worldRotation = rotation;
+  }
 
-  // Init noodlefyi
-  auto localRotation = NEVector::Quaternion::identity();
+  auto const& scale = ad.objectData.scale;
 
-  if (ad.objectData.localRotation) {
-    localRotation = *ad.objectData.localRotation;
-    transform->localRotation = NEVector::Quaternion(self->_worldRotation) * localRotation;
-  };
+  if (scale) {
+    if (scale->at(0)) {
+      self->_width = *scale->at(0) * singleLineWidth;
+    }
 
+    if (scale->at(2)) {
+      self->_length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
+    }
+  }
 
-  // auto const& scale = ad.objectData.scale;
-
-  // if (scale) {
-  //   if (scale->at(0)) {
-  //     self->_width = *scale->at(0) * singleLineWidth;
-  //   }
-
-  //   if (scale->at(2)) {
-  //     self->_length = *scale->at(2) * /*NoteLinesDistace*/ 0.6f;
-  //   }
-  // }
-
-
+  auto b = NEVector::Vector3((self->_width - singleLineWidth) * 0.5f, 0, 0);
+  self->_startPos = NEVector::Vector3(startPos) + b;
+  self->_midPos = NEVector::Vector3(midPos) + b;
+  self->_endPos = NEVector::Vector3(endPos) + b;
   ad.moveStartPos = self->_startPos;
   ad.moveEndPos = self->_midPos;
   ad.jumpEndPos = self->_endPos;
-  ad.localRotation = localRotation;
 
-  Vector3 noteOffset = self->_endPos;
+  Vector3 noteOffset = ad.jumpEndPos;
   noteOffset.z = 0;
   ad.noteOffset = noteOffset;
+
+  self->_stretchableObstacle->SetSizeAndColor(self->width * 0.98f, self->height, self->length,
+                                              self->_stretchableObstacle->_obstacleFrame->color);
+  self->_bounds = self->_stretchableObstacle->bounds;
+
+  setBounds();
+
+  
+
+  NEVector::Quaternion localRotation = NEVector::Quaternion::identity();
+  auto const& localrot = ad.objectData.localRotation;
+  if (localrot.has_value()) {
+    localRotation = *localrot;
+    transform->set_localRotation(NEVector::Quaternion(self->_worldRotation) * localRotation);
+  }
+  ad.localRotation = localRotation;
+
 
   auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
   if (!tracks.empty()) {
@@ -258,6 +199,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
       track->AddGameObject(go);
     }
   }
+
 
   self->Update();
 }
@@ -326,8 +268,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
   float const elapsedTime = songTime - self->_startTimeOffset;
   float const obstacleOriginalTime =
       (elapsedTime - self->move1Duration) / (self->move2Duration + self->_obstacleDuration);
-
   float normalTime;
+
   auto animatedTime = NoodleExtensions::getTimeProp(tracks);
 
   if (animatedTime) {
@@ -443,6 +385,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
     cutoutAnimationEffect->SetCutout(dissolve);
   }
+
   // do transpile only if needed
 
   auto animatedTimeAdjusted = obstacleTimeAdjust(self, elapsedTime, tracks);
