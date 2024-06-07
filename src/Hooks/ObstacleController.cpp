@@ -156,7 +156,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
   if (scale) {
     if (scale->at(0)) {
-      self->_width = *scale->at(0);
+      self->_width = *scale->at(0) * singleLineWidth;
     }
 
     if (scale->at(2)) {
