@@ -41,6 +41,7 @@ MAKE_HOOK_MATCH(
                                                  overrideColorScheme, gameplayModifiers, playerSpecificSettings,
                                                  environmentsListModel, beatmapLevelsModel, audioClipAsyncLoader,
                                                  performancePreset, beatmapDataLoader, backButtonText);
+    return;
   }
 
   auto environmentInfoBySerializedNameSafe = environmentsListModel->GetEnvironmentInfoBySerializedNameSafe(

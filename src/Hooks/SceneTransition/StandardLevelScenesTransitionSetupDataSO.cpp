@@ -24,6 +24,7 @@ MAKE_HOOK_MATCH(StandardLevelScenesTransitionSetupDataSO_Init,
   auto customBeatmapLevel = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(self->get_beatmapLevel());
   if (!customBeatmapLevel) {
     StandardLevelScenesTransitionSetupDataSO_Init(self, playerSpecificSettings, backButtonText, startPaused);
+    return;
   }
 
   // TODO: Fix environment override
