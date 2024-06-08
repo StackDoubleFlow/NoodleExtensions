@@ -385,8 +385,8 @@ MAKE_HOOK_MATCH(NoteController_SendNoteWasCutEvent_LinkedNotes, &NoteController:
 
   if (!Hooks::isNoodleHookEnabled()) return;
 
-  auto* customNoteData = il2cpp_utils::cast<CustomJSONData::CustomNoteData>(self->noteData);
-  if (!customNoteData->customData) {
+  auto* customNoteData = il2cpp_utils::try_cast<CustomJSONData::CustomNoteData>(self->noteData).value_or(nullptr);
+  if (!customNoteData || !customNoteData->customData) {
     return;
   }
 
