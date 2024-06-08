@@ -1,96 +1,134 @@
 // TODO: Fix with SongCore changes
 
-// #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
-// #include "beatsaber-hook/shared/utils/hooking.hpp"
+#include "GlobalNamespace/BeatmapData.hpp"
+#include "beatsaber-hook/shared/utils/hooking.hpp"
 
-// #include "GlobalNamespace/BeatmapData.hpp"
-// #include "GlobalNamespace/BeatmapDataLoader.hpp"
+#include "GlobalNamespace/BeatmapDataLoader.hpp"
+#include "GlobalNamespace/BeatmapDataBasicInfo.hpp"
 
-// #include "custom-json-data/shared/CustomBeatmapData.h"
-// #include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
-// #include "custom-json-data/shared/VList.h"
+#include "custom-json-data/shared/CustomBeatmapSaveDatav3.h"
 
-// #include "FakeNoteHelper.h"
-// #include "SceneTransitionHelper.hpp"
-// #include "NEHooks.h"
-// #include "NEJSON.h"
+#include "NEHooks.h"
+#include "NEJSON.h"
+#include "SceneTransitionHelper.hpp"
+#include "AssociatedData.h"
 
-// #include "songloader/shared/API.hpp"
+#include "BeatmapDataLoaderVersion3/BeatmapDataLoader.hpp"
 
-// #include "sombrero/shared/linq_functional.hpp"
+#include "BeatmapDataLoaderVersion2_6_0AndEarlier/BeatmapDataLoader.hpp"
+#include "BeatmapSaveDataVersion2_6_0AndEarlier/BeatmapSaveData.hpp"
+#include "BeatmapSaveDataVersion2_6_0AndEarlier/NoteData.hpp"
 
-// #include "Constants.hpp"
-// using namespace System;
-// using namespace System::Collections::Generic;
-// using namespace GlobalNamespace;
-// using namespace CustomJSONData;
-// using namespace Sombrero::Linq;
+#include "custom-json-data/shared/CustomBeatmapSaveDatav2.h"
+#include "UnityEngine/JsonUtility.hpp"
 
-// // return true if fake
-// // subtracts from object count if fake
-// template <typename T> static bool IsFake(T* o, bool v2) {
-//   auto const optData = o->customData;
+#include "Constants.hpp"
+#include "sombrero/shared/linq_functional.hpp"
+using namespace System;
+using namespace System::Collections::Generic;
+using namespace GlobalNamespace;
+using namespace CustomJSONData;
+using namespace UnityEngine;
 
-//   if (!optData || !optData->value) return false;
+// return true if fake
+// subtracts from object count if fake
+template <typename T> static bool IsFake(T* o, bool v2) {
+  auto const optData = o->customData;
 
-//   rapidjson::Value const& customData = *optData->value;
+  if (!optData || !optData) return false;
 
-//   auto fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE
-//                                                       : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
-//   return fake.value_or(false);
-// }
+  rapidjson::Value const& customData = *optData;
 
-// template <typename U, typename T> auto FakeCount(VList<T> list, bool v2) {
-//   int i = list.size();
-//   for (auto o : list) {
-//     auto note = il2cpp_utils::try_cast<U>(o);
-//     if (!note) continue;
+  auto fake = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_FAKE_NOTE
+                                                      : NoodleExtensions::Constants::INTERNAL_FAKE_NOTE);
+  return fake.value_or(false);
+}
 
-//     if (IsFake(*note, v2)) i--;
-//   }
+template <typename U, typename T> auto FakeCount(ArrayW<T> list, bool v2) {
+  int i = list.size();
+  for (auto o : list) {
+    auto note = il2cpp_utils::try_cast<U>(o);
+    if (!note) continue;
 
-//   return i;
-// }
+    if (IsFake(*note, v2)) i--;
+  }
 
-// void HandleBasicInfo(CustomJSONData::CustomLevelInfoSaveData*, std::string const&,
-//                      BeatmapSaveDataVersion3::BeatmapSaveData* beatmap, GlobalNamespace::BeatmapDataBasicInfo* ret) {
+  return i;
+}
 
-//   auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmap);
+MAKE_HOOK_MATCH(V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
+                &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson, GlobalNamespace::BeatmapDataBasicInfo*,
+                StringW beatmapSaveDataJson) {
+  if(!beatmapSaveDataJson) return nullptr;
 
-//   if (!customBeatmap) return;
+  auto beatmapSaveData = JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapSaveDataJson);
+  if (beatmapSaveData == nullptr)
+  {
+    return nullptr;
+  }
+  ListW<BeatmapSaveDataVersion2_6_0AndEarlier::NoteData*> notes = beatmapSaveData->notes;
 
-//   bool v2 = customBeatmap.value()->v2orEarlier;
+  auto notBombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x){ return x->type != BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb; }) | Sombrero::Linq::Functional::ToArray();
+  auto bombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x){ return x->type == BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb; }) | Sombrero::Linq::Functional::ToArray();
+  
+  int noteCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(notBombs, true);
+  int bombCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(bombs, true);
+  int obstacleCount = FakeCount<v2::CustomBeatmapSaveData_ObstacleData>(beatmapSaveData->obstacles->ToArray(), true);
+  return BeatmapDataBasicInfo::New_ctor(4, noteCount, bombCount, obstacleCount);
+}
 
-//   ret->_cuttableNotesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(ListW<v3::CustomBeatmapSaveData_ColorNoteData*>(beatmap->colorNotes), v2);
-//   ret->_bombsCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(ListW<v3::CustomBeatmapSaveData_BombNoteData*>(beatmap->bombNotes), v2);
-//   ret->_obstaclesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(ListW<v3::CustomBeatmapSaveData_ObstacleData*>(beatmap->obstacles), v2);
-// }
+static JSONWrapper* JSONWrapperOrNull(v3::CustomDataOpt const& val) {
+  auto* wrapper = JSONWrapper::New_ctor();
 
-// MAKE_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData,
-//                 &BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveData, GlobalNamespace::BeatmapDataBasicInfo*,
-//                 BeatmapSaveDataVersion3::BeatmapSaveData* beatmapSaveData) {
-//   auto ret = BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData(beatmapSaveData);
+  if (!val || !val->get().IsObject()) {
+    return wrapper;
+  }
 
-//   auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapSaveData);
+  wrapper->value = val;
 
-//   if (!customBeatmap) return ret;
+  return wrapper;
+}
 
-//   bool v2 = customBeatmap.value()->v2orEarlier;
+MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData, 
+                &BeatmapDataLoaderVersion3::BeatmapDataLoader::GetBeatmapDataFromSaveData, GlobalNamespace::BeatmapData*, 
+                ::BeatmapSaveDataVersion3::BeatmapSaveData *beatmapSaveData, ::BeatmapSaveDataVersion4::LightshowSaveData *defaultLightshowSaveData, 
+                ::GlobalNamespace::BeatmapDifficulty beatmapDifficulty, float_t startBpm, bool loadingForDesignatedEnvironment, ::GlobalNamespace::EnvironmentKeywords *environmentKeywords, 
+                ::GlobalNamespace::IEnvironmentLightGroups *environmentLightGroups, ::GlobalNamespace::PlayerSpecificSettings *playerSpecificSettings, ::System::Diagnostics::Stopwatch *stopwatch) {
+  using namespace CustomJSONData::v3;
+  auto beatmap = il2cpp_utils::cast<CustomBeatmapSaveData>(beatmapSaveData);
+  if (!beatmap->customData) return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);;
 
-//   // Not necessary in v3
-//   if (!v2) return ret;
+  rapidjson::Value const& customData = *beatmap->customData;
 
-//   ret->_cuttableNotesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ColorNoteData>(ListW<v3::CustomBeatmapSaveData_ColorNoteData*>(beatmapSaveData->colorNotes), v2);
-//   ret->_bombsCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_BombNoteData>(ListW<v3::CustomBeatmapSaveData_BombNoteData*>(beatmapSaveData->bombNotes), v2);
-//   ret->_obstaclesCount_k__BackingField = FakeCount<v3::CustomBeatmapSaveData_ObstacleData>(ListW<v3::CustomBeatmapSaveData_ObstacleData*>(beatmapSaveData->obstacles), v2);
+#define PARSE_ARRAY(key, array, parse)                                                                                 \
+  auto key##it = customData.FindMember(#key);                                                                          \
+  if (key##it != customData.MemberEnd()) {                                                                             \
+    for (auto const& it : key##it->value.GetArray()) {                                                                 \
+      auto item = parse(it);                                                                                           \
+      auto& ad = getAD(JSONWrapperOrNull(item->customData));                                                                              \
+      ad.objectData.fake = true;                                                                                       \
+      array->Add(item);                                                                                                \
+    }                                                                                                                  \
+  }
 
-//   return ret;
-// }
+  PARSE_ARRAY(fakeColorNotes, beatmap->colorNotes, Parser::DeserializeColorNote);
+  //PARSE_ARRAY(fakeBombNotes, beatmap->bombNotes, Parser::DeserializeBombNote);
+  //PARSE_ARRAY(fakeObstacles, beatmap->obstacles, Parser::DeserializeObstacle);
+  //PARSE_ARRAY(fakeBurstSliders, beatmap->burstSliders, Parser::DeserializeBurstSlider);
+  //PARSE_ARRAY(fakeSliders, beatmap->sliders, Parser::DeserializeSlider);
+  return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
+}
 
-// void InstallBeatmapDataHooks() {
-//   // force CJD to be first
-//   //Modloader::requireMod("CustomJSONData");
-//   RuntimeSongLoader::API::AddBeatmapDataBasicInfoLoadedEvent(HandleBasicInfo);
-//   INSTALL_HOOK(NELogger::Logger, BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveData)
-// }
-// NEInstallHooks(InstallBeatmapDataHooks);
+void HandleFakeV3Objects(v3::CustomBeatmapSaveData*) {
+
+}
+void InstallBeatmapDataHooks() {
+  // force CJD to be first, is this needed?
+  //Modloader::requireMod("CustomJSONData");
+  INSTALL_HOOK(NELogger::Logger, V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson)
+  INSTALL_HOOK(NELogger::Logger, V3_BeatmapDataLoader_GetBeatmapDataFromSaveData)
+
+  v3::Parser::ParsedEvent.addCallback(HandleFakeV3Objects);
+}
+
+NEInstallHooks(InstallBeatmapDataHooks);

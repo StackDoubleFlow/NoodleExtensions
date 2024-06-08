@@ -130,7 +130,7 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
   if (!customNoteData->customData) return;
   BeatmapObjectAssociatedData& ad = getAD(customNoteData->customData);
 
-  CRASH_UNLESS(ad.parsed);
+  if(!ad.parsed) return;
 
   auto link = ad.objectData.link;
   if (link) {

@@ -22,7 +22,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 using namespace NoodleExtensions;
 
-MAKE_HOOK_MATCH(ObstacleSaberSparkleEffectManager_GetBurnMarkPos, &ObstacleSaberSparkleEffectManager::GetBurnMarkPos,
+/*MAKE_HOOK_MATCH(ObstacleSaberSparkleEffectManager_GetBurnMarkPos, &ObstacleSaberSparkleEffectManager::GetBurnMarkPos,
                 bool, ObstacleSaberSparkleEffectManager* self, UnityEngine::Bounds bounds,
                 UnityEngine::Transform* transform, UnityEngine::Vector3 bladeBottomPos,
                 UnityEngine::Vector3 bladeTopPos, ByRef<UnityEngine::Vector3> burnMarkPos) {
@@ -44,4 +44,4 @@ void ObstacleSaberSparkleEffectManagerHook() {
   INSTALL_HOOK(NELogger::Logger, ObstacleSaberSparkleEffectManager_GetBurnMarkPos);
 }
 
-NEInstallHooks(ObstacleSaberSparkleEffectManagerHook)
+NEInstallHooks(ObstacleSaberSparkleEffectManagerHook)*/
