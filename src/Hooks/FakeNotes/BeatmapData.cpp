@@ -20,6 +20,8 @@
 #include "BeatmapSaveDataVersion2_6_0AndEarlier/NoteData.hpp"
 
 #include "custom-json-data/shared/CustomBeatmapSaveDatav2.h"
+#include "custom-json-data/shared/misc/BeatmapDataLoaderUtils.hpp"
+
 #include "UnityEngine/JsonUtility.hpp"
 
 #include "Constants.hpp"
@@ -57,20 +59,26 @@ template <typename U, typename T> auto FakeCount(ArrayW<T> list, bool v2) {
 }
 
 MAKE_HOOK_MATCH(V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
-                &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson, GlobalNamespace::BeatmapDataBasicInfo*,
-                StringW beatmapSaveDataJson) {
-  if(!beatmapSaveDataJson) return nullptr;
+                &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson,
+                GlobalNamespace::BeatmapDataBasicInfo*, StringW beatmapSaveDataJson) {
+  if (!beatmapSaveDataJson) return nullptr;
 
-  auto beatmapSaveData = JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapSaveDataJson);
-  if (beatmapSaveData == nullptr)
-  {
+  auto beatmapSaveData =
+      JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapSaveDataJson);
+  if (beatmapSaveData == nullptr) {
     return nullptr;
   }
   ListW<BeatmapSaveDataVersion2_6_0AndEarlier::NoteData*> notes = beatmapSaveData->notes;
 
-  auto notBombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x){ return x->type != BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb; }) | Sombrero::Linq::Functional::ToArray();
-  auto bombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x){ return x->type == BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb; }) | Sombrero::Linq::Functional::ToArray();
-  
+  auto notBombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x) {
+                    return x->type != BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb;
+                  }) |
+                  Sombrero::Linq::Functional::ToArray();
+  auto bombs = notes | Sombrero::Linq::Functional::Where([](BeatmapSaveDataVersion2_6_0AndEarlier::NoteData* x) {
+                 return x->type == BeatmapSaveDataVersion2_6_0AndEarlier::NoteType::Bomb;
+               }) |
+               Sombrero::Linq::Functional::ToArray();
+
   int noteCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(notBombs, true);
   int bombCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(bombs, true);
   int obstacleCount = FakeCount<v2::CustomBeatmapSaveData_ObstacleData>(beatmapSaveData->obstacles->ToArray(), true);
@@ -89,42 +97,101 @@ static JSONWrapper* JSONWrapperOrNull(v3::CustomDataOpt const& val) {
   return wrapper;
 }
 
-MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData, 
-                &BeatmapDataLoaderVersion3::BeatmapDataLoader::GetBeatmapDataFromSaveData, GlobalNamespace::BeatmapData*, 
-                ::BeatmapSaveDataVersion3::BeatmapSaveData *beatmapSaveData, ::BeatmapSaveDataVersion4::LightshowSaveData *defaultLightshowSaveData, 
-                ::GlobalNamespace::BeatmapDifficulty beatmapDifficulty, float_t startBpm, bool loadingForDesignatedEnvironment, ::GlobalNamespace::EnvironmentKeywords *environmentKeywords, 
-                ::GlobalNamespace::IEnvironmentLightGroups *environmentLightGroups, ::GlobalNamespace::PlayerSpecificSettings *playerSpecificSettings, ::System::Diagnostics::Stopwatch *stopwatch) {
+MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
+                &BeatmapDataLoaderVersion3::BeatmapDataLoader::GetBeatmapDataFromSaveData,
+                GlobalNamespace::BeatmapData*, ::BeatmapSaveDataVersion3::BeatmapSaveData* beatmapSaveData,
+                ::BeatmapSaveDataVersion4::LightshowSaveData* defaultLightshowSaveData,
+                ::GlobalNamespace::BeatmapDifficulty beatmapDifficulty, float_t startBpm,
+                bool loadingForDesignatedEnvironment, ::GlobalNamespace::EnvironmentKeywords* environmentKeywords,
+                ::GlobalNamespace::IEnvironmentLightGroups* environmentLightGroups,
+                ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
+                ::System::Diagnostics::Stopwatch* stopwatch) {
   using namespace CustomJSONData::v3;
-  auto beatmap = il2cpp_utils::cast<CustomBeatmapSaveData>(beatmapSaveData);
-  if (!beatmap->customData) return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);;
 
-  rapidjson::Value const& customData = *beatmap->customData;
+  auto beatmap = V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(
+      beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment,
+      environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
 
-#define PARSE_ARRAY(key, array, parse)                                                                                 \
+  auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapSaveData);
+  if (!customBeatmap || !customBeatmap.value()->customData->value) {
+    return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(
+        beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment,
+        environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
+  }
+
+  rapidjson::Value const& customData = customBeatmap.value()->customData->value.value();
+
+  ListW<BeatmapSaveDataVersion3::BpmChangeEventData*> bpmEvents = beatmapSaveData->bpmEvents;
+  CustomJSONData::BpmTimeProcessor bpmTimeProcessor(startBpm, bpmEvents);
+
+  auto const BeatToTime = [&bpmTimeProcessor](float beat) {
+    auto time = bpmTimeProcessor.ConvertBeatToTime(beat);
+    return time;
+  };
+
+#define PARSE_ARRAY(key, parse, convert)                                                                               \
   auto key##it = customData.FindMember(#key);                                                                          \
   if (key##it != customData.MemberEnd()) {                                                                             \
+    bpmTimeProcessor.Reset();                                                                                          \
     for (auto const& it : key##it->value.GetArray()) {                                                                 \
       auto item = parse(it);                                                                                           \
-      auto& ad = getAD(JSONWrapperOrNull(item->customData));                                                                              \
+      auto obj = convert(item);                                                                                        \
+      auto& ad = getAD(obj->customData);                                                                               \
       ad.objectData.fake = true;                                                                                       \
-      array->Add(item);                                                                                                \
+      customBeatmap.value()->AddBeatmapObjectDataOverride(obj);                                                                              \
     }                                                                                                                  \
   }
 
-  PARSE_ARRAY(fakeColorNotes, beatmap->colorNotes, Parser::DeserializeColorNote);
-  //PARSE_ARRAY(fakeBombNotes, beatmap->bombNotes, Parser::DeserializeBombNote);
-  //PARSE_ARRAY(fakeObstacles, beatmap->obstacles, Parser::DeserializeObstacle);
-  //PARSE_ARRAY(fakeBurstSliders, beatmap->burstSliders, Parser::DeserializeBurstSlider);
-  //PARSE_ARRAY(fakeSliders, beatmap->sliders, Parser::DeserializeSlider);
-  return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment, environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
+  PARSE_ARRAY(fakeColorNotes, Parser::DeserializeColorNote, [&](v3::CustomBeatmapSaveData_ColorNoteData* data) {
+    return CreateCustomBasicNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
+                                     ConvertColorType(data->color),
+                                     ConvertNoteCutDirection(data->cutDirection), data->customData);
+  });
+  PARSE_ARRAY(fakeBombNotes, Parser::DeserializeBombNote, [&](v3::CustomBeatmapSaveData_BombNoteData* data) {
+    return CreateCustomBombNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
+                                    data->customData);
+  });
+  PARSE_ARRAY(fakeObstacles, Parser::DeserializeObstacle, [&](v3::CustomBeatmapSaveData_ObstacleData* data) {
+    float beat = BeatToTime(data->b);
+    auto* obstacle = CustomObstacleData::New_ctor(
+        beat, data->line,
+        GetNoteLineLayer(data->get_layer()),
+        BeatToTime(data->b + data->duration) - beat, data->width, data->height);
+
+    obstacle->customData = CustomJSONData::JSONWrapperOrNull(data->customData);
+
+    return obstacle;
+  });
+
+  PARSE_ARRAY(fakeSliders, Parser::DeserializeSlider,
+              [&](v3::CustomBeatmapSaveData_SliderData* data) -> CustomSliderData* {
+                return CustomSliderData_CreateCustomSliderData(
+                    ConvertColorType(data->get_colorType()), BeatToTime(data->b), data->get_headLine(),
+                    ConvertNoteLineLayer(data->get_headLayer()), ConvertNoteLineLayer(data->get_headLayer()),
+                    data->get_headControlPointLengthMultiplier(), ConvertNoteCutDirection(data->get_headCutDirection()),
+                    BeatToTime(data->get_tailBeat()), data->get_tailLine(), ConvertNoteLineLayer(data->get_tailLayer()),
+                    ConvertNoteLineLayer(data->get_tailLayer()), data->get_tailControlPointLengthMultiplier(),
+                    ConvertNoteCutDirection(data->get_tailCutDirection()),
+                    ConvertSliderMidAnchorMode(data->get_sliderMidAnchorMode()), data->customData);
+              });
+
+  PARSE_ARRAY(fakeBurstSliders, Parser::DeserializeBurstSlider,
+              [&](v3::CustomBeatmapSaveData_BurstSliderData* data) -> CustomSliderData* {
+                return CustomSliderData_CreateCustomBurstSliderData(
+                    ConvertColorType(data->get_colorType()), BeatToTime(data->b), data->get_headLine(),
+                    ConvertNoteLineLayer(data->get_headLayer()), ConvertNoteLineLayer(data->get_tailLayer()),
+                    ConvertNoteCutDirection(data->get_headCutDirection()), BeatToTime(data->get_tailBeat()),
+                    data->get_tailLine(), ConvertNoteLineLayer(data->get_tailLayer()),
+                    ConvertNoteLineLayer(data->get_tailLayer()), NoteCutDirection::Any, data->get_sliceCount(),
+                    data->get_squishAmount(), data->customData);
+              });
+  return beatmap;
 }
 
-void HandleFakeV3Objects(v3::CustomBeatmapSaveData*) {
-
-}
+void HandleFakeV3Objects(v3::CustomBeatmapSaveData*) {}
 void InstallBeatmapDataHooks() {
   // force CJD to be first, is this needed?
-  //Modloader::requireMod("CustomJSONData");
+  // Modloader::requireMod("CustomJSONData");
   INSTALL_HOOK(NELogger::Logger, V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson)
   INSTALL_HOOK(NELogger::Logger, V3_BeatmapDataLoader_GetBeatmapDataFromSaveData)
 
