@@ -1,6 +1,7 @@
 // TODO: Fix with SongCore changes
 
 #include "GlobalNamespace/BeatmapData.hpp"
+#include "NELogger.h"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
 #include "GlobalNamespace/BeatmapDataLoader.hpp"
@@ -112,14 +113,12 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
       beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment,
       environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
 
-  auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapSaveData);
-  if (!customBeatmap || !customBeatmap.value()->customData->value) {
-    return V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(
-        beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment,
-        environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
+  auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmap).value_or(nullptr);
+  if (!customBeatmap || !customBeatmap->customData->value) {
+    return beatmap;
   }
 
-  rapidjson::Value const& customData = customBeatmap.value()->customData->value.value();
+  rapidjson::Value const& customData = customBeatmap->customData->value.value();
 
   ListW<BeatmapSaveDataVersion3::BpmChangeEventData*> bpmEvents = beatmapSaveData->bpmEvents;
   CustomJSONData::BpmTimeProcessor bpmTimeProcessor(startBpm, bpmEvents);
@@ -138,14 +137,14 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
       auto obj = convert(item);                                                                                        \
       auto& ad = getAD(obj->customData);                                                                               \
       ad.objectData.fake = true;                                                                                       \
-      customBeatmap.value()->AddBeatmapObjectDataOverride(obj);                                                                              \
+      customBeatmap->AddBeatmapObjectDataOverride(obj);                                                                \
     }                                                                                                                  \
   }
 
   PARSE_ARRAY(fakeColorNotes, Parser::DeserializeColorNote, [&](v3::CustomBeatmapSaveData_ColorNoteData* data) {
     return CreateCustomBasicNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
-                                     ConvertColorType(data->color),
-                                     ConvertNoteCutDirection(data->cutDirection), data->customData);
+                                     ConvertColorType(data->color), ConvertNoteCutDirection(data->cutDirection),
+                                     data->customData);
   });
   PARSE_ARRAY(fakeBombNotes, Parser::DeserializeBombNote, [&](v3::CustomBeatmapSaveData_BombNoteData* data) {
     return CreateCustomBombNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
@@ -153,10 +152,9 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
   });
   PARSE_ARRAY(fakeObstacles, Parser::DeserializeObstacle, [&](v3::CustomBeatmapSaveData_ObstacleData* data) {
     float beat = BeatToTime(data->b);
-    auto* obstacle = CustomObstacleData::New_ctor(
-        beat, data->line,
-        GetNoteLineLayer(data->get_layer()),
-        BeatToTime(data->b + data->duration) - beat, data->width, data->height);
+    auto* obstacle =
+        CustomObstacleData::New_ctor(beat, data->line, GetNoteLineLayer(data->get_layer()),
+                                     BeatToTime(data->b + data->duration) - beat, data->width, data->height);
 
     obstacle->customData = CustomJSONData::JSONWrapperOrNull(data->customData);
 
@@ -185,17 +183,21 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
                     ConvertNoteLineLayer(data->get_tailLayer()), NoteCutDirection::Any, data->get_sliceCount(),
                     data->get_squishAmount(), data->customData);
               });
-  return beatmap;
+
+  customBeatmap->ProcessRemainingData();
+  customBeatmap->ProcessAndSortBeatmapData();
+
+  return customBeatmap;
 }
 
 void HandleFakeV3Objects(v3::CustomBeatmapSaveData*) {}
-void InstallBeatmapDataHooks() {
+void InstallBeatmapDataHooks(){
   // force CJD to be first, is this needed?
   // Modloader::requireMod("CustomJSONData");
   INSTALL_HOOK(NELogger::Logger, V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson)
-  INSTALL_HOOK(NELogger::Logger, V3_BeatmapDataLoader_GetBeatmapDataFromSaveData)
+      INSTALL_HOOK(NELogger::Logger, V3_BeatmapDataLoader_GetBeatmapDataFromSaveData)
 
-  v3::Parser::ParsedEvent.addCallback(HandleFakeV3Objects);
+  // v3::Parser::ParsedEvent.addCallback(HandleFakeV3Objects);
 }
 
 NEInstallHooks(InstallBeatmapDataHooks);
