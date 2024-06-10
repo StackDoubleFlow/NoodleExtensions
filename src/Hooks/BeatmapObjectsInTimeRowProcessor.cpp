@@ -42,6 +42,9 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
     bool flag = false;
 
     for (int j = 0; j < list.size(); j++) {
+      // TODO: Find why null
+      if (!list[j]) continue;
+
       if (list[j]->noteLineLayer > noteData->noteLineLayer) {
         list.insert_at(j, noteData);
         flag = true;
@@ -55,6 +58,8 @@ void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDi
   for (auto const& notesInColumnsReusableProcessingListOfList : self->_notesInColumnsReusableProcessingListOfLists) {
     auto list2 = ListW<GlobalNamespace::NoteData*>(notesInColumnsReusableProcessingListOfList);
     for (int l = 0; l < list2.size(); l++) {
+      if (!list2[l]) continue;
+      
       list2[l]->SetBeforeJumpNoteLineLayer((NoteLineLayer)l);
     }
   }
