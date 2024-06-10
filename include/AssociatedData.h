@@ -101,11 +101,13 @@ struct BeatmapObjectAssociatedData {
   void ResetState();
 };
 
+enum class PlayerTrackObject { ENTIRE_PLAYER, HMD, LEFT_HAND, RIGHT_HAND };
+
 struct PlayerTrackEventData {
-  explicit PlayerTrackEventData(Track* track, std::string_view target) : track(track), target(target) {}
+  explicit PlayerTrackEventData(Track* track, std::optional<std::string_view> target);
 
   Track* track;
-  std::optional<std::string_view> target;
+  std::optional<PlayerTrackObject> target;
 };
 
 struct ParentTrackEventData {

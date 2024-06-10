@@ -35,138 +35,134 @@ void PlayerTrack::ctor() {
 }
 
 void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
-  auto instance = [&]() -> PlayerTrack* {
-    switch (object) {
-      case ENTIRE_PLAYER:
-        return entirePlayerInstance;
-      case HMD:
-        return HMDInstance;
-      case LEFT_HAND:
-        return leftHandInstance;
-      case RIGHT_HAND:
-        return rightHandInstance;
-      default:
-        return nullptr;
-    }
-  }();
+  PlayerTrack* targetInstance;
 
-  auto instanceTrack = instance ? instance->track : nullptr;
-
-  if (instanceTrack && instance) {
-    instanceTrack->RemoveGameObject(instance->get_gameObject());
+  switch (object) {
+  case PlayerTrackObject::ENTIRE_PLAYER:
+    targetInstance = entirePlayerInstance;
+  case PlayerTrackObject::HMD:
+    targetInstance = HMDInstance;
+  case PlayerTrackObject::LEFT_HAND:
+    targetInstance = leftHandInstance;
+  case PlayerTrackObject::RIGHT_HAND:
+    targetInstance = rightHandInstance;
+  default:
+    targetInstance = nullptr;
   }
 
-  if (!instance && !instanceTrack) {
+  auto instanceTrack = targetInstance ? targetInstance->track : nullptr;
+  GameObject* noodleObject = targetInstance ? targetInstance->origin->gameObject : nullptr;
+
+  if (instanceTrack && targetInstance) {
+    instanceTrack->RemoveGameObject(targetInstance->get_gameObject());
+  }
+
+  // Init
+  if (!targetInstance) {
     UnityEngine::Transform* player;
     switch (object) {
-      case HMD:
-        player = GameObject::Find("VRGameCore/MainCamera")->get_transform();
-        break;
-      case LEFT_HAND:
-        player = GameObject::Find("VRGameCore/LeftHand")->get_transform();
-        break;
-      case RIGHT_HAND:
-        player = GameObject::Find("VRGameCore/RightHand")->get_transform();
-        break;
-      case ENTIRE_PLAYER:
-      default:
-        player = GameObject::Find("LocalPlayerGameCore")->get_transform();
-        break;
+    case PlayerTrackObject::HMD:
+      player = GameObject::Find("VRGameCore/MainCamera")->get_transform();
+      break;
+    case PlayerTrackObject::LEFT_HAND:
+      player = GameObject::Find("VRGameCore/LeftHand")->get_transform();
+      break;
+    case PlayerTrackObject::RIGHT_HAND:
+      player = GameObject::Find("VRGameCore/RightHand")->get_transform();
+      break;
+    case PlayerTrackObject::ENTIRE_PLAYER:
+    default:
+      player = GameObject::Find("LocalPlayerGameCore")->get_transform();
+      break;
     }
 
-    GameObject* noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
+    noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
 
-    instance = noodleObject->AddComponent<PlayerTrack*>();
-    instance->set_enabled(track->v2);
-    instance->track = track;
+    targetInstance = noodleObject->AddComponent<PlayerTrack*>();
 
-    switch (object) {
-      case ENTIRE_PLAYER:
-        entirePlayerInstance = instance;
-        break;
-      case HMD:
-        HMDInstance = instance;
-        break;
-      case LEFT_HAND:
-        leftHandInstance = instance;
-        break;
-      case RIGHT_HAND:
-        rightHandInstance = instance;
-        break;
-      default:
-        break;
+    // Transform hierarchy manipulation: PLAYER PARENT -> NOODLE -> PLAYER
+    targetInstance->origin = noodleObject->transform;
+    targetInstance->origin->SetParent(player->parent, true);
+    player->SetParent(targetInstance->origin, true);
+
+    targetInstance->startLocalRot = targetInstance->origin->get_localRotation();
+    targetInstance->startPos = targetInstance->origin->get_localPosition();
+
+    targetInstance->pauseController = Object::FindObjectOfType<PauseController*>();
+
+    if (targetInstance->pauseController) {
+      std::function<void()> pause = [targetInstance]() { targetInstance->OnDidPauseEvent(); };
+      std::function<void()> resume = [targetInstance]() { targetInstance->OnDidResumeEvent(); };
+      didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
+      targetInstance->pauseController->add_didPauseEvent(didPauseEventAction);
+      didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
+      targetInstance->pauseController->add_didResumeEvent(didResumeEventAction);
     }
 
-    instance->origin = noodleObject->get_transform();
-    instance->origin->SetParent(player->get_parent(), true);
-    player->SetParent(instance->origin, true);
-
-    auto* pauseMenuManager = instance->pauseController ? instance->pauseController->_pauseMenuManager.ptr()
-                                             : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
+    auto* pauseMenuManager = targetInstance->pauseController
+                                 ? targetInstance->pauseController->_pauseMenuManager.ptr()
+                                 : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
     auto multiPauseMenuManager =
         NECaches::GameplayCoreContainer->TryResolve<MultiplayerLocalActivePlayerInGameMenuController*>();
     if (pauseMenuManager) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting transform to pause menu");
-      pauseMenuManager->get_transform()->SetParent(instance->origin, false);
+      pauseMenuManager->get_transform()->SetParent(targetInstance->origin, false);
     }
 
     if (multiPauseMenuManager) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting multi transform to pause menu");
-      multiPauseMenuManager->get_transform()->SetParent(instance->origin, false);
+      multiPauseMenuManager->get_transform()->SetParent(targetInstance->origin, false);
     }
 
-    instance->startLocalRot = instance->origin->get_localRotation();
-    instance->startPos = instance->origin->get_localPosition();
-
-    instance->pauseController = Object::FindObjectOfType<PauseController*>();
-
-    if (instance->pauseController) {
-      std::function<void()> pause = [instance]() { instance->OnDidPauseEvent(); };
-      std::function<void()> resume = [instance]() { instance->OnDidResumeEvent(); };
-      didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
-      instance->pauseController->add_didPauseEvent(didPauseEventAction);
-      didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
-      instance->pauseController->add_didResumeEvent(didResumeEventAction);
-    }
-
-    if (track->v2) {
-      instance->Update();
-    } else {
-      instance->trackController = Tracks::GameObjectTrackController::HandleTrackData(noodleObject, {track}, 0.6, track->v2, true).value_or(nullptr);
-      instance->trackController->UpdateData(true);
+    switch (object) {
+    case PlayerTrackObject::ENTIRE_PLAYER:
+      entirePlayerInstance = targetInstance;
+      break;
+    case PlayerTrackObject::HMD:
+      HMDInstance = targetInstance;
+      break;
+    case PlayerTrackObject::LEFT_HAND:
+      leftHandInstance = targetInstance;
+      break;
+    case PlayerTrackObject::RIGHT_HAND:
+      rightHandInstance = targetInstance;
+      break;
+    default:
+      break;
     }
   }
 
-  if (instance && instance->track) {
-    instance->track->AddGameObject(instance->get_gameObject());
+  targetInstance->set_enabled(track->v2);
+  targetInstance->track = track;
+
+  if (track->v2) {
+    targetInstance->Update();
+  } else {
+    targetInstance->trackController =
+        Tracks::GameObjectTrackController::HandleTrackData(noodleObject, { track }, 0.6, track->v2, true)
+            .value_or(nullptr);
+    targetInstance->trackController->UpdateData(true);
+  }
+
+  if (targetInstance && targetInstance->track) {
+    targetInstance->track->AddGameObject(targetInstance->get_gameObject());
   }
 }
 
 void PlayerTrack::OnDidPauseEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidPauseEvent");
   IL2CPP_CATCH_HANDLER(
-    if (selfInstance) {
-      selfInstance->set_enabled(false);
-    }
+      if (selfInstance) { selfInstance->set_enabled(false); }
 
-    
-    if (trackController) {
-      trackController->set_enabled(false);
-    }
-  )
+      if (trackController) { trackController->set_enabled(false); })
 }
 
 void PlayerTrack::OnDidResumeEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidResumeEvent");
   IL2CPP_CATCH_HANDLER(
-    if (selfInstance) {
-      selfInstance->set_enabled(track->v2);
-    }
+      if (selfInstance) { selfInstance->set_enabled(track->v2); }
 
-    if (trackController) {
-      trackController->set_enabled(true);
-    }
-  )
+      if (trackController) { trackController->set_enabled(true); })
 }
 
 void PlayerTrack::OnDestroy() {

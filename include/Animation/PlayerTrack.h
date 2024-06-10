@@ -10,14 +10,8 @@
 #include "GlobalNamespace/PauseController.hpp"
 #include "tracks/shared/Animation/GameObjectTrackController.hpp"
 
-namespace TrackParenting {
-enum PlayerTrackObject {
-  ENTIRE_PLAYER,
-  HMD,
-  LEFT_HAND,
-  RIGHT_HAND
-};
-}
+enum struct PlayerTrackObject;
+
 DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     DECLARE_CTOR(ctor);
                     DECLARE_INSTANCE_METHOD(void, Update);
@@ -28,7 +22,7 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     uint64_t lastCheckedTime = 0;
 
                     public:
-                    static void AssignTrack(Track* track, PlayerTrackObject object = TrackParenting::ENTIRE_PLAYER);
+                    static void AssignTrack(Track* track, PlayerTrackObject object);
                     private:
                     static inline PlayerTrack * entirePlayerInstance;
                     static inline PlayerTrack * HMDInstance;
@@ -47,4 +41,4 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
 
                     void OnDidPauseEvent(); 
                     void OnDidResumeEvent();
-                      )
+)

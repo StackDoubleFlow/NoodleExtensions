@@ -160,6 +160,27 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
                            .value_or(false);
 }
 
+PlayerTrackEventData::PlayerTrackEventData(Track* track, std::optional<std::string_view> targetOpt) : track(track) {
+  this->target = PlayerTrackObject::ENTIRE_PLAYER;
+
+  if (targetOpt) {
+    auto targetStr = *targetOpt;
+
+    if (targetStr == "ENTIRE_PLAYER") {
+      this->target = PlayerTrackObject::ENTIRE_PLAYER;
+    }
+    if (targetStr == "HMD") {
+      this->target = PlayerTrackObject::HMD;
+    }
+    if (targetStr == "LEFT_HAND") {
+      this->target = PlayerTrackObject::LEFT_HAND;
+    }
+    if (targetStr == "RIGHT_HAND") {
+      this->target = PlayerTrackObject::RIGHT_HAND;
+    }
+  }
+}
+
 static std::unordered_map<CustomJSONData::CustomEventData const*, BeatmapEventAssociatedData> eventDataMap;
 static std::unordered_map<GlobalNamespace::BeatmapObjectData const*, ::BeatmapObjectAssociatedData> obstacleDataMap;
 
