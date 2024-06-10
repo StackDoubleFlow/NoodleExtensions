@@ -56,7 +56,14 @@ void CustomEventCallback(BeatmapCallbacksController* callbackController,
 
       if (ad.parentTrackEventData) {
         ParentObject::AssignTrack(*ad.parentTrackEventData);
-      } else if (ad.playerTrackEventData) { PlayerTrack::AssignTrack(ad.playerTrackEventData->track); })
+      } else if (ad.playerTrackEventData) {
+        PlayerTrackObject trackObject = PlayerTrackObject::ENTIRE_PLAYER;
+        if(ad.playerTrackEventData->target.has_value() && ad.playerTrackEventData->target.value() == "ENTIRE_PLAYER") trackObject = PlayerTrackObject::ENTIRE_PLAYER;
+        if(ad.playerTrackEventData->target.has_value() && ad.playerTrackEventData->target.value() == "HMD") trackObject = PlayerTrackObject::HMD;
+        if(ad.playerTrackEventData->target.has_value() && ad.playerTrackEventData->target.value() == "LEFT_HAND") trackObject = PlayerTrackObject::LEFT_HAND;
+        if(ad.playerTrackEventData->target.has_value() && ad.playerTrackEventData->target.value() == "RIGHT_HAND") trackObject = PlayerTrackObject::RIGHT_HAND;
+        PlayerTrack::AssignTrack(ad.playerTrackEventData->track, trackObject); 
+      })
 }
 
 void NEEvents::AddEventCallbacks() {

@@ -9,6 +9,7 @@
 #include "System/Action.hpp"
 #include "NECaches.h"
 
+#include "UnityEngine/zzzz__Transform_def.hpp"
 #include "custom-types/shared/delegate.hpp"
 
 using namespace TrackParenting;
@@ -33,68 +34,119 @@ void PlayerTrack::ctor() {
   if (!pauseController) pauseController.emplace(nullptr);
 }
 
-void PlayerTrack::AssignTrack(Track* track) {
-  if (PlayerTrack::track && PlayerTrack::instance) {
-    PlayerTrack::track->RemoveGameObject(PlayerTrack::instance->get_gameObject());
+void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
+  auto instance = [&]() -> PlayerTrack* {
+    switch (object) {
+      case ENTIRE_PLAYER:
+        return entirePlayerInstance;
+      case HMD:
+        return HMDInstance;
+      case LEFT_HAND:
+        return leftHandInstance;
+      case RIGHT_HAND:
+        return rightHandInstance;
+      default:
+        return nullptr;
+    }
+  }();
+
+  auto instanceTrack = instance ? instance->track : nullptr;
+
+  if (instanceTrack && instance) {
+    instanceTrack->RemoveGameObject(instance->get_gameObject());
   }
-  PlayerTrack::track = track;
 
-  if (!instance && !trackController) {
-    auto player = GameObject::Find("LocalPlayerGameCore")->get_transform();
-    GameObject* noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
-    origin = noodleObject->get_transform();
-    origin->SetParent(player->get_parent(), true);
-    player->SetParent(origin, true);
-
-
-    pauseController = Object::FindObjectOfType<PauseController*>();
-
-    if (pauseController) {
-      std::function<void()> pause = []() { PlayerTrack::OnDidPauseEvent(); };
-      std::function<void()> resume = []() { PlayerTrack::OnDidResumeEvent(); };
-      didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
-      pauseController->add_didPauseEvent(didPauseEventAction);
-      didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
-      pauseController->add_didResumeEvent(didResumeEventAction);
+  if (!instance && !instanceTrack) {
+    UnityEngine::Transform* player;
+    switch (object) {
+      case HMD:
+        player = GameObject::Find("VRGameCore/MainCamera")->get_transform();
+        break;
+      case LEFT_HAND:
+        player = GameObject::Find("VRGameCore/LeftHand")->get_transform();
+        break;
+      case RIGHT_HAND:
+        player = GameObject::Find("VRGameCore/RightHand")->get_transform();
+        break;
+      case ENTIRE_PLAYER:
+      default:
+        player = GameObject::Find("LocalPlayerGameCore")->get_transform();
+        break;
     }
 
-    auto* pauseMenuManager = pauseController ? pauseController->_pauseMenuManager.ptr()
+    GameObject* noodleObject = GameObject::New_ctor("NoodlePlayerTrack");
+
+    instance = noodleObject->AddComponent<PlayerTrack*>();
+    instance->set_enabled(track->v2);
+    instance->track = track;
+
+    switch (object) {
+      case ENTIRE_PLAYER:
+        entirePlayerInstance = instance;
+        break;
+      case HMD:
+        HMDInstance = instance;
+        break;
+      case LEFT_HAND:
+        leftHandInstance = instance;
+        break;
+      case RIGHT_HAND:
+        rightHandInstance = instance;
+        break;
+      default:
+        break;
+    }
+
+    instance->origin = noodleObject->get_transform();
+    instance->origin->SetParent(player->get_parent(), true);
+    player->SetParent(instance->origin, true);
+
+    auto* pauseMenuManager = instance->pauseController ? instance->pauseController->_pauseMenuManager.ptr()
                                              : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
     auto multiPauseMenuManager =
         NECaches::GameplayCoreContainer->TryResolve<MultiplayerLocalActivePlayerInGameMenuController*>();
     if (pauseMenuManager) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting transform to pause menu");
-      pauseMenuManager->get_transform()->SetParent(origin, false);
+      pauseMenuManager->get_transform()->SetParent(instance->origin, false);
     }
 
     if (multiPauseMenuManager) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting multi transform to pause menu");
-      multiPauseMenuManager->get_transform()->SetParent(origin, false);
+      multiPauseMenuManager->get_transform()->SetParent(instance->origin, false);
     }
 
-    startLocalRot = origin->get_localRotation();
-    startPos = origin->get_localPosition();
-    instance = noodleObject->AddComponent<PlayerTrack*>();
-    instance->set_enabled(track->v2);
+    instance->startLocalRot = instance->origin->get_localRotation();
+    instance->startPos = instance->origin->get_localPosition();
+
+    instance->pauseController = Object::FindObjectOfType<PauseController*>();
+
+    if (instance->pauseController) {
+      std::function<void()> pause = [instance]() { instance->OnDidPauseEvent(); };
+      std::function<void()> resume = [instance]() { instance->OnDidResumeEvent(); };
+      didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
+      instance->pauseController->add_didPauseEvent(didPauseEventAction);
+      didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
+      instance->pauseController->add_didResumeEvent(didResumeEventAction);
+    }
 
     if (track->v2) {
       instance->Update();
     } else {
-      trackController = Tracks::GameObjectTrackController::HandleTrackData(noodleObject, {track}, 0.6, track->v2, true).value_or(nullptr);
-      trackController->UpdateData(true);
+      instance->trackController = Tracks::GameObjectTrackController::HandleTrackData(noodleObject, {track}, 0.6, track->v2, true).value_or(nullptr);
+      instance->trackController->UpdateData(true);
     }
   }
 
-  if (PlayerTrack::track && PlayerTrack::instance) {
-    PlayerTrack::track->AddGameObject(PlayerTrack::instance->get_gameObject());
+  if (instance && instance->track) {
+    instance->track->AddGameObject(instance->get_gameObject());
   }
 }
 
 void PlayerTrack::OnDidPauseEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidPauseEvent");
   IL2CPP_CATCH_HANDLER(
-    if (instance) {
-      instance->set_enabled(false);
+    if (selfInstance) {
+      selfInstance->set_enabled(false);
     }
 
     
@@ -107,8 +159,8 @@ void PlayerTrack::OnDidPauseEvent() {
 void PlayerTrack::OnDidResumeEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidResumeEvent");
   IL2CPP_CATCH_HANDLER(
-    if (instance) {
-      instance->set_enabled(track->v2);
+    if (selfInstance) {
+      selfInstance->set_enabled(track->v2);
     }
 
     if (trackController) {
@@ -123,7 +175,7 @@ void PlayerTrack::OnDestroy() {
     // NELogger::Logger.debug("Removing action didPauseEvent %p", didPauseEventAction);
     // pauseController->remove_didPauseEvent(didPauseEventAction);
   }
-  instance = nullptr;
+  selfInstance = nullptr;
   trackController = nullptr;
   track = nullptr;
 }
@@ -162,7 +214,7 @@ void PlayerTrack::UpdateDataOld() {
 }
 
 void PlayerTrack::Update() {
-  if (track->v2) {
+  if (track && track->v2) {
     return UpdateDataOld();
   }
 }

@@ -10,6 +10,14 @@
 #include "GlobalNamespace/PauseController.hpp"
 #include "tracks/shared/Animation/GameObjectTrackController.hpp"
 
+namespace TrackParenting {
+enum PlayerTrackObject {
+  ENTIRE_PLAYER,
+  HMD,
+  LEFT_HAND,
+  RIGHT_HAND
+};
+}
 DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     DECLARE_CTOR(ctor);
                     DECLARE_INSTANCE_METHOD(void, Update);
@@ -20,18 +28,23 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     uint64_t lastCheckedTime = 0;
 
                     public:
-                    static void AssignTrack(Track* track);
+                    static void AssignTrack(Track* track, PlayerTrackObject object = TrackParenting::ENTIRE_PLAYER);
                     private:
-                    static inline PlayerTrack * instance;
-                    static inline Tracks::GameObjectTrackController * trackController;
-                    static inline Track * track; 
-                    static inline NEVector::Vector3 startPos;
-                    static inline NEVector::Quaternion startRot;
-                    static inline NEVector::Quaternion startLocalRot;
-                    static inline NEVector::Vector3 startScale;
-                    static inline UnityEngine::Transform * origin;
-                    static inline SafePtrUnity<GlobalNamespace::PauseController> pauseController;
+                    static inline PlayerTrack * entirePlayerInstance;
+                    static inline PlayerTrack * HMDInstance;
+                    static inline PlayerTrack * leftHandInstance;
+                    static inline PlayerTrack * rightHandInstance;
 
-                    static void OnDidPauseEvent(); 
-                    static void OnDidResumeEvent();
+                    PlayerTrack * selfInstance;
+                    Tracks::GameObjectTrackController * trackController;
+                    Track * track; 
+                    NEVector::Vector3 startPos;
+                    NEVector::Quaternion startRot;
+                    NEVector::Quaternion startLocalRot;
+                    NEVector::Vector3 startScale;
+                    UnityEngine::Transform * origin;
+                    SafePtrUnity<GlobalNamespace::PauseController> pauseController;
+
+                    void OnDidPauseEvent(); 
+                    void OnDidResumeEvent();
                       )

@@ -31,6 +31,7 @@
 #include "GlobalNamespace/SortedList_1.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
 #include "SpawnDataHelper.h"
+#include "custom-json-data/shared/JsonUtils.h"
 #include "tracks/shared/Json.h"
 
 #include <optional>
@@ -166,9 +167,11 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData& beatmapAD, CustomJSONData:
     std::string_view trackName(
         eventData[v2 ? NoodleExtensions::Constants::V2_TRACK.data() : NoodleExtensions::Constants::TRACK.data()]
             .GetString());
+    std::string_view trackTarget(
+        NEJSON::ReadOptionalString(eventData, v2 ? NoodleExtensions::Constants::V2_TRACK.data() : NoodleExtensions::Constants::TRACK.data()).value_or("ENTIRE_PLAYER"));
     Track* track = beatmapAD.getTrack(trackName);
-    NELogger::Logger.debug("Assigning player to track {} at {}", trackName.data(), fmt::ptr(track));
-    eventAD.playerTrackEventData.emplace(track);
+    NELogger::Logger.debug("Assigning player to track {} at {}, with target {}", trackName.data(), fmt::ptr(track), trackTarget.data());
+    eventAD.playerTrackEventData.emplace(track, trackTarget);
   }
 
   eventAD.parsed = true;

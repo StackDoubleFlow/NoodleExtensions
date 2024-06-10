@@ -13,6 +13,7 @@
 #include "GlobalNamespace/CutoutEffect.hpp"
 #include "GlobalNamespace/DisappearingArrowControllerBase_1.hpp"
 #include "GlobalNamespace/CutoutAnimateEffect.hpp"
+#include <optional>
 
 namespace GlobalNamespace {
 class CutoutAnimateEffect;
@@ -101,9 +102,10 @@ struct BeatmapObjectAssociatedData {
 };
 
 struct PlayerTrackEventData {
-  explicit PlayerTrackEventData(Track* track) : track(track) {}
+  explicit PlayerTrackEventData(Track* track, std::string_view target) : track(track), target(target) {}
 
   Track* track;
+  std::optional<std::string_view> target;
 };
 
 struct ParentTrackEventData {
