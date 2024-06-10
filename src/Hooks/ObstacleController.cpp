@@ -360,7 +360,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
           // multiply rgb by alpha?
           if (colorIt &&
-              (colorIt->a > 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).sqrMagnitude() > 3)) {
+              (colorIt->a > 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).Magnitude() >= 1)) {
             transparent = false;
           }
         }
