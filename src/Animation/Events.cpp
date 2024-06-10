@@ -56,7 +56,9 @@ void CustomEventCallback(BeatmapCallbacksController* callbackController,
 
       if (ad.parentTrackEventData) {
         ParentObject::AssignTrack(*ad.parentTrackEventData);
-      } else if (ad.playerTrackEventData) { PlayerTrack::AssignTrack(ad.playerTrackEventData->track); })
+      } else if (ad.playerTrackEventData) {
+        PlayerTrack::AssignTrack(ad.playerTrackEventData->track, ad.playerTrackEventData->target.value_or(PlayerTrackObject::Root)); 
+      })
 }
 
 void NEEvents::AddEventCallbacks() {
