@@ -1,6 +1,8 @@
 #include "Animation/PlayerTrack.h"
 #include "Animation/AnimationHelper.h"
+#include "GlobalNamespace/PlayerTransforms.hpp"
 #include "UnityEngine/GameObject.hpp"
+#include "UnityEngine/Resources.hpp"
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
 #include "GlobalNamespace/MultiplayerLocalActivePlayerInGameMenuController.hpp"
@@ -38,13 +40,13 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   PlayerTrack* targetInstance;
 
   switch (object) {
-  case PlayerTrackObject::ENTIRE_PLAYER:
+  case PlayerTrackObject::Root:
     targetInstance = entirePlayerInstance;
-  case PlayerTrackObject::HMD:
+  case PlayerTrackObject::Head:
     targetInstance = HMDInstance;
-  case PlayerTrackObject::LEFT_HAND:
+  case PlayerTrackObject::LeftHand:
     targetInstance = leftHandInstance;
-  case PlayerTrackObject::RIGHT_HAND:
+  case PlayerTrackObject::RightHand:
     targetInstance = rightHandInstance;
   default:
     targetInstance = nullptr;
@@ -60,17 +62,22 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   // Init
   if (!targetInstance) {
     UnityEngine::Transform* player;
+    auto playerTransforms = Resources::FindObjectsOfTypeAll<PlayerTransforms*>()->FirstOrDefault();
+    if(!playerTransforms) {
+      CJDLogger::Logger.fmtLog<Paper::LogLevel::ERR>("PlayerTransforms not found");
+      return;
+    }
     switch (object) {
-    case PlayerTrackObject::HMD:
+    case PlayerTrackObject::Head:
       player = GameObject::Find("VRGameCore/MainCamera")->get_transform();
       break;
-    case PlayerTrackObject::LEFT_HAND:
-      player = GameObject::Find("VRGameCore/LeftHand")->get_transform();
+    case PlayerTrackObject::LeftHand:
+      player = playerTransforms->_leftHandTransform;
       break;
-    case PlayerTrackObject::RIGHT_HAND:
-      player = GameObject::Find("VRGameCore/RightHand")->get_transform();
+    case PlayerTrackObject::RightHand:
+      player = playerTransforms->_rightHandTransform;
       break;
-    case PlayerTrackObject::ENTIRE_PLAYER:
+    case PlayerTrackObject::Root:
     default:
       player = GameObject::Find("LocalPlayerGameCore")->get_transform();
       break;
@@ -115,16 +122,16 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
     }
 
     switch (object) {
-    case PlayerTrackObject::ENTIRE_PLAYER:
+    case PlayerTrackObject::Root:
       entirePlayerInstance = targetInstance;
       break;
-    case PlayerTrackObject::HMD:
+    case PlayerTrackObject::Head:
       HMDInstance = targetInstance;
       break;
-    case PlayerTrackObject::LEFT_HAND:
+    case PlayerTrackObject::LeftHand:
       leftHandInstance = targetInstance;
       break;
-    case PlayerTrackObject::RIGHT_HAND:
+    case PlayerTrackObject::RightHand:
       rightHandInstance = targetInstance;
       break;
     default:

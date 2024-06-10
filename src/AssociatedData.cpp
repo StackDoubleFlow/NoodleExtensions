@@ -161,22 +161,22 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
 }
 
 PlayerTrackEventData::PlayerTrackEventData(Track* track, std::optional<std::string_view> targetOpt) : track(track) {
-  this->target = PlayerTrackObject::ENTIRE_PLAYER;
+  this->target = PlayerTrackObject::Root;
 
   if (targetOpt) {
     auto targetStr = *targetOpt;
 
-    if (targetStr == "ENTIRE_PLAYER") {
-      this->target = PlayerTrackObject::ENTIRE_PLAYER;
+    if (targetStr == "Root") {
+      this->target = PlayerTrackObject::Root;
     }
-    if (targetStr == "HMD") {
-      this->target = PlayerTrackObject::HMD;
+    if (targetStr == "Head") {
+      this->target = PlayerTrackObject::Head;
     }
-    if (targetStr == "LEFT_HAND") {
-      this->target = PlayerTrackObject::LEFT_HAND;
+    if (targetStr == "LeftHand") {
+      this->target = PlayerTrackObject::LeftHand;
     }
-    if (targetStr == "RIGHT_HAND") {
-      this->target = PlayerTrackObject::RIGHT_HAND;
+    if (targetStr == "RightHand") {
+      this->target = PlayerTrackObject::RightHand;
     }
   }
 }
