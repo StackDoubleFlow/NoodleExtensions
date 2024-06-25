@@ -91,6 +91,7 @@ MAKE_HOOK_MATCH(
 
   std::unordered_map<float, std::vector<CustomNoteData*>> notesInColumn;
   for (auto noteData : customNotes) {
+    if (!noteData) continue;
     float lineIndex = noteData->lineIndex;
     float lineLayer = noteData->noteLineLayer.value__;
 
