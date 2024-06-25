@@ -137,6 +137,7 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
       auto obj = convert(item);                                                                                        \
       auto& ad = getAD(obj->customData);                                                                               \
       ad.objectData.fake = true;                                                                                       \
+      if (!obj) continue;                                                                                              \
       customBeatmap->AddBeatmapObjectDataOverride(obj);                                                                \
     }                                                                                                                  \
   }
