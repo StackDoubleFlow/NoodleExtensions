@@ -2,7 +2,7 @@ name: NDK build
 
 env:
   module_id: noodleextensions
-  qmodName: noodle_extensions
+  qmodName: NoodleExtensions
   cache-name: noodleextensions_cache
 
 on:
