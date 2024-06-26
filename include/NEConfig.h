@@ -5,7 +5,7 @@
 
 enum struct MaterialBehaviour { SMART_COLOR = 0, SEMI_BASIC = 1, BASIC = 2 };
 
-inline std::vector<StringW> getMaterialBehaviourValues() {
+inline std::vector<std::string> getMaterialBehaviourValues() {
   return { { "Smart Color", "SemiBasic", "Basic" } };
 }
 
