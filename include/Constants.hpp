@@ -22,6 +22,7 @@ inline static constexpr const std::string_view V2_TIME = "_time";
 inline static constexpr const std::string_view V2_WORLD_POSITION_STAYS = "_worldPositionStays";
 inline static constexpr const std::string_view V2_PARENT_TRACK = "_parentTrack";
 inline static constexpr const std::string_view V2_CHILDREN_TRACKS = "_childrenTracks";
+inline static constexpr const std::string_view V2_TARGET = "_target";
 
 inline static constexpr const std::string_view NOTE_OFFSET = "coordinates";
 inline static constexpr const std::string_view TAIL_NOTE_OFFSET = "tailCoordinates";
@@ -44,6 +45,7 @@ inline static constexpr const std::string_view WORLD_POSITION_STAYS = "worldPosi
 inline static constexpr const std::string_view PARENT_TRACK = "parentTrack";
 inline static constexpr const std::string_view CHILDREN_TRACKS = "childrenTracks";
 inline static constexpr const std::string_view LINK = "link";
+inline static constexpr const std::string_view TARGET = "target";
 
 inline static constexpr const std::string_view INTERNAL_STARTNOTELINELAYER = "NE_startNoteLineLayer";
 inline static constexpr const std::string_view INTERNAL_FLIPYSIDE = "NE_flipYSide";

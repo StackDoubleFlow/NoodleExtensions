@@ -13,22 +13,30 @@
   },
   "workspace": {
     "scripts": {
-      "build": ["pwsh ./build.ps1"]
+      "build": [
+        "pwsh ./build.ps1"
+      ]
     },
-    "qmodIncludeDirs": ["./build", "./extern/libs"],
+    "qmodIncludeDirs": [
+      "./build",
+      "./extern/libs"
+    ],
+    "qmodIncludeFiles": [],
     "qmodOutput": "NoodleExtensions.qmod"
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": ">5.1.0<5.1.7",
+      "versionRange": ">5.1.0, <5.1.8",
       "additionalData": {
-        "extraFiles": ["src/inline-hook"]
+        "extraFiles": [
+          "src/inline-hook"
+        ]
       }
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^3602.0.0",
+      "versionRange": "^3700.0.0",
       "additionalData": {}
     },
     {
@@ -85,6 +93,11 @@
     {
       "id": "conditional-dependencies",
       "versionRange": "^0.3.0",
+      "additionalData": {}
+    },
+    {
+      "id": "bsml",
+      "versionRange": "^0.4.42",
       "additionalData": {}
     }
   ]
