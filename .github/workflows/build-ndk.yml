@@ -41,20 +41,11 @@ jobs:
           # Name of qmod in release asset. Assumes exists, same as prior
           qpm_qmod: ${{env.qmodName}}.qmod
 
-      - name: QPM Collapse
-        run: |
-          qpm-rust collapse
-
       - name: Build
         run: |
           cd ${GITHUB_WORKSPACE}
           qpm-rust s build
-          qpm-rust qmod build
-
-
-      - name: Create Qmod
-        run: |
-          pwsh -Command ./createqmod.ps1 ${{env.qmodName}}
+          qpm-rust qmod zip
 
       - name: Get Library Name
         id: libname
