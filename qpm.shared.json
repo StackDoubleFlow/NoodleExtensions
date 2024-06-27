@@ -1,6 +1,6 @@
 {
   "config": {
-    "version": "0.1.0",
+    "version": "0.4.0",
     "sharedDir": "shared",
     "dependenciesDir": "extern",
     "info": {
@@ -78,7 +78,7 @@
         "id": "scotland2",
         "versionRange": "^0.1.0",
         "additionalData": {
-          "includeQmod": true
+          "includeQmod": false
         }
       },
       {

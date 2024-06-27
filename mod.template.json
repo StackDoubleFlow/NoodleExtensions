@@ -9,6 +9,7 @@
   "packageVersion": "1.37.0_9064817954",
   "description": "This adds a host of new things you can do with your maps. Original mod for PC by Aeroluna. Contributions by Fern and Sc2ad.",
   "modFiles": [],
+  "lateModFiles": ["${binary}"],
   "dependencies": [],
   "libraryFiles": [],
   "fileCopies": [],
