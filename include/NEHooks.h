@@ -31,7 +31,7 @@ public:
   struct __NERegister##func {                                                                                          \
     __NERegister##func() {                                                                                             \
       Hooks::AddInstallFunc(func);                                                                                     \
-      NELogger::Logger.info("NEHooks Registered install func: " #func);                                               \
+      NELogger::Logger.info("NEHooks Registered install func: " #func);                                                \
     }                                                                                                                  \
   };                                                                                                                   \
   static __NERegister##func __NERegisterInstance##func;
