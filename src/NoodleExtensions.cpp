@@ -32,7 +32,7 @@ void InstallAndRegisterAll() {
         bool meRequirement = std::any_of(requirements.begin(), requirements.end(),
                                          [](auto const& s) { return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
         bool neRequirement = std::any_of(requirements.begin(), requirements.end(),
-                                         [](auto const& s) { return s == NoodleExtensions::U8_ME_REQUIREMENTNAME; });
+                                         [](auto const& s) { return s == NoodleExtensions::U8_REQUIREMENTNAME; });
 
         for (auto const& r : requirements) {
           NELogger::Logger.debug("Installed on map {}", r.c_str());
