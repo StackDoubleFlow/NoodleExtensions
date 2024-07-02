@@ -80,7 +80,7 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
 
 
     // Transform hierarchy manipulation: PLAYER PARENT -> NOODLE -> PLAYER
-    playerTrack->origin->SetParent(target->parent, true);
+    playerTrack->origin->SetParent(target->parent, false);
     target->SetParent(playerTrack->origin, true);
 
     playerTrack->startLocalRot = playerTrack->origin->get_localRotation();
