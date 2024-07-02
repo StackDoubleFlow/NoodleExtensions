@@ -48,7 +48,7 @@
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.21.0",
+      "versionRange": "^0.21.1",
       "additionalData": {}
     },
     {
