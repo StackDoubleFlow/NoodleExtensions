@@ -49,7 +49,7 @@
       },
       {
         "id": "custom-json-data",
-        "versionRange": "^0.21.1",
+        "versionRange": "^0.21.2",
         "additionalData": {}
       },
       {
@@ -59,7 +59,7 @@
       },
       {
         "id": "tracks",
-        "versionRange": "^1.0.0",
+        "versionRange": "^1.0.2",
         "additionalData": {}
       },
       {
@@ -133,17 +133,17 @@
     {
       "dependency": {
         "id": "tracks",
-        "versionRange": "=1.0.1",
+        "versionRange": "=1.0.2",
         "additionalData": {
-          "soLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.1/libtracks.so",
-          "debugSoLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.1/debug_libtracks.so",
+          "soLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.2/libtracks.so",
+          "debugSoLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.2/debug_libtracks.so",
           "overrideSoName": "libtracks.so",
-          "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.1/Tracks.qmod",
-          "branchName": "version/v1_0_1",
+          "modLink": "https://github.com/StackDoubleFlow/Tracks/releases/download/v1.0.2/Tracks.qmod",
+          "branchName": "version/v1_0_2",
           "cmake": true
         }
       },
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     {
       "dependency": {
@@ -171,13 +171,13 @@
     {
       "dependency": {
         "id": "custom-json-data",
-        "versionRange": "=0.21.1",
+        "versionRange": "=0.21.2",
         "additionalData": {
-          "soLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.1/libcustom-json-data.so",
-          "debugSoLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.1/debug_libcustom-json-data.so",
+          "soLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.2/libcustom-json-data.so",
+          "debugSoLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.2/debug_libcustom-json-data.so",
           "overrideSoName": "libcustom-json-data.so",
-          "modLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.1/custom-json-data.qmod",
-          "branchName": "version/v0_21_1",
+          "modLink": "https://github.com/StackDoubleFlow/CustomJSONData/releases/download/v0.21.2/custom-json-data.qmod",
+          "branchName": "version/v0_21_2",
           "compileOptions": {
             "cppFlags": [
               "-DRAPIDJSON_NEON"
@@ -186,7 +186,7 @@
           "cmake": true
         }
       },
-      "version": "0.21.1"
+      "version": "0.21.2"
     },
     {
       "dependency": {
@@ -253,13 +253,13 @@
     {
       "dependency": {
         "id": "custom-types",
-        "versionRange": "=0.17.8",
+        "versionRange": "=0.17.9",
         "additionalData": {
-          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/libcustom-types.so",
-          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/debug_libcustom-types.so",
+          "soLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.9/libcustom-types.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.9/debug_libcustom-types.so",
           "overrideSoName": "libcustom-types.so",
-          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.8/CustomTypes.qmod",
-          "branchName": "version/v0_17_8",
+          "modLink": "https://github.com/QuestPackageManager/Il2CppQuestTypePatching/releases/download/v0.17.9/CustomTypes.qmod",
+          "branchName": "version/v0_17_9",
           "compileOptions": {
             "cppFlags": [
               "-Wno-invalid-offsetof"
@@ -268,7 +268,7 @@
           "cmake": true
         }
       },
-      "version": "0.17.8"
+      "version": "0.17.9"
     },
     {
       "dependency": {
@@ -321,15 +321,15 @@
     {
       "dependency": {
         "id": "beatsaber-hook",
-        "versionRange": "=5.1.8",
+        "versionRange": "=5.1.9",
         "additionalData": {
-          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.8/libbeatsaber-hook_5_1_8.so",
-          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.8/debug_libbeatsaber-hook_5_1_8.so",
-          "branchName": "version/v5_1_8",
+          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/libbeatsaber-hook_5_1_9.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v5.1.9/debug_libbeatsaber-hook_5_1_9.so",
+          "branchName": "version/v5_1_9",
           "cmake": true
         }
       },
-      "version": "5.1.8"
+      "version": "5.1.9"
     },
     {
       "dependency": {
