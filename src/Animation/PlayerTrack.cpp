@@ -23,6 +23,8 @@ using namespace Animation;
 // Events.cpp
 extern BeatmapObjectSpawnController* spawnController;
 
+std::unordered_map<PlayerTrackObject, SafePtrUnity<PlayerTrack>> PlayerTrack::playerTracks;
+
 static Action* didPauseEventAction;
 static Action* didResumeEventAction;
 
@@ -87,8 +89,8 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
     playerTrack->pauseController = Object::FindObjectOfType<PauseController*>();
 
     if (playerTrack->pauseController) {
-      std::function<void()> pause = [playerTrack]() { playerTrack->OnDidPauseEvent(); };
-      std::function<void()> resume = [playerTrack]() { playerTrack->OnDidResumeEvent(); };
+      std::function<void()> pause = [playerTrack]() mutable { playerTrack->OnDidPauseEvent(); };
+      std::function<void()> resume = [playerTrack]() mutable { playerTrack->OnDidResumeEvent(); };
       didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
       playerTrack->pauseController->add_didPauseEvent(didPauseEventAction);
       didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
