@@ -3,7 +3,7 @@
   "name": "NoodleExtensions",
   "id": "${mod_id}",
   "author": "StackDoubleFlow",
-  "version": "${version}-beta1",
+  "version": "${version}",
   "coverImage": "cover.png",
   "packageId": "com.beatgames.beatsaber",
   "packageVersion": "1.37.0_9064817954",
