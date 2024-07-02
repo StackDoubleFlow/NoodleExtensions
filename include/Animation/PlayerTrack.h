@@ -9,6 +9,7 @@
 
 #include "GlobalNamespace/PauseController.hpp"
 #include "tracks/shared/Animation/GameObjectTrackController.hpp"
+#include <unordered_map>
 
 enum struct PlayerTrackObject;
 
@@ -24,12 +25,9 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     public:
                     static void AssignTrack(Track* track, PlayerTrackObject object);
                     private:
-                    static inline PlayerTrack * entirePlayerInstance;
-                    static inline PlayerTrack * HMDInstance;
-                    static inline PlayerTrack * leftHandInstance;
-                    static inline PlayerTrack * rightHandInstance;
+                    static std::unordered_map<PlayerTrackObject, SafePtrUnity<PlayerTrack>> playerTracks;
+                    PlayerTrackObject trackObject;
 
-                    PlayerTrack * selfInstance;
                     Tracks::GameObjectTrackController * trackController;
                     Track * track; 
                     NEVector::Vector3 startPos;
