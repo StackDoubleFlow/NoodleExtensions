@@ -447,15 +447,17 @@ MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_OnEnable, &ParametricBoxFakeGlow
   ParametricBoxFakeGlowController_OnEnable(self);
 }
 
-// Kaitlyn's fake glow overbounds fix
+// Kaitlyn's fake glow overbounds fix (modified)
 // https://github.com/ItsKaitlyn03/AnyTweaks-old/blob/a723e76506cd7cb8ab6f890b3d6a342f3618aaeb/src/hooks/ParametricBoxFakeGlowController.cpp#L23-L36
 MAKE_HOOK_MATCH(ParametricBoxFakeGlowController_Refresh, &GlobalNamespace::ParametricBoxFakeGlowController::Refresh,
                 void, GlobalNamespace::ParametricBoxFakeGlowController* self) {
   if (!Hooks::isNoodleHookEnabled()) return ParametricBoxFakeGlowController_Refresh(self);
+  
+  float initialEdgeSizeMultip = self->edgeSizeMultiplier;
+  float minDimension = std::min({ self->width, self->height, std::abs(self->length) });
+  float clampedMinDimension = std::max(minDimension, 0.1f);
 
-  float value = std::min({ self->width, self->height, self->length });
-
-  self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, value * 13.5f));
+  self->edgeSizeMultiplier = std::min(self->edgeSizeMultiplier, std::min(0.5f, clampedMinDimension * 13.5f));
 
   ParametricBoxFakeGlowController_Refresh(self);
 }
@@ -473,9 +475,11 @@ void InstallObstacleControllerHooks() {
   INSTALL_HOOK(NELogger::Logger, ObstacleController_Init);
   INSTALL_HOOK_ORIG(NELogger::Logger, ObstacleController_ManualUpdate);
   INSTALL_HOOK(NELogger::Logger, ObstacleController_GetPosForTime);
-  // Temporary fake glow disable hook
+
+  // Fixes glow being too large on small walls.
   INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_Refresh);
-  INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_OnEnable);
+  // Uncomment to disable fake glow.
+  //INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_OnEnable);
 
   // Instruction on((const int32_t*) HookTracker::GetOrig(il2cpp_functions::object_new));
   // Instruction j2Ob_N_thunk(CRASH_UNLESS(on.findNthCall(1)->label));
