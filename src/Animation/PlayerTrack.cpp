@@ -101,7 +101,7 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   }
 
   // Init
-  bool firstTime = playerTrack.ptr() == nullptr;
+  bool firstTime = !playerTrack.isAlive();
   if (!playerTrack) {
     playerTrack = Create(object);
   }
