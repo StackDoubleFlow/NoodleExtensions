@@ -94,7 +94,7 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   auto& playerTrack = PlayerTrack::playerTracks[object];
 
   auto instanceTrack = playerTrack && playerTrack.isAlive() ? playerTrack->track : nullptr;
-  GameObject* noodleObject = playerTrack ? playerTrack->origin->gameObject : nullptr;
+
 
   if (instanceTrack && playerTrack) {
     instanceTrack->RemoveGameObject(playerTrack->get_gameObject());
@@ -127,6 +127,8 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
       multiPauseMenuManager->get_transform()->SetParent(playerTrack->origin, false);
     }
   }
+
+  GameObject* noodleObject = playerTrack->origin->gameObject;
 
   // this is only used in v2
   playerTrack->set_enabled(track->v2);
