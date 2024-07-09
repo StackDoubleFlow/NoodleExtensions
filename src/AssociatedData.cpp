@@ -161,8 +161,6 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
 }
 
 PlayerTrackEventData::PlayerTrackEventData(Track* track, std::optional<std::string_view> targetOpt) : track(track) {
-  this->target = PlayerTrackObject::Root;
-
   if (targetOpt) {
     auto targetStr = *targetOpt;
 

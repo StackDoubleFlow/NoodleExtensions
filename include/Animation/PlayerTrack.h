@@ -23,6 +23,7 @@ DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
                     uint64_t lastCheckedTime = 0;
 
                     public:
+                    static PlayerTrack* Create(PlayerTrackObject object);
                     static void AssignTrack(Track* track, PlayerTrackObject object);
                     private:
                     static std::unordered_map<PlayerTrackObject, SafePtrUnity<PlayerTrack>> playerTracks;

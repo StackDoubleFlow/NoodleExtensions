@@ -1,6 +1,8 @@
 #include "Animation/PlayerTrack.h"
 #include "Animation/AnimationHelper.h"
+#include "AssociatedData.h"
 #include "GlobalNamespace/PlayerTransforms.hpp"
+#include "NELogger.h"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Resources.hpp"
 #include "GlobalNamespace/PauseController.hpp"
@@ -38,6 +40,56 @@ void PlayerTrack::ctor() {
   if (!pauseController) pauseController.emplace(nullptr);
 }
 
+PlayerTrack* PlayerTrack::Create(PlayerTrackObject object) {
+  auto playerTransforms = Resources::FindObjectsOfTypeAll<PlayerTransforms*>()->FirstOrDefault();
+  if (!playerTransforms) {
+    CJDLogger::Logger.fmtLog<Paper::LogLevel::ERR>("PlayerTransforms not found");
+    return nullptr;
+  }
+
+  UnityEngine::Transform* target;
+  switch (object) {
+  case PlayerTrackObject::Head:
+    target = playerTransforms->_headTransform;
+    break;
+  case PlayerTrackObject::LeftHand:
+    target = playerTransforms->_leftHandTransform;
+    break;
+  case PlayerTrackObject::RightHand:
+    target = playerTransforms->_rightHandTransform;
+    break;
+  case PlayerTrackObject::Root:
+  default:
+    target = playerTransforms->_originTransform->parent;
+    break;
+  }
+
+  auto noodleObject = GameObject::New_ctor("NoodlePlayerTrack " + std::to_string((int)object));
+  auto playerTrack = noodleObject->AddComponent<PlayerTrack*>();
+  playerTrack->trackObject = object;
+  auto origin = playerTrack->origin = noodleObject->transform;
+
+  // Transform hierarchy manipulation: PLAYER PARENT -> NOODLE -> PLAYER
+  origin->SetParent(target->parent, false);
+  target->SetParent(origin, true);
+
+  playerTrack->startLocalRot = playerTrack->origin->get_localRotation();
+  playerTrack->startPos = playerTrack->origin->get_localPosition();
+
+  playerTrack->pauseController = Object::FindObjectOfType<PauseController*>();
+
+  if (playerTrack->pauseController) {
+    std::function<void()> pause = [playerTrack]() mutable { playerTrack->OnDidPauseEvent(); };
+    std::function<void()> resume = [playerTrack]() mutable { playerTrack->OnDidResumeEvent(); };
+    didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
+    playerTrack->pauseController->add_didPauseEvent(didPauseEventAction);
+    didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
+    playerTrack->pauseController->add_didResumeEvent(didResumeEventAction);
+  }
+
+  return playerTrack;
+}
+
 void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   auto& playerTrack = PlayerTrack::playerTracks[object];
 
@@ -49,54 +101,17 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
   }
 
   // Init
+  bool firstTime = playerTrack.ptr() == nullptr;
   if (!playerTrack) {
-    auto playerTransforms = Resources::FindObjectsOfTypeAll<PlayerTransforms*>()->FirstOrDefault();
-    if (!playerTransforms) {
-      CJDLogger::Logger.fmtLog<Paper::LogLevel::ERR>("PlayerTransforms not found");
-      return;
-    }
+    playerTrack = Create(object);
+  }
 
-    UnityEngine::Transform* target;
-    switch (object) {
-    case PlayerTrackObject::Head:
-      target = playerTransforms->_headTransform;
-      break;
-    case PlayerTrackObject::LeftHand:
-      target = playerTransforms->_leftHandTransform;
-      break;
-    case PlayerTrackObject::RightHand:
-      target = playerTransforms->_rightHandTransform;
-      break;
-    case PlayerTrackObject::Root:
-    default:
-      target = playerTransforms->_originTransform->parent;
-      break;
-    }
+  if (!playerTrack) {
+    NELogger::Logger.error("Failed to initialize player track {} {}", track ? track->name : "", (int)object);
+    return;
+  }
 
-    noodleObject = GameObject::New_ctor("NoodlePlayerTrack " + std::to_string((int)object));
-    playerTrack = noodleObject->AddComponent<PlayerTrack*>();
-    playerTrack->trackObject = object;
-    playerTrack->origin = noodleObject->transform;
-
-
-    // Transform hierarchy manipulation: PLAYER PARENT -> NOODLE -> PLAYER
-    playerTrack->origin->SetParent(target->parent, false);
-    target->SetParent(playerTrack->origin, true);
-
-    playerTrack->startLocalRot = playerTrack->origin->get_localRotation();
-    playerTrack->startPos = playerTrack->origin->get_localPosition();
-
-    playerTrack->pauseController = Object::FindObjectOfType<PauseController*>();
-
-    if (playerTrack->pauseController) {
-      std::function<void()> pause = [playerTrack]() mutable { playerTrack->OnDidPauseEvent(); };
-      std::function<void()> resume = [playerTrack]() mutable { playerTrack->OnDidResumeEvent(); };
-      didPauseEventAction = custom_types::MakeDelegate<Action*>(pause);
-      playerTrack->pauseController->add_didPauseEvent(didPauseEventAction);
-      didResumeEventAction = custom_types::MakeDelegate<Action*>(resume);
-      playerTrack->pauseController->add_didResumeEvent(didResumeEventAction);
-    }
-
+  if (firstTime && object == PlayerTrackObject::Root) {
     auto* pauseMenuManager = playerTrack->pauseController
                                  ? playerTrack->pauseController->_pauseMenuManager.ptr()
                                  : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
@@ -134,6 +149,11 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
 void PlayerTrack::OnDidPauseEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidPauseEvent");
   this->set_enabled(false);
+
+  if (this->trackObject != PlayerTrackObject::Root) {
+    origin->localPosition = startPos;
+    origin->localRotation = startLocalRot;
+  }
 
   if (trackController) {
     trackController->set_enabled(false);
