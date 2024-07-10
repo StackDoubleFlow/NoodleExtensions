@@ -87,31 +87,7 @@ PlayerTrack* PlayerTrack::Create(PlayerTrackObject object) {
     playerTrack->pauseController->add_didResumeEvent(didResumeEventAction);
   }
 
-  return playerTrack;
-}
-
-void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
-  auto& playerTrack = PlayerTrack::playerTracks[object];
-
-  auto instanceTrack = playerTrack && playerTrack.isAlive() ? playerTrack->track : nullptr;
-
-
-  if (instanceTrack && playerTrack) {
-    instanceTrack->RemoveGameObject(playerTrack->get_gameObject());
-  }
-
-  // Init
-  bool firstTime = !playerTrack.isAlive();
-  if (!playerTrack) {
-    playerTrack = Create(object);
-  }
-
-  if (!playerTrack) {
-    NELogger::Logger.error("Failed to initialize player track {} {}", track ? track->name : "", (int)object);
-    return;
-  }
-
-  if (firstTime && object == PlayerTrackObject::Root) {
+  if (object == PlayerTrackObject::Root) {
     auto* pauseMenuManager = playerTrack->pauseController
                                  ? playerTrack->pauseController->_pauseMenuManager.ptr()
                                  : NECaches::GameplayCoreContainer->TryResolve<PauseMenuManager*>();
@@ -126,6 +102,26 @@ void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("Setting multi transform to pause menu");
       multiPauseMenuManager->get_transform()->SetParent(playerTrack->origin, false);
     }
+  }
+
+  return playerTrack;
+}
+
+void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
+  auto& playerTrack = PlayerTrack::playerTracks[object];
+
+  if (playerTrack && playerTrack->track) {
+    playerTrack->track->RemoveGameObject(playerTrack->get_gameObject());
+  }
+
+  // Init
+  if (!playerTrack) {
+    playerTrack = Create(object);
+  }
+
+  if (!playerTrack) {
+    NELogger::Logger.error("Failed to initialize player track {} {}", track ? track->name : "", (int)object);
+    return;
   }
 
   GameObject* noodleObject = playerTrack->origin->gameObject;
