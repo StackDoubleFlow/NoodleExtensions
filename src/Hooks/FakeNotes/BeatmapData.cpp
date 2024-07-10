@@ -177,12 +177,11 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
   PARSE_ARRAY(fakeBurstSliders, Parser::DeserializeBurstSlider,
               [&](v3::CustomBeatmapSaveData_BurstSliderData* data) -> CustomSliderData* {
                 return CustomSliderData_CreateCustomBurstSliderData(
-                    ConvertColorType(data->get_colorType()), BeatToTime(data->b), data->get_headLine(),
-                    ConvertNoteLineLayer(data->get_headLayer()), ConvertNoteLineLayer(data->get_tailLayer()),
-                    ConvertNoteCutDirection(data->get_headCutDirection()), BeatToTime(data->get_tailBeat()),
-                    data->get_tailLine(), ConvertNoteLineLayer(data->get_tailLayer()),
-                    ConvertNoteLineLayer(data->get_tailLayer()), NoteCutDirection::Any, data->get_sliceCount(),
-                    data->get_squishAmount(), data->customData);
+                    ConvertColorType(data->colorType), BeatToTime(data->beat), data->headLine,
+                    ConvertNoteLineLayer(data->headLayer), ConvertNoteLineLayer(data->headLayer),
+                    ConvertNoteCutDirection(data->headCutDirection), BeatToTime(data->tailBeat), data->tailLine,
+                    ConvertNoteLineLayer(data->tailLayer), ConvertNoteLineLayer(data->tailLayer), data->sliceCount,
+                    data->squishAmount, data->customData);
               });
 
   customBeatmap->ProcessRemainingData();
