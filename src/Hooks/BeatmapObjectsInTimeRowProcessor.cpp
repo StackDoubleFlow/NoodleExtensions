@@ -168,15 +168,18 @@ MAKE_HOOK_MATCH(
       self, allObjectsTimeSlice, nextTimeSliceTime);
 }
 
-MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
+MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceColorNotesDidFinishTimeSlice,
                 &BeatmapObjectsInTimeRowProcessor::HandleCurrentTimeSliceColorNotesDidFinishTimeSlice, void,
                 BeatmapObjectsInTimeRowProcessor* self,
                 GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::NoteData*>*
                     currentTimeSlice,
                 float nextTimeSliceTime) {
   if (!Hooks::isNoodleHookEnabled())
-    return BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
+    return BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceColorNotesDidFinishTimeSlice(self, currentTimeSlice,
+                                                                                               nextTimeSliceTime);
 
+  // TODO: Implement this properly
+  
   auto items = ListW<GlobalNamespace::NoteData*>(currentTimeSlice->items);
 
   auto colorNotesData = NoodleExtensions::of_type<CustomNoteData*>(items);
@@ -236,11 +239,12 @@ MAKE_HOOK_MATCH(BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow,
     }
   }
 
-  BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow(self, currentTimeSlice, nextTimeSliceTime);
+  BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceColorNotesDidFinishTimeSlice(self, currentTimeSlice,
+                                                                                      nextTimeSliceTime);
 }
 
 void InstallBeatmapObjectsInTimeRowProcessorHooks() {
-  INSTALL_HOOK(NELogger::Logger, BeatmapObjectsInTimeRowProcessor_ProcessColorNotesInTimeRow);
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceColorNotesDidFinishTimeSlice);
 
   INSTALL_HOOK(NELogger::Logger, BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSlice)
 }
