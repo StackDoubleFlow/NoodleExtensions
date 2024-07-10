@@ -3,7 +3,11 @@
 #include "NECaches.h"
 #include "NELogger.h"
 #include "Zenject/DiContainer.hpp"
+#include "custom-json-data/shared/CJDLogger.h"
 #include "songcore/shared/SongCore.hpp"
+
+#include "scotland2/shared/loader.hpp"
+#include "scotland2/shared/modloader.h"
 
 float NECaches::noteJumpMovementSpeed;
 float NECaches::noteJumpStartBeatOffset;
@@ -15,6 +19,15 @@ bool NECaches::LeftHandedMode;
 SafePtr<Zenject::DiContainer> NECaches::GameplayCoreContainer;
 
 void InstallAndRegisterAll() {
+  // Force load to ensure order
+  auto cjdModInfo = CustomJSONData::modInfo.to_c();
+  auto tracksModInfo = CModInfo{ .id = "Tracks" };
+  auto chromaModInfo = CModInfo{ .id = "Chroma" };
+
+  modloader_require_mod(&cjdModInfo, CMatchType::MatchType_IdOnly);
+  modloader_require_mod(&tracksModInfo, CMatchType::MatchType_IdOnly);
+  modloader_require_mod(&chromaModInfo, CMatchType::MatchType_IdOnly);
+
   Hooks::InstallHooks();
   NEEvents::AddEventCallbacks();
   SongCore::API::Capabilities::RegisterCapability(NoodleExtensions::U8_REQUIREMENTNAME);
