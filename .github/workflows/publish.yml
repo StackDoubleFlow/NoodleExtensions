@@ -81,8 +81,20 @@ jobs:
           name: ${{ github.event.inputs.release_msg }}
           tag_name: ${{ github.event.inputs.version }}
           files: |
+            ./${{ env.qmodName }}.qmod
             ./build/${{ steps.libname.outputs.NAME }}
             ./build/debug/debug_${{ steps.libname.outputs.NAME }}
-            ./${{ env.qmodName }}.qmod
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make PR to QeatMods3
+        id: qmod-release
+        uses: QuestPackageManager/qmod-repo-publish-action@main
+        # TODO: Make this work!
+        continue-on-error: true
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          # first asset URL
+          qmod_url: ${{ fromJSON(steps.upload_file_release.outputs.assets)[0].browser_download_url }}
+          qmod_repo_owner: 'dantheman827'
+          qmod_repo_name: 'bsqmods'
