@@ -62,11 +62,11 @@ template <typename U, typename T> auto FakeCount(ArrayW<T> list, bool v2) {
 MAKE_HOOK_MATCH(V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
                 &BeatmapDataLoaderVersion2_6_0AndEarlier::BeatmapDataLoader::GetBeatmapDataBasicInfoFromSaveDataJson,
                 GlobalNamespace::BeatmapDataBasicInfo*, StringW beatmapSaveDataJson) {
-  if (!beatmapSaveDataJson) return nullptr;
+  if (!beatmapSaveDataJson) return V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson(beatmapSaveDataJson);
 
   auto beatmapSaveData =
       JsonUtility::FromJson<BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData*>(beatmapSaveDataJson);
-  if (beatmapSaveData == nullptr) {
+  if (beatmapSaveData == nullptr || beatmapSaveData->notes == nullptr) {
     return nullptr;
   }
   ListW<BeatmapSaveDataVersion2_6_0AndEarlier::NoteData*> notes = beatmapSaveData->notes;
