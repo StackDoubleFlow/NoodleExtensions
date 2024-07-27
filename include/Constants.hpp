@@ -48,6 +48,7 @@ inline static constexpr const std::string_view LINK = "link";
 inline static constexpr const std::string_view TARGET = "target";
 
 inline static constexpr const std::string_view INTERNAL_STARTNOTELINELAYER = "NE_startNoteLineLayer";
+inline static constexpr const std::string_view INTERNAL_TAILSTARTNOTELINELAYER = "NE_tailStartNoteLineLayer";
 inline static constexpr const std::string_view INTERNAL_FLIPYSIDE = "NE_flipYSide";
 inline static constexpr const std::string_view INTERNAL_FLIPLINEINDEX = "NE_flipLineIndex";
 inline static constexpr const std::string_view INTERNAL_FAKE_NOTE = "NE_fake";

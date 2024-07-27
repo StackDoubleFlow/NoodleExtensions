@@ -16,6 +16,14 @@
 using namespace GlobalNamespace;
 using namespace CustomJSONData;
 
+#include <cmath>
+// Port of MathF.Approximately
+bool Approximately(float a, float b) {
+  float const epsilon = 1.17549435E-38f * 8.0f;
+  float const maxAbs = std::max(std::fabs(a), std::fabs(b));
+  return std::fabs(b - a) < std::max(1E-06f * maxAbs, epsilon);
+}
+
 void BeatmapObjectsInTimeRowProcessor_HandleCurrentTimeSliceAllNotesAndSlidersDidFinishTimeSliceTranspile(
     BeatmapObjectsInTimeRowProcessor* self,
     GlobalNamespace::BeatmapObjectsInTimeRowProcessor::TimeSliceContainer_1<::GlobalNamespace::BeatmapDataItem*>*
@@ -161,6 +169,173 @@ MAKE_HOOK_MATCH(
     for (int m = 0; m < list.size(); m++) {
       BeatmapObjectAssociatedData& ad = getAD(list[m]->customData);
       ad.startNoteLineLayer = (float)m;
+    }
+  }
+
+  auto customSliders = NoodleExtensions::of_type<CustomSliderData*>(ListW<GlobalNamespace::BeatmapDataItem*>(items));
+  auto customTails = NoodleExtensions::of_type<BeatmapObjectsInTimeRowProcessor::SliderTailData*>(
+      ListW<GlobalNamespace::BeatmapDataItem*>(items));
+  for (auto slider : customSliders) {
+    NEJSON::OptPair headPos = NEJSON::OptPair(std::nullopt, std::nullopt);
+
+    if (slider->customData->value) {
+      rapidjson::Value const& sliderCustomData = *slider->customData->value;
+      headPos = NEJSON::ReadOptionalPair(sliderCustomData, NoodleExtensions::Constants::NOTE_OFFSET.data());
+    }
+
+    float headX = headPos.first.value_or(slider->headLineIndex - offset) + offset;
+    float headY = headPos.second.value_or(slider->headLineLayer.value__);
+
+    for (auto note : customNotes) {
+      NEJSON::OptPair notePos = NEJSON::OptPair(std::nullopt, std::nullopt);
+
+      if (note->customData->value) {
+        rapidjson::Value const& noteCustomData = *note->customData->value;
+
+        notePos = NEJSON::ReadOptionalPair(noteCustomData, NoodleExtensions::Constants::V2_POSITION.data());
+        if (!notePos.first) {
+          notePos = NEJSON::ReadOptionalPair(noteCustomData, NoodleExtensions::Constants::NOTE_OFFSET.data());
+        }
+      }
+
+      float noteX = notePos.first.value_or(note->lineIndex - offset) + offset;
+      float noteY = notePos.second.value_or(note->noteLineLayer.value__);
+
+      if (Approximately(headX, noteX) && Approximately(headY, noteY)) {
+        slider->SetHasHeadNote(true);
+
+        float startNoteLineLayer = note->beforeJumpNoteLineLayer.value__;
+        if (note->customData->value) {
+          startNoteLineLayer = getAD(note->customData).startNoteLineLayer;
+        }
+        if (slider->customData->value) {
+          BeatmapObjectAssociatedData& ad = getAD(slider->customData);
+          ad.startNoteLineLayer = startNoteLineLayer;
+        } else {
+          slider->SetHeadBeforeJumpLineLayer(startNoteLineLayer);
+        }
+
+        if (slider->sliderType == CustomSliderData::Type::Burst) {
+          note->ChangeToBurstSliderHead();
+
+          // PC logic, I've no idea why it's there
+
+          // if (noteData.cutDirection != sliderData.tailCutDirection)
+          // {
+          //     continue;
+          // }
+
+          // Vector2 line = SpawnDataManager.Get2DNoteOffset(noteX, ____numberOfLines, noteY) -
+          //               SpawnDataManager.Get2DNoteOffset(tailX, ____numberOfLines, tailY);
+          // float num = noteData.cutDirection.Direction().SignedAngleToLine(line);
+          // if (!(Mathf.Abs(num) <= 40f))
+          // {
+          //     continue;
+          // }
+
+          // noteData.SetCutDirectionAngleOffset(num);
+          // sliderData.SetCutDirectionAngleOffset(num, num);
+        } else {
+          note->MarkAsSliderHead();
+        }
+      }
+    }
+
+    for (auto tailSlider : customSliders) {
+      if (slider == tailSlider || slider->sliderType != CustomSliderData::Type::Normal ||
+          tailSlider->sliderType != CustomSliderData::Type::Burst)
+        continue;
+
+      NEJSON::OptPair tailPos = NEJSON::OptPair(std::nullopt, std::nullopt);
+
+      if (tailSlider->customData->value) {
+        rapidjson::Value const& tailSliderCustomData = *tailSlider->customData->value;
+
+        tailPos = NEJSON::ReadOptionalPair(tailSliderCustomData, NoodleExtensions::Constants::TAIL_NOTE_OFFSET.data());
+      }
+      float tailX = tailPos.first.value_or(tailSlider->tailLineIndex - offset) + offset;
+      float tailY = tailPos.second.value_or(tailSlider->tailLineLayer.value__);
+
+      if (Approximately(tailX, headX) && Approximately(tailY, headY)) {
+        slider->SetHasHeadNote(true);
+        float startNoteLineLayer = tailSlider->tailBeforeJumpLineLayer.value__;
+        if (slider->customData->value) {
+          BeatmapObjectAssociatedData& ad = getAD(slider->customData);
+          ad.tailStartNoteLineLayer = startNoteLineLayer;
+        } else {
+          slider->SetTailBeforeJumpLineLayer(startNoteLineLayer);
+        }
+      }
+    }
+
+    for (auto tailSliderData : customTails) {
+      auto tailSlider = reinterpret_cast<CustomSliderData*>(tailSliderData->slider);
+      if (!tailSlider || slider->sliderType != CustomSliderData::Type::Normal ||
+          tailSlider->sliderType != CustomSliderData::Type::Burst)
+        continue;
+
+      NEJSON::OptPair tailPos = NEJSON::OptPair(std::nullopt, std::nullopt);
+
+      if (tailSlider->customData->value) {
+        rapidjson::Value const& tailSliderCustomData = *tailSlider->customData->value;
+
+        tailPos = NEJSON::ReadOptionalPair(tailSliderCustomData, NoodleExtensions::Constants::TAIL_NOTE_OFFSET.data());
+      }
+      float tailX = tailPos.first.value_or(tailSlider->tailLineIndex - offset) + offset;
+      float tailY = tailPos.second.value_or(tailSlider->tailLineLayer.value__);
+
+      if (Approximately(tailX, headX) && Approximately(tailY, headY)) {
+        slider->SetHasHeadNote(true);
+        float startNoteLineLayer = tailSlider->tailBeforeJumpLineLayer.value__;
+        if (slider->customData->value) {
+          BeatmapObjectAssociatedData& ad = getAD(slider->customData);
+          ad.tailStartNoteLineLayer = startNoteLineLayer;
+        } else {
+          slider->SetTailBeforeJumpLineLayer(startNoteLineLayer);
+        }
+      }
+    }
+  }
+
+  for (auto customTail : customTails) {
+    auto slider = reinterpret_cast<CustomSliderData*>(customTail->slider);
+
+    if (!slider) continue;
+
+    NEJSON::OptPair tailPos = NEJSON::OptPair(std::nullopt, std::nullopt);
+    if (slider->customData->value) {
+      rapidjson::Value const& sliderCustomData = *slider->customData->value;
+
+      tailPos = NEJSON::ReadOptionalPair(sliderCustomData, NoodleExtensions::Constants::TAIL_NOTE_OFFSET.data());
+    }
+    float tailX = tailPos.first.value_or(slider->tailLineIndex - offset) + offset;
+    float tailY = tailPos.second.value_or(slider->tailLineLayer.value__);
+
+    for (auto note : customNotes) {
+      NEJSON::OptPair notePos = NEJSON::OptPair(std::nullopt, std::nullopt);
+
+      if (note->customData->value) {
+        rapidjson::Value const& noteCustomData = *note->customData->value;
+
+        notePos = NEJSON::ReadOptionalPair(noteCustomData, NoodleExtensions::Constants::V2_POSITION.data());
+        if (!notePos.first)
+          notePos = NEJSON::ReadOptionalPair(noteCustomData, NoodleExtensions::Constants::NOTE_OFFSET.data());
+      }
+
+      float noteX = notePos.first.value_or(note->lineIndex - offset) + offset;
+      float noteY = notePos.second.value_or(note->noteLineLayer.value__);
+
+      if (Approximately(tailX, noteX) && Approximately(tailY, noteY)) {
+        slider->SetHasTailNote(true);
+        note->MarkAsSliderTail();
+        float startNoteLineLayer = note->beforeJumpNoteLineLayer.value__;
+        if (slider->customData->value) {
+          BeatmapObjectAssociatedData& ad = getAD(slider->customData);
+          ad.tailStartNoteLineLayer = startNoteLineLayer;
+        } else {
+          slider->SetTailBeforeJumpLineLayer(startNoteLineLayer);
+        }
+      }
     }
   }
 
