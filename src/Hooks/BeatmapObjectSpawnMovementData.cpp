@@ -220,7 +220,8 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 void InstallBeatmapObjectSpawnMovementDataHooks() {
   INSTALL_HOOK(NELogger::Logger, GetObstacleSpawnData);
   INSTALL_HOOK(NELogger::Logger, GetJumpingNoteSpawnData);
-  INSTALL_HOOK(NELogger::Logger, BeatmapObjectSpawnController_Start)
+  INSTALL_HOOK(NELogger::Logger, BeatmapObjectSpawnController_Start);
+  INSTALL_HOOK(NELogger::Logger, GetSliderSpawnData)
 }
 
 NEInstallHooks(InstallBeatmapObjectSpawnMovementDataHooks);
