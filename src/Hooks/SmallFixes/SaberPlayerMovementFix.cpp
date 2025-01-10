@@ -26,8 +26,8 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 static std::unordered_map<GlobalNamespace::IBladeMovementData*, GlobalNamespace::SaberMovementData*> _worldMovementData;
-static bool _active;
-static bool _local;
+static bool _active = true; //TODO
+static bool _local = false; //TODO
 static SafePtrUnity<Transform> _origin;
 
 void CheckOrigin() {
