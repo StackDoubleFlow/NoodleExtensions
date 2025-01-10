@@ -173,6 +173,8 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData& beatmapAD, CustomJSONData:
     Track* track = beatmapAD.getTrack(trackName);
     NELogger::Logger.debug("Assigning player to track {} at {}, with target {}", trackName.data(), fmt::ptr(track), trackTarget.data());
     eventAD.playerTrackEventData.emplace(track, trackTarget);
+
+    NECaches::hasPlayerTransfrom = true;
   }
 
   eventAD.parsed = true;
@@ -215,6 +217,17 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
 
     LoadNoodleObjects(*customBeatmap);
     LoadNoodleEvents(*customBeatmap);
+
+    NECaches::hasLocalSpaceTrail = false;
+    auto customData = customBeatmap.value()->customData;
+    if (customData != nullptr) {
+      if (customData->value.has_value()) {
+        auto localSpaceTrail = NEJSON::ReadOptionalBool(customData->value.value(), NoodleExtensions::Constants::TRAIL_LOCAL_SPACE);
+        if (localSpaceTrail.has_value()) {
+          NECaches::hasLocalSpaceTrail = localSpaceTrail.value();
+        }
+      } 
+    }
   }
 
   return result;
