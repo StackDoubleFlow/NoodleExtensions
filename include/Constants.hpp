@@ -24,6 +24,7 @@ inline static constexpr const std::string_view V2_PARENT_TRACK = "_parentTrack";
 inline static constexpr const std::string_view V2_CHILDREN_TRACKS = "_childrenTracks";
 inline static constexpr const std::string_view V2_TARGET = "_target";
 
+inline static constexpr const std::string_view TRAIL_LOCAL_SPACE = "_localSpaceSaberTrail";
 inline static constexpr const std::string_view NOTE_OFFSET = "coordinates";
 inline static constexpr const std::string_view TAIL_NOTE_OFFSET = "tailCoordinates";
 inline static constexpr const std::string_view OBSTACLE_SIZE = "size";

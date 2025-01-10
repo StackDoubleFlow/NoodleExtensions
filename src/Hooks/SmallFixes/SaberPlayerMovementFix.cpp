@@ -26,8 +26,6 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 static std::unordered_map<GlobalNamespace::IBladeMovementData*, GlobalNamespace::SaberMovementData*> _worldMovementData;
-static bool _active = true; //TODO
-static bool _local = false; //TODO
 static SafePtrUnity<Transform> _origin;
 
 void CheckOrigin() {
@@ -57,7 +55,8 @@ bool containsValue(SaberMovementData* data) {
 
 MAKE_HOOK_MATCH(SaberMovementData_ComputeAdditionalData, &SaberMovementData::ComputeAdditionalData, void, SaberMovementData* self, 
                 Vector3 topPos, Vector3 bottomPos, int idxOffset, ByRef<Vector3> segmentNormal, ByRef<float> segmentAngle) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberMovementData_ComputeAdditionalData(self, topPos, bottomPos, idxOffset, segmentNormal, segmentAngle);
+  if (!Hooks::isNoodleHookEnabled() || NECaches::hasLocalSpaceTrail || !NECaches::hasPlayerTransfrom) 
+    return SaberMovementData_ComputeAdditionalData(self, topPos, bottomPos, idxOffset, segmentNormal, segmentAngle);
 
   int num = self->_data.size();
 	int num2 = self->_nextAddIndex + idxOffset;
@@ -72,7 +71,7 @@ MAKE_HOOK_MATCH(SaberMovementData_ComputeAdditionalData, &SaberMovementData::Com
 		Sombrero::FastVector3 bottomPos3 = ComputeWorld(self->_data[num3].bottomPos);
 		segmentNormal = self->ComputePlaneNormal(topPos2, bottomPos2, topPos3, bottomPos3);
 		segmentAngle = Sombrero::FastVector3::Angle(topPos3 - bottomPos3, topPos2 - bottomPos2);
-		return;
+		return SaberMovementData_ComputeAdditionalData(self, topPos, bottomPos, idxOffset, segmentNormal, segmentAngle);
 	}
 	segmentNormal = Sombrero::FastVector3::zero();
 	segmentAngle = 0.0f;
@@ -80,11 +79,8 @@ MAKE_HOOK_MATCH(SaberMovementData_ComputeAdditionalData, &SaberMovementData::Com
 
 MAKE_HOOK_MATCH(SaberSwingRatingCounter_ProcessNewData, &SaberSwingRatingCounter::ProcessNewData, void, SaberSwingRatingCounter* self,
                 BladeMovementDataElement newData, BladeMovementDataElement prevData, bool prevDataAreValid) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberSwingRatingCounter_ProcessNewData(self, newData, prevData, prevDataAreValid);
-
-  if (_local) {
+  if (!Hooks::isNoodleHookEnabled() || NECaches::hasLocalSpaceTrail || !NECaches::hasPlayerTransfrom) 
     return SaberSwingRatingCounter_ProcessNewData(self, newData, prevData, prevDataAreValid);
-  }
 
   newData.topPos = ComputeWorld(newData.topPos);
   newData.bottomPos = ComputeWorld(newData.bottomPos);
@@ -95,11 +91,8 @@ MAKE_HOOK_MATCH(SaberSwingRatingCounter_ProcessNewData, &SaberSwingRatingCounter
 }
 
 MAKE_HOOK_MATCH(SaberMovementData_lastAddedData, &SaberMovementData::get_lastAddedData, BladeMovementDataElement, SaberMovementData* self) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberMovementData_lastAddedData(self);
-
-  if (_local) {
+  if (!Hooks::isNoodleHookEnabled() || NECaches::hasLocalSpaceTrail || !NECaches::hasPlayerTransfrom) 
     return SaberMovementData_lastAddedData(self);
-  }
 
   if (containsValue(self)) {
     return SaberMovementData_lastAddedData(self);
@@ -114,11 +107,8 @@ MAKE_HOOK_MATCH(SaberMovementData_lastAddedData, &SaberMovementData::get_lastAdd
 }
 
 MAKE_HOOK_MATCH(SaberMovementData_prevAddedData, &SaberMovementData::get_prevAddedData, BladeMovementDataElement, SaberMovementData* self) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberMovementData_prevAddedData(self);
-
-  if (_local) {
+  if (!Hooks::isNoodleHookEnabled() || NECaches::hasLocalSpaceTrail || !NECaches::hasPlayerTransfrom) 
     return SaberMovementData_prevAddedData(self);
-  }
 
   if (containsValue(self)) {
     return SaberMovementData_prevAddedData(self);
@@ -134,11 +124,8 @@ MAKE_HOOK_MATCH(SaberMovementData_prevAddedData, &SaberMovementData::get_prevAdd
 
 MAKE_HOOK_MATCH(SaberMovementData_AddNewData, &SaberMovementData::AddNewData, void, SaberMovementData* self,
                 Vector3 topPos, Vector3 bottomPos, float time) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
-
-  if (_local) {
+  if (!Hooks::isNoodleHookEnabled() || NECaches::hasLocalSpaceTrail || !NECaches::hasPlayerTransfrom) 
     return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
-  }
 
   if (containsValue(self)) {
     return SaberMovementData_AddNewData(self, topPos, bottomPos, time);
@@ -153,9 +140,9 @@ MAKE_HOOK_MATCH(SaberMovementData_AddNewData, &SaberMovementData::AddNewData, vo
 
 MAKE_HOOK_MATCH(SaberTrail_Setup, &SaberTrail::Setup, void, SaberTrail* self,
                 Color color, IBladeMovementData* movementData) {
-  if (!Hooks::isNoodleHookEnabled()) return SaberTrail_Setup(self, color, movementData);
+  if (!Hooks::isNoodleHookEnabled() || !NECaches::hasPlayerTransfrom) return SaberTrail_Setup(self, color, movementData);
 
-  if (_local) {
+  if (NECaches::hasLocalSpaceTrail) {
     CheckOrigin();
     self->_trailRenderer->transform->SetParent(_origin->parent, false);
     return SaberTrail_Setup(self, color, movementData);

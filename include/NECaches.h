@@ -31,6 +31,9 @@ public:
   static SafePtr<Zenject::DiContainer> GameplayCoreContainer;
   static GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType noteJumpValueType;
   static float noteJumpValue;
+  
+  static bool hasLocalSpaceTrail;
+  static bool hasPlayerTransfrom;
 
   static bool LeftHandedMode;
 

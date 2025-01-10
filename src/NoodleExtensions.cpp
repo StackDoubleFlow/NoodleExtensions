@@ -15,6 +15,8 @@ float NECaches::numberOfLines;
 float NECaches::beatsPerMinute;
 float NECaches::noteJumpValue;
 GlobalNamespace::BeatmapObjectSpawnMovementData::NoteJumpValueType NECaches::noteJumpValueType;
+bool NECaches::hasLocalSpaceTrail;
+bool NECaches::hasPlayerTransfrom;
 bool NECaches::LeftHandedMode;
 SafePtr<Zenject::DiContainer> NECaches::GameplayCoreContainer;
 
