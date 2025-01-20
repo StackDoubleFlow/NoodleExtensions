@@ -163,13 +163,13 @@ ObjectOffset AnimationHelper::GetObjectOffset(AnimationObjectData const& animati
 #define multiPathProp(name, func)                                                                                      \
   if (!path##name) path##name = func
 
-      pathposition = MSumTrackPathProps(tracks, Vector3::zero(), position, time);
-      pathrotation = MMultTrackPathProps(tracks, Quaternion::identity(), rotation, time);
-      pathscale = MMultTrackPathProps(tracks, Vector3::one(), scale, time);
-      pathlocalRotation = MMultTrackPathProps(tracks, Quaternion::identity(), localRotation, time);
-      pathdissolve = MMultTrackPathProps(tracks, 1.0f, dissolve, time);
-      pathdissolveArrow = MMultTrackPathProps(tracks, 1.0f, dissolveArrow, time);
-      pathcuttable = MMultTrackPathProps(tracks, 1.0f, cuttable, time);
+      pathposition = pathposition.has_value() ? pathposition.value() : MSumTrackPathProps(tracks, Vector3::zero(), position, time);
+      pathrotation = pathrotation.has_value() ? pathrotation.value() : MMultTrackPathProps(tracks, Quaternion::identity(), rotation, time);
+      pathscale = pathscale.has_value() ? pathscale.value() : MMultTrackPathProps(tracks, Vector3::one(), scale, time);
+      pathlocalRotation = pathlocalRotation.has_value() ? pathlocalRotation.value() : MMultTrackPathProps(tracks, Quaternion::identity(), localRotation, time);
+      pathdissolve = pathdissolve.has_value() ? pathdissolve.value() : MMultTrackPathProps(tracks, 1.0f, dissolve, time);
+      pathdissolveArrow = pathdissolveArrow.has_value() ? pathdissolveArrow.value() : MMultTrackPathProps(tracks, 1.0f, dissolveArrow, time);
+      pathcuttable = pathcuttable.has_value() ? pathcuttable.value() : MMultTrackPathProps(tracks, 1.0f, cuttable, time);
 
       offset.positionOffset = pathposition + MSumTrackProps(tracks, Vector3::zero(), position);
       offset.rotationOffset = pathrotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);
