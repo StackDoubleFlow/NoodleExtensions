@@ -24,15 +24,7 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-ninja@v3
 
-      # Use canary NDK to avoid lesser known compile bugs
-      - name: Setup canary NDK
-        id: setup-ndk
-        uses: ./.github/actions/canary-ndk
 
-      - name: Create ndkpath.txt
-        run: |
-          echo ${{ steps.setup-ndk.outputs.ndk-path }} > ${GITHUB_WORKSPACE}/ndkpath.txt
-          cat ${GITHUB_WORKSPACE}/ndkpath.txt
       
       # - name: Create ndkpath.txt
       #   run: |
@@ -40,7 +32,7 @@ jobs:
       #     cat ${GITHUB_WORKSPACE}/ndkpath.txt
 
       - name: QPM Rust Action
-        uses: Fernthedev/qpm-rust-action@main
+        uses: Fernthedev/qpm-rust-action@v1
         with:
           #required
           workflow_token: ${{secrets.GITHUB_TOKEN}}
@@ -54,8 +46,8 @@ jobs:
       - name: Build
         run: |
           cd ${GITHUB_WORKSPACE}
-          qpm-rust s build
-          qpm-rust qmod zip
+          qpm s build
+          qpm qmod zip
 
       - name: Get Library Name
         id: libname
@@ -64,15 +56,16 @@ jobs:
           pattern="lib${module_id}*.so"
           files=( $pattern )
           echo ::set-output name=NAME::"${files[0]}"
+
       - name: Upload non-debug artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.libname.outputs.NAME }}
           path: ./build/${{ steps.libname.outputs.NAME }}
           if-no-files-found: error
 
       - name: Upload qmod artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{env.qmodName}}.qmod
           path: ./${{ env.qmodName }}.qmod
