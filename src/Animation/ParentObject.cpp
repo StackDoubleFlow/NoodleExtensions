@@ -37,7 +37,7 @@ void ParentObject::OnTransformParentChanged() {
 void ParentObject::UpdateData(bool force) {
   if (!track) return;
 
-  if (track->v2) {
+  if (track.v2) {
     UpdateDataOld(force);
     return;
   }
@@ -193,7 +193,7 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
   parentTrackEventData.parentTrack->AddGameObject(parentGameObject);
 
   for (auto& track : parentTrackEventData.childrenTracks) {
-    if (track == parentTrackEventData.parentTrack) {
+    if (track.track == parentTrackEventData.parentTrack.track) {
       NELogger::Logger.error("How could a track contain itself?");
     }
 
@@ -228,7 +228,7 @@ void ParentObject::ResetTransformParent(Transform* transform) {
   SetParent(transform, nullptr, false);
 }
 
-void ParentObject::HandleGameObject(Track* track, UnityEngine::GameObject* go, bool removed) {
+void ParentObject::HandleGameObject(TrackW track, UnityEngine::GameObject* go, bool removed) {
   static auto get_transform =
       il2cpp_utils::il2cpp_type_check::FPtrWrapper<&UnityEngine::GameObject::get_transform>::get();
 

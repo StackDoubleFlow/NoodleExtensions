@@ -17,6 +17,7 @@
         "pwsh ./build.ps1"
       ]
     },
+    "ndk": "^27.2.12479018",
     "qmodIncludeDirs": [
       "./build",
       "./extern/libs"
@@ -27,38 +28,34 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^5.1.7",
-      "additionalData": {
-        "extraFiles": [
-          "src/inline-hook"
-        ]
-      }
+      "versionRange": "^6.1.7",
+      "additionalData": {}
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^3700.0.0",
+      "versionRange": "^4030.0.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.17.0",
+      "versionRange": "^0.18.0",
       "additionalData": {
         "includeQmod": true
       }
     },
     {
       "id": "custom-json-data",
-      "versionRange": "^0.21.5",
+      "versionRange": "^0.22.0",
       "additionalData": {}
     },
     {
       "id": "config-utils",
-      "versionRange": "=1.4.2",
+      "versionRange": "*",
       "additionalData": {}
     },
     {
       "id": "tracks",
-      "versionRange": "^1.0.3",
+      "versionRange": "^2.0.0",
       "additionalData": {}
     },
     {
@@ -86,8 +83,8 @@
       "additionalData": {}
     },
     {
-      "id": "paper",
-      "versionRange": "^3.0.0",
+      "id": "paper2_scotland2",
+      "versionRange": "^4.0.0",
       "additionalData": {}
     },
     {

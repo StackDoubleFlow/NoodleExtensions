@@ -135,7 +135,7 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
   if (rawChildrenTracks.IsArray()) {
     childrenTracks.reserve(rawChildrenTracks.Size());
     for (rapidjson::Value::ConstValueIterator itr = rawChildrenTracks.Begin(); itr != rawChildrenTracks.End(); itr++) {
-      Track* child = beatmapAD.getTrack(itr->GetString());
+      TrackW child = beatmapAD.getTrack(itr->GetString());
       // NELogger::Logger.debug("Assigning track {}(%p) to parent track {}(%p)", itr->GetString(), child,
       // eventData["_parentTrack"].GetString(), track);
       childrenTracks.emplace_back(child);
@@ -160,7 +160,7 @@ ParentTrackEventData::ParentTrackEventData(rapidjson::Value const& eventData, Be
                            .value_or(false);
 }
 
-PlayerTrackEventData::PlayerTrackEventData(Track* track, std::optional<std::string_view> targetOpt) : track(track) {
+PlayerTrackEventData::PlayerTrackEventData(TrackW track, std::optional<std::string_view> targetOpt) : track(track) {
   if (targetOpt) {
     auto targetStr = *targetOpt;
 

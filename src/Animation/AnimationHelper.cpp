@@ -50,47 +50,48 @@ template <typename T> constexpr std::optional<T> operator*(std::optional<T> cons
 }
 
 std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(AnimationObjectData const& animationData,
-                                                                            std::span<Track* const> tracks,
-                                                                            float time) {
-  PointDefinition* localDefinitePosition = animationData.definitePosition;
-
-
+                                                                            std::span<TrackW const> tracks, float time,
+                                                                            Tracks::ffi::BaseProviderContext* context) {
+  PointDefinitionW localDefinitePosition = animationData.definitePosition;
 
   [[maybe_unused]] bool last;
   std::optional<Vector3> pathDefinitePosition =
-      localDefinitePosition ? std::optional(localDefinitePosition->Interpolate(time, last)) : std::nullopt;
+      localDefinitePosition ? std::optional(localDefinitePosition.InterpolateVec3(time, last)) : std::nullopt;
 
   // track animation only
   if (!pathDefinitePosition && !tracks.empty()) {
     if (tracks.size() == 1) {
-      Track const* track = tracks.front();
+      auto track = tracks.front();
       pathDefinitePosition =
-          getPathPropertyNullable<Vector3>(track, track->pathProperties.definitePosition.value, time);
+          track.GetPathPropertyNamed(PropertyNames::DefinitePosition).InterpolateVec3(time, last, context);
     } else {
-      pathDefinitePosition = MSumTrackPathProps(tracks, Vector3::zero(), definitePosition, time);
+      auto positions = Animation::getPathPropertiesVec3(tracks, PropertyNames::DefinitePosition, context, time);
+      pathDefinitePosition = Animation::addVector3s(positions);
     }
   }
 
   if (!pathDefinitePosition) return std::nullopt;
 
-  PointDefinition const* position = animationData.position;
-  std::optional<Vector3> pathPosition = position ? std::optional(position->Interpolate(time, last)) : std::nullopt;
+  auto const position = animationData.position;
+  std::optional<Vector3> pathPosition = position ? std::optional(position.InterpolateVec3(time, last)) : std::nullopt;
   std::optional<Vector3> trackPosition;
 
   std::optional<Vector3> positionOffset;
 
   if (!tracks.empty()) {
     if (tracks.size() == 1) {
-      Track const* track = tracks.front();
+      auto track = tracks.front();
 
       if (!pathPosition)
-        pathPosition = getPathPropertyNullable<Vector3>(track, track->pathProperties.position.value, time);
+        pathPosition = track.GetPathPropertyNamed(PropertyNames::Position).InterpolateVec3(time, last, context);
 
-      trackPosition = getPropertyNullable<Vector3>(track, track->properties.position);
+      trackPosition = track.GetPropertyNamed(PropertyNames::Position).GetVec3();
     } else {
-      trackPosition = MSumTrackProps(tracks, Vector3::zero(), position);
+      trackPosition = Animation::addVector3s(Animation::getPropertiesVec3(tracks, PropertyNames::Position, {}));
 
-      if (!pathPosition) pathPosition = MSumTrackPathProps(tracks, Vector3::zero(), position, time);
+      if (!pathPosition)
+        pathPosition =
+            Animation::addVector3s(Animation::getPathPropertiesVec3(tracks, PropertyNames::Position, context, time));
     }
 
     positionOffset = pathPosition + trackPosition;
@@ -108,87 +109,130 @@ std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(Anim
   return definitePosition;
 }
 
-ObjectOffset AnimationHelper::GetObjectOffset(AnimationObjectData const& animationData, std::span<Track* const> tracks,
-                                              float time) {
+ObjectOffset AnimationHelper::GetObjectOffset(AnimationObjectData const& animationData, std::span<TrackW const> tracks,
+                                              float time, Tracks::ffi::BaseProviderContext* context) {
   ObjectOffset offset;
 
   [[maybe_unused]] bool last;
 
-  PointDefinition const* position = animationData.position;
-  PointDefinition const* rotation = animationData.rotation;
-  PointDefinition const* scale = animationData.scale;
-  PointDefinition const* localRotation = animationData.localRotation;
-  PointDefinition const* dissolve = animationData.dissolve;
-  PointDefinition const* dissolveArrow = animationData.dissolveArrow;
-  PointDefinition const* cuttable = animationData.cuttable;
+  PointDefinitionW position = animationData.position;
+  PointDefinitionW rotation = animationData.rotation;
+  PointDefinitionW scale = animationData.scale;
+  PointDefinitionW localRotation = animationData.localRotation;
+  PointDefinitionW dissolve = animationData.dissolve;
+  PointDefinitionW dissolveArrow = animationData.dissolveArrow;
+  PointDefinitionW cuttable = animationData.cuttable;
 
-#define pathPropPointDef(type, name, interpolate)                                                                      \
-  std::optional<type> path##name = (name) ? std::optional<type>((name)->interpolate(time, last)) : std::nullopt
-
-#define singlePathProp(type, name, interpolate)                                                                        \
-  if (!path##name) path##name = getPathPropertyNullable<type>(track, track->pathProperties.name.value, time)
-
-#define offsetProp(type, name, offsetName, op)                                                                         \
-  offset.offsetName = path##name op getPropertyNullable<type>(track, track->properties.name)
-
-  pathPropPointDef(Vector3, position, Interpolate);
-  pathPropPointDef(Quaternion, rotation, InterpolateQuaternion);
-  pathPropPointDef(Vector3, scale, Interpolate);
-  pathPropPointDef(Quaternion, localRotation, InterpolateQuaternion);
-  pathPropPointDef(float, dissolve, InterpolateLinear);
-  pathPropPointDef(float, dissolveArrow, InterpolateLinear);
-  pathPropPointDef(float, cuttable, InterpolateLinear);
+  // Get path properties from animation data
+  std::optional<Vector3> pathPosition = position ? std::optional(position.InterpolateVec3(time, last)) : std::nullopt;
+  std::optional<Quaternion> pathRotation =
+      rotation ? std::optional(rotation.InterpolateQuaternion(time, last)) : std::nullopt;
+  std::optional<Vector3> pathScale = scale ? std::optional(scale.InterpolateVec3(time, last)) : std::nullopt;
+  std::optional<Quaternion> pathLocalRotation =
+      localRotation ? std::optional(localRotation.InterpolateQuaternion(time, last)) : std::nullopt;
+  std::optional<float> pathDissolve = dissolve ? std::optional(dissolve.InterpolateLinear(time, last)) : std::nullopt;
+  std::optional<float> pathDissolveArrow =
+      dissolveArrow ? std::optional(dissolveArrow.InterpolateLinear(time, last)) : std::nullopt;
+  std::optional<float> pathCuttable = cuttable ? std::optional(cuttable.InterpolateLinear(time, last)) : std::nullopt;
 
   if (!tracks.empty()) {
     if (tracks.size() == 1) {
       auto const track = tracks.front();
 
-      singlePathProp(Vector3, position, Interpolate);
-      singlePathProp(Quaternion, rotation, InterpolateQuaternion);
-      singlePathProp(Vector3, scale, Interpolate);
-      singlePathProp(Quaternion, localRotation, InterpolateQuaternion);
-      singlePathProp(float, dissolve, InterpolateLinear);
-      singlePathProp(float, dissolveArrow, InterpolateLinear);
-      singlePathProp(float, cuttable, InterpolateLinear);
+      // Macros to simplify getter code
+      if (!pathPosition) pathPosition = track.GetPathPropertyNamed(PropertyNames::Position).InterpolateVec3(time, last, context);
+      if (!pathRotation) pathRotation = track.GetPathPropertyNamed(PropertyNames::Rotation).InterpolateQuat(time, last, context);
+      if (!pathScale) pathScale = track.GetPathPropertyNamed(PropertyNames::Scale).InterpolateVec3(time, last, context);
+      if (!pathLocalRotation)
+        pathLocalRotation = track.GetPathPropertyNamed(PropertyNames::LocalRotation).InterpolateQuat(time, last, context);
+      
+      if (!pathDissolve)
+        pathDissolve = track.GetPathPropertyNamed(PropertyNames::Dissolve).InterpolateLinear(time, last, context);
+      if (!pathDissolveArrow)
+        pathDissolveArrow = track.GetPathPropertyNamed(PropertyNames::DissolveArrow).InterpolateLinear(time, last, context);
+      if (!pathCuttable)
+        pathCuttable = track.GetPathPropertyNamed(PropertyNames::Cuttable).InterpolateLinear(time, last, context);
 
-      offsetProp(Vector3, position, positionOffset, +);
-      offsetProp(Quaternion, rotation, rotationOffset, *);
-      offsetProp(Vector3, scale, scaleOffset, *);
-      offsetProp(Quaternion, localRotation, localRotationOffset, *);
-      offsetProp(float, dissolve, dissolve, *);
-      offsetProp(float, dissolveArrow, dissolveArrow, *);
-      offsetProp(float, cuttable, cuttable, *);
-
+      // Combine with track properties
+      offset.positionOffset = pathPosition + track.GetPropertyNamed(PropertyNames::Position).GetVec3();
+      offset.rotationOffset = pathRotation * track.GetPropertyNamed(PropertyNames::Rotation).GetQuat();
+      offset.scaleOffset = pathScale * track.GetPropertyNamed(PropertyNames::Scale).GetVec3();
+      offset.localRotationOffset = pathLocalRotation * track.GetPropertyNamed(PropertyNames::LocalRotation).GetQuat();
+      offset.dissolve = pathDissolve * track.GetPropertyNamed(PropertyNames::Dissolve).GetFloat();
+      offset.dissolveArrow = pathDissolveArrow * track.GetPropertyNamed(PropertyNames::DissolveArrow).GetFloat();
+      offset.cuttable = pathCuttable * track.GetPropertyNamed(PropertyNames::Cuttable).GetFloat();
     } else {
-#define multiPathProp(name, func)                                                                                      \
-  if (!path##name) path##name = func
+      // Multiple tracks - combine their properties
+      if (!pathPosition) {
+        auto positionPaths = Animation::getPathPropertiesVec3(tracks, PropertyNames::Position, context, time);
+        pathPosition = Animation::addVector3s(positionPaths);
+      }
+      if (!pathRotation) {
+        auto rotationPaths = Animation::getPathPropertiesQuat(tracks, PropertyNames::Rotation, context, time);
+        pathRotation = Animation::multiplyQuaternions(rotationPaths);
+      }
+      if (!pathScale) {
+        auto scalePaths = Animation::getPathPropertiesVec3(tracks, PropertyNames::Scale, context, time);
+        pathScale = Animation::multiplyVector3s(scalePaths);
+      }
+      if (!pathLocalRotation) {
+        auto localRotationPaths = Animation::getPathPropertiesQuat(tracks, PropertyNames::LocalRotation, context, time);
+        pathLocalRotation = Animation::multiplyQuaternions(localRotationPaths);
+      }
+      if (!pathDissolve) {
+        auto dissolvePaths = Animation::getPathPropertiesFloat(tracks, PropertyNames::Dissolve, context, time);
+        pathDissolve = Animation::multiplyFloats(dissolvePaths);
+      }
+      if (!pathDissolveArrow) {
+        auto dissolveArrowPaths =
+            Animation::getPathPropertiesFloat(tracks, PropertyNames::DissolveArrow, context, time);
+        pathDissolveArrow = Animation::multiplyFloats(dissolveArrowPaths);
+      }
+      if (!pathCuttable) {
+        auto cuttablePaths = Animation::getPathPropertiesFloat(tracks, PropertyNames::Cuttable, context, time);
+        pathCuttable = Animation::multiplyFloats(cuttablePaths);
+      }
 
-      pathposition = pathposition.has_value() ? pathposition.value() : MSumTrackPathProps(tracks, Vector3::zero(), position, time);
-      pathrotation = pathrotation.has_value() ? pathrotation.value() : MMultTrackPathProps(tracks, Quaternion::identity(), rotation, time);
-      pathscale = pathscale.has_value() ? pathscale.value() : MMultTrackPathProps(tracks, Vector3::one(), scale, time);
-      pathlocalRotation = pathlocalRotation.has_value() ? pathlocalRotation.value() : MMultTrackPathProps(tracks, Quaternion::identity(), localRotation, time);
-      pathdissolve = pathdissolve.has_value() ? pathdissolve.value() : MMultTrackPathProps(tracks, 1.0f, dissolve, time);
-      pathdissolveArrow = pathdissolveArrow.has_value() ? pathdissolveArrow.value() : MMultTrackPathProps(tracks, 1.0f, dissolveArrow, time);
-      pathcuttable = pathcuttable.has_value() ? pathcuttable.value() : MMultTrackPathProps(tracks, 1.0f, cuttable, time);
+      // Combine track properties with path properties
+      auto trackPositions = Animation::getPropertiesVec3(tracks, PropertyNames::Position, {});
+      auto trackRotations = Animation::getPropertiesQuat(tracks, PropertyNames::Rotation, {});
+      auto trackScales = Animation::getPropertiesVec3(tracks, PropertyNames::Scale, {});
+      auto trackLocalRotations = Animation::getPropertiesQuat(tracks, PropertyNames::LocalRotation, {});
+      auto trackDissolves = Animation::getPropertiesFloat(tracks, PropertyNames::Dissolve, {});
+      auto trackDissolveArrows = Animation::getPropertiesFloat(tracks, PropertyNames::DissolveArrow, {});
+      auto trackCuttables = Animation::getPropertiesFloat(tracks, PropertyNames::Cuttable, {});
+      
+      // Calculate combined track values
+      auto combinedTrackPositions = Animation::addVector3s(trackPositions);
+      auto combinedTrackRotations = Animation::multiplyQuaternions(trackRotations);
+      auto combinedTrackScales = Animation::multiplyVector3s(trackScales);
+      auto combinedTrackLocalRotations = Animation::multiplyQuaternions(trackLocalRotations);
+      auto combinedTrackDissolves = Animation::multiplyFloats(trackDissolves);
+      auto combinedTrackDissolveArrows = Animation::multiplyFloats(trackDissolveArrows);
+      auto combinedTrackCuttables = Animation::multiplyFloats(trackCuttables);
 
-      offset.positionOffset = pathposition + MSumTrackProps(tracks, Vector3::zero(), position);
-      offset.rotationOffset = pathrotation * MMultTrackProps(tracks, Quaternion::identity(), rotation);
-      offset.scaleOffset = pathscale * MMultTrackProps(tracks, Vector3::one(), scale);
-      offset.localRotationOffset = pathlocalRotation * MMultTrackProps(tracks, Quaternion::identity(), localRotation);
-      offset.dissolve = pathdissolve * MMultTrackProps(tracks, 1.0f, dissolve);
-      offset.dissolveArrow = pathdissolveArrow * MMultTrackProps(tracks, 1.0f, dissolveArrow);
-      offset.cuttable = pathcuttable * MMultTrackProps(tracks, 1.0f, cuttable);
+      // all paths are non-null by now
+      // Set final property values
+      offset.positionOffset = pathPosition.value() + combinedTrackPositions;
+      offset.rotationOffset = pathRotation.value() * combinedTrackRotations;
+      offset.scaleOffset = pathScale.value() * combinedTrackScales;
+      offset.localRotationOffset = pathLocalRotation.value() * combinedTrackLocalRotations;
+      offset.dissolve = pathDissolve.value() * combinedTrackDissolves;
+      offset.dissolveArrow = pathDissolveArrow.value() * combinedTrackDissolveArrows;
+      offset.cuttable = pathCuttable.value() * combinedTrackCuttables;
     }
   } else {
-    offset.positionOffset = pathposition;
-    offset.rotationOffset = pathrotation;
-    offset.scaleOffset = pathscale;
-    offset.localRotationOffset = pathlocalRotation;
-    offset.dissolve = pathdissolve;
-    offset.dissolveArrow = pathdissolveArrow;
-    offset.cuttable = pathcuttable;
+    // No tracks - use animation data only
+    offset.positionOffset = pathPosition;
+    offset.rotationOffset = pathRotation;
+    offset.scaleOffset = pathScale;
+    offset.localRotationOffset = pathLocalRotation;
+    offset.dissolve = pathDissolve;
+    offset.dissolveArrow = pathDissolveArrow;
+    offset.cuttable = pathCuttable;
   }
 
+  // Apply scale and mirroring
   if (offset.positionOffset)
     offset.positionOffset = offset.positionOffset.value() * NECaches::get_noteLinesDistanceFast();
 

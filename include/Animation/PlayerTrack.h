@@ -13,31 +13,32 @@
 
 enum struct PlayerTrackObject;
 
-DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour,
-                    DECLARE_CTOR(ctor);
-                    DECLARE_INSTANCE_METHOD(void, Update);
-                    DECLARE_INSTANCE_METHOD(void, OnDestroy);
+DECLARE_CLASS_CODEGEN(TrackParenting, PlayerTrack, UnityEngine::MonoBehaviour) {
+  DECLARE_CTOR(ctor);
+  DECLARE_INSTANCE_METHOD(void, Update);
+  DECLARE_INSTANCE_METHOD(void, OnDestroy);
 
-                    void UpdateDataOld();
+  void UpdateDataOld();
 
-                    uint64_t lastCheckedTime = 0;
+  uint64_t lastCheckedTime = 0;
 
-                    public:
-                    static PlayerTrack* Create(PlayerTrackObject object);
-                    static void AssignTrack(Track* track, PlayerTrackObject object);
-                    private:
-                    static std::unordered_map<PlayerTrackObject, SafePtrUnity<PlayerTrack>> playerTracks;
-                    PlayerTrackObject trackObject;
+public:
+  static PlayerTrack* Create(PlayerTrackObject object);
+  static void AssignTrack(TrackW track, PlayerTrackObject object);
 
-                    Tracks::GameObjectTrackController * trackController;
-                    Track * track; 
-                    NEVector::Vector3 startPos;
-                    NEVector::Quaternion startRot;
-                    NEVector::Quaternion startLocalRot;
-                    NEVector::Vector3 startScale;
-                    UnityEngine::Transform * origin;
-                    SafePtrUnity<GlobalNamespace::PauseController> pauseController;
+private:
+  static std::unordered_map<PlayerTrackObject, SafePtrUnity<PlayerTrack>> playerTracks;
+  PlayerTrackObject trackObject;
 
-                    void OnDidPauseEvent(); 
-                    void OnDidResumeEvent();
-)
+  Tracks::GameObjectTrackController* trackController;
+  TrackW track;
+  NEVector::Vector3 startPos;
+  NEVector::Quaternion startRot;
+  NEVector::Quaternion startLocalRot;
+  NEVector::Vector3 startScale;
+  UnityEngine::Transform* origin;
+  SafePtrUnity<GlobalNamespace::PauseController> pauseController;
+
+  void OnDidPauseEvent();
+  void OnDidResumeEvent();
+};

@@ -107,7 +107,7 @@ PlayerTrack* PlayerTrack::Create(PlayerTrackObject object) {
   return playerTrack;
 }
 
-void PlayerTrack::AssignTrack(Track* track, PlayerTrackObject object) {
+void PlayerTrack::AssignTrack(TrackW track, PlayerTrackObject object) {
   auto& playerTrack = PlayerTrack::playerTracks[object];
 
   if (playerTrack && playerTrack->track) {
@@ -160,7 +160,7 @@ void PlayerTrack::OnDidPauseEvent() {
 
 void PlayerTrack::OnDidResumeEvent() {
   NELogger::Logger.debug("PlayerTrack::OnDidResumeEvent");
-  this->set_enabled(track->v2);
+  this->set_enabled(track.v2);
 
   if (trackController) {
     trackController->set_enabled(true);
@@ -174,7 +174,7 @@ void PlayerTrack::OnDestroy() {
     // pauseController->remove_didPauseEvent(didPauseEventAction);
   }
   trackController = nullptr;
-  track = nullptr;
+  track = TrackW(nullptr, false);
   PlayerTrack::playerTracks[this->trackObject] = nullptr;
 }
 
@@ -213,7 +213,7 @@ void PlayerTrack::UpdateDataOld() {
 }
 
 void PlayerTrack::Update() {
-  if (track && track->v2) {
+  if (track && track.v2) {
     return UpdateDataOld();
   }
 }

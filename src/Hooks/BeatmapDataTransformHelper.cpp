@@ -170,7 +170,7 @@ void LoadNoodleEvent(TracksAD::BeatmapAssociatedData& beatmapAD, CustomJSONData:
             .GetString());
     std::string_view trackTarget(
         NEJSON::ReadOptionalString(eventData, v2 ? NoodleExtensions::Constants::V2_TARGET.data() : NoodleExtensions::Constants::TARGET.data()).value_or("Root"));
-    Track* track = beatmapAD.getTrack(trackName);
+    TrackW track = beatmapAD.getTrack(trackName);
     NELogger::Logger.debug("Assigning player to track {} at {}, with target {}", trackName.data(), fmt::ptr(track), trackTarget.data());
     eventAD.playerTrackEventData.emplace(track, trackTarget);
 
@@ -201,10 +201,10 @@ MAKE_HOOK_MATCH(BeatmapDataTransformHelper_CreateTransformedBeatmapData,
                 ::GlobalNamespace::GameplayModifiers* gameplayModifiers, bool leftHanded,
                 ::GlobalNamespace::EnvironmentEffectsFilterPreset environmentEffectsFilterPreset,
                 ::GlobalNamespace::EnvironmentIntensityReductionOptions* environmentIntensityReductionOptions,
-                ::BeatSaber::PerformancePresets::PerformancePreset* performancePreset) {
+                ::ByRef<::BeatSaber::Settings::Settings> settings) {
   auto result = BeatmapDataTransformHelper_CreateTransformedBeatmapData(
       beatmapData, beatmapLevel, gameplayModifiers, leftHanded, environmentEffectsFilterPreset,
-      environmentIntensityReductionOptions, performancePreset);
+      environmentIntensityReductionOptions, settings);
 
   if (!Hooks::isNoodleHookEnabled()) return result;
 

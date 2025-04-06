@@ -83,7 +83,8 @@ MAKE_HOOK_MATCH(V2_BeatmapDataLoader_GetBeatmapDataBasicInfoFromSaveDataJson,
   int noteCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(notBombs, true);
   int bombCount = FakeCount<v2::CustomBeatmapSaveData_NoteData>(bombs, true);
   int obstacleCount = FakeCount<v2::CustomBeatmapSaveData_ObstacleData>(beatmapSaveData->obstacles->ToArray(), true);
-  return BeatmapDataBasicInfo::New_ctor(4, noteCount, bombCount, obstacleCount);
+
+  return BeatmapDataBasicInfo::New_ctor(4, noteCount, 0, obstacleCount, bombCount);
 }
 
 static JSONWrapper* JSONWrapperOrNull(v3::CustomDataOpt const& val) {
@@ -106,12 +107,13 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
                 bool loadingForDesignatedEnvironment, ::GlobalNamespace::EnvironmentKeywords* environmentKeywords,
                 ::GlobalNamespace::IEnvironmentLightGroups* environmentLightGroups,
                 ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings,
+                ::GlobalNamespace::IBeatmapLightEventConverter* lightEventConverter,
                 ::System::Diagnostics::Stopwatch* stopwatch) {
   using namespace CustomJSONData::v3;
 
   auto beatmap = V3_BeatmapDataLoader_GetBeatmapDataFromSaveData(
       beatmapSaveData, defaultLightshowSaveData, beatmapDifficulty, startBpm, loadingForDesignatedEnvironment,
-      environmentKeywords, environmentLightGroups, playerSpecificSettings, stopwatch);
+      environmentKeywords, environmentLightGroups, playerSpecificSettings, lightEventConverter, stopwatch);
 
   auto customBeatmap = il2cpp_utils::try_cast<CustomBeatmapData>(beatmap).value_or(nullptr);
   if (!customBeatmap || !customBeatmap->customData->value) {
@@ -143,18 +145,21 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
   }
 
   PARSE_ARRAY(fakeColorNotes, Parser::DeserializeColorNote, [&](v3::CustomBeatmapSaveData_ColorNoteData* data) {
-    return CreateCustomBasicNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
-                                     ConvertColorType(data->color), ConvertNoteCutDirection(data->cutDirection),
-                                     data->customData);
+    auto rotation = 0;
+    return CreateCustomBasicNoteData(BeatToTime(data->b), data->b, rotation, data->line,
+                                     ConvertNoteLineLayer(data->layer), ConvertColorType(data->color),
+                                     ConvertNoteCutDirection(data->cutDirection), data->customData);
   });
   PARSE_ARRAY(fakeBombNotes, Parser::DeserializeBombNote, [&](v3::CustomBeatmapSaveData_BombNoteData* data) {
-    return CreateCustomBombNoteData(BeatToTime(data->b), data->line, ConvertNoteLineLayer(data->layer),
-                                    data->customData);
+    auto rotation = 0;
+
+    return CreateCustomBombNoteData(BeatToTime(data->b), data->b, rotation, data->line,
+                                    ConvertNoteLineLayer(data->layer), data->customData);
   });
   PARSE_ARRAY(fakeObstacles, Parser::DeserializeObstacle, [&](v3::CustomBeatmapSaveData_ObstacleData* data) {
     float beat = BeatToTime(data->b);
     auto* obstacle =
-        CustomObstacleData::New_ctor(beat, data->line, GetNoteLineLayer(data->get_layer()),
+        CustomObstacleData::New_ctor(beat, data->line, data->b + data->duration, beat, GetNoteLineLayer(data->get_layer()),
                                      BeatToTime(data->b + data->duration) - beat, data->width, data->height);
 
     obstacle->customData = CustomJSONData::JSONWrapperOrNull(data->customData);
@@ -162,26 +167,30 @@ MAKE_HOOK_MATCH(V3_BeatmapDataLoader_GetBeatmapDataFromSaveData,
     return obstacle;
   });
 
-  PARSE_ARRAY(fakeSliders, Parser::DeserializeSlider,
-              [&](v3::CustomBeatmapSaveData_SliderData* data) -> CustomSliderData* {
-                return CustomSliderData_CreateCustomSliderData(
-                    ConvertColorType(data->get_colorType()), BeatToTime(data->b), data->get_headLine(),
-                    ConvertNoteLineLayer(data->get_headLayer()), ConvertNoteLineLayer(data->get_headLayer()),
-                    data->get_headControlPointLengthMultiplier(), ConvertNoteCutDirection(data->get_headCutDirection()),
-                    BeatToTime(data->get_tailBeat()), data->get_tailLine(), ConvertNoteLineLayer(data->get_tailLayer()),
-                    ConvertNoteLineLayer(data->get_tailLayer()), data->get_tailControlPointLengthMultiplier(),
-                    ConvertNoteCutDirection(data->get_tailCutDirection()),
-                    ConvertSliderMidAnchorMode(data->get_sliderMidAnchorMode()), data->customData);
-              });
+  PARSE_ARRAY(
+      fakeSliders, Parser::DeserializeSlider, [&](v3::CustomBeatmapSaveData_SliderData* data) -> CustomSliderData* {
+        auto headRotation = 0;
+        auto tailRotation = 0;
+        return CustomSliderData_CreateCustomSliderData(
+            ConvertColorType(data->get_colorType()), BeatToTime(data->b), data->b, headRotation, data->get_headLine(),
+            ConvertNoteLineLayer(data->get_headLayer()), ConvertNoteLineLayer(data->get_headLayer()),
+            data->get_headControlPointLengthMultiplier(), ConvertNoteCutDirection(data->get_headCutDirection()),
+            BeatToTime(data->get_tailBeat()), tailRotation, data->get_tailLine(),
+            ConvertNoteLineLayer(data->get_tailLayer()), ConvertNoteLineLayer(data->get_tailLayer()),
+            data->get_tailControlPointLengthMultiplier(), ConvertNoteCutDirection(data->get_tailCutDirection()),
+            ConvertSliderMidAnchorMode(data->get_sliderMidAnchorMode()), data->customData);
+      });
 
   PARSE_ARRAY(fakeBurstSliders, Parser::DeserializeBurstSlider,
               [&](v3::CustomBeatmapSaveData_BurstSliderData* data) -> CustomSliderData* {
+                auto headRotation = 0;
+                auto tailRotation = 0;
                 return CustomSliderData_CreateCustomBurstSliderData(
-                    ConvertColorType(data->colorType), BeatToTime(data->beat), data->headLine,
+                    ConvertColorType(data->colorType), BeatToTime(data->beat), data->beat, headRotation, data->headLine,
                     ConvertNoteLineLayer(data->headLayer), ConvertNoteLineLayer(data->headLayer),
-                    ConvertNoteCutDirection(data->headCutDirection), BeatToTime(data->tailBeat), data->tailLine,
-                    ConvertNoteLineLayer(data->tailLayer), ConvertNoteLineLayer(data->tailLayer), data->sliceCount,
-                    data->squishAmount, data->customData);
+                    ConvertNoteCutDirection(data->headCutDirection), BeatToTime(data->tailBeat), data->tailBeat,
+                    data->tailLine, ConvertNoteLineLayer(data->tailLayer), ConvertNoteLineLayer(data->tailLayer),
+                    data->sliceCount, data->squishAmount, data->customData);
               });
 
   customBeatmap->ProcessRemainingData();

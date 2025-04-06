@@ -26,14 +26,14 @@ class Renderer;
 }
 
 struct AnimationObjectData {
-  PointDefinition* position = nullptr;
-  PointDefinition* rotation = nullptr;
-  PointDefinition* scale = nullptr;
-  PointDefinition* localRotation = nullptr;
-  PointDefinition* dissolve = nullptr;
-  PointDefinition* dissolveArrow = nullptr;
-  PointDefinition* cuttable = nullptr;
-  PointDefinition* definitePosition = nullptr;
+  PointDefinitionW position = PointDefinitionW(nullptr);
+  PointDefinitionW rotation = PointDefinitionW(nullptr);
+  PointDefinitionW scale = PointDefinitionW(nullptr);
+  PointDefinitionW localRotation = PointDefinitionW(nullptr);
+  PointDefinitionW dissolve = PointDefinitionW(nullptr);
+  PointDefinitionW dissolveArrow = PointDefinitionW(nullptr);
+  PointDefinitionW cuttable = PointDefinitionW(nullptr);
+  PointDefinitionW definitePosition = PointDefinitionW(nullptr);
   bool parsed = false;
 
   AnimationObjectData() = default;
@@ -104,23 +104,23 @@ struct BeatmapObjectAssociatedData {
 enum class PlayerTrackObject { Root, Head, LeftHand, RightHand };
 
 struct PlayerTrackEventData {
-  explicit PlayerTrackEventData(Track* track, std::optional<std::string_view> target);
+  explicit PlayerTrackEventData(TrackW track, std::optional<std::string_view> target);
 
-  Track* track;
+  TrackW track;
   std::optional<PlayerTrackObject> target;
 };
 
 struct ParentTrackEventData {
   explicit ParentTrackEventData(rapidjson::Value const& eventData, TracksAD::BeatmapAssociatedData& beatmapAD, bool v2);
 
-  Track* parentTrack;
+  TrackW parentTrack;
   std::optional<NEVector::Vector3> pos;
   std::optional<NEVector::Vector3> localPos;
   std::optional<NEVector::Quaternion> rot;
   std::optional<NEVector::Quaternion> localRot;
   std::optional<NEVector::Vector3> scale;
   bool worldPositionStays;
-  std::vector<Track*> childrenTracks;
+  std::vector<TrackW> childrenTracks;
 };
 
 struct BeatmapEventAssociatedData {

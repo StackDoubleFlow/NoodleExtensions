@@ -53,7 +53,7 @@ void NECaches::ClearObstacleCaches() {
   mapLoaded = false;
 }
 
-float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<Track*> tracks) {
+float obstacleTimeAdjust(ObstacleController* oc, float original, std::span<TrackW> tracks) {
   if (original <= oc->move1Duration) return original;
 
   auto time = NoodleExtensions::getTimeProp(tracks);

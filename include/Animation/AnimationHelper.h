@@ -7,27 +7,6 @@
 #include "AssociatedData.h"
 #include "NECaches.h"
 
-// why not?
-template <typename T>
-inline constexpr std::optional<T> getPropertyNullableFast(Track* track, Property const& prop,
-                                                          uint64_t lastCheckedTime) {
-  if (lastCheckedTime != 0 && prop.lastUpdated != 0 && prop.lastUpdated < lastCheckedTime) return std::nullopt;
-
-  auto ret = Animation::getPropertyNullable<T>(track, prop.value);
-
-  if (NECaches::LeftHandedMode) {
-    if constexpr (std::is_same_v<T, NEVector::Vector3>) {
-      return Animation::MirrorVectorNullable(ret);
-    }
-
-    if constexpr (std::is_same_v<T, NEVector::Quaternion>) {
-      return Animation::MirrorQuaternionNullable(ret);
-    }
-  }
-
-  return ret;
-}
-
 namespace AnimationHelper {
 struct ObjectOffset {
   std::optional<NEVector::Vector3> positionOffset;
@@ -40,7 +19,8 @@ struct ObjectOffset {
 };
 
 std::optional<NEVector::Vector3> GetDefinitePositionOffset(AnimationObjectData const& animationData,
-                                                           std::span<Track* const> tracks, float time);
-ObjectOffset GetObjectOffset(AnimationObjectData const& customData, std::span<Track* const> tracks, float time);
+                                                           std::span<TrackW const> tracks, float time, Tracks::ffi::BaseProviderContext* context);
+ObjectOffset GetObjectOffset(AnimationObjectData const& customData, std::span<TrackW const> tracks, float time,
+                             Tracks::ffi::BaseProviderContext* context);
 
 } // end namespace AnimationHelper

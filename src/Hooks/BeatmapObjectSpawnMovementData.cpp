@@ -30,7 +30,7 @@ MAKE_HOOK_MATCH(BeatmapObjectSpawnController_Start, &BeatmapObjectSpawnControlle
 }
 
 MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSpawnData,
-                BeatmapObjectSpawnMovementData::SliderSpawnData, BeatmapObjectSpawnMovementData* self,
+                SliderSpawnData, BeatmapObjectSpawnMovementData* self,
                 SliderData* normalSliderData) {
 
   if (!Hooks::isNoodleHookEnabled()) return GetSliderSpawnData(self, normalSliderData);
@@ -86,7 +86,7 @@ MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSp
   SpawnDataHelper::NoteJumpGravityForLineLayer(self, tailLineLayer, tailStartlinelayer, jumpDistance, njs,
                                                tailJumpGravity, tailNoGravity);
 
-  result = BeatmapObjectSpawnMovementData::SliderSpawnData(
+  result = SliderSpawnData(
       moveStartPos + headOffset, moveEndPos + headOffset, jumpEndPos + headOffset,
       gravityOverride ? headNoGravity : headJumpGravity, moveStartPos + tailOffset, moveEndPos + tailOffset,
       jumpEndPos + tailOffset, gravityOverride ? tailNoGravity : tailJumpGravity, self->moveDuration, jumpDuration);
@@ -95,7 +95,7 @@ MAKE_HOOK_MATCH(GetSliderSpawnData, &BeatmapObjectSpawnMovementData::GetSliderSp
 }
 
 MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstacleSpawnData,
-                BeatmapObjectSpawnMovementData::ObstacleSpawnData, BeatmapObjectSpawnMovementData* self,
+                ObstacleSpawnData, BeatmapObjectSpawnMovementData* self,
                 ObstacleData* normalObstacleData) {
   if (!Hooks::isNoodleHookEnabled()) return GetObstacleSpawnData(self, normalObstacleData);
 
@@ -103,7 +103,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
     return GetObstacleSpawnData(self, normalObstacleData);
 
   auto* obstacleData = reinterpret_cast<CustomJSONData::CustomObstacleData*>(normalObstacleData);
-  BeatmapObjectSpawnMovementData::ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
+  ObstacleSpawnData result = GetObstacleSpawnData(self, obstacleData);
 
   // No need to create a custom ObstacleSpawnData if there is no custom data to begin with
   if (!obstacleData->customData) {
@@ -145,7 +145,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
   SpawnDataHelper::GetNoteJumpValues(beatmapObjectSpawnController->_initData, self, njs, spawnOffset, jumpDuration,
                                      jumpDistance, localMoveStartPos, localMoveEndPos, localJumpEndPos);
 
-  result = BeatmapObjectSpawnMovementData::ObstacleSpawnData(
+  result = ObstacleSpawnData(
       localMoveStartPos + obstacleOffset, localMoveEndPos + obstacleOffset, localJumpEndPos + obstacleOffset,
       obstacleHeight, result.moveDuration, jumpDuration, NECaches::get_noteLinesDistanceFast());
 
@@ -153,7 +153,7 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
 }
 
 MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJumpingNoteSpawnData,
-                BeatmapObjectSpawnMovementData::NoteSpawnData, BeatmapObjectSpawnMovementData* self,
+                NoteSpawnData, BeatmapObjectSpawnMovementData* self,
                 NoteData* normalNoteData) {
   if (!Hooks::isNoodleHookEnabled()) return GetJumpingNoteSpawnData(self, normalNoteData);
 
@@ -210,7 +210,7 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
 
   Vector3 const noteOffset2 = SpawnDataHelper::GetNoteOffset(self, offsetStartRow, offsetStartHeight);
 
-  auto result = BeatmapObjectSpawnMovementData::NoteSpawnData(
+  auto result = NoteSpawnData(
       moveStartPos + noteOffset2, moveEndPos + noteOffset2, jumpEndPos + noteOffset,
       gravityOverride ? noGravity : jumpGravity, self->moveDuration, jumpDuration);
 
